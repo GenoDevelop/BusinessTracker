@@ -15,8 +15,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Update="infrastructure_settings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     </ItemGroup>
 

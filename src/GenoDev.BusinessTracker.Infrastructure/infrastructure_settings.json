@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "BusinessTracker": "Host=localhost;Port=5434;Database=business_tracker;Username=postgres;Password=postgres"
+  }
+}

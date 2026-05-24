@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.Inf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.Domain", "src\GenoDev.BusinessTracker.Domain\GenoDev.BusinessTracker.Domain.csproj", "{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.ApplicationLogic.Tests", "tests\GenoDev.BusinessTracker.Application.Tests\GenoDev.BusinessTracker.ApplicationLogic.Tests\GenoDev.BusinessTracker.ApplicationLogic.Tests.csproj", "{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.ApplicationLogic.Tests", "tests\GenoDev.BusinessTracker.ApplicationLogic.Tests\GenoDev.BusinessTracker.ApplicationLogic.Tests.csproj", "{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EADA39E5-A902-4565-9408-917F15A30F64}"
 EndProject
