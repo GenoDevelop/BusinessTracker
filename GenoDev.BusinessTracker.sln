@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.ApplicationLogic", "src\GenoDev.BusinessTracker.ApplicationLogic\GenoDev.BusinessTracker.ApplicationLogic.csproj", "{E88AF52C-E7AC-451D-ACD3-D464B102F146}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.Infrastructure", "src\GenoDev.BusinessTracker.Infrastructure\GenoDev.BusinessTracker.Infrastructure.csproj", "{7A982164-3B2B-43AB-803A-C818FAAAFC70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.Domain", "src\GenoDev.BusinessTracker.Domain\GenoDev.BusinessTracker.Domain.csproj", "{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.ApplicationLogic.Tests", "tests\GenoDev.BusinessTracker.Application.Tests\GenoDev.BusinessTracker.ApplicationLogic.Tests\GenoDev.BusinessTracker.ApplicationLogic.Tests.csproj", "{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EADA39E5-A902-4565-9408-917F15A30F64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logic", "Logic", "{8E41F2F9-0877-4901-8BBB-C7595D7A38C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.BusinessTracker.TestsUtilities", "tests\GenoDev.BusinessTracker.TestsUtilities\GenoDev.BusinessTracker.TestsUtilities.csproj", "{F0A98397-1F05-49CB-BEDC-F16874349620}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{7271880F-5D5A-4C9D-8F10-906569413BA3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenoDev.Utilities.Core", "utilities\GenoDev.Utilities.Core\GenoDev.Utilities.Core.csproj", "{CCD9C04C-D1B2-454B-85DB-93B4D32213EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E88AF52C-E7AC-451D-ACD3-D464B102F146}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E88AF52C-E7AC-451D-ACD3-D464B102F146}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E88AF52C-E7AC-451D-ACD3-D464B102F146}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E88AF52C-E7AC-451D-ACD3-D464B102F146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A982164-3B2B-43AB-803A-C818FAAAFC70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A982164-3B2B-43AB-803A-C818FAAAFC70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A982164-3B2B-43AB-803A-C818FAAAFC70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A982164-3B2B-43AB-803A-C818FAAAFC70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB90C2D7-5CA8-4511-BFB0-42D8493048FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0A98397-1F05-49CB-BEDC-F16874349620}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0A98397-1F05-49CB-BEDC-F16874349620}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0A98397-1F05-49CB-BEDC-F16874349620}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0A98397-1F05-49CB-BEDC-F16874349620}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCD9C04C-D1B2-454B-85DB-93B4D32213EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCD9C04C-D1B2-454B-85DB-93B4D32213EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCD9C04C-D1B2-454B-85DB-93B4D32213EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCD9C04C-D1B2-454B-85DB-93B4D32213EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DB90C2D7-5CA8-4511-BFB0-42D8493048FB} = {EADA39E5-A902-4565-9408-917F15A30F64}
+		{E88AF52C-E7AC-451D-ACD3-D464B102F146} = {8E41F2F9-0877-4901-8BBB-C7595D7A38C0}
+		{D36FE4DF-E856-4BFE-AA9E-C6AFC0050FE2} = {8E41F2F9-0877-4901-8BBB-C7595D7A38C0}
+		{7A982164-3B2B-43AB-803A-C818FAAAFC70} = {8E41F2F9-0877-4901-8BBB-C7595D7A38C0}
+		{F0A98397-1F05-49CB-BEDC-F16874349620} = {EADA39E5-A902-4565-9408-917F15A30F64}
+		{CCD9C04C-D1B2-454B-85DB-93B4D32213EC} = {7271880F-5D5A-4C9D-8F10-906569413BA3}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <RootNamespace>GenoDev.BusinessTracker.Tests</RootNamespace>
+        
+        <IsPackable>false</IsPackable>
+
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <PackageId>GenoDev.BusinessTracker.ApplicationLogic.Tests</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="10.0.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.2.2"/>
+        <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\GenoDev.BusinessTracker.ApplicationLogic\GenoDev.BusinessTracker.ApplicationLogic.csproj" />
+      <ProjectReference Include="..\..\GenoDev.BusinessTracker.TestsUtilities\GenoDev.BusinessTracker.TestsUtilities.csproj" />
+    </ItemGroup>
+
+</Project>
