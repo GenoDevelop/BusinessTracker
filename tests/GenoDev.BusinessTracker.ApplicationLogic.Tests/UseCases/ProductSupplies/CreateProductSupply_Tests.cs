@@ -3,6 +3,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.ProductSupplies.Create;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
+using GenoDev.Utilities.Core.Time;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.ProductSupplies;
@@ -18,6 +19,9 @@ public class CreateProductSupply_Tests : BusinessTrackerUnitTestsBase<CreateProd
     public async Task Handle_ShouldCreateProductSupply_WhenValidInputProvided()
     {
         // Arrange
+        using var _ = TestClock.FreezeCurrentTime();
+        var now = Clock.UtcNowOffset;
+
         var product = new Product { ProductName = "Test Product" };
         var supplier = new Supplier { SupplierName = "Test Supplier" };
         
@@ -34,7 +38,7 @@ public class CreateProductSupply_Tests : BusinessTrackerUnitTestsBase<CreateProd
             123.00m,
             10.5,
             SupplyStatus.Odebrane,
-            DateTimeOffset.UtcNow,
+            now,
             "Initial stock"
         );
 
@@ -49,7 +53,7 @@ public class CreateProductSupply_Tests : BusinessTrackerUnitTestsBase<CreateProd
         result.BuyPriceGross.Should().Be(command.BuyPriceGross);
         result.Quantity.Should().Be(command.Quantity);
         result.SupplyStatus.Should().Be(command.SupplyStatus);
-        result.BuyTime.Should().BeCloseTo(command.BuyTime!.Value, TimeSpan.FromMilliseconds(100));
+        result.BuyTime.Should().Be(command.BuyTime);
         result.Description.Should().Be(command.Description);
 
         AssertBusinessTracker_Database(db =>

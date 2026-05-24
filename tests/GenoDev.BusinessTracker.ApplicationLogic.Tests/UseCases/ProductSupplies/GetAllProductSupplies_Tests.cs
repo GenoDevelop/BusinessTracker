@@ -4,6 +4,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.ProductSupplies.GetAll;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
+using GenoDev.Utilities.Core.Time;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.ProductSupplies;
@@ -91,6 +92,9 @@ public class GetAllProductSupplies_Tests : BusinessTrackerUnitTestsBase<GetAllPr
     public async Task Handle_ShouldFilterByShowOnlyNullDates()
     {
         // Arrange
+        using var _ = TestClock.FreezeCurrentTime();
+        var now = Clock.UtcNowOffset;
+
         var product = new Product { ProductName = "Product" };
         var supplier = new Supplier { SupplierName = "Supplier" };
 
@@ -98,7 +102,7 @@ public class GetAllProductSupplies_Tests : BusinessTrackerUnitTestsBase<GetAllPr
         {
             db.Products.Add(product);
             db.Suppliers.Add(supplier);
-            db.ProductSupplies.Add(new ProductSupply { Product = product, Supplier = supplier, BuyTime = DateTimeOffset.UtcNow, BuyPriceNet = 1, Quantity = 1, SupplyStatus = SupplyStatus.Odebrane });
+            db.ProductSupplies.Add(new ProductSupply { Product = product, Supplier = supplier, BuyTime = now, BuyPriceNet = 1, Quantity = 1, SupplyStatus = SupplyStatus.Odebrane });
             db.ProductSupplies.Add(new ProductSupply { Product = product, Supplier = supplier, BuyTime = null, BuyPriceNet = 2, Quantity = 1, SupplyStatus = SupplyStatus.Odebrane });
         });
 

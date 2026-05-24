@@ -3,6 +3,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Products.Delete;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
+using GenoDev.Utilities.Core.Time;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Products;
@@ -100,9 +101,12 @@ public class DeleteProduct_Tests : BusinessTrackerUnitTestsBase<DeleteProductCom
     public async Task Handle_ShouldThrowException_WhenProductIsPartOfSale()
     {
         // Arrange
+        using var _ = TestClock.FreezeCurrentTime();
+        var now = Clock.UtcNowOffset;
+
         var product = new Product { ProductName = "Product in sale" };
         var taxRate = new TaxRate { VatRate = 0.23m, TaxRateName = "VAT 23%" };
-        var sale = new Sale { SaleTime = DateTimeOffset.UtcNow };
+        var sale = new Sale { SaleTime = now };
         var productSale = new ProductSale
         {
             Product = product,

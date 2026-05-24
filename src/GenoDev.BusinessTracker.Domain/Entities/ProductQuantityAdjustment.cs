@@ -6,6 +6,7 @@ public class ProductQuantityAdjustment
     public Guid ProductId { get; set; }
     public double Quantity { get; set; }
     public string? Description { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
     public virtual Product Product { get; set; } = null!;
 }

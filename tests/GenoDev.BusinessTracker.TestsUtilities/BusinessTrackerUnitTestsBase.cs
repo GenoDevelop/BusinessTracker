@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.TestsUtilities;
 
+[Collection("BusinessTrackerUnitTestsCollection")]
 public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncLifetime
     where TSubjectOfUnitTest : class
 {
