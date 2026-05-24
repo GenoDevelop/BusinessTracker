@@ -27,6 +27,7 @@ public class ProductQuantityAdjustmentConfiguration : IEntityTypeConfiguration<P
 
         builder.HasOne(x => x.Product)
             .WithMany(x => x.ProductQuantityAdjustments)
-            .HasForeignKey(x => x.ProductId);
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

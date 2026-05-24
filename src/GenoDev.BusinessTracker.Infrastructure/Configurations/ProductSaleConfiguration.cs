@@ -36,7 +36,8 @@ public class ProductSaleConfiguration : IEntityTypeConfiguration<ProductSale>
 
         builder.HasOne(x => x.Product)
             .WithMany(x => x.ProductSales)
-            .HasForeignKey(x => x.ProductId);
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.TaxRate)
             .WithMany(x => x.ProductSales)

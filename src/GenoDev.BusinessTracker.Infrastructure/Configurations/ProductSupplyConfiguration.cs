@@ -42,7 +42,8 @@ public class ProductSupplyConfiguration : IEntityTypeConfiguration<ProductSupply
 
         builder.HasOne(x => x.Product)
             .WithMany(x => x.ProductSupplies)
-            .HasForeignKey(x => x.ProductId);
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Supplier)
             .WithMany(x => x.ProductSupplies)
