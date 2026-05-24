@@ -13,10 +13,7 @@ public static class DependencyInjectionExtensions
         
         services.AddDbContext<BusinessTrackerDbContext>(builder => builder.UseNpgsql(connectionString, opt =>
         {
-            opt.MigrationsHistoryTable(
-                BusinessTrackerDbContext.MigrationHistoryTableName,
-                BusinessTrackerDbContext.SchemaName
-                );
+            BusinessTrackerDbContext.ModifyOptionsBuilder(opt);
         }));
         services.AddScoped<IBusinessTrackerDbContext, BusinessTrackerDbContext>();
         

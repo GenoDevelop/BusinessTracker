@@ -1,5 +1,3 @@
-using GenoDev.BusinessTracker.Domain.Enums;
-
 namespace GenoDev.BusinessTracker.Domain.Entities;
 
 public class Product

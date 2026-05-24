@@ -7,6 +7,11 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
+        });
+        
         return services;
     }
 }

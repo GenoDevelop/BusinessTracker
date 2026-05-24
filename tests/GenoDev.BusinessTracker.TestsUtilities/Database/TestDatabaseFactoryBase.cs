@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GenoDev.BusinessTracker.TestsUtilities;
+namespace GenoDev.BusinessTracker.TestsUtilities.Database;
 
 /// <summary>
 /// Serves as an abstract base class for creating a test database factory.

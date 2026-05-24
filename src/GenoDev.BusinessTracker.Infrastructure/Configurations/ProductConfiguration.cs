@@ -8,13 +8,13 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToTable("products", "storage");
+        builder.ToTable("products", BusinessTrackerDbContext.StorageSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.ProductName)
             .IsRequired();
@@ -23,7 +23,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired(false);
 
         builder.HasIndex(x => x.EanCode)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"ean_code\" IS NOT NULL");
 
         builder.HasMany(x => x.ProductSales)
             .WithOne(x => x.Product)

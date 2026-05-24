@@ -8,13 +8,13 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
 {
     public void Configure(EntityTypeBuilder<Supplier> builder)
     {
-        builder.ToTable("suppliers", "storage");
+        builder.ToTable("suppliers", BusinessTrackerDbContext.StorageSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.SupplierName)
             .IsRequired();

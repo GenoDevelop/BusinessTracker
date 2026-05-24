@@ -8,6 +8,8 @@ namespace GenoDev.BusinessTracker.Infrastructure;
 public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext> contextOptions) : DbContext(contextOptions), IBusinessTrackerDbContext
 {
     public const string SchemaName = "business_tracker";
+    public const string StorageSchema = "storage";
+    public const string SalesSchema = "sales";
     public const string MigrationHistoryTableName = "__EFMigrationsHistory";
 
     public DbSet<Product> Products => Set<Product>();
@@ -30,5 +32,13 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
         optionsBuilder
             .UseLazyLoadingProxies()
             .UseSnakeCaseNamingConvention();
+    }
+
+    public static void ModifyOptionsBuilder(NpgsqlDbContextOptionsBuilder builder)
+    {
+        builder.MigrationsHistoryTable(
+            MigrationHistoryTableName,
+            SchemaName
+        );
     }
 }

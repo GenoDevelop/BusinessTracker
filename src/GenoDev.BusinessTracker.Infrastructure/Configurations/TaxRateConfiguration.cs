@@ -8,13 +8,13 @@ public class TaxRateConfiguration : IEntityTypeConfiguration<TaxRate>
 {
     public void Configure(EntityTypeBuilder<TaxRate> builder)
     {
-        builder.ToTable("tax_rates", "sales");
+        builder.ToTable("tax_rates", BusinessTrackerDbContext.SalesSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.TaxRateName)
             .IsRequired();

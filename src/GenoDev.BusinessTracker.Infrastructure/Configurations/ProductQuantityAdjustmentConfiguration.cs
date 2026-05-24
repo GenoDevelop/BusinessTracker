@@ -8,13 +8,13 @@ public class ProductQuantityAdjustmentConfiguration : IEntityTypeConfiguration<P
 {
     public void Configure(EntityTypeBuilder<ProductQuantityAdjustment> builder)
     {
-        builder.ToTable("product_quantity_adjustments", "storage");
+        builder.ToTable("product_quantity_adjustments", BusinessTrackerDbContext.StorageSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.ProductId)
             .IsRequired();

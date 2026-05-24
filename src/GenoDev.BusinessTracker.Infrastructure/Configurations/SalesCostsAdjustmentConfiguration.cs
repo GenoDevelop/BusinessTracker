@@ -8,13 +8,13 @@ public class SalesCostsAdjustmentConfiguration : IEntityTypeConfiguration<SalesC
 {
     public void Configure(EntityTypeBuilder<SalesCostsAdjustment> builder)
     {
-        builder.ToTable("sales_costs_adjustments", "sales");
+        builder.ToTable("sales_costs_adjustments", BusinessTrackerDbContext.SalesSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.SalesId)
             .IsRequired();

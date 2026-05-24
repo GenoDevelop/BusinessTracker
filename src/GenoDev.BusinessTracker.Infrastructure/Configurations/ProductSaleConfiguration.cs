@@ -8,13 +8,13 @@ public class ProductSaleConfiguration : IEntityTypeConfiguration<ProductSale>
 {
     public void Configure(EntityTypeBuilder<ProductSale> builder)
     {
-        builder.ToTable("product_sales", "sales");
+        builder.ToTable("product_sales", BusinessTrackerDbContext.SalesSchema);
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.ProductId)
             .IsRequired();
