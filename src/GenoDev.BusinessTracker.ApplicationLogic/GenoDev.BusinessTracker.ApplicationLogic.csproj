@@ -21,10 +21,6 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7"/>
         <PackageReference Include="MediatR" Version="12.5.0" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="UseCases\" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\GenoDev.BusinessTracker.Domain\GenoDev.BusinessTracker.Domain.csproj" />
