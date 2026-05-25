@@ -1,3 +1,4 @@
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,8 @@ public static class DependencyInjectionExtensions
         {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
         });
+
+        services.AddScoped<ISaleService, SaleService>();
         
         return services;
     }
