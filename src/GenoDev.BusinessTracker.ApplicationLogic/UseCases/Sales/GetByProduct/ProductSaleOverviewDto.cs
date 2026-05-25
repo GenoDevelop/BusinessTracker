@@ -10,5 +10,6 @@ public record ProductSaleOverviewDto(
     decimal SalePriceNetSum,
     string? Description,
     string? SaleIdentifier,
-    string TaxRateName
+    string TaxRateName,
+    DateTimeOffset SaleTime
 );

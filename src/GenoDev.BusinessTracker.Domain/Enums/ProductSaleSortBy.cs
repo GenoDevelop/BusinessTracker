@@ -9,5 +9,6 @@ public enum ProductSaleSortBy
     SalePriceNetSum,
     SaleId,
     SaleIdentifier,
-    TaxRateName
+    TaxRateName,
+    SaleTime
 }

@@ -23,7 +23,8 @@ public class GetAllProductSalesByProductIdQueryHandler(IBusinessTrackerDbContext
                 SalePriceNetSum = (decimal)ps.Quantity * (ps.SalePriceGross - (ps.SalePriceGross * ps.TaxRate.VatRate)),
                 ps.Description,
                 SaleIdentifier = ps.Sale.SaleIdentifier,
-                TaxRateName = ps.TaxRate.TaxRateName
+                TaxRateName = ps.TaxRate.TaxRateName,
+                SaleTime = ps.Sale.SaleTime
             });
 
         baseQuery = request.SortBy switch
@@ -36,6 +37,7 @@ public class GetAllProductSalesByProductIdQueryHandler(IBusinessTrackerDbContext
             ProductSaleSortBy.SaleId => request.IsDescending ? baseQuery.OrderByDescending(x => x.SaleId) : baseQuery.OrderBy(x => x.SaleId),
             ProductSaleSortBy.SaleIdentifier => request.IsDescending ? baseQuery.OrderByDescending(x => x.SaleIdentifier) : baseQuery.OrderBy(x => x.SaleIdentifier),
             ProductSaleSortBy.TaxRateName => request.IsDescending ? baseQuery.OrderByDescending(x => x.TaxRateName) : baseQuery.OrderBy(x => x.TaxRateName),
+            ProductSaleSortBy.SaleTime => request.IsDescending ? baseQuery.OrderByDescending(x => x.SaleTime) : baseQuery.OrderBy(x => x.SaleTime),
             _ => baseQuery.OrderByDescending(x => x.Id)
         };
 
@@ -54,7 +56,8 @@ public class GetAllProductSalesByProductIdQueryHandler(IBusinessTrackerDbContext
                 x.SalePriceNetSum,
                 x.Description,
                 x.SaleIdentifier,
-                x.TaxRateName))
+                x.TaxRateName,
+                x.SaleTime))
             .ToListAsync(cancellationToken);
 
         return new PagedList<ProductSaleOverviewDto>(items, totalCount, request.Page, request.PageSize);

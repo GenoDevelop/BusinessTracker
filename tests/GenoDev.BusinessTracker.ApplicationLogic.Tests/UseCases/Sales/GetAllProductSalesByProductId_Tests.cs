@@ -80,9 +80,11 @@ public class GetAllProductSalesByProductId_Tests : BusinessTrackerUnitTestsBase<
         item1.Description.Should().Be("Desc 1");
         item1.SaleIdentifier.Should().Be("S1");
         item1.TaxRateName.Should().Be("VAT 23%");
+        item1.SaleTime.Should().BeCloseTo(sale1.SaleTime, TimeSpan.FromMilliseconds(100));
 
         var item2 = result.Items.First(i => i.Id == ps2.Id);
         item2.SaleIdentifier.Should().Be("S2");
+        item2.SaleTime.Should().BeCloseTo(sale2.SaleTime, TimeSpan.FromMilliseconds(100));
     }
 
     [Fact]
@@ -125,20 +127,23 @@ public class GetAllProductSalesByProductId_Tests : BusinessTrackerUnitTestsBase<
     [InlineData(ProductSaleSortBy.Quantity, true, 5, 1)]
     [InlineData(ProductSaleSortBy.SalePriceGrossEach, false, 10, 50)]
     [InlineData(ProductSaleSortBy.SalePriceGrossEach, true, 50, 10)]
+    [InlineData(ProductSaleSortBy.SaleTime, false, 1, 2)]
+    [InlineData(ProductSaleSortBy.SaleTime, true, 2, 1)]
     public async Task Handle_ShouldApplySorting(ProductSaleSortBy sortBy, bool isDescending, decimal firstExpected, decimal lastExpected)
     {
         // Arrange
         var product = new Product { ProductName = "Product" };
         var taxRate = new TaxRate { TaxRateName = "VAT", VatRate = 0m };
-        var sale = new Sale { SaleTime = DateTimeOffset.UtcNow };
+        var sale1 = new Sale { SaleTime = DateTimeOffset.UtcNow.AddHours(-1) };
+        var sale2 = new Sale { SaleTime = DateTimeOffset.UtcNow };
 
         ArrangeBusinessTracker_Database(db =>
         {
             db.Products.Add(product);
             db.TaxRates.Add(taxRate);
-            db.Sales.Add(sale);
-            db.ProductSales.Add(new ProductSale { Product = product, TaxRate = taxRate, Sale = sale, Quantity = 1, SalePriceGross = 10 });
-            db.ProductSales.Add(new ProductSale { Product = product, TaxRate = taxRate, Sale = sale, Quantity = 5, SalePriceGross = 50 });
+            db.Sales.AddRange(sale1, sale2);
+            db.ProductSales.Add(new ProductSale { Product = product, TaxRate = taxRate, Sale = sale1, Quantity = 1, SalePriceGross = 10 });
+            db.ProductSales.Add(new ProductSale { Product = product, TaxRate = taxRate, Sale = sale2, Quantity = 5, SalePriceGross = 50 });
         });
 
         var query = new GetAllProductSalesByProductIdQuery(product.Id, 0, 10, sortBy, isDescending);
@@ -156,6 +161,11 @@ public class GetAllProductSalesByProductId_Tests : BusinessTrackerUnitTestsBase<
         {
             result.Items.First().SalePriceGrossEach.Should().Be(firstExpected);
             result.Items.Last().SalePriceGrossEach.Should().Be(lastExpected);
+        }
+        else if (sortBy == ProductSaleSortBy.SaleTime)
+        {
+            result.Items.First().Quantity.Should().Be(firstExpected == 1 ? 1 : 5);
+            result.Items.Last().Quantity.Should().Be(lastExpected == 1 ? 1 : 5);
         }
     }
 }
