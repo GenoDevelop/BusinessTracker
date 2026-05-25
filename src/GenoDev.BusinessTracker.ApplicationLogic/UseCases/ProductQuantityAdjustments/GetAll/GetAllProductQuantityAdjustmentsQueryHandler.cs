@@ -32,8 +32,6 @@ public class GetAllProductQuantityAdjustmentsQueryHandler : IRequestHandler<GetA
             .Select(x => ProductQuantityAdjustmentDto.FromEntity(x))
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = (request.Page + 1) * request.PageSize < totalCount;
-
-        return new PagedList<ProductQuantityAdjustmentDto>(items, totalCount, hasNextPage);
+        return new PagedList<ProductQuantityAdjustmentDto>(items, totalCount, request.Page, request.PageSize);
     }
 }

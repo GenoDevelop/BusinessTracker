@@ -31,8 +31,6 @@ public class GetAllSuppliersQueryHandler(IBusinessTrackerDbContext dbContext) : 
             })
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = (request.Page + 1) * request.PageSize < totalCount;
-
-        return new PagedList<SupplierDto>(items, totalCount, hasNextPage);
+        return new PagedList<SupplierDto>(items, totalCount, request.Page, request.PageSize);
     }
 }

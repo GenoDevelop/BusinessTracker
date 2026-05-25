@@ -28,8 +28,6 @@ public class GetAllTaxRatesQueryHandler(IBusinessTrackerDbContext dbContext) : I
             .Select(x => new TaxRateDto(x.Id, x.TaxRateName, x.VatRate, x.TaxRateValue))
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = (request.Page + 1) * request.PageSize < totalCount;
-
-        return new PagedList<TaxRateDto>(items, totalCount, hasNextPage);
+        return new PagedList<TaxRateDto>(items, totalCount, request.Page, request.PageSize);
     }
 }

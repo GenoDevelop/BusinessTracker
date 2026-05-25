@@ -71,8 +71,6 @@ public class GetAllProductSuppliesQueryHandler(IBusinessTrackerDbContext dbConte
             })
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = (request.Page + 1) * request.PageSize < totalCount;
-
-        return new PagedList<ProductSupplyDto>(items, totalCount, hasNextPage);
+        return new PagedList<ProductSupplyDto>(items, totalCount, request.Page, request.PageSize);
     }
 }

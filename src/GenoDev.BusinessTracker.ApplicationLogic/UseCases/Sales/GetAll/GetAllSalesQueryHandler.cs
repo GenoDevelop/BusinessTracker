@@ -54,8 +54,6 @@ public class GetAllSalesQueryHandler(IBusinessTrackerDbContext dbContext) : IReq
                 x.AdjustmentsCount))
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = (request.Page + 1) * request.PageSize < totalCount;
-
-        return new PagedList<SaleOverviewDto>(items, totalCount, hasNextPage);
+        return new PagedList<SaleOverviewDto>(items, totalCount, request.Page, request.PageSize);
     }
 }
