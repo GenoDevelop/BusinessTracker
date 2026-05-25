@@ -62,4 +62,68 @@ public class SaleService_Tests
         adjustment.Description.Should().Be(description);
         adjustment.Sale.Should().Be(sale);
     }
+
+    [Fact]
+    public void MapToDto_ShouldMapSaleToDtoCorrectly()
+    {
+        // Arrange
+        var sale = new Sale
+        {
+            Id = Guid.NewGuid(),
+            SaleTime = DateTimeOffset.UtcNow,
+            Description = "Main description",
+            SaleIdentifier = "SALE-001",
+            PaymentIdentifier = "PAY-001"
+        };
+
+        var psId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        var taxRateId = Guid.NewGuid();
+        sale.ProductSales.Add(new ProductSale
+        {
+            Id = psId,
+            ProductId = productId,
+            TaxRateId = taxRateId,
+            Quantity = 2,
+            SalePriceGross = 50m,
+            Description = "PS Desc",
+            SalesId = sale.Id,
+            Sale = sale
+        });
+
+        var scaId = Guid.NewGuid();
+        sale.SalesCostsAdjustments.Add(new SalesCostsAdjustment
+        {
+            Id = scaId,
+            CostName = "Extra",
+            AdjustmentValueGross = 10m,
+            Description = "SCA Desc",
+            SalesId = sale.Id,
+            Sale = sale
+        });
+
+        // Act
+        var result = _sut.MapToDto(sale);
+
+        // Assert
+        result.Id.Should().Be(sale.Id);
+        result.SaleTime.Should().Be(sale.SaleTime);
+        result.Description.Should().Be(sale.Description);
+        result.SaleIdentifier.Should().Be(sale.SaleIdentifier);
+        result.PaymentIdentifier.Should().Be(sale.PaymentIdentifier);
+
+        result.ProductSales.Should().HaveCount(1);
+        result.ProductSales[0].Id.Should().Be(psId);
+        result.ProductSales[0].ProductId.Should().Be(productId);
+        result.ProductSales[0].TaxRateId.Should().Be(taxRateId);
+        result.ProductSales[0].Quantity.Should().Be(2);
+        result.ProductSales[0].SalePriceGross.Should().Be(50m);
+        result.ProductSales[0].Description.Should().Be("PS Desc");
+
+        result.SalesCostsAdjustments.Should().HaveCount(1);
+        result.SalesCostsAdjustments[0].Id.Should().Be(scaId);
+        result.SalesCostsAdjustments[0].CostName.Should().Be("Extra");
+        result.SalesCostsAdjustments[0].AdjustmentValueGross.Should().Be(10m);
+        result.SalesCostsAdjustments[0].Description.Should().Be("SCA Desc");
+    }
 }

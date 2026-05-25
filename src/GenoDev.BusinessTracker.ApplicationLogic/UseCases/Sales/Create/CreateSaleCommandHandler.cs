@@ -53,13 +53,6 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, SaleD
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new SaleDto(
-            sale.Id,
-            sale.SaleTime,
-            sale.Description,
-            sale.SaleIdentifier,
-            sale.PaymentIdentifier,
-            sale.ProductSales.Select(x => new ProductSaleDto(x.Id, x.ProductId, x.TaxRateId, x.Quantity, x.SalePriceGross, x.Description)).ToList(),
-            sale.SalesCostsAdjustments.Select(x => new SalesCostsAdjustmentDto(x.Id, x.CostName, x.AdjustmentValueGross, x.Description)).ToList());
+        return _saleService.MapToDto(sale);
     }
 }

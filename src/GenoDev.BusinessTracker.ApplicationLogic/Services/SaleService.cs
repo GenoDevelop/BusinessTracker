@@ -1,3 +1,4 @@
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Sales;
 using GenoDev.BusinessTracker.Domain.Entities;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Services;
@@ -30,5 +31,18 @@ public class SaleService : ISaleService
             Description = description,
             Sale = sale
         });
+    }
+
+    public SaleDto MapToDto(Sale sale)
+    {
+        return new SaleDto(
+            sale.Id,
+            sale.SaleTime,
+            sale.Description,
+            sale.SaleIdentifier,
+            sale.PaymentIdentifier,
+            sale.ProductSales.Select(ps => new ProductSaleDto(ps.Id, ps.ProductId, ps.TaxRateId, ps.Quantity, ps.SalePriceGross, ps.Description)).ToList(),
+            sale.SalesCostsAdjustments.Select(sca => new SalesCostsAdjustmentDto(sca.Id, sca.CostName, sca.AdjustmentValueGross, sca.Description)).ToList()
+        );
     }
 }

@@ -1,4 +1,5 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Sales.Update;
 public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, SaleDto>
 {
     private readonly IBusinessTrackerDbContext _context;
+    private readonly ISaleService _saleService;
 
-    public UpdateSaleCommandHandler(IBusinessTrackerDbContext context)
+    public UpdateSaleCommandHandler(IBusinessTrackerDbContext context, ISaleService saleService)
     {
         _context = context;
+        _saleService = saleService;
     }
 
     public async Task<SaleDto> Handle(UpdateSaleCommand request, CancellationToken cancellationToken)
@@ -27,23 +30,6 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, SaleD
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new SaleDto(
-            sale.Id,
-            sale.SaleTime,
-            sale.Description,
-            sale.SaleIdentifier,
-            sale.PaymentIdentifier,
-            sale.ProductSales.Select(ps => new ProductSaleDto(
-                ps.Id,
-                ps.ProductId,
-                ps.TaxRateId,
-                ps.Quantity,
-                ps.SalePriceGross,
-                ps.Description)).ToList(),
-            sale.SalesCostsAdjustments.Select(sca => new SalesCostsAdjustmentDto(
-                sca.Id,
-                sca.CostName,
-                sca.AdjustmentValueGross,
-                sca.Description)).ToList());
+        return _saleService.MapToDto(sale);
     }
 }

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Sales.Update;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -11,6 +12,7 @@ public class UpdateSale_Tests : BusinessTrackerUnitTestsBase<UpdateSaleCommandHa
     protected override void RegisterMockedDependencies(IServiceCollection services, AutoFixture.IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<ISaleService, SaleService>();
     }
 
     [Fact]
