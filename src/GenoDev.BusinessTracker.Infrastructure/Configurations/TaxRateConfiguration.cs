@@ -27,6 +27,7 @@ public class TaxRateConfiguration : IEntityTypeConfiguration<TaxRate>
 
         builder.HasMany(x => x.ProductSales)
             .WithOne(x => x.TaxRate)
-            .HasForeignKey(x => x.TaxRateId);
+            .HasForeignKey(x => x.TaxRateId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
