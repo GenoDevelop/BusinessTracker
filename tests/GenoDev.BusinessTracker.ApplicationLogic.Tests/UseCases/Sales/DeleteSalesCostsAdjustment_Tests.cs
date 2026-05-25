@@ -49,4 +49,17 @@ public class DeleteSalesCostsAdjustment_Tests : BusinessTrackerUnitTestsBase<Del
             db.Sales.Any(x => x.Id == sale.Id).Should().BeTrue();
         });
     }
+
+    [Fact]
+    public async Task Handle_ShouldThrowException_WhenAdjustmentDoesNotExist()
+    {
+        // Arrange
+        var command = new DeleteSalesCostsAdjustmentCommand(Guid.NewGuid());
+
+        // Act
+        var act = () => Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
 }
