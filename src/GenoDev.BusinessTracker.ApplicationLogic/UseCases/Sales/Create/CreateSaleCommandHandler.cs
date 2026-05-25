@@ -59,7 +59,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, SaleD
             sale.Description,
             sale.SaleIdentifier,
             sale.PaymentIdentifier,
-            sale.ProductSales.Select(x => new ProductSaleDto(x.Id, x.ProductId, x.TaxRateId, x.Quantity, x.SalePriceGross, x.Decription)).ToList(),
+            sale.ProductSales.Select(x => new ProductSaleDto(x.Id, x.ProductId, x.TaxRateId, x.Quantity, x.SalePriceGross, x.Description)).ToList(),
             sale.SalesCostsAdjustments.Select(x => new SalesCostsAdjustmentDto(x.Id, x.CostName, x.AdjustmentValueGross, x.Description)).ToList());
     }
 }

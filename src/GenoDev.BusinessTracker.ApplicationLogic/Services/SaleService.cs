@@ -14,7 +14,7 @@ public class SaleService : ISaleService
             SalesId = sale.Id,
             Quantity = quantity,
             SalePriceGross = salePriceGross,
-            Decription = description,
+            Description = description,
             Sale = sale
         });
     }

@@ -31,7 +31,7 @@ public class ProductSaleConfiguration : IEntityTypeConfiguration<ProductSale>
         builder.Property(x => x.SalePriceGross)
             .IsRequired();
 
-        builder.Property(x => x.Decription)
+        builder.Property(x => x.Description)
             .IsRequired(false);
 
         builder.HasOne(x => x.Product)

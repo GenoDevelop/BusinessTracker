@@ -36,7 +36,7 @@ public class SaleService_Tests
         productSale.SalesId.Should().Be(sale.Id);
         productSale.Quantity.Should().Be(quantity);
         productSale.SalePriceGross.Should().Be(salePriceGross);
-        productSale.Decription.Should().Be(description);
+        productSale.Description.Should().Be(description);
         productSale.Sale.Should().Be(sale);
     }
 

@@ -8,7 +8,7 @@ public class ProductSale
     public Guid SalesId { get; set; }
     public double Quantity { get; set; }
     public decimal SalePriceGross { get; set; }
-    public string? Decription { get; set; }
+    public string? Description { get; set; }
 
     public virtual Product Product { get; set; } = null!;
     public virtual TaxRate TaxRate { get; set; } = null!;
