@@ -11,8 +11,12 @@ public class GetAllProductSuppliesQueryHandler(IBusinessTrackerDbContext dbConte
     public async Task<PagedList<ProductSupplyDto>> Handle(GetAllProductSuppliesQuery request, CancellationToken cancellationToken)
     {
         IQueryable<ProductSupply> query = dbContext.ProductSupplies
-            .Include(x => x.Supplier)
-            .Where(x => x.ProductId == request.ProductId);
+            .Include(x => x.Supplier);
+
+        if (request.ProductId.HasValue)
+        {
+            query = query.Where(x => x.ProductId == request.ProductId.Value);
+        }
 
         if (request.ShowOnlyNullDates == true)
         {
@@ -67,7 +71,8 @@ public class GetAllProductSuppliesQueryHandler(IBusinessTrackerDbContext dbConte
                 BuyTime = x.BuyTime,
                 Quantity = x.Quantity,
                 Description = x.Description,
-                SupplyStatus = x.SupplyStatus
+                SupplyStatus = x.SupplyStatus,
+                SupplierName = x.Supplier.SupplierName
             })
             .ToListAsync(cancellationToken);
 

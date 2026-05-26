@@ -13,4 +13,5 @@ public class ProductSupplyDto
     public string? Description { get; set; }
     public SupplyStatus SupplyStatus { get; set; }
     public Guid SupplierId { get; set; }
+    public string SupplierName { get; set; } = null!;
 }

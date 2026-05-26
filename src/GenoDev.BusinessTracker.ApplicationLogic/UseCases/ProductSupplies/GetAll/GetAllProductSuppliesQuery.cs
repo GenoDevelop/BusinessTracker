@@ -4,7 +4,7 @@ using MediatR;
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.ProductSupplies.GetAll;
 
 public record GetAllProductSuppliesQuery(
-    Guid ProductId,
+    Guid? ProductId,
     int Page,
     int PageSize,
     DateTimeOffset? MinDate = null,

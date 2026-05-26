@@ -1,0 +1,45 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.TaxRatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModels="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewModels:TaxRatesViewModel}">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Stawki podatkowe" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <Button Content="Odśwież" Command="{Binding LoadTaxRatesCommand}" Padding="10,5" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding TaxRates}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nazwa" Binding="{Binding TaxRateName}" Width="*" />
+                <DataGridTextColumn Header="Stawka VAT (%)" Binding="{Binding VatRate, StringFormat=\{0:P2\}}" Width="120" />
+                <DataGridTextColumn Header="Stawka podatku dochodowego (%)" Binding="{Binding TaxRateValue, StringFormat=\{0:P2\}}" Width="150" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                <Run Text="Suma pozycji:" />
+                <Run Text="{Binding TotalCount, Mode=OneWay}" />
+            </TextBlock>
+            <Button Content="Poprzednia" Command="{Binding PreviousPageCommand}" Margin="5,0" Padding="10,5" />
+            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                <Run Text="Strona " />
+                <Run Text="{Binding DisplayPage, Mode=OneWay}" />
+                <Run Text=" z " />
+                <Run Text="{Binding TotalPages, Mode=OneWay}" />
+            </TextBlock>
+            <Button Content="Następna" Command="{Binding NextPageCommand}" Margin="5,0" Padding="10,5" />
+        </StackPanel>
+    </Grid>
+</UserControl>
