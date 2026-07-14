@@ -12,14 +12,17 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public const string SalesSchema = "sales";
     public const string MigrationHistoryTableName = "__EFMigrationsHistory";
 
-    public DbSet<Product> Products => Set<Product>();
-    public DbSet<ProductQuantityAdjustment> ProductQuantityAdjustments => Set<ProductQuantityAdjustment>();
-    public DbSet<ProductSupply> ProductSupplies => Set<ProductSupply>();
-    public DbSet<Supplier> Suppliers => Set<Supplier>();
-    public DbSet<Sale> Sales => Set<Sale>();
-    public DbSet<ProductSale> ProductSales => Set<ProductSale>();
-    public DbSet<SalesCostsAdjustment> SalesCostsAdjustments => Set<SalesCostsAdjustment>();
-    public DbSet<TaxRate> TaxRates => Set<TaxRate>();
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Material> Materials { get; set; }
+    public DbSet<MaterialSupply> MaterialSupplies { get; set; }
+    public DbSet<MaterialSupplyItem> MaterialSupplyItems { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductRecipe> ProductRecipes { get; set; }
+    public DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; set; }
+    public DbSet<Production> Productions { get; set; }
+    public DbSet<ProductionMaterial> ProductionMaterials { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderProduct> OrderProducts { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

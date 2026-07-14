@@ -1,12 +1,14 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using GenoDev.BusinessTracker.ApplicationLogic.Extensions;
 using GenoDev.BusinessTracker.Infrastructure.Extensions;
-using GenoDev.BusinessTracker.Wpf.ViewModels;
-using GenoDev.BusinessTracker.Wpf.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using GenoDev.BusinessTracker.Wpf.ViewModels;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
 namespace GenoDev.BusinessTracker.Wpf;
 
@@ -38,11 +40,16 @@ public partial class App : Application
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
-        services.AddTransient<ProductsViewModel>();
+        services.AddTransient<MaterialsViewModel>();
+        services.AddTransient<MaterialListViewModel>();
         services.AddTransient<SuppliersViewModel>();
-        services.AddTransient<TaxRatesViewModel>();
+        services.AddTransient<MaterialSuppliesViewModel>();
+        services.AddTransient<ProductionViewModel>();
+        services.AddTransient<ProductsViewModel>();
+        services.AddTransient<RecipesViewModel>();
+        services.AddTransient<ProductionListViewModel>();
         services.AddTransient<SalesViewModel>();
-        services.AddTransient<ProductSuppliesViewModel>();
+        services.AddTransient<OrdersViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>(s => new MainWindow

@@ -8,33 +8,25 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToTable("products", BusinessTrackerDbContext.StorageSchema);
+        builder.ToTable("products");
 
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.Property(x => x.Id)
-            .IsRequired()
-            .ValueGeneratedOnAdd();
+        builder.Property(x => x.Name).IsRequired();
+        builder.Property(x => x.Description).IsRequired(false);
+        builder.Property(x => x.Identifier).IsRequired();
+        builder.HasIndex(x => x.Identifier).IsUnique();
 
-        builder.Property(x => x.ProductName)
-            .IsRequired();
-
-        builder.Property(x => x.EanCode)
-            .IsRequired(false);
-
-        builder.HasIndex(x => x.EanCode)
-            .IsUnique()
-            .HasFilter("\"ean_code\" IS NOT NULL");
-
-        builder.HasMany(x => x.ProductSales)
+        builder.HasMany(x => x.ProductRecipes)
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId);
 
-        builder.HasMany(x => x.ProductSupplies)
+        builder.HasMany(x => x.Productions)
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId);
 
-        builder.HasMany(x => x.ProductQuantityAdjustments)
+        builder.HasMany(x => x.OrderProducts)
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId);
     }

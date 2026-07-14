@@ -5,14 +5,17 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 
 public interface IBusinessTrackerDbContext
 {
-    DbSet<Product> Products { get; }
-    DbSet<ProductQuantityAdjustment> ProductQuantityAdjustments { get; }
-    DbSet<ProductSupply> ProductSupplies { get; }
     DbSet<Supplier> Suppliers { get; }
-    DbSet<Sale> Sales { get; }
-    DbSet<ProductSale> ProductSales { get; }
-    DbSet<SalesCostsAdjustment> SalesCostsAdjustments { get; }
-    DbSet<TaxRate> TaxRates { get; }
+    DbSet<Material> Materials { get; }
+    DbSet<MaterialSupply> MaterialSupplies { get; }
+    DbSet<MaterialSupplyItem> MaterialSupplyItems { get; }
+    DbSet<Product> Products { get; }
+    DbSet<ProductRecipe> ProductRecipes { get; }
+    DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; }
+    DbSet<Production> Productions { get; }
+    DbSet<ProductionMaterial> ProductionMaterials { get; }
+    DbSet<Order> Orders { get; }
+    DbSet<OrderProduct> OrderProducts { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -1,30 +1,22 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
     public MainViewModel(
-        ProductsViewModel productsViewModel,
-        SuppliersViewModel suppliersViewModel,
-        TaxRatesViewModel taxRatesViewModel,
-        SalesViewModel salesViewModel,
-        ProductSuppliesViewModel productSuppliesViewModel)
+        MaterialsViewModel materialsViewModel,
+        ProductionViewModel productionViewModel,
+        SalesViewModel salesViewModel)
     {
-        ProductsViewModel = productsViewModel;
-        SuppliersViewModel = suppliersViewModel;
-        TaxRatesViewModel = taxRatesViewModel;
+        MaterialsViewModel = materialsViewModel;
+        ProductionViewModel = productionViewModel;
         SalesViewModel = salesViewModel;
-        ProductSuppliesViewModel = productSuppliesViewModel;
 
-        ProductsViewModel.RequestShowSupplies += async (product) =>
-        {
-            SelectedMainTabIndex = 0; // Magazyn
-            SelectedWarehouseTabIndex = 2; // Dostawy
-            await ProductSuppliesViewModel.SetProduct(product.Id);
-        };
-        
         InitializeAsync();
     }
 
@@ -33,11 +25,9 @@ public partial class MainViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await ProductsViewModel.LoadProducts();
-            await SuppliersViewModel.LoadSuppliers();
-            await TaxRatesViewModel.LoadTaxRates();
+            // await MaterialsViewModel.LoadData();
+            // await ProductionViewModel.LoadData();
             await SalesViewModel.LoadSales();
-            await ProductSuppliesViewModel.LoadSupplies();
         }
         finally
         {
@@ -48,12 +38,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private int _selectedMainTabIndex;
 
-    [ObservableProperty]
-    private int _selectedWarehouseTabIndex;
-
-    public ProductsViewModel ProductsViewModel { get; }
-    public SuppliersViewModel SuppliersViewModel { get; }
-    public TaxRatesViewModel TaxRatesViewModel { get; }
+    public MaterialsViewModel MaterialsViewModel { get; }
+    public ProductionViewModel ProductionViewModel { get; }
     public SalesViewModel SalesViewModel { get; }
-    public ProductSuppliesViewModel ProductSuppliesViewModel { get; }
 }

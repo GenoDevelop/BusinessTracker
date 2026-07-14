@@ -4,53 +4,39 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels"
+        xmlns:materials="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
+        xmlns:production="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Production"
         xmlns:views="clr-namespace:GenoDev.BusinessTracker.Wpf.Views"
+        xmlns:sales="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Sales"
+        xmlns:salesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Sales"
+        xmlns:materialsViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Materials"
+        xmlns:productionViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Production"
         mc:Ignorable="d"
         Title="Business Tracker" Height="768" Width="1024"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type viewModels:SalesViewModel}">
-            <views:SalesView />
+        <DataTemplate DataType="{x:Type materials:MaterialsViewModel}">
+            <materialsViews:MaterialsView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:ProductsViewModel}">
-            <views:ProductsView />
+        <DataTemplate DataType="{x:Type production:ProductionViewModel}">
+            <productionViews:ProductionView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:SuppliersViewModel}">
-            <views:SuppliersView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:TaxRatesViewModel}">
-            <views:TaxRatesView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:ProductSuppliesViewModel}">
-            <views:ProductSuppliesView />
+        <DataTemplate DataType="{x:Type sales:SalesViewModel}">
+            <salesViews:SalesView />
         </DataTemplate>
     </Window.Resources>
-        <Grid x:Name="MainGrid">
-            <TabControl SelectedIndex="{Binding SelectedMainTabIndex}">
-                <TabItem Header="Magazyn">
-                    <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedWarehouseTabIndex}">
-                        <TabItem Header="Produkty">
-                            <ContentControl Content="{Binding ProductsViewModel}" />
-                        </TabItem>
-                        <TabItem Header="Dostawcy">
-                            <ContentControl Content="{Binding SuppliersViewModel}" />
-                        </TabItem>
-                        <TabItem Header="Dostawy">
-                            <ContentControl Content="{Binding ProductSuppliesViewModel}" />
-                        </TabItem>
-                    </TabControl>
-                </TabItem>
-                <TabItem Header="Sprzedaż">
-                    <TabControl TabStripPlacement="Left">
-                        <TabItem Header="Sprzedaż">
-                            <ContentControl Content="{Binding SalesViewModel}" />
-                        </TabItem>
-                        <TabItem Header="Stawki podatkowe">
-                            <ContentControl Content="{Binding TaxRatesViewModel}" />
-                        </TabItem>
-                    </TabControl>
-                </TabItem>
-            </TabControl>
+    <Grid x:Name="MainGrid">
+        <TabControl SelectedIndex="{Binding SelectedMainTabIndex}">
+            <TabItem Header="Materiały">
+                <ContentControl Content="{Binding MaterialsViewModel}" />
+            </TabItem>
+            <TabItem Header="Produkcja">
+                <ContentControl Content="{Binding ProductionViewModel}" />
+            </TabItem>
+            <TabItem Header="Sprzedaż">
+                <ContentControl Content="{Binding SalesViewModel}" />
+            </TabItem>
+        </TabControl>
 
             <Grid Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                 <Rectangle Fill="#80000000" />

@@ -37,4 +37,19 @@
       <ProjectReference Include="..\GenoDev.BusinessTracker.TestsUtilities\GenoDev.BusinessTracker.TestsUtilities.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="UseCases\**" />
+      <Compile Remove="Services\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="UseCases\**" />
+      <EmbeddedResource Remove="Services\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="UseCases\**" />
+      <None Remove="Services\**" />
+    </ItemGroup>
+
 </Project>

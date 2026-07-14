@@ -25,5 +25,5 @@
     <ItemGroup>
         <ProjectReference Include="..\GenoDev.BusinessTracker.Domain\GenoDev.BusinessTracker.Domain.csproj" />
     </ItemGroup>
-    
+
 </Project>
