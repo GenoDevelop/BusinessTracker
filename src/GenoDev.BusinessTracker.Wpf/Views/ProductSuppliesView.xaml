@@ -21,16 +21,31 @@
                 <TextBlock Text="Dostawca:" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <ComboBox ItemsSource="{Binding AvailableSuppliers}" 
                           SelectedItem="{Binding SelectedSupplier}" 
-                          DisplayMemberPath="SupplierName" 
-                          Width="200" Margin="0,0,20,0" />
+                          Width="200" Margin="0,0,20,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SupplierName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
                 <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <ComboBox ItemsSource="{Binding AllStatuses}" 
                           SelectedItem="{Binding SelectedStatus}" 
-                          Width="150" Margin="0,0,20,0" />
+                          Width="150" Margin="0,0,20,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 
                 <Button Command="{Binding LoadSuppliesCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież">
                     <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
+                </Button>
+
+                <Button Command="{Binding ShowCreatePopupCommand}" Style="{StaticResource IconButton}" Margin="10,0,0,0" ToolTip="Nowa Dostawa">
+                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="20" Height="20" />
                 </Button>
 
                 <Button Command="{Binding ClearProductFilterCommand}" Style="{StaticResource IconButton}" Margin="10,0,0,0" ToolTip="Wyczyść filtr produktu" Visibility="{Binding SelectedProductId, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -42,6 +57,81 @@
                 <Run Text="Filtrowanie po produkcie ID: " />
                 <Run Text="{Binding SelectedProductId, Mode=OneWay}" FontWeight="Bold" />
             </TextBlock>
+
+            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Center" StaysOpen="False">
+                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+                    <Grid Width="400">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Text="Dodaj nową dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                        
+                        <ScrollViewer Grid.Row="1" MaxHeight="500" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="Produkt:" Margin="0,0,0,5" />
+                                <ComboBox ItemsSource="{Binding AllProducts}" 
+                                          SelectedValue="{Binding NewSupplyProductId}" 
+                                          SelectedValuePath="Id"
+                                          DisplayMemberPath="ProductName" 
+                                          Margin="0,0,0,10" />
+
+                                <TextBlock Text="Dostawca:" Margin="0,0,0,5" />
+                                <ComboBox ItemsSource="{Binding AllSuppliersForCreate}" 
+                                          SelectedValue="{Binding NewSupplySupplierId}" 
+                                          SelectedValuePath="Id"
+                                          DisplayMemberPath="SupplierName" 
+                                          Margin="0,0,0,10" />
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Ilość:" Margin="0,0,0,5" />
+                                        <TextBox Text="{Binding NewSupplyQuantity, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Status:" Margin="0,0,0,5" />
+                                        <ComboBox ItemsSource="{Binding AllStatusesForCreate}" SelectedItem="{Binding NewSupplyStatus}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Cena Netto:" Margin="0,0,0,5" />
+                                        <TextBox Text="{Binding NewSupplyBuyPriceNet, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Cena Brutto:" Margin="0,0,0,5" />
+                                        <TextBox Text="{Binding NewSupplyBuyPriceGross, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Data zakupu:" Margin="0,0,0,5" />
+                                <DatePicker SelectedDate="{Binding NewSupplyBuyTime}" Margin="0,0,0,10" />
+
+                                <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                                <TextBox Text="{Binding NewSupplyDescription, UpdateSourceTrigger=PropertyChanged}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button Content="Anuluj" Command="{Binding CloseCreatePopupCommand}" Margin="0,0,10,0" Padding="15,5" />
+                            <Button Content="Dodaj" Command="{Binding CreateProductSupplyCommand}" Padding="15,5" Background="LightBlue" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Popup>
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding ProductSupplies}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" Sorting="DataGrid_Sorting">
@@ -49,8 +139,8 @@
                 <DataGridTextColumn Header="Data zakupu" Binding="{Binding BuyTime, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" SortMemberPath="BuyTime" Width="150" />
                 <DataGridTextColumn Header="Dostawca" Binding="{Binding SupplierName}" SortMemberPath="SupplierName" Width="150" />
                 <DataGridTextColumn Header="Ilość" Binding="{Binding Quantity}" SortMemberPath="Quantity" Width="80" />
-                <DataGridTextColumn Header="Cena Netto" Binding="{Binding BuyPriceNet, StringFormat=C}" SortMemberPath="BuyPriceNet" Width="100" />
-                <DataGridTextColumn Header="Cena Brutto" Binding="{Binding BuyPriceGross, StringFormat=C}" SortMemberPath="BuyPriceGross" Width="100" />
+                <DataGridTextColumn Header="Cena Netto" Binding="{Binding BuyPriceNet, StringFormat=\{0\} zł}" SortMemberPath="BuyPriceNet" Width="100" />
+                <DataGridTextColumn Header="Cena Brutto" Binding="{Binding BuyPriceGross, StringFormat=\{0\} zł}" SortMemberPath="BuyPriceGross" Width="100" />
                 <DataGridTextColumn Header="Status" Binding="{Binding SupplyStatus}" SortMemberPath="SupplyStatus" Width="100" />
                 <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" />
             </DataGrid.Columns>

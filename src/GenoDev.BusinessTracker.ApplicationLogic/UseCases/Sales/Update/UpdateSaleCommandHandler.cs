@@ -23,7 +23,7 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, SaleD
             .Include(x => x.SalesCostsAdjustments)
             .FirstAsync(x => x.Id == request.Id, cancellationToken);
 
-        sale.SaleTime = request.SaleTime;
+        sale.SaleTime = request.SaleTime.ToUniversalTime();
         sale.Description = request.Description;
         sale.SaleIdentifier = request.SaleIdentifier;
         sale.PaymentIdentifier = request.PaymentIdentifier;

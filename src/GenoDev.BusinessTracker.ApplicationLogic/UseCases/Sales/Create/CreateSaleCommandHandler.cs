@@ -33,7 +33,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, SaleD
         var sale = new Sale
         {
             Id = Guid.NewGuid(),
-            SaleTime = request.SaleTime,
+            SaleTime = request.SaleTime.ToUniversalTime(),
             Description = request.Description,
             SaleIdentifier = request.SaleIdentifier,
             PaymentIdentifier = request.PaymentIdentifier

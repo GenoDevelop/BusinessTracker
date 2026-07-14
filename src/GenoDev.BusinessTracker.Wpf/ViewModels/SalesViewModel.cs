@@ -57,7 +57,7 @@ public partial class SalesViewModel(IMediator mediator) : ViewModelBase
     partial void OnPageSizeChanged(int value)
     {
         CurrentPage = 0;
-        _ = LoadSales();
+        if (!IsBusy) _ = LoadSales();
     }
 
     [RelayCommand]

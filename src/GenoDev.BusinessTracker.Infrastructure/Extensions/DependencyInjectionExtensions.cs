@@ -11,11 +11,11 @@ public static class DependencyInjectionExtensions
     {
         var connectionString = configuration.GetConnectionString("BusinessTracker");
         
-        services.AddDbContext<BusinessTrackerDbContext>(builder => builder.UseNpgsql(connectionString, opt =>
+        services.AddDbContextFactory<BusinessTrackerDbContext>(builder => builder.UseNpgsql(connectionString, opt =>
         {
             BusinessTrackerDbContext.ModifyOptionsBuilder(opt);
         }));
-        services.AddScoped<IBusinessTrackerDbContext, BusinessTrackerDbContext>();
+        services.AddTransient<IBusinessTrackerDbContext>(s => s.GetRequiredService<IDbContextFactory<BusinessTrackerDbContext>>().CreateDbContext());
         
         return services;
     }

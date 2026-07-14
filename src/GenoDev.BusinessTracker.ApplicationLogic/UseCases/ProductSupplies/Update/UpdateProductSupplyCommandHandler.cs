@@ -16,7 +16,7 @@ public class UpdateProductSupplyCommandHandler(IBusinessTrackerDbContext dbConte
         productSupply.BuyPriceGross = request.BuyPriceGross;
         productSupply.Quantity = request.Quantity;
         productSupply.SupplyStatus = request.SupplyStatus;
-        productSupply.BuyTime = request.BuyTime;
+        productSupply.BuyTime = request.BuyTime?.ToUniversalTime();
         productSupply.Description = request.Description;
 
         await dbContext.SaveChangesAsync(cancellationToken);

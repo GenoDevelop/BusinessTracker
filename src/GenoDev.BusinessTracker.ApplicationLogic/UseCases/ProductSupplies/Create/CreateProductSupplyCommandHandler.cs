@@ -16,7 +16,7 @@ public class CreateProductSupplyCommandHandler(IBusinessTrackerDbContext dbConte
             BuyPriceGross = request.BuyPriceGross,
             Quantity = request.Quantity,
             SupplyStatus = request.SupplyStatus,
-            BuyTime = request.BuyTime,
+            BuyTime = request.BuyTime?.ToUniversalTime(),
             Description = request.Description
         };
 

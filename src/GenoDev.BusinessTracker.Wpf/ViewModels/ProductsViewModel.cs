@@ -84,7 +84,7 @@ public partial class ProductsViewModel(IMediator mediator) : ViewModelBase
     partial void OnPageSizeChanged(int value)
     {
         CurrentPage = 0;
-        _ = LoadProducts();
+        if (!IsBusy) _ = LoadProducts();
     }
 
     [RelayCommand]

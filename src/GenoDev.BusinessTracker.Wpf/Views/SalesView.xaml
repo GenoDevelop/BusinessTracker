@@ -27,8 +27,8 @@
                 <DataGridTextColumn Header="Identyfikator" Binding="{Binding SaleIdentifier}" SortMemberPath="SaleIdentifier" Width="100" />
                 <DataGridTextColumn Header="ID płatności" Binding="{Binding PaymentIdentifier}" SortMemberPath="PaymentIdentifier" Width="100" />
                 <DataGridTextColumn Header="Ilość całkowita" Binding="{Binding TotalQuantity}" SortMemberPath="TotalQuantity" Width="120" />
-                <DataGridTextColumn Header="Suma brutto" Binding="{Binding TotalGrossPrice, StringFormat=C}" SortMemberPath="TotalGrossPrice" Width="100" />
-                <DataGridTextColumn Header="Suma netto" Binding="{Binding TotalNetPrice, StringFormat=C}" SortMemberPath="TotalNetPrice" Width="100" />
+                <DataGridTextColumn Header="Suma brutto" Binding="{Binding TotalGrossPrice, StringFormat=\{0\} zł}" SortMemberPath="TotalGrossPrice" Width="100" />
+                <DataGridTextColumn Header="Suma netto" Binding="{Binding TotalNetPrice, StringFormat=\{0\} zł}" SortMemberPath="TotalNetPrice" Width="100" />
                 <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>

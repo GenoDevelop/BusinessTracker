@@ -30,11 +30,19 @@ public partial class MainViewModel : ViewModelBase
 
     private async void InitializeAsync()
     {
-        await ProductsViewModel.LoadProducts();
-        await SuppliersViewModel.LoadSuppliers();
-        await TaxRatesViewModel.LoadTaxRates();
-        await SalesViewModel.LoadSales();
-        await ProductSuppliesViewModel.LoadSupplies();
+        IsBusy = true;
+        try
+        {
+            await ProductsViewModel.LoadProducts();
+            await SuppliersViewModel.LoadSuppliers();
+            await TaxRatesViewModel.LoadTaxRates();
+            await SalesViewModel.LoadSales();
+            await ProductSuppliesViewModel.LoadSupplies();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [ObservableProperty]
