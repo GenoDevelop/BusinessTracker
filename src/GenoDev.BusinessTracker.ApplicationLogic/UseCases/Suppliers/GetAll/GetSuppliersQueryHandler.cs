@@ -17,7 +17,6 @@ public class GetSuppliersQueryHandler(IBusinessTrackerDbContext dbContext)
             SupplierSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             SupplierSortBy.Nip => request.IsDescending ? query.OrderByDescending(x => x.Nip) : query.OrderBy(x => x.Nip),
             SupplierSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
-            SupplierSortBy.WebsiteUrl => request.IsDescending ? query.OrderByDescending(x => x.WebsiteUrl) : query.OrderBy(x => x.WebsiteUrl),
             _ => query.OrderBy(x => x.Name)
         };
 

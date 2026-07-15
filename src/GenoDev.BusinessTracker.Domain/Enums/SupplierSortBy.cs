@@ -4,6 +4,5 @@ public enum SupplierSortBy
 {
     Name,
     Nip,
-    Description,
-    WebsiteUrl
+    Description
 }

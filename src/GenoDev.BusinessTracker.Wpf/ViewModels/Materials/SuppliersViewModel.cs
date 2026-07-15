@@ -23,7 +23,9 @@ public partial class SuppliersViewModel : ViewModelBase
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
         CreateSupplierCommand = new RelayCommand(OpenCreatePopup);
+        OpenWebsiteCommand = new RelayCommand<string>(OpenWebsite);
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
+        _ = LoadSuppliersAsync();
     }
 
     [ObservableProperty]
@@ -81,6 +83,7 @@ public partial class SuppliersViewModel : ViewModelBase
     public IAsyncRelayCommand NextPageCommand { get; }
     public IAsyncRelayCommand PreviousPageCommand { get; }
     public IRelayCommand CreateSupplierCommand { get; }
+    public IRelayCommand<string> OpenWebsiteCommand { get; }
 
     partial void OnPageSizeChanged(int value)
     {
@@ -147,5 +150,24 @@ public partial class SuppliersViewModel : ViewModelBase
         };
 
         IsCreatePopupOpen = true;
+    }
+
+    private void OpenWebsite(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return;
+        
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            // Fallback or log if needed, but for now just prevent crash
+            System.Diagnostics.Debug.WriteLine($"Failed to open website: {ex.Message}");
+        }
     }
 }

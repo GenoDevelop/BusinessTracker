@@ -102,25 +102,6 @@ public class GetAllSuppliers_Tests : BusinessTrackerUnitTestsBase<GetSuppliersQu
         result.Items.Select(x => x.Description).Should().ContainInOrder("A", "B", "C");
     }
 
-    [Fact]
-    public async Task Handle_ShouldSortByWebsiteUrl()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Supplier(name: "S1", websiteUrl: "http://c.com");
-            db.Arrange_Supplier(name: "S2", websiteUrl: "http://a.com");
-            db.Arrange_Supplier(name: "S3", websiteUrl: "http://b.com");
-        });
-
-        var query = new GetSuppliersQuery(0, 10, SupplierSortBy.WebsiteUrl, false);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.WebsiteUrl).Should().ContainInOrder("http://a.com", "http://b.com", "http://c.com");
-    }
 
     [Fact]
     public async Task Handle_ShouldCompleteAllData()
