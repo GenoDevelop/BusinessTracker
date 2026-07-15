@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers.Delete;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers.GetAll;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.Views.Materials;
@@ -23,6 +24,9 @@ public partial class SuppliersViewModel : ViewModelBase
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
         CreateSupplierCommand = new RelayCommand(OpenCreatePopup);
+        DeleteSupplierCommand = new RelayCommand<SupplierDto>(OpenDeletePopup);
+        ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
+        CancelDeleteCommand = new RelayCommand(CancelDelete);
         OpenWebsiteCommand = new RelayCommand<string>(OpenWebsite);
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _ = LoadSuppliersAsync();
@@ -33,6 +37,12 @@ public partial class SuppliersViewModel : ViewModelBase
 
     [ObservableProperty]
     private CreateSupplierViewModel? _createSupplierViewModel;
+
+    [ObservableProperty]
+    private bool _isDeletePopupOpen;
+
+    [ObservableProperty]
+    private SupplierDto? _supplierToDelete;
 
     public ObservableCollection<SupplierDto> Suppliers { get; } = new();
 
@@ -83,6 +93,9 @@ public partial class SuppliersViewModel : ViewModelBase
     public IAsyncRelayCommand NextPageCommand { get; }
     public IAsyncRelayCommand PreviousPageCommand { get; }
     public IRelayCommand CreateSupplierCommand { get; }
+    public IRelayCommand<SupplierDto> DeleteSupplierCommand { get; }
+    public IAsyncRelayCommand ConfirmDeleteCommand { get; }
+    public IRelayCommand CancelDeleteCommand { get; }
     public IRelayCommand<string> OpenWebsiteCommand { get; }
 
     partial void OnPageSizeChanged(int value)
@@ -117,6 +130,16 @@ public partial class SuppliersViewModel : ViewModelBase
 
             TotalCount = result.TotalCount;
             HasNextPage = result.HasNextPage;
+
+            if (PageIndex > 0 && Suppliers.Count == 0 && TotalCount > 0)
+            {
+                var maxPage = (int)Math.Ceiling((double)TotalCount / PageSize) - 1;
+                if (PageIndex > maxPage)
+                {
+                    PageIndex = Math.Max(0, maxPage);
+                    await LoadSuppliersAsync();
+                }
+            }
         }
         finally
         {
@@ -150,6 +173,37 @@ public partial class SuppliersViewModel : ViewModelBase
         };
 
         IsCreatePopupOpen = true;
+    }
+
+    private void OpenDeletePopup(SupplierDto? supplier)
+    {
+        if (supplier == null) return;
+        SupplierToDelete = supplier;
+        IsDeletePopupOpen = true;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (SupplierToDelete == null) return;
+
+        IsBusy = true;
+        try
+        {
+            await _mediator.Send(new DeleteSupplierCommand(SupplierToDelete.Id));
+            IsDeletePopupOpen = false;
+            SupplierToDelete = null;
+            await LoadSuppliersAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void CancelDelete()
+    {
+        IsDeletePopupOpen = false;
+        SupplierToDelete = null;
     }
 
     private void OpenWebsite(string? url)
