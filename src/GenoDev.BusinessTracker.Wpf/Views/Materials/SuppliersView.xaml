@@ -26,10 +26,40 @@
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
                   Sorting="DataGrid_Sorting">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="5,5,5,0"/>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*" SortMemberPath="Name"/>
-                <DataGridTextColumn Header="NIP" Binding="{Binding Nip}" Width="120" SortMemberPath="Nip"/>
-                <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="2*" SortMemberPath="Description"/>
+                <DataGridTextColumn Binding="{Binding Name}" Width="*" SortMemberPath="Name">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Nazwa" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.NameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Nip}" Width="120" SortMemberPath="Nip">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="NIP" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.NipFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Description}" Width="2*" SortMemberPath="Description">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.DescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
                 <DataGridTemplateColumn Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.Delete;
@@ -13,6 +18,7 @@ public partial class MaterialListViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
+    private CancellationTokenSource? _filterCancellationTokenSource;
 
     public MaterialListViewModel(IMediator mediator, IServiceProvider serviceProvider)
     {
@@ -27,6 +33,7 @@ public partial class MaterialListViewModel : ViewModelBase
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
+        _selectedAmountOperator = AvailableOperators[0];
         _ = LoadMaterialsAsync();
     }
 
@@ -41,6 +48,41 @@ public partial class MaterialListViewModel : ViewModelBase
 
     [ObservableProperty]
     private MaterialDto? _materialToDelete;
+
+    [ObservableProperty]
+    private string? _nameFilter;
+
+    [ObservableProperty]
+    private string? _eanFilter;
+
+    [ObservableProperty]
+    private string? _unitFilter;
+
+    [ObservableProperty]
+    private string? _descriptionFilter;
+
+    [ObservableProperty]
+    private double? _amountFilterValue;
+
+    [ObservableProperty]
+    private NumericOperator? _amountFilterOperator;
+
+    public List<OperatorWrapper> AvailableOperators { get; } = new()
+    {
+        new OperatorWrapper(null, ""),
+        new OperatorWrapper(NumericOperator.Equal, "="),
+        new OperatorWrapper(NumericOperator.NotEqual, "≠"),
+        new OperatorWrapper(NumericOperator.LessThan, "<"),
+        new OperatorWrapper(NumericOperator.LessThanOrEqual, "≤"),
+        new OperatorWrapper(NumericOperator.GreaterThan, ">"),
+        new OperatorWrapper(NumericOperator.GreaterThanOrEqual, "≥")
+    };
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAmountFilterEnabled))]
+    private OperatorWrapper? _selectedAmountOperator;
+
+    public bool IsAmountFilterEnabled => SelectedAmountOperator?.Operator != null;
 
     public ObservableCollection<MaterialDto> Materials { get; } = new();
 
@@ -112,12 +154,63 @@ public partial class MaterialListViewModel : ViewModelBase
         _ = LoadMaterialsAsync();
     }
 
+    partial void OnNameFilterChanged(string? value) => DebounceLoadMaterials();
+    partial void OnEanFilterChanged(string? value) => DebounceLoadMaterials();
+    partial void OnUnitFilterChanged(string? value) => DebounceLoadMaterials();
+    partial void OnDescriptionFilterChanged(string? value) => DebounceLoadMaterials();
+    partial void OnAmountFilterValueChanged(double? value) => DebounceLoadMaterials();
+    partial void OnSelectedAmountOperatorChanged(OperatorWrapper? value)
+    {
+        AmountFilterOperator = value?.Operator;
+        DebounceLoadMaterials();
+    }
+
+    private void DebounceLoadMaterials()
+    {
+        _filterCancellationTokenSource?.Cancel();
+        _filterCancellationTokenSource = new CancellationTokenSource();
+        var token = _filterCancellationTokenSource.Token;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(500, token);
+                if (!token.IsCancellationRequested)
+                {
+                    App.Current.Dispatcher.Invoke(() => PageIndex = 0);
+                    await LoadMaterialsAsync();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore
+            }
+        }, token);
+    }
+
     private async Task LoadMaterialsAsync()
     {
+        if (!App.Current.Dispatcher.CheckAccess())
+        {
+            await App.Current.Dispatcher.InvokeAsync(LoadMaterialsAsync);
+            return;
+        }
+
         IsBusy = true;
         try
         {
-            var query = new GetMaterialsQuery(PageIndex, PageSize, SortBy, IsDescending);
+            var query = new GetMaterialsQuery(
+                PageIndex, 
+                PageSize, 
+                SortBy, 
+                IsDescending,
+                NameFilter,
+                EanFilter,
+                UnitFilter,
+                DescriptionFilter,
+                AmountFilterValue,
+                AmountFilterOperator);
             var result = await _mediator.Send(query);
 
             Materials.Clear();
@@ -219,4 +312,6 @@ public partial class MaterialListViewModel : ViewModelBase
         IsDeletePopupOpen = false;
         MaterialToDelete = null;
     }
+
+    public record OperatorWrapper(NumericOperator? Operator, string Display);
 }

@@ -172,4 +172,66 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         item.Unit.Should().Be("kg");
         item.Amount.Should().Be(123.45);
     }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByName()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_Material(name: "Apple");
+            db.Arrange_Material(name: "Banana");
+            db.Arrange_Material(name: "Cherry");
+        });
+
+        var query = new GetMaterialsQuery(0, 10, NameFilter: "an");
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Name.Should().Be("Banana");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByAmount_GreaterThan()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_Material(name: "M1", amount: 10);
+            db.Arrange_Material(name: "M2", amount: 20);
+            db.Arrange_Material(name: "M3", amount: 30);
+        });
+
+        var query = new GetMaterialsQuery(0, 10, AmountFilter: 20, AmountOperator: NumericOperator.GreaterThan);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Name.Should().Be("M3");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByAmount_Equal()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_Material(name: "M1", amount: 10.5);
+            db.Arrange_Material(name: "M2", amount: 20.0);
+        });
+
+        var query = new GetMaterialsQuery(0, 10, AmountFilter: 10.5, AmountOperator: NumericOperator.Equal);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Name.Should().Be("M1");
+    }
 }

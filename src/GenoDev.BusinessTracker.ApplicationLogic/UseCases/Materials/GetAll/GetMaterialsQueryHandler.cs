@@ -12,6 +12,40 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
     {
         var query = dbContext.Materials.AsNoTracking();
 
+        if (!string.IsNullOrWhiteSpace(request.NameFilter))
+        {
+            query = query.Where(x => x.Name.ToLower().Contains(request.NameFilter.ToLower()));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.EanFilter))
+        {
+            query = query.Where(x => x.Ean != null && x.Ean.ToLower().Contains(request.EanFilter.ToLower()));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.UnitFilter))
+        {
+            query = query.Where(x => x.Unit != null && x.Unit.ToLower().Contains(request.UnitFilter.ToLower()));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
+        {
+            query = query.Where(x => x.Description != null && x.Description.ToLower().Contains(request.DescriptionFilter.ToLower()));
+        }
+
+        if (request.AmountFilter.HasValue && request.AmountOperator.HasValue)
+        {
+            query = request.AmountOperator.Value switch
+            {
+                NumericOperator.Equal => query.Where(x => x.Amount == request.AmountFilter.Value),
+                NumericOperator.NotEqual => query.Where(x => x.Amount != request.AmountFilter.Value),
+                NumericOperator.LessThan => query.Where(x => x.Amount < request.AmountFilter.Value),
+                NumericOperator.LessThanOrEqual => query.Where(x => x.Amount <= request.AmountFilter.Value),
+                NumericOperator.GreaterThan => query.Where(x => x.Amount > request.AmountFilter.Value),
+                NumericOperator.GreaterThanOrEqual => query.Where(x => x.Amount >= request.AmountFilter.Value),
+                _ => query
+            };
+        }
+
         query = request.SortBy switch
         {
             MaterialSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),

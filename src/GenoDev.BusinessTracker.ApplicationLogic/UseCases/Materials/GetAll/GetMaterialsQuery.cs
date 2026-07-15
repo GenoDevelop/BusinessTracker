@@ -15,4 +15,10 @@ public record GetMaterialsQuery(
     int PageIndex,
     int PageSize,
     MaterialSortBy SortBy = MaterialSortBy.Name,
-    bool IsDescending = false) : IRequest<PagedList<MaterialDto>>;
+    bool IsDescending = false,
+    string? NameFilter = null,
+    string? EanFilter = null,
+    string? UnitFilter = null,
+    string? DescriptionFilter = null,
+    double? AmountFilter = null,
+    NumericOperator? AmountOperator = null) : IRequest<PagedList<MaterialDto>>;

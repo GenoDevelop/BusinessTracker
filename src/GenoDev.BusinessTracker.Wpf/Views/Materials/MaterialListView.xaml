@@ -26,12 +26,88 @@
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
                   Sorting="DataGrid_Sorting">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="5,5,5,4"/>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*" SortMemberPath="Name"/>
-                <DataGridTextColumn Header="EAN" Binding="{Binding Ean}" Width="120" SortMemberPath="Ean"/>
-                <DataGridTextColumn Header="J.m." Binding="{Binding Unit}" Width="60" SortMemberPath="Unit"/>
-                <DataGridTextColumn Header="Ilość" Binding="{Binding Amount}" Width="80" SortMemberPath="Amount"/>
-                <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="2*" SortMemberPath="Description"/>
+                <DataGridTextColumn Width="*" SortMemberPath="Name">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Nazwa" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.NameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Name"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="120" SortMemberPath="Ean">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.EanFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Ean"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="60" SortMemberPath="Unit">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="J.m." FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.UnitFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Unit"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" 
+                                          ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                          SelectedItem="{Binding DataContext.SelectedAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                          DisplayMemberPath="Display"
+                                          Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
+                                <TextBox Grid.Column="1" 
+                                         Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" 
+                                         IsEnabled="{Binding DataContext.IsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                         Margin="0" FontWeight="Normal" />
+                            </Grid>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Amount}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Width="2*" SortMemberPath="Description">
+                    <DataGridTextColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
+                            <TextBox Text="{Binding DataContext.DescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0" FontWeight="Normal" />
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Description"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
                 <DataGridTemplateColumn Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
