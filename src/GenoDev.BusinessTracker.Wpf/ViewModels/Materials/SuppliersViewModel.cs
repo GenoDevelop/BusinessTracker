@@ -24,6 +24,7 @@ public partial class SuppliersViewModel : ViewModelBase
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
         CreateSupplierCommand = new RelayCommand(OpenCreatePopup);
+        EditSupplierCommand = new RelayCommand<SupplierDto>(OpenEditPopup);
         DeleteSupplierCommand = new RelayCommand<SupplierDto>(OpenDeletePopup);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
@@ -93,6 +94,7 @@ public partial class SuppliersViewModel : ViewModelBase
     public IAsyncRelayCommand NextPageCommand { get; }
     public IAsyncRelayCommand PreviousPageCommand { get; }
     public IRelayCommand CreateSupplierCommand { get; }
+    public IRelayCommand<SupplierDto> EditSupplierCommand { get; }
     public IRelayCommand<SupplierDto> DeleteSupplierCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }
@@ -165,6 +167,22 @@ public partial class SuppliersViewModel : ViewModelBase
     private void OpenCreatePopup()
     {
         CreateSupplierViewModel = _serviceProvider.GetRequiredService<CreateSupplierViewModel>();
+        
+        CreateSupplierViewModel.RequestClose += () =>
+        {
+            IsCreatePopupOpen = false;
+            _ = LoadSuppliersAsync();
+        };
+
+        IsCreatePopupOpen = true;
+    }
+
+    private void OpenEditPopup(SupplierDto? supplier)
+    {
+        if (supplier == null) return;
+        
+        CreateSupplierViewModel = _serviceProvider.GetRequiredService<CreateSupplierViewModel>();
+        CreateSupplierViewModel.InitializeForEdit(supplier);
         
         CreateSupplierViewModel.RequestClose += () =>
         {
