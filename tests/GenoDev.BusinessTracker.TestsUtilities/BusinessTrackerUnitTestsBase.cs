@@ -60,7 +60,7 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
         PrepareTestData(DataGenerator);
     }
 
-    protected T ArrangeBusinessTracker_Database<T>(Func<BusinessTrackerDbContext, T> arrange,
+    protected T Arrange_BusinessTrackerDatabase<T>(Func<BusinessTrackerDbContext, T> arrange,
         Func<IServiceProvider, BusinessTrackerDbContext>? customContextInjection = null)
     {
         var scope = GetArrangeScope();
@@ -74,7 +74,7 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
         return result;
     }
     
-    protected void ArrangeBusinessTracker_Database(Action<BusinessTrackerDbContext> arrange,
+    protected void Arrange_BusinessTrackerDatabase(Action<BusinessTrackerDbContext> arrange,
         Func<IServiceProvider, BusinessTrackerDbContext>? customContextInjection = null)
     {
         var scope = GetArrangeScope();

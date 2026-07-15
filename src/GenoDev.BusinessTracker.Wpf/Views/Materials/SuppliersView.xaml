@@ -7,7 +7,79 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:SuppliersViewModel}">
-    <Grid>
-        <TextBlock Text="Dostawcy" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <Button Command="{Binding CreateSupplierCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj dostawcę" Margin="0,0,10,0">
+                <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="20" Height="20" />
+            </Button>
+            <Button Command="{Binding LoadSuppliersCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież">
+                <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
+            </Button>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  Sorting="DataGrid_Sorting">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*" SortMemberPath="Name"/>
+                <DataGridTextColumn Header="NIP" Binding="{Binding Nip}" Width="120" SortMemberPath="Nip"/>
+                <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="2*" SortMemberPath="Description"/>
+                <DataGridTextColumn Header="Strona WWW" Binding="{Binding WebsiteUrl}" Width="150" SortMemberPath="WebsiteUrl"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+                <StackPanel Width="400" DataContext="{Binding CreateSupplierViewModel}">
+                    <TextBlock Text="Dodaj dostawcę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+
+                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                    <TextBlock Text="NIP:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
+                             Height="100" Margin="0,0,0,10" />
+
+                    <TextBlock Text="Strona WWW:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding CreateCommand}" Padding="15,5" Background="LightBlue" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                <Run Text="Pozycje:" />
+                <Run Text="{Binding ItemsRange, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" />
+            <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="60" />
+            <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
+                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
+            </Button>
+            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                <Run Text="Strona " />
+                <Run Text="{Binding DisplayPage, Mode=OneWay}" />
+                <Run Text=" z " />
+                <Run Text="{Binding TotalPages, Mode=OneWay}" />
+            </TextBlock>
+            <Button Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
+                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

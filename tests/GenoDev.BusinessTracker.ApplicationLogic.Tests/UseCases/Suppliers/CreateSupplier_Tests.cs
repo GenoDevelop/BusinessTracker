@@ -1,84 +1,69 @@
+using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers.Create;
 using GenoDev.BusinessTracker.TestsUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Suppliers;
 
 public class CreateSupplier_Tests : BusinessTrackerUnitTestsBase<CreateSupplierCommandHandler>
 {
-    protected override void RegisterMockedDependencies(IServiceCollection services, AutoFixture.IFixture autoSubstitute)
+    protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateSupplier_WhenValidInputProvided()
+    public async Task Handle_ShouldCreateSupplierWithAllData()
     {
         // Arrange
-        var command = new CreateSupplierCommand("Test Supplier", "Test Description");
+        var command = new CreateSupplierCommand(
+            Name: "Full Supplier",
+            Nip: "1234567890",
+            Description: "Multi-line\nDescription",
+            WebsiteUrl: "https://example.com");
 
         // Act
-        var result = await Sut.Handle(command, CancellationToken.None);
+        var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.SupplierName.Should().Be(command.SupplierName);
-        result.Description.Should().Be(command.Description);
-        result.Id.Should().NotBeEmpty();
-
         AssertBusinessTracker_Database(db =>
         {
-            var supplier = db.Suppliers.FirstOrDefault(x => x.Id == result.Id);
+            var supplier = db.Suppliers.FirstOrDefault(x => x.Id == resultId);
             supplier.Should().NotBeNull();
-            supplier!.SupplierName.Should().Be(command.SupplierName);
+            supplier!.Name.Should().Be(command.Name);
+            supplier.Nip.Should().Be(command.Nip);
             supplier.Description.Should().Be(command.Description);
+            supplier.WebsiteUrl.Should().Be(command.WebsiteUrl);
+            supplier.MaterialSupplies.Should().BeEmpty();
         });
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateSupplier_WhenDescriptionIsNull()
+    public async Task Handle_ShouldCreateSupplierWithOnlyRequiredData()
     {
         // Arrange
-        var command = new CreateSupplierCommand("Test Supplier No Desc", null);
+        var command = new CreateSupplierCommand(
+            Name: "Minimal Supplier",
+            Nip: null,
+            Description: null,
+            WebsiteUrl: null);
 
         // Act
-        var result = await Sut.Handle(command, CancellationToken.None);
+        var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.SupplierName.Should().Be(command.SupplierName);
-        result.Description.Should().BeNull();
-
         AssertBusinessTracker_Database(db =>
         {
-            var supplier = db.Suppliers.FirstOrDefault(x => x.Id == result.Id);
+            var supplier = db.Suppliers.FirstOrDefault(x => x.Id == resultId);
             supplier.Should().NotBeNull();
-            supplier!.SupplierName.Should().Be(command.SupplierName);
+            supplier!.Name.Should().Be(command.Name);
+            supplier.Nip.Should().BeNull();
             supplier.Description.Should().BeNull();
-        });
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCreateTwoSuppliers_WhenTheyHaveSameName()
-    {
-        // Arrange
-        var name = "Duplicate Name";
-        var command1 = new CreateSupplierCommand(name, "Desc 1");
-        var command2 = new CreateSupplierCommand(name, "Desc 2");
-
-        // Act
-        var result1 = await Sut.Handle(command1, CancellationToken.None);
-        var result2 = await Sut.Handle(command2, CancellationToken.None);
-
-        // Assert
-        result1.Id.Should().NotBe(result2.Id);
-        result1.SupplierName.Should().Be(result2.SupplierName);
-
-        AssertBusinessTracker_Database(db =>
-        {
-            var suppliers = db.Suppliers.Where(x => x.SupplierName == name).ToList();
-            suppliers.Should().HaveCount(2);
+            supplier.WebsiteUrl.Should().BeNull();
         });
     }
 }

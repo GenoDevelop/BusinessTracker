@@ -11,6 +11,7 @@ public static class BusinessTrackerDbContextExtensions
         public Supplier Arrange_Supplier(Guid? id = null,
             string name = "Test Supplier",
             string? nip = null,
+            string? description = null,
             string? websiteUrl = null)
         {
             var supplier = new Supplier
@@ -18,6 +19,7 @@ public static class BusinessTrackerDbContextExtensions
                 Id = id ?? Guid.NewGuid(),
                 Name = name,
                 Nip = nip,
+                Description = description,
                 WebsiteUrl = websiteUrl,
                 MaterialSupplies = []
             };
