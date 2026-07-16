@@ -19,9 +19,12 @@
             <Button Command="{Binding CreateMaterialCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj materiał" Margin="0,0,10,0">
                 <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="20" Height="20" />
             </Button>
-            <Button Command="{Binding LoadMaterialsCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież">
+            <Button Command="{Binding LoadMaterialsCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież" Margin="0,0,10,0">
                 <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
             </Button>
+            <ToggleButton IsChecked="{Binding IsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
+                <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z" Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
+            </ToggleButton>
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
@@ -38,6 +41,7 @@
                         <StackPanel>
                             <TextBlock Text="Nazwa" FontWeight="Bold" Margin="0,0,0,2"/>
                             <TextBox Text="{Binding DataContext.NameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Margin="0" FontWeight="Normal" />
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -50,6 +54,7 @@
                         <StackPanel>
                             <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
                             <TextBox Text="{Binding DataContext.EanFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Margin="0" FontWeight="Normal" />
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -62,6 +67,7 @@
                         <StackPanel>
                             <TextBlock Text="J.m." FontWeight="Bold" Margin="0,0,0,2"/>
                             <TextBox Text="{Binding DataContext.UnitFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Margin="0" FontWeight="Normal" />
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -73,7 +79,7 @@
                     <DataGridTemplateColumn.Header>
                         <StackPanel>
                             <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <Grid>
+                            <Grid Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -101,6 +107,7 @@
                         <StackPanel>
                             <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
                             <TextBox Text="{Binding DataContext.DescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
+                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Margin="0" FontWeight="Normal" />
                         </StackPanel>
                     </DataGridTextColumn.Header>

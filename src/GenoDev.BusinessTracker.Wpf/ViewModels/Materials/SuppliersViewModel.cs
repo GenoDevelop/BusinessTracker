@@ -1,4 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Suppliers;
@@ -15,6 +18,7 @@ public partial class SuppliersViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
+    private CancellationTokenSource? _filterCancellationTokenSource;
 
     public SuppliersViewModel(IMediator mediator, IServiceProvider serviceProvider)
     {
@@ -44,6 +48,18 @@ public partial class SuppliersViewModel : ViewModelBase
 
     [ObservableProperty]
     private SupplierDto? _supplierToDelete;
+
+    [ObservableProperty]
+    private bool _isFilterVisible;
+
+    [ObservableProperty]
+    private string? _nameFilter;
+
+    [ObservableProperty]
+    private string? _nipFilter;
+
+    [ObservableProperty]
+    private string? _descriptionFilter;
 
     public ObservableCollection<SupplierDto> Suppliers { get; } = new();
 
@@ -116,12 +132,58 @@ public partial class SuppliersViewModel : ViewModelBase
         _ = LoadSuppliersAsync();
     }
 
+    partial void OnNameFilterChanged(string? value) => DebounceLoadSuppliers();
+    partial void OnNipFilterChanged(string? value) => DebounceLoadSuppliers();
+    partial void OnDescriptionFilterChanged(string? value) => DebounceLoadSuppliers();
+
+    partial void OnIsFilterVisibleChanged(bool value)
+    {
+        _ = LoadSuppliersAsync();
+    }
+
+    private void DebounceLoadSuppliers()
+    {
+        _filterCancellationTokenSource?.Cancel();
+        _filterCancellationTokenSource = new CancellationTokenSource();
+        var token = _filterCancellationTokenSource.Token;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(500, token);
+                if (!token.IsCancellationRequested)
+                {
+                    App.Current.Dispatcher.Invoke(() => PageIndex = 0);
+                    await LoadSuppliersAsync();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore
+            }
+        }, token);
+    }
+
     private async Task LoadSuppliersAsync()
     {
+        if (!App.Current.Dispatcher.CheckAccess())
+        {
+            await App.Current.Dispatcher.InvokeAsync(LoadSuppliersAsync);
+            return;
+        }
+
         IsBusy = true;
         try
         {
-            var query = new GetSuppliersQuery(PageIndex, PageSize, SortBy, IsDescending);
+            var query = new GetSuppliersQuery(
+                PageIndex, 
+                PageSize, 
+                SortBy, 
+                IsDescending,
+                IsFilterVisible ? NameFilter : null,
+                IsFilterVisible ? NipFilter : null,
+                IsFilterVisible ? DescriptionFilter : null);
             var result = await _mediator.Send(query);
 
             Suppliers.Clear();

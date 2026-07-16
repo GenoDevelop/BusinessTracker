@@ -14,4 +14,7 @@ public record GetSuppliersQuery(
     int PageIndex,
     int PageSize,
     SupplierSortBy SortBy = SupplierSortBy.Name,
-    bool IsDescending = false) : IRequest<PagedList<SupplierDto>>;
+    bool IsDescending = false,
+    string? NameFilter = null,
+    string? NipFilter = null,
+    string? DescriptionFilter = null) : IRequest<PagedList<SupplierDto>>;

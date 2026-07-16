@@ -50,6 +50,9 @@ public partial class MaterialListViewModel : ViewModelBase
     private MaterialDto? _materialToDelete;
 
     [ObservableProperty]
+    private bool _isFilterVisible;
+
+    [ObservableProperty]
     private string? _nameFilter;
 
     [ObservableProperty]
@@ -165,6 +168,11 @@ public partial class MaterialListViewModel : ViewModelBase
         DebounceLoadMaterials();
     }
 
+    partial void OnIsFilterVisibleChanged(bool value)
+    {
+        _ = LoadMaterialsAsync();
+    }
+
     private void DebounceLoadMaterials()
     {
         _filterCancellationTokenSource?.Cancel();
@@ -205,12 +213,12 @@ public partial class MaterialListViewModel : ViewModelBase
                 PageSize, 
                 SortBy, 
                 IsDescending,
-                NameFilter,
-                EanFilter,
-                UnitFilter,
-                DescriptionFilter,
-                AmountFilterValue,
-                AmountFilterOperator);
+                IsFilterVisible ? NameFilter : null,
+                IsFilterVisible ? EanFilter : null,
+                IsFilterVisible ? UnitFilter : null,
+                IsFilterVisible ? DescriptionFilter : null,
+                IsFilterVisible ? AmountFilterValue : null,
+                IsFilterVisible ? AmountFilterOperator : null);
             var result = await _mediator.Send(query);
 
             Materials.Clear();

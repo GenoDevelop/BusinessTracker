@@ -12,6 +12,21 @@ public class GetSuppliersQueryHandler(IBusinessTrackerDbContext dbContext)
     {
         var query = dbContext.Suppliers.AsNoTracking();
 
+        if (!string.IsNullOrWhiteSpace(request.NameFilter))
+        {
+            query = query.Where(x => x.Name.Contains(request.NameFilter));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NipFilter))
+        {
+            query = query.Where(x => x.Nip != null && x.Nip.Contains(request.NipFilter));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
+        {
+            query = query.Where(x => x.Description != null && x.Description.Contains(request.DescriptionFilter));
+        }
+
         query = request.SortBy switch
         {
             SupplierSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
