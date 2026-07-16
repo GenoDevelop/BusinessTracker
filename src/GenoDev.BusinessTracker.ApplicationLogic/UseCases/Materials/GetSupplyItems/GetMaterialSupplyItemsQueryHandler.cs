@@ -50,6 +50,11 @@ public class GetMaterialSupplyItemsQueryHandler(IBusinessTrackerDbContext dbCont
             query = ApplyNumericFilter(query, x => x.UnitsInSet, request.UnitsInSetFilter.Value, request.UnitsInSetOperator.Value);
         }
 
+        if (request.TotalAmountFilter.HasValue && request.TotalAmountOperator.HasValue)
+        {
+            query = ApplyNumericFilter(query, x => (double)x.SetsAmount * x.UnitsInSet, request.TotalAmountFilter.Value, request.TotalAmountOperator.Value);
+        }
+
         if (request.SetNetPriceFilter.HasValue && request.SetNetPriceOperator.HasValue)
         {
             query = ApplyNumericFilter(query, x => (double)x.SetNetPrice, (double)request.SetNetPriceFilter.Value, request.SetNetPriceOperator.Value);
@@ -87,6 +92,9 @@ public class GetMaterialSupplyItemsQueryHandler(IBusinessTrackerDbContext dbCont
             "UnitsInSet" => request.SortDescending 
                 ? query.OrderByDescending(x => x.UnitsInSet) 
                 : query.OrderBy(x => x.UnitsInSet),
+            "TotalAmount" => request.SortDescending 
+                ? query.OrderByDescending(x => (double)x.SetsAmount * x.UnitsInSet) 
+                : query.OrderBy(x => (double)x.SetsAmount * x.UnitsInSet),
             "SetNetPrice" => request.SortDescending 
                 ? query.OrderByDescending(x => x.SetNetPrice) 
                 : query.OrderBy(x => x.SetNetPrice),
@@ -109,11 +117,13 @@ public class GetMaterialSupplyItemsQueryHandler(IBusinessTrackerDbContext dbCont
             .Take(request.PageSize)
             .Select(x => new MaterialSupplyItemDto(
                 x.Id,
+                x.MaterialId,
                 x.Material.Name ?? string.Empty,
                 x.Material.Ean,
                 x.SetsAmount,
                 x.Material.Unit,
                 x.UnitsInSet,
+                (double)x.SetsAmount * x.UnitsInSet,
                 x.SetNetPrice,
                 (decimal)x.SetsAmount * x.SetNetPrice,
                 x.SetGrossPrice,

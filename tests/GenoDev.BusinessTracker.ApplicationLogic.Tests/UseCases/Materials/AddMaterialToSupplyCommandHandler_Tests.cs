@@ -91,4 +91,79 @@ public class AddMaterialToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsB
         await Sut.Invoking(x => x.Handle(command, CancellationToken.None))
             .Should().ThrowAsync<KeyNotFoundException>();
     }
+
+    [Fact]
+    public async Task Handle_ShouldIncreaseMaterialAmount_WhenAddingToReceivedSupply()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid materialId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialAmount = 100;
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supply =
+                db.Arrange_MaterialSupply(status: GenoDev.BusinessTracker.Domain.Enums.MaterialSupplyStatus.Received);
+            var material = db.Arrange_Material(amount: initialAmount);
+            supplyId = supply.Id;
+            materialId = material.Id;
+        });
+
+        var command = new AddMaterialToSupplyCommand(
+            supplyId,
+            materialId,
+            SetsAmount: setsAmount,
+            UnitsInSet: unitsInSet,
+            SetNetPrice: 10,
+            SetGrossPrice: 12.3m);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var material = db.Materials.First(x => x.Id == materialId);
+            material.Amount.Should().Be(initialAmount + (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldNotChangeMaterialAmount_WhenAddingToNotReceivedSupply()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid materialId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialAmount = 100;
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supply = db.Arrange_MaterialSupply(status: GenoDev.BusinessTracker.Domain.Enums.MaterialSupplyStatus.Ordered);
+            var material = db.Arrange_Material(amount: initialAmount);
+            supplyId = supply.Id;
+            materialId = material.Id;
+        });
+
+        var command = new AddMaterialToSupplyCommand(
+            supplyId,
+            materialId,
+            SetsAmount: setsAmount,
+            UnitsInSet: unitsInSet,
+            SetNetPrice: 10,
+            SetGrossPrice: 12.3m);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var material = db.Materials.First(x => x.Id == materialId);
+            material.Amount.Should().Be(initialAmount);
+        });
+    }
 }

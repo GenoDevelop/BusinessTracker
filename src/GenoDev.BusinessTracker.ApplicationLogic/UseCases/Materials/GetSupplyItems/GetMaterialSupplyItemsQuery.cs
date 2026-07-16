@@ -18,6 +18,8 @@ public record GetMaterialSupplyItemsQuery(
     NumericOperator? SetsAmountOperator = null,
     double? UnitsInSetFilter = null,
     NumericOperator? UnitsInSetOperator = null,
+    double? TotalAmountFilter = null,
+    NumericOperator? TotalAmountOperator = null,
     decimal? SetNetPriceFilter = null,
     NumericOperator? SetNetPriceOperator = null,
     decimal? TotalNetPriceFilter = null,
@@ -29,11 +31,13 @@ public record GetMaterialSupplyItemsQuery(
 
 public record MaterialSupplyItemDto(
     Guid Id,
+    Guid MaterialId,
     string MaterialName,
     string? Ean,
     int SetsAmount,
     string? Unit,
     double UnitsInSet,
+    double TotalAmount,
     decimal SetNetPrice,
     decimal TotalNetPrice,
     decimal SetGrossPrice,

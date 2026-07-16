@@ -28,8 +28,18 @@ public partial class MaterialSuppliesView : UserControl
     {
         if (DataContext is ViewModels.Materials.MaterialSuppliesViewModel vm)
         {
-            vm.ItemsSortColumn = e.Column.SortMemberPath;
-            vm.ItemsSortDescending = e.Column.SortDirection != ListSortDirection.Ascending;
+            var propertyName = e.Column.SortMemberPath;
+            if (vm.ItemsSortColumn == propertyName)
+            {
+                vm.ItemsSortDescending = !vm.ItemsSortDescending;
+            }
+            else
+            {
+                vm.ItemsSortColumn = propertyName;
+                vm.ItemsSortDescending = false;
+            }
+
+            e.Column.SortDirection = vm.ItemsSortDescending ? ListSortDirection.Descending : ListSortDirection.Ascending;
             e.Handled = true;
         }
     }

@@ -32,6 +32,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         _refreshSupplyItemsCommand = new AsyncRelayCommand(LoadSupplyItemsAsync);
         _nextItemsPageCommand = new AsyncRelayCommand(NextItemsPageAsync, () => HasNextItemsPage);
         _previousItemsPageCommand = new AsyncRelayCommand(PreviousItemsPageAsync, () => ItemsPageIndex > 0);
+        _openWebsiteCommand = new RelayCommand<string>(OpenWebsite);
 
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _ = LoadSuppliesAsync();
@@ -158,6 +159,14 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private string? _itemUnitsInSetFilter;
 
     [ObservableProperty]
+    private string? _itemTotalAmountFilter;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsItemTotalAmountFilterEnabled))]
+    private OperatorWrapper? _selectedItemTotalAmountOperator;
+    public bool IsItemTotalAmountFilterEnabled => SelectedItemTotalAmountOperator?.Operator != null;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsItemUnitsInSetFilterEnabled))]
     private OperatorWrapper? _selectedItemUnitsInSetOperator;
     public bool IsItemUnitsInSetFilterEnabled => SelectedItemUnitsInSetOperator?.Operator != null;
@@ -221,13 +230,25 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private bool _isEditPopupOpen;
 
     [ObservableProperty]
+    private bool _isEditItemPopupOpen;
+
+    [ObservableProperty]
+    private bool _isDeleteItemPopupOpen;
+
+    [ObservableProperty]
     private bool _isAddMaterialPopupOpen;
 
     [ObservableProperty]
     private EditMaterialSupplyViewModel? _editMaterialSupplyViewModel;
 
     [ObservableProperty]
+    private EditMaterialSupplyItemViewModel? _editMaterialSupplyItemViewModel;
+
+    [ObservableProperty]
     private AddMaterialToSupplyViewModel? _addMaterialToSupplyViewModel;
+
+    [ObservableProperty]
+    private MaterialSupplyItemDto? _selectedItemToRemove;
 
     [RelayCommand]
     private async Task EditSupply()
@@ -267,6 +288,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         AddMaterialToSupplyViewModel.RequestClose += async () =>
         {
             IsAddMaterialPopupOpen = false;
+            await LoadSuppliesAsync();
             await LoadSupplyItemsAsync();
             await LoadSupplyDetailsAsync(); // Total prices might change
         };
@@ -298,6 +320,48 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         IsDeletePopupOpen = false;
     }
 
+    [RelayCommand]
+    private async Task EditItem(MaterialSupplyItemDto item)
+    {
+        EditMaterialSupplyItemViewModel = new EditMaterialSupplyItemViewModel(_mediator, item);
+        EditMaterialSupplyItemViewModel.RequestClose += async () =>
+        {
+            IsEditItemPopupOpen = false;
+            await LoadSuppliesAsync();
+            await LoadSupplyItemsAsync();
+            await LoadSupplyDetailsAsync();
+        };
+        await EditMaterialSupplyItemViewModel.InitializeAsync();
+        IsEditItemPopupOpen = true;
+    }
+
+    [RelayCommand]
+    private void DeleteItem(MaterialSupplyItemDto item)
+    {
+        SelectedItemToRemove = item;
+        IsDeleteItemPopupOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteItem()
+    {
+        if (SelectedItemToRemove == null) return;
+
+        IsDeleteItemPopupOpen = false;
+        await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.RemoveSupplyItem.RemoveMaterialFromSupplyCommand(SelectedItemToRemove.Id));
+        SelectedItemToRemove = null;
+        await LoadSuppliesAsync();
+        await LoadSupplyItemsAsync();
+        await LoadSupplyDetailsAsync();
+    }
+
+    [RelayCommand]
+    private void CancelDeleteItem()
+    {
+        IsDeleteItemPopupOpen = false;
+        SelectedItemToRemove = null;
+    }
+
     private readonly IAsyncRelayCommand _loadSuppliesCommand;
     public IAsyncRelayCommand LoadSuppliesCommand => _loadSuppliesCommand;
 
@@ -321,6 +385,27 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
 
     private readonly IAsyncRelayCommand _previousItemsPageCommand;
     public IAsyncRelayCommand PreviousItemsPageCommand => _previousItemsPageCommand;
+
+    private readonly IRelayCommand<string> _openWebsiteCommand;
+    public IRelayCommand<string> OpenWebsiteCommand => _openWebsiteCommand;
+
+    private void OpenWebsite(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return;
+        
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to open website: {ex.Message}");
+        }
+    }
 
     partial void OnStartDateChanged(DateTime? value)
     {
@@ -395,6 +480,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     partial void OnItemUnitFilterChanged(string? value) => DebounceLoadItems();
     partial void OnItemSetsAmountFilterChanged(string? value) => DebounceLoadItems();
     partial void OnItemUnitsInSetFilterChanged(string? value) => DebounceLoadItems();
+    partial void OnItemTotalAmountFilterChanged(string? value) => DebounceLoadItems();
     partial void OnItemSetNetPriceFilterChanged(string? value) => DebounceLoadItems();
     partial void OnItemTotalNetPriceFilterChanged(string? value) => DebounceLoadItems();
     partial void OnItemSetGrossPriceFilterChanged(string? value) => DebounceLoadItems();
@@ -402,12 +488,21 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
 
     partial void OnSelectedItemSetsAmountOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     partial void OnSelectedItemUnitsInSetOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
+    partial void OnSelectedItemTotalAmountOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     partial void OnSelectedItemSetNetPriceOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     partial void OnSelectedItemTotalNetPriceOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     partial void OnSelectedItemSetGrossPriceOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     partial void OnSelectedItemTotalGrossPriceOperatorChanged(OperatorWrapper? value) => DebounceLoadItems();
     
-    partial void OnIsItemsFilterVisibleChanged(bool value) => _ = LoadSupplyItemsAsync();
+    partial void OnIsFilterVisibleChanged(bool value)
+    {
+        _ = LoadSuppliesAsync();
+    }
+
+    partial void OnIsItemsFilterVisibleChanged(bool value)
+    {
+        _ = LoadSupplyItemsAsync();
+    }
 
     private double? ParseDouble(string? value)
     {
@@ -427,6 +522,12 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
 
     private async Task LoadSupplyItemsAsync()
     {
+        if (!App.Current.Dispatcher.CheckAccess())
+        {
+            await App.Current.Dispatcher.InvokeAsync(LoadSupplyItemsAsync);
+            return;
+        }
+
         if (SelectedSupply == null)
         {
             SupplyItems.Clear();
@@ -452,6 +553,8 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
                 IsItemsFilterVisible ? SelectedItemSetsAmountOperator?.Operator : null,
                 IsItemsFilterVisible ? ParseDouble(ItemUnitsInSetFilter) : null,
                 IsItemsFilterVisible ? SelectedItemUnitsInSetOperator?.Operator : null,
+                IsItemsFilterVisible ? ParseDouble(ItemTotalAmountFilter) : null,
+                IsItemsFilterVisible ? SelectedItemTotalAmountOperator?.Operator : null,
                 IsItemsFilterVisible ? ParseDecimal(ItemSetNetPriceFilter) : null,
                 IsItemsFilterVisible ? SelectedItemSetNetPriceOperator?.Operator : null,
                 IsItemsFilterVisible ? ParseDecimal(ItemTotalNetPriceFilter) : null,
@@ -499,6 +602,12 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
 
     private async Task LoadSupplyDetailsAsync()
     {
+        if (!App.Current.Dispatcher.CheckAccess())
+        {
+            await App.Current.Dispatcher.InvokeAsync(LoadSupplyDetailsAsync);
+            return;
+        }
+
         if (SelectedSupply == null)
         {
             SelectedSupplyDetails = null;

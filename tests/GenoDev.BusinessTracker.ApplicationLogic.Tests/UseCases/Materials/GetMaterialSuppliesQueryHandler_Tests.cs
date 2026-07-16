@@ -64,15 +64,15 @@ public class GetMaterialSuppliesQueryHandler_Tests : BusinessTrackerUnitTestsBas
     }
 
     [Fact]
-    public async Task Handle_ShouldCalculateTotalGrossPriceCorrectly()
+    public async Task Handle_ShouldCalculatePricesCorrectly()
     {
         // Arrange
         Arrange_BusinessTrackerDatabase(db =>
         {
             var supply = db.Arrange_MaterialSupply();
-            db.Arrange_MaterialSupplyItem(supply, setsAmount: 2, setGrossPrice: 10.5m); // 21.0
-            db.Arrange_MaterialSupplyItem(supply, setsAmount: 3, setGrossPrice: 5.0m);  // 15.0
-            // Total should be 36.0
+            db.Arrange_MaterialSupplyItem(supply, setsAmount: 2, setNetPrice: 10m, setGrossPrice: 12.3m); // Net: 20, Gross: 24.6
+            db.Arrange_MaterialSupplyItem(supply, setsAmount: 3, setNetPrice: 5m, setGrossPrice: 6.15m);  // Net: 15, Gross: 18.45
+            // Total Net: 35.0, Total Gross: 43.05
         });
 
         var query = new GetMaterialSuppliesQuery(0, 10);
@@ -82,7 +82,8 @@ public class GetMaterialSuppliesQueryHandler_Tests : BusinessTrackerUnitTestsBas
 
         // Assert
         result.Items.Should().HaveCount(1);
-        result.Items[0].TotalGrossPrice.Should().Be(36.0m);
+        result.Items[0].TotalNetPrice.Should().Be(35.0m);
+        result.Items[0].TotalGrossPrice.Should().Be(43.05m);
     }
 
     [Fact]

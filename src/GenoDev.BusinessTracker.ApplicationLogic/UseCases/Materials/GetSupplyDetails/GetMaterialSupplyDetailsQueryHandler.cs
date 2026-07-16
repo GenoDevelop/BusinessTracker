@@ -29,6 +29,7 @@ public class GetMaterialSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbCo
             supply.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
             supply.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
             supply.InvoiceNo,
-            supply.Description);
+            supply.Description,
+            supply.Supplier.WebsiteUrl);
     }
 }

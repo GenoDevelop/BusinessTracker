@@ -34,6 +34,7 @@ public class GetMaterialSuppliesQueryHandler(IBusinessTrackerDbContext dbContext
                 x.Id,
                 x.Supplier.Name,
                 x.OrderDate,
+                x.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
                 x.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
                 x.Status))
             .ToListAsync(cancellationToken);

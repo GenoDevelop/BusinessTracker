@@ -12,6 +12,7 @@ public record MaterialSupplyDetailsDto(
     decimal TotalNetPrice,
     decimal TotalGrossPrice,
     string? InvoiceNo,
-    string? Description);
+    string? Description,
+    string? WebsiteUrl);
 
 public record GetMaterialSupplyDetailsQuery(Guid Id) : IRequest<MaterialSupplyDetailsDto?>;

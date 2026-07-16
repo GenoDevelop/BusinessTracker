@@ -1,15 +1,15 @@
+using AutoFixture;
 using FluentAssertions;
-using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.DeleteSupply;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.RemoveSupplyItem;
+using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
 using GenoDev.BusinessTracker.TestsUtilities.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using AutoFixture;
-using Microsoft.EntityFrameworkCore;
-using GenoDev.BusinessTracker.Domain.Enums;
+using Xunit;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Materials;
 
-public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<DeleteMaterialSupplyCommandHandler>
+public class RemoveMaterialFromSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<RemoveMaterialFromSupplyCommandHandler>
 {
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
@@ -17,18 +17,18 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     }
 
     [Fact]
-    public async Task Handle_ShouldDeleteSupplySuccessfully()
+    public async Task Handle_ShouldRemoveItemFromSupply()
     {
         // Arrange
-        Guid supplyId = Guid.Empty;
-        Arrange_BusinessTrackerDatabase(db =>
+        var itemId = Arrange_BusinessTrackerDatabase(db =>
         {
-            var supplier = db.Arrange_Supplier();
-            var supply = db.Arrange_MaterialSupply(supplier: supplier);
-            supplyId = supply.Id;
+            var supply = db.Arrange_MaterialSupply();
+            var material = db.Arrange_Material();
+            var item = db.Arrange_MaterialSupplyItem(supply, material);
+            return item.Id;
         });
 
-        var command = new DeleteMaterialSupplyCommand(supplyId);
+        var command = new RemoveMaterialFromSupplyCommand(itemId);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -36,29 +36,15 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         // Assert
         AssertBusinessTracker_Database(db =>
         {
-            var deletedSupply = db.MaterialSupplies.FirstOrDefault(x => x.Id == supplyId);
-            deletedSupply.Should().BeNull();
+            db.MaterialSupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
     }
 
     [Fact]
-    public async Task Handle_ShouldDoNothingIfSupplyNotFound()
+    public async Task Handle_ShouldSubtractMaterialAmount_WhenDeletingFromReceivedSupply()
     {
         // Arrange
-        var command = new DeleteMaterialSupplyCommand(Guid.NewGuid());
-
-        // Act
-        var act = async () => await Sut.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().NotThrowAsync();
-    }
-
-    [Fact]
-    public async Task Handle_ShouldSubtractMaterialAmount_WhenDeletingReceivedSupply()
-    {
-        // Arrange
-        Guid supplyId = Guid.Empty;
+        Guid itemId = Guid.Empty;
         Guid materialId = Guid.Empty;
         int setsAmount = 5;
         double unitsInSet = 10;
@@ -68,12 +54,12 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         {
             var material = db.Arrange_Material(amount: initialMaterialAmount);
             var supply = db.Arrange_MaterialSupply(status: MaterialSupplyStatus.Received);
-            db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
-            supplyId = supply.Id;
+            var item = db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
+            itemId = item.Id;
             materialId = material.Id;
         });
 
-        var command = new DeleteMaterialSupplyCommand(supplyId);
+        var command = new RemoveMaterialFromSupplyCommand(itemId);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -83,14 +69,15 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         {
             var material = db.Materials.First(x => x.Id == materialId);
             material.Amount.Should().Be(initialMaterialAmount - (setsAmount * unitsInSet));
+            db.MaterialSupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
     }
 
     [Fact]
-    public async Task Handle_ShouldNotChangeMaterialAmount_WhenDeletingNotReceivedSupply()
+    public async Task Handle_ShouldNotChangeMaterialAmount_WhenDeletingFromNotReceivedSupply()
     {
         // Arrange
-        Guid supplyId = Guid.Empty;
+        Guid itemId = Guid.Empty;
         Guid materialId = Guid.Empty;
         int setsAmount = 5;
         double unitsInSet = 10;
@@ -100,12 +87,12 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         {
             var material = db.Arrange_Material(amount: initialMaterialAmount);
             var supply = db.Arrange_MaterialSupply(status: MaterialSupplyStatus.Ordered);
-            db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
-            supplyId = supply.Id;
+            var item = db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
+            itemId = item.Id;
             materialId = material.Id;
         });
 
-        var command = new DeleteMaterialSupplyCommand(supplyId);
+        var command = new RemoveMaterialFromSupplyCommand(itemId);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -115,6 +102,18 @@ public class DeleteMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         {
             var material = db.Materials.First(x => x.Id == materialId);
             material.Amount.Should().Be(initialMaterialAmount);
+            db.MaterialSupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
+    }
+
+    [Fact]
+    public async Task Handle_WithNonExistentItem_ShouldThrowKeyNotFoundException()
+    {
+        // Arrange
+        var command = new RemoveMaterialFromSupplyCommand(Guid.NewGuid());
+
+        // Act & Assert
+        await Sut.Invoking(x => x.Handle(command, CancellationToken.None))
+            .Should().ThrowAsync<KeyNotFoundException>();
     }
 }

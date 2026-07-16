@@ -1,5 +1,6 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,11 @@ public class AddMaterialToSupplyCommandHandler : IRequestHandler<AddMaterialToSu
         if (material == null)
         {
             throw new KeyNotFoundException($"Material with ID {request.MaterialId} not found.");
+        }
+
+        if (supply.Status == MaterialSupplyStatus.Received)
+        {
+            material.Amount += request.SetsAmount * request.UnitsInSet;
         }
 
         var item = new MaterialSupplyItem

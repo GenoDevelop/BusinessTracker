@@ -8,6 +8,7 @@ public record MaterialSupplyDto(
     Guid Id,
     string SupplierName,
     DateTime OrderDate,
+    decimal TotalNetPrice,
     decimal TotalGrossPrice,
     MaterialSupplyStatus Status);
 

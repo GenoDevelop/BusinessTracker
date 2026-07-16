@@ -21,7 +21,7 @@ public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTes
         Guid supplyId = Guid.Empty;
         Arrange_BusinessTrackerDatabase(db =>
         {
-            var supplier = db.Arrange_Supplier(name: "Test Supplier");
+            var supplier = db.Arrange_Supplier(name: "Test Supplier", websiteUrl: "https://example.com");
             var supply = db.Arrange_MaterialSupply(
                 supplier: supplier,
                 orderDate: new DateTime(2026, 7, 16),
@@ -46,6 +46,7 @@ public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTes
         result.InvoiceNo.Should().Be("INV/123");
         result.TotalNetPrice.Should().Be(70m); // (2 * 10) + (1 * 50)
         result.TotalGrossPrice.Should().Be(86.1m); // (2 * 12.3) + (1 * 61.5) = 24.6 + 61.5 = 86.1
+        result.WebsiteUrl.Should().Be("https://example.com");
     }
 
     [Fact]
