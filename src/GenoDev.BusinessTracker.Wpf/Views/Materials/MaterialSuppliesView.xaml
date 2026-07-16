@@ -43,7 +43,7 @@
             </Grid>
 
             <!-- Supplies List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" Margin="0,0,0,3" BorderThickness="0" Padding="0">
+            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" SelectedItem="{Binding SelectedSupply}" Margin="0,0,0,3" BorderThickness="0" Padding="0">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -140,6 +140,67 @@
                 </Border>
             </Popup>
 
+            <!-- Edit Supply Popup -->
+            <Popup IsOpen="{Binding IsEditPopupOpen}" Placement="Mouse" StaysOpen="True">
+                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
+                    </Border.Effect>
+                    <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyViewModel}">
+                        <TextBlock Text="Edytuj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
+
+                        <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
+                        <ComboBox ItemsSource="{Binding Suppliers}" 
+                                  SelectedItem="{Binding SelectedSupplier}" 
+                                  DisplayMemberPath="Name" 
+                                  Margin="0,0,0,15" />
+
+                        <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" />
+                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" />
+
+                        <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" />
+                        <ComboBox ItemsSource="{Binding AvailableStatuses}" 
+                                  SelectedItem="{Binding Status}" 
+                                  Margin="0,0,0,15" />
+
+                        <TextBlock Text="Numer faktury" Margin="0,0,0,5" Foreground="Gray" />
+                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
+
+                        <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" />
+                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                                 AcceptsReturn="True" 
+                                 Height="80" 
+                                 VerticalScrollBarVisibility="Auto" 
+                                 TextWrapping="Wrap" 
+                                 Margin="0,0,0,20" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Width="80" Margin="0,0,10,0" />
+                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
+            <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
+                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+                    <StackPanel Width="300">
+                        <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                        <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                            <Run Text="Czy na pewno chcesz usunąć dostawę od " />
+                            <Run Text="{Binding SelectedSupply.SupplierName, Mode=OneWay}" FontWeight="Bold" />
+                            <Run Text=" z dnia " />
+                            <Run Text="{Binding SelectedSupply.OrderDate, StringFormat='dd.MM.yyyy', Mode=OneWay}" FontWeight="Bold" />
+                            <Run Text="?" />
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
+                            <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
             <!-- Pagination -->
             <Grid Grid.Row="3" Margin="0,5,0,0">
                 <Grid.RowDefinitions>
@@ -177,9 +238,94 @@
             </Grid>
         </Grid>
 
-        <!-- Right Panel (Empty for now) -->
+        <!-- Right Panel -->
         <Grid Grid.Column="1" Background="#F9F9F9" Margin="10,0,0,0">
-            <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Upper space: Basic Information -->
+            <Grid Grid.Row="0" Margin="15" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Header: [OrderDate] Supplier Name and Delete Button -->
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontSize="18" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Bottom">
+                            <Run Text="[" /><Run Text="{Binding SelectedSupplyDetails.OrderDate, StringFormat='dd.MM.yyyy'}" /><Run Text="]" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding SelectedSupplyDetails.SupplierName}" FontWeight="Bold" FontSize="18" Margin="10,0,0,0" Foreground="Black" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Command="{Binding EditSupplyCommand}" 
+                                Style="{StaticResource IconButton}" 
+                                Margin="0,0,10,0"
+                                ToolTip="Edytuj dostawę">
+                            <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" 
+                                  Fill="SteelBlue" Stretch="Uniform" Width="20" Height="20" />
+                        </Button>
+                        
+                        <Button Command="{Binding DeleteSupplyCommand}" 
+                                Style="{StaticResource IconButton}" 
+                                ToolTip="Usuń dostawę">
+                            <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
+                                  Fill="IndianRed" Stretch="Uniform" Width="20" Height="20" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Status, Prices, Invoice Number -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,30,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,5,0"
+                                     Fill="{Binding SelectedSupplyDetails.Status, Converter={StaticResource StatusToColorConverter}}" />
+                            <TextBlock Text="{Binding SelectedSupplyDetails.Status, Converter={StaticResource MaterialSupplyStatusToTextConverter}}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Cena netto suma:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="{Binding SelectedSupplyDetails.TotalNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Cena brutto suma:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Numer faktury:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="{Binding SelectedSupplyDetails.InvoiceNo}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Description -->
+                <Grid Grid.Row="1" Grid.Column="1" MaxHeight="100">
+                    <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- Down space: Empty for now -->
+            <Grid Grid.Row="1" />
+
+            <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"
+                       Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
         </Grid>
     </Grid>
 </UserControl>

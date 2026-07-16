@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.DeleteSupply;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplyDetails;
 using MediatR;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
@@ -77,6 +79,37 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     [ObservableProperty]
     private CreateMaterialSupplyViewModel? _createMaterialSupplyViewModel;
 
+    [ObservableProperty]
+    private MaterialSupplyDto? _selectedSupply;
+
+    [ObservableProperty]
+    private MaterialSupplyDetailsDto? _selectedSupplyDetails;
+
+    [ObservableProperty]
+    private bool _isDeletePopupOpen;
+
+    [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private EditMaterialSupplyViewModel? _editMaterialSupplyViewModel;
+
+    [RelayCommand]
+    private async Task EditSupply()
+    {
+        if (SelectedSupplyDetails == null) return;
+
+        EditMaterialSupplyViewModel = new EditMaterialSupplyViewModel(_mediator, SelectedSupplyDetails);
+        EditMaterialSupplyViewModel.RequestClose += async () =>
+        {
+            IsEditPopupOpen = false;
+            await LoadSupplyDetailsAsync();
+            await LoadSuppliesAsync();
+        };
+        await EditMaterialSupplyViewModel.InitializeAsync();
+        IsEditPopupOpen = true;
+    }
+
     [RelayCommand]
     private async Task CreateSupply()
     {
@@ -88,6 +121,30 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         };
         await CreateMaterialSupplyViewModel.InitializeAsync();
         IsCreatePopupOpen = true;
+    }
+
+    [RelayCommand]
+    private void DeleteSupply()
+    {
+        if (SelectedSupply == null) return;
+        IsDeletePopupOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDelete()
+    {
+        if (SelectedSupply == null) return;
+
+        IsDeletePopupOpen = false;
+        await _mediator.Send(new DeleteMaterialSupplyCommand(SelectedSupply.Id));
+        SelectedSupply = null;
+        await LoadSuppliesAsync();
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        IsDeletePopupOpen = false;
     }
 
     private readonly IAsyncRelayCommand _loadSuppliesCommand;
@@ -120,6 +177,31 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         _ = LoadSuppliesAsync();
     }
 
+    partial void OnSelectedSupplyChanged(MaterialSupplyDto? value)
+    {
+        _ = LoadSupplyDetailsAsync();
+    }
+
+    private async Task LoadSupplyDetailsAsync()
+    {
+        if (SelectedSupply == null)
+        {
+            SelectedSupplyDetails = null;
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var result = await _mediator.Send(new GetMaterialSupplyDetailsQuery(SelectedSupply.Id));
+            SelectedSupplyDetails = result;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task LoadSuppliesAsync()
     {
         if (!App.Current.Dispatcher.CheckAccess())
@@ -127,6 +209,8 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
             await App.Current.Dispatcher.InvokeAsync(LoadSuppliesAsync);
             return;
         }
+
+        var selectedId = SelectedSupply?.Id;
 
         IsBusy = true;
         try
@@ -142,6 +226,11 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
             foreach (var item in result.Items)
             {
                 Supplies.Add(item);
+            }
+
+            if (selectedId.HasValue)
+            {
+                SelectedSupply = Supplies.FirstOrDefault(x => x.Id == selectedId.Value);
             }
 
             TotalCount = result.TotalCount;

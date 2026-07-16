@@ -77,7 +77,9 @@
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <infrastructure:NullToAllConverter x:Key="NullToAllConverter" />
+        <infrastructure:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <infrastructure:StatusToColorConverter x:Key="StatusToColorConverter" />
+        <infrastructure:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
 
         <Style TargetType="DataGridRow">
             <Setter Property="MinHeight" Value="32" />

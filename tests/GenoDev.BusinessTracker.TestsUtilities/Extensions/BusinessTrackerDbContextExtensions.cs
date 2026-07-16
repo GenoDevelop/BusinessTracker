@@ -56,6 +56,7 @@ public static class BusinessTrackerDbContextExtensions
             Guid? id = null,
             DateTime? orderDate = null,
             string? description = null,
+            string? invoiceNo = null,
             MaterialSupplyStatus status = MaterialSupplyStatus.Ordered)
         {
             supplier ??= db.Arrange_Supplier();
@@ -67,6 +68,7 @@ public static class BusinessTrackerDbContextExtensions
                 Supplier = supplier,
                 OrderDate = orderDate ?? DateTime.Now,
                 Description = description,
+                InvoiceNo = invoiceNo,
                 Status = status,
                 MaterialSupplyItems = []
             };
