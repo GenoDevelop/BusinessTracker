@@ -75,6 +75,11 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="5,5,5,4"/>
+        </Style>
+
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <infrastructure:NullToAllConverter x:Key="NullToAllConverter" />
         <infrastructure:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />

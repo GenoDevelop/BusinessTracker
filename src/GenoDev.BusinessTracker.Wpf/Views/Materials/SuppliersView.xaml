@@ -28,13 +28,8 @@
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   Sorting="DataGrid_Sorting">
-            <DataGrid.Resources>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Padding" Value="5,5,5,4"/>
-                </Style>
-            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Name}" Width="*" SortMemberPath="Name">
                     <DataGridTextColumn.Header>

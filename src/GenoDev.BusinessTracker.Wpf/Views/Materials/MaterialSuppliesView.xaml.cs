@@ -23,6 +23,16 @@ public partial class MaterialSuppliesView : UserControl
             view.SortDescriptions.Add(new SortDescription("OrderDate", ListSortDirection.Descending));
         }
     }
+
+    private void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+        if (DataContext is ViewModels.Materials.MaterialSuppliesViewModel vm)
+        {
+            vm.ItemsSortColumn = e.Column.SortMemberPath;
+            vm.ItemsSortDescending = e.Column.SortDirection != ListSortDirection.Ascending;
+            e.Handled = true;
+        }
+    }
 }
 
 public class DateToDateOnlyConverter : IValueConverter

@@ -65,7 +65,7 @@ public partial class MaterialListViewModel : ViewModelBase
     private string? _descriptionFilter;
 
     [ObservableProperty]
-    private double? _amountFilterValue;
+    private string? _amountFilterValue;
 
     [ObservableProperty]
     private NumericOperator? _amountFilterOperator;
@@ -161,7 +161,7 @@ public partial class MaterialListViewModel : ViewModelBase
     partial void OnEanFilterChanged(string? value) => DebounceLoadMaterials();
     partial void OnUnitFilterChanged(string? value) => DebounceLoadMaterials();
     partial void OnDescriptionFilterChanged(string? value) => DebounceLoadMaterials();
-    partial void OnAmountFilterValueChanged(double? value) => DebounceLoadMaterials();
+    partial void OnAmountFilterValueChanged(string? value) => DebounceLoadMaterials();
     partial void OnSelectedAmountOperatorChanged(OperatorWrapper? value)
     {
         AmountFilterOperator = value?.Operator;
@@ -197,6 +197,14 @@ public partial class MaterialListViewModel : ViewModelBase
         }, token);
     }
 
+    private double? ParseDouble(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        if (double.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
+            return result;
+        return null;
+    }
+
     private async Task LoadMaterialsAsync()
     {
         if (!App.Current.Dispatcher.CheckAccess())
@@ -217,7 +225,7 @@ public partial class MaterialListViewModel : ViewModelBase
                 IsFilterVisible ? EanFilter : null,
                 IsFilterVisible ? UnitFilter : null,
                 IsFilterVisible ? DescriptionFilter : null,
-                IsFilterVisible ? AmountFilterValue : null,
+                IsFilterVisible ? ParseDouble(AmountFilterValue) : null,
                 IsFilterVisible ? AmountFilterOperator : null);
             var result = await _mediator.Send(query);
 

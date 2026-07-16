@@ -28,13 +28,8 @@
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   Sorting="DataGrid_Sorting">
-            <DataGrid.Resources>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Padding" Value="5,5,5,4"/>
-                </Style>
-            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*" SortMemberPath="Name">
                     <DataGridTextColumn.Header>
@@ -90,7 +85,7 @@
                                           DisplayMemberPath="Display"
                                           Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
                                 <TextBox Grid.Column="1" 
-                                         Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" 
+                                         Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
                                          IsEnabled="{Binding DataContext.IsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                          Margin="0" FontWeight="Normal" />
                             </Grid>
