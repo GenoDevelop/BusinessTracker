@@ -43,14 +43,56 @@
             </Grid>
 
             <!-- Supplies List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" Margin="0,0,0,3">
+            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" Margin="0,0,0,3" BorderThickness="0" Padding="0">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Background="{TemplateBinding Background}" 
+                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                            BorderThickness="{TemplateBinding BorderThickness}" 
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#E0EEFF" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0F7FF" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="3,3,0,3" Foreground="SteelBlue" FontSize="13" />
+                                <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="0,3,0,3" Foreground="SteelBlue" FontSize="13" />
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="GroupItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="GroupItem">
+                                            <StackPanel>
+                                                <ContentPresenter />
+                                                <ItemsPresenter />
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
                     </GroupStyle>
                 </ListBox.GroupStyle>
                 <ListBox.ItemTemplate>
@@ -68,7 +110,7 @@
             </ListBox>
 
             <!-- Create Supply Popup -->
-            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Center" StaysOpen="True">
+            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
                 <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
