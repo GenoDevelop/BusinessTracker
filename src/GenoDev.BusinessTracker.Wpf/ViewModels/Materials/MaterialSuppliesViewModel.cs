@@ -221,7 +221,13 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private bool _isEditPopupOpen;
 
     [ObservableProperty]
+    private bool _isAddMaterialPopupOpen;
+
+    [ObservableProperty]
     private EditMaterialSupplyViewModel? _editMaterialSupplyViewModel;
+
+    [ObservableProperty]
+    private AddMaterialToSupplyViewModel? _addMaterialToSupplyViewModel;
 
     [RelayCommand]
     private async Task EditSupply()
@@ -250,6 +256,22 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         };
         await CreateMaterialSupplyViewModel.InitializeAsync();
         IsCreatePopupOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task AddMaterial()
+    {
+        if (SelectedSupply == null) return;
+
+        AddMaterialToSupplyViewModel = new AddMaterialToSupplyViewModel(_mediator, SelectedSupply.Id);
+        AddMaterialToSupplyViewModel.RequestClose += async () =>
+        {
+            IsAddMaterialPopupOpen = false;
+            await LoadSupplyItemsAsync();
+            await LoadSupplyDetailsAsync(); // Total prices might change
+        };
+        await AddMaterialToSupplyViewModel.InitializeAsync();
+        IsAddMaterialPopupOpen = true;
     }
 
     [RelayCommand]
