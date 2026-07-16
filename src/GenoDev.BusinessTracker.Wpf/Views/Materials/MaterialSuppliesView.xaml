@@ -259,7 +259,7 @@
             </Popup>
 
             <!-- Edit Material Item Popup -->
-            <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Center" StaysOpen="True">
+            <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Mouse" StaysOpen="True">
                 <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
@@ -453,7 +453,6 @@
 
                 <!-- Materials DataGrid -->
                 <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="None"
-                          Margin="-10, 0, 1, 0"
                           Background="White" BorderThickness="1" BorderBrush="#DDD"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                           Sorting="DataGrid_Sorting">
@@ -474,7 +473,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="0.75*" SortMemberPath="Ean">
+                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
@@ -490,7 +489,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="SetsAmount">
+                        <DataGridTemplateColumn Width="0.4*" SortMemberPath="SetsAmount">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Zest." FontWeight="Bold" Margin="0,0,0,2"/>
@@ -518,7 +517,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="UnitsInSet">
+                        <DataGridTemplateColumn Width="0.5*" SortMemberPath="UnitsInSet">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="W Zest." FontWeight="Bold" Margin="0,0,0,2"/>
@@ -548,7 +547,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="TotalAmount">
+                        <DataGridTemplateColumn Width="0.5*" SortMemberPath="TotalAmount">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
@@ -578,7 +577,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="SetNetPrice">
+                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetNetPrice">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Z. Netto" FontWeight="Bold" Margin="0,0,0,2"/>
@@ -606,7 +605,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="SetGrossPrice">
+                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetGrossPrice">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Z. Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
@@ -634,7 +633,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="TotalNetPrice">
+                        <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalNetPrice">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Netto" FontWeight="Bold" Margin="0,0,0,2"/>
@@ -662,7 +661,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" SortMemberPath="TotalGrossPrice">
+                        <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalGrossPrice">
                             <DataGridTemplateColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
