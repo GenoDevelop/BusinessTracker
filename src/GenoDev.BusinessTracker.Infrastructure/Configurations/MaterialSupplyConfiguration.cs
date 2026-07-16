@@ -13,6 +13,8 @@ public class MaterialSupplyConfiguration : IEntityTypeConfiguration<MaterialSupp
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
+        builder.Property(x => x.OrderDate).IsRequired().HasColumnType("timestamp");
+        
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Status).HasConversion<string>();
         builder.Property(x => x.InvoiceNo).IsRequired(false);

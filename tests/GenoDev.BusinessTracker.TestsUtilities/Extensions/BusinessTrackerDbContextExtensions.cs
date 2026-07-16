@@ -65,7 +65,7 @@ public static class BusinessTrackerDbContextExtensions
                 Id = id ?? Guid.NewGuid(),
                 SupplierId = supplier.Id,
                 Supplier = supplier,
-                OrderDate = orderDate ?? DateTime.UtcNow,
+                OrderDate = orderDate ?? DateTime.Now,
                 Description = description,
                 Status = status,
                 MaterialSupplyItems = []
@@ -190,7 +190,7 @@ public static class BusinessTrackerDbContextExtensions
                 Id = id ?? Guid.NewGuid(),
                 ProductId = product.Id,
                 Product = product,
-                ProductionDate = productionDate ?? DateTime.UtcNow,
+                ProductionDate = productionDate ?? DateTime.Now,
                 Description = description,
                 ProductionMaterials = []
             };
@@ -239,7 +239,7 @@ public static class BusinessTrackerDbContextExtensions
             {
                 Id = id ?? Guid.NewGuid(),
                 Description = description,
-                OrderDate = orderDate ?? DateTime.UtcNow,
+                OrderDate = orderDate ?? DateTime.Now,
                 OrderIdentifier = orderIdentifier ?? Guid.NewGuid().ToString(),
                 PaymentIdentifier = paymentIdentifier,
                 TrackingNumber = trackingNumber,

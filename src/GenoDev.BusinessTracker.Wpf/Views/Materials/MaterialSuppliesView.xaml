@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:MaterialSuppliesViewModel}">
@@ -27,57 +28,111 @@
                 <Button Command="{Binding CreateSupplyCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj dostawę" Margin="0,0,5,0">
                     <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="18" Height="18" />
                 </Button>
-                <Button Command="{Binding RefreshCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież">
+                <Button Command="{Binding RefreshCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież" Margin="0,0,5,0">
                     <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
                 </Button>
+                <ToggleButton IsChecked="{Binding IsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
+                    <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z" 
+                          Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
+                </ToggleButton>
             </StackPanel>
 
-            <!-- Date Range Picker (Single Widget) -->
-            <Grid Grid.Row="1" Margin="0,0,0,10">
-                <ToggleButton x:Name="DateRangeToggle" HorizontalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding StartDate, StringFormat=d}" />
-                            <TextBlock Text=" - " Visibility="{Binding EndDate, Converter={StaticResource NullToAllConverter}, ConverterParameter='Visible;Collapsed'}" />
-                            <TextBlock Text="{Binding EndDate, StringFormat=d}" />
-                        </StackPanel>
-                        <Path Grid.Column="1" Data="M7,10L12,15L17,10H7Z" Fill="Gray" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                    </Grid>
-                </ToggleButton>
-                <Popup IsOpen="{Binding IsChecked, ElementName=DateRangeToggle}" PlacementTarget="{Binding ElementName=DateRangeToggle}" StaysOpen="False">
-                    <Border Background="White" BorderBrush="Gray" BorderThickness="1">
-                        <Calendar SelectionMode="SingleRange" x:Name="RangeCalendar" />
-                    </Border>
-                </Popup>
+            <!-- Date Range Picker -->
+            <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <controls:DateRangePicker StartDate="{Binding StartDate}" EndDate="{Binding EndDate}" />
             </Grid>
 
             <!-- Supplies List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" Margin="0,0,0,10">
+            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" Margin="0,0,0,3">
+                <ListBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="3,3,0,3" Foreground="SteelBlue" FontSize="13" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ListBox.GroupStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding}" Padding="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center"
+                                     Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding SupplierName}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" Foreground="Gray" FontSize="11" />
+                            </StackPanel>
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
+            <!-- Create Supply Popup -->
+            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Center" StaysOpen="True">
+                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
+                    </Border.Effect>
+                    <StackPanel Width="400" DataContext="{Binding CreateMaterialSupplyViewModel}">
+                        <TextBlock Text="Dodaj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+
+                        <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+
+                        <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
+                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
+
+                        <TextBlock Text="Numer faktury:" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                        <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
+                                 Height="100" Margin="0,0,0,20" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
             <!-- Pagination -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" Margin="5,0">
-                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="16" Height="16" />
+            <Grid Grid.Row="3" Margin="0,5,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Arrows (Top Row) -->
+                <Button Grid.Row="0" Grid.Column="0" Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" ToolTip="Poprzednia">
+                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
                 </Button>
-                <TextBlock VerticalAlignment="Center" Margin="5,0">
-                    <Run Text="{Binding CurrentPage, Mode=OneWay}" />
+                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11">
+                    <Run Text="{Binding DisplayPage, Mode=OneWay}" />
                     <Run Text="/" />
                     <Run Text="{Binding TotalPages, Mode=OneWay}" />
                 </TextBlock>
-                <Button Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" Margin="5,0">
-                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="16" Height="16" />
+                <Button Grid.Row="0" Grid.Column="2" Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" ToolTip="Następna">
+                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
                 </Button>
-            </StackPanel>
+
+                <!-- Page Size and Counters (Bottom Row) -->
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,-5">
+                    <TextBlock VerticalAlignment="Center" Text="Na stronie:" FontSize="11" Margin="0,0,5,0" />
+                    <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="45" FontSize="11" Height="22" />
+                    <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" FontSize="11">
+                        <Run Text="Poz.:" />
+                        <Run Text="{Binding ItemsRange, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
         </Grid>
 
         <!-- Right Panel (Empty for now) -->

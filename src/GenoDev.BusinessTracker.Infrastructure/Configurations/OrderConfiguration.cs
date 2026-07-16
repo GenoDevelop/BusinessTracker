@@ -13,6 +13,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
+        builder.Property(x => x.OrderDate).IsRequired().HasColumnType("timestamp");
+        
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.OrderIdentifier).IsRequired(false);
         builder.Property(x => x.PaymentIdentifier).IsRequired(false);

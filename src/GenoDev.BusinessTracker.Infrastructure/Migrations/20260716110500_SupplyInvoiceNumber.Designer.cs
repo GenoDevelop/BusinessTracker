@@ -3,6 +3,7 @@ using System;
 using GenoDev.BusinessTracker.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GenoDev.BusinessTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(BusinessTrackerDbContext))]
-    partial class BusinessTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716110500_SupplyInvoiceNumber")]
+    partial class SupplyInvoiceNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,7 +83,7 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnName("invoice_no");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
 
                     b.Property<string>("Status")
@@ -160,7 +163,7 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
 
                     b.Property<string>("OrderIdentifier")
@@ -341,7 +344,7 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnName("product_id");
 
                     b.Property<DateTime>("ProductionDate")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("production_date");
 
                     b.HasKey("Id")

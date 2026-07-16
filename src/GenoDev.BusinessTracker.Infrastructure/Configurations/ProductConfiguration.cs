@@ -12,7 +12,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
-
+        
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Identifier).IsRequired();
