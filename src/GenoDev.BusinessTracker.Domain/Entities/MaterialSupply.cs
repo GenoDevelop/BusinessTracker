@@ -9,6 +9,7 @@ public class MaterialSupply
     public DateTime OrderDate { get; set; }
     public string? Description { get; set; }
     public MaterialSupplyStatus Status { get; set; }
+    public string? InvoiceNo { get; set; }
 
     public virtual Supplier Supplier { get; set; } = null!;
     public virtual ICollection<MaterialSupplyItem> MaterialSupplyItems { get; set; } = new HashSet<MaterialSupplyItem>();

@@ -15,6 +15,7 @@ public class MaterialSupplyConfiguration : IEntityTypeConfiguration<MaterialSupp
 
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Status).HasConversion<string>();
+        builder.Property(x => x.InvoiceNo).IsRequired(false);
 
         builder.HasOne(x => x.Supplier)
             .WithMany(x => x.MaterialSupplies)
