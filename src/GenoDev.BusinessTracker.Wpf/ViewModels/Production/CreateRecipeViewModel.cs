@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.CreateRecipe;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateRecipe;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProducts;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipes;
 using MediatR;
 using System.Collections.ObjectModel;
 
@@ -9,6 +11,10 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
 public partial class CreateRecipeViewModel(IMediator mediator) : ViewModelBase
 {
+    private Guid? _editingRecipeId;
+
+    [ObservableProperty]
+    private string _title = "Dodaj przepis";
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     private string _name = string.Empty;
@@ -46,9 +52,20 @@ public partial class CreateRecipeViewModel(IMediator mediator) : ViewModelBase
 
     public void Clear()
     {
+        _editingRecipeId = null;
+        Title = "Dodaj przepis";
         Name = string.Empty;
         Description = null;
         SelectedProduct = null;
+    }
+
+    public void LoadRecipe(RecipeDto recipe)
+    {
+        _editingRecipeId = recipe.Id;
+        Title = "Edytuj przepis";
+        Name = recipe.Name;
+        Description = recipe.Description;
+        SelectedProduct = Products.FirstOrDefault(p => p.Id == recipe.ProductId);
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -59,8 +76,16 @@ public partial class CreateRecipeViewModel(IMediator mediator) : ViewModelBase
         IsBusy = true;
         try
         {
-            var command = new CreateRecipeCommand(SelectedProduct.Id, Name, Description);
-            await mediator.Send(command);
+            if (_editingRecipeId.HasValue)
+            {
+                var command = new UpdateRecipeCommand(_editingRecipeId.Value, SelectedProduct.Id, Name, Description);
+                await mediator.Send(command);
+            }
+            else
+            {
+                var command = new CreateRecipeCommand(SelectedProduct.Id, Name, Description);
+                await mediator.Send(command);
+            }
             
             Clear();
             RequestClose?.Invoke();
