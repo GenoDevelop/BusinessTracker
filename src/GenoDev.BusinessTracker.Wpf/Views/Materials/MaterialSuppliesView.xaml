@@ -452,8 +452,8 @@
                 </StackPanel>
 
                 <!-- Materials DataGrid -->
-                <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="None"
-                          Background="White" BorderThickness="1" BorderBrush="#DDD"
+                <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True"
+                          Background="White"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                           Sorting="DataGrid_Sorting">
                     <DataGrid.Columns>
@@ -491,7 +491,7 @@
 
                         <DataGridTemplateColumn Width="0.4*" SortMemberPath="SetsAmount">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Ilość zestawów">
                                     <TextBlock Text="Zest." FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -519,7 +519,7 @@
 
                         <DataGridTemplateColumn Width="0.5*" SortMemberPath="UnitsInSet">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Ilość sztuk w zestawie">
                                     <TextBlock Text="W Zest." FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -549,7 +549,7 @@
 
                         <DataGridTemplateColumn Width="0.5*" SortMemberPath="TotalAmount">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Sumaryczna ilość sztuk we wszystkich zestawach">
                                     <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -579,7 +579,7 @@
                         
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetNetPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Cena netto za zestaw">
                                     <TextBlock Text="Z. Netto" FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -607,7 +607,7 @@
 
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetGrossPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Cena brutto za zestaw">
                                     <TextBlock Text="Z. Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -635,7 +635,7 @@
                         
                         <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalNetPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Całkowita cena netto za wszystkie zestawy">
                                     <TextBlock Text="Netto" FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
@@ -663,7 +663,7 @@
 
                         <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalGrossPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
+                                <StackPanel ToolTip="Całkowita cena brutto za wszystkie zestawy">
                                     <TextBlock Text="Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
                                     <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>

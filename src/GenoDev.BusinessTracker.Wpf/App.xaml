@@ -86,6 +86,13 @@
         <infrastructure:StatusToColorConverter x:Key="StatusToColorConverter" />
         <infrastructure:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
 
+        <Style TargetType="DataGrid">
+            <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#DDD" />
+        </Style>
+
         <Style TargetType="DataGridRow">
             <Setter Property="MinHeight" Value="32" />
             <Setter Property="VerticalContentAlignment" Value="Center" />

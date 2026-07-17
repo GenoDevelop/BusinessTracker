@@ -27,7 +27,7 @@
             </ToggleButton>
         </StackPanel>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="None"
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
