@@ -16,6 +16,9 @@
 
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <Button Command="{Binding CreateProductCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj produkt" Margin="0,0,10,0">
+                <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="20" Height="20" />
+            </Button>
             <Button Command="{Binding LoadProductsCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież" Margin="0,0,10,0">
                 <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
             </Button>
@@ -101,6 +104,33 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource IconButton}" 
+                                        ToolTip="Edytuj"
+                                        Padding="0"
+                                        Margin="0,0,5,0">
+                                    <Path
+                                        Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
+                                        Fill="SteelBlue" Stretch="Uniform" Width="18" Height="18" />
+                                </Button>
+                                <Button Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource IconButton}" 
+                                        ToolTip="Usuń"
+                                        Padding="0">
+                                    <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
+                                          Fill="LightCoral" Stretch="Uniform" Width="18" Height="18" />
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -124,5 +154,49 @@
                 <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
             </Button>
         </StackPanel>
+
+        <!-- Create Product Popup -->
+        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+                <StackPanel Width="400" DataContext="{Binding CreateProductViewModel}">
+                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj produkt;Dodaj produkt'}" 
+                               FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+
+                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                    <TextBlock Text="Identyfikator (wymagane):" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Identifier, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
+                             Height="100" Margin="0,0,0,20" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Delete Product Confirmation Popup -->
+        <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+                <StackPanel Width="300">
+                    <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                        <Run Text="Czy na pewno chcesz usunąć produkt " />
+                        <Run Text="{Binding ProductToDelete.Name, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text="?" />
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>

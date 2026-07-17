@@ -385,7 +385,7 @@
                 </Grid>
 
                 <!-- Status, Prices, Invoice Number -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,30,0">
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="100"/>
                         <StackPanel Orientation="Horizontal">
@@ -412,7 +412,7 @@
                 </StackPanel>
 
                 <!-- Description -->
-                <Grid Grid.Row="1" Grid.Column="1" MaxHeight="100">
+                <Grid Grid.Row="1" Grid.Column="1" Height="100">
                     <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" />

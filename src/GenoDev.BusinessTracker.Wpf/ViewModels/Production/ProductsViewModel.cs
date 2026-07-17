@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.Delete;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProducts;
 using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
@@ -17,16 +18,83 @@ public partial class ProductsViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private CancellationTokenSource? _filterCancellationTokenSource;
 
+    public CreateProductViewModel CreateProductViewModel { get; }
+
     public ProductsViewModel(IMediator mediator)
     {
         _mediator = mediator;
+        CreateProductViewModel = new CreateProductViewModel(mediator);
+        CreateProductViewModel.RequestClose += () =>
+        {
+            IsCreatePopupOpen = false;
+            _ = LoadProductsAsync();
+        };
+
         LoadProductsCommand = new AsyncRelayCommand(LoadProductsAsync);
+        CreateProductCommand = new RelayCommand(OpenCreatePopup);
+        EditProductCommand = new RelayCommand<ProductDto>(OpenEditPopup);
+        DeleteProductCommand = new RelayCommand<ProductDto>(OpenDeletePopup);
+        ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
+        CancelDeleteCommand = new RelayCommand(CancelDelete);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _selectedAmountOperator = AvailableOperators[0];
         _ = LoadProductsAsync();
     }
+
+    private void OpenCreatePopup()
+    {
+        CreateProductViewModel.Clear();
+        IsCreatePopupOpen = true;
+    }
+
+    private void OpenEditPopup(ProductDto? product)
+    {
+        if (product == null) return;
+        CreateProductViewModel.InitializeForEdit(product);
+        IsCreatePopupOpen = true;
+    }
+
+    private void OpenDeletePopup(ProductDto? product)
+    {
+        if (product == null) return;
+        ProductToDelete = product;
+        IsDeletePopupOpen = true;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (ProductToDelete == null) return;
+
+        IsBusy = true;
+        try
+        {
+            await _mediator.Send(new DeleteProductCommand(ProductToDelete.Id));
+            IsDeletePopupOpen = false;
+            ProductToDelete = null;
+            await LoadProductsAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void CancelDelete()
+    {
+        IsDeletePopupOpen = false;
+        ProductToDelete = null;
+    }
+
+    [ObservableProperty]
+    private bool _isCreatePopupOpen;
+
+    [ObservableProperty]
+    private bool _isDeletePopupOpen;
+
+    [ObservableProperty]
+    private ProductDto? _productToDelete;
 
     [ObservableProperty]
     private bool _isFilterVisible;
@@ -109,6 +177,11 @@ public partial class ProductsViewModel : ViewModelBase
     }
 
     public IAsyncRelayCommand LoadProductsCommand { get; }
+    public IRelayCommand CreateProductCommand { get; }
+    public IRelayCommand<ProductDto> EditProductCommand { get; }
+    public IRelayCommand<ProductDto> DeleteProductCommand { get; }
+    public IAsyncRelayCommand ConfirmDeleteCommand { get; }
+    public IRelayCommand CancelDeleteCommand { get; }
     public IAsyncRelayCommand NextPageCommand { get; }
     public IAsyncRelayCommand PreviousPageCommand { get; }
 
