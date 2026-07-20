@@ -177,6 +177,12 @@ public partial class ProductionListViewModel : ViewModelBase
     private bool _isProductionSaved;
 
     [ObservableProperty]
+    private bool _isDeletePopupOpen;
+
+    [ObservableProperty]
+    private ProductionHistoryDto? _productionToDelete;
+
+    [ObservableProperty]
     private int _productionAmount = 1;
 
     [ObservableProperty]
@@ -189,6 +195,8 @@ public partial class ProductionListViewModel : ViewModelBase
 
     public IRelayCommand SaveProductionCommand { get; }
     public IRelayCommand CancelAddProductionCommand { get; }
+    public IRelayCommand ConfirmDeleteProductionCommand { get; }
+    public IRelayCommand CancelDeleteProductionCommand { get; }
 
     public ProductionListViewModel(IMediator mediator)
     {
@@ -206,6 +214,8 @@ public partial class ProductionListViewModel : ViewModelBase
         EditProductionCommand = new AsyncRelayCommand<ProductionHistoryDto>(EditProductionAsync, (p) => p != null && !IsAddingProduction && !IsEditingProduction);
         SaveProductionCommand = new AsyncRelayCommand(SaveProductionAsync, () => !IsProductionSaved);
         CancelAddProductionCommand = new RelayCommand(CancelAddProduction);
+        ConfirmDeleteProductionCommand = new AsyncRelayCommand(ConfirmDeleteProductionAsync);
+        CancelDeleteProductionCommand = new RelayCommand(CancelDeleteProduction);
 
         _ = LoadProductsAsync();
     }
@@ -568,29 +578,37 @@ public partial class ProductionListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task DeleteProductionAsync(ProductionHistoryDto production)
+    private void DeleteProduction(ProductionHistoryDto production)
     {
         if (production == null) return;
+        ProductionToDelete = production;
+        IsDeletePopupOpen = true;
+    }
 
-        var result = System.Windows.MessageBox.Show(
-            $"Czy na pewno chcesz usunąć tę historię produkcji z dnia {production.ProductionDate:yyyy-MM-dd HH:mm}?\nSpowoduje to cofnięcie zmian w stanach magazynowych produktu i materiałów.",
-            "Potwierdzenie usunięcia",
-            System.Windows.MessageBoxButton.YesNo,
-            System.Windows.MessageBoxImage.Warning);
+    private async Task ConfirmDeleteProductionAsync()
+    {
+        if (ProductionToDelete == null) return;
 
-        if (result == System.Windows.MessageBoxResult.Yes)
+        try
         {
-            try
-            {
-                await _mediator.Send(new DeleteProductionCommand(production.Id));
-                await RefreshHistoryAndRecipesAsync();
-                await LoadProductsAsync(); // Update product stock in the main list
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Błąd podczas usuwania produkcji: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+            await _mediator.Send(new DeleteProductionCommand(ProductionToDelete.Id));
+            await RefreshHistoryAndRecipesAsync();
+            await LoadProductsAsync(); // Update product stock in the main list
         }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Błąd podczas usuwania produkcji: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            CancelDeleteProduction();
+        }
+    }
+
+    private void CancelDeleteProduction()
+    {
+        IsDeletePopupOpen = false;
+        ProductionToDelete = null;
     }
 
     private void CancelAddProduction()
