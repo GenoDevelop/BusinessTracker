@@ -30,9 +30,29 @@ public partial class DateRangePicker : UserControl
         InitializeComponent();
     }
 
+    private bool _isClearing;
+
     private void RangeCalendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isClearing) return;
+
         StartDate = RangeCalendar.SelectedDates.FirstOrDefault();
         EndDate = RangeCalendar.SelectedDates.LastOrDefault();
+    }
+
+    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+        _isClearing = true;
+        try
+        {
+            StartDate = null;
+            EndDate = null;
+            RangeCalendar.SelectedDates.Clear();
+        }
+        finally
+        {
+            _isClearing = false;
+        }
+        e.Handled = true;
     }
 }
