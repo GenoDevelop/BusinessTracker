@@ -359,5 +359,86 @@
                 </Grid>
             </Grid>
         </Grid>
+
+        <!-- Add/Edit Material Popup -->
+        <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5">
+                <StackPanel DataContext="{Binding AddRecipeMaterialViewModel}">
+                    <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Wyszukaj materiał:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding MaterialSearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Wybierz materiał:" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Materials}" 
+                              SelectedItem="{Binding SelectedMaterial}" 
+                              DisplayMemberPath="Name"
+                              Margin="0,0,0,10" Height="25"/>
+
+                    <TextBlock Text="Ilość:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Create/Edit Recipe Popup -->
+        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5">
+                <StackPanel DataContext="{Binding CreateRecipeViewModel}">
+                    <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Nazwa:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Produkt:" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Products}" 
+                              SelectedItem="{Binding SelectedProduct}" 
+                              DisplayMemberPath="Name"
+                              Margin="0,0,0,10" Height="25"/>
+
+                    <TextBlock Text="Opis:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Delete Material Confirmation Popup -->
+        <Popup IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5">
+                <StackPanel Width="300">
+                    <TextBlock Text="Potwierdź usunięcie" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Nie" Command="{Binding CancelDeleteMaterialCommand}" Margin="0,0,10,0" Padding="15,5"/>
+                        <Button Content="Tak" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Delete Recipe Confirmation -->
+        <Popup IsOpen="{Binding IsDeleteConfirmationOpen}" Placement="Mouse" StaysOpen="True">
+            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5">
+                <StackPanel Width="300">
+                    <TextBlock Text="Potwierdź usunięcie przepisu" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Nie" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/>
+                        <Button Content="Tak" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>

@@ -123,4 +123,47 @@ public class GetRecipes_Tests : BusinessTrackerUnitTestsBase<GetRecipesQueryHand
         result.TotalCount.Should().Be(5);
         result.HasNextPage.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByProductId()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var product1 = db.Arrange_Product(id: productId, name: "Product A");
+            var product2 = db.Arrange_Product(name: "Product B");
+            
+            db.Arrange_ProductRecipe(product: product1, name: "Recipe A");
+            db.Arrange_ProductRecipe(product: product2, name: "Recipe B");
+        });
+
+        var query = new GetRecipesQuery(ProductId: productId);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items.First().ProductId.Should().Be(productId);
+        result.Items.First().Name.Should().Be("Recipe A");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnEmpty_WhenProductIdDoesNotExist()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_ProductRecipe(name: "Recipe 1");
+        });
+
+        var query = new GetRecipesQuery(ProductId: Guid.NewGuid());
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().BeEmpty();
+    }
 }

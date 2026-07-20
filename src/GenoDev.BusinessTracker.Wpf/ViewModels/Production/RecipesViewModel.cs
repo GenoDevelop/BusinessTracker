@@ -71,9 +71,11 @@ public partial class RecipesViewModel : ViewModelBase
         NextRecipeMaterialsPageCommand = new AsyncRelayCommand(NextRecipeMaterialsPageAsync, () => HasNextRecipeMaterialsPage);
         PreviousRecipeMaterialsPageCommand = new AsyncRelayCommand(PreviousRecipeMaterialsPageAsync, () => RecipeMaterialsPageIndex > 0);
 
-        AddRecipeMaterialCommand = new RelayCommand(() => { });
-        EditRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(item => { });
-        DeleteRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(item => { });
+        AddRecipeMaterialCommand = new RelayCommand(AddRecipeMaterial);
+        EditRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(EditRecipeMaterial);
+        DeleteRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(DeleteRecipeMaterial);
+        ConfirmDeleteMaterialCommand = new AsyncRelayCommand(ConfirmDeleteMaterialAsync);
+        CancelDeleteMaterialCommand = new RelayCommand(CancelDeleteMaterial);
 
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _ = LoadRecipesAsync();
@@ -175,6 +177,17 @@ public partial class RecipesViewModel : ViewModelBase
     }
 
     [ObservableProperty]
+    private AddRecipeMaterialViewModel? _addRecipeMaterialViewModel;
+
+    [ObservableProperty]
+    private bool _isAddMaterialPopupOpen;
+
+    [ObservableProperty]
+    private bool _isDeleteMaterialConfirmationOpen;
+
+    private RecipeMaterialDto? _materialToDelete;
+
+    [ObservableProperty]
     private CreateRecipeViewModel? _createRecipeViewModel;
 
     [ObservableProperty]
@@ -197,6 +210,8 @@ public partial class RecipesViewModel : ViewModelBase
     public IRelayCommand AddRecipeMaterialCommand { get; }
     public IRelayCommand<RecipeMaterialDto> EditRecipeMaterialCommand { get; }
     public IRelayCommand<RecipeMaterialDto> DeleteRecipeMaterialCommand { get; }
+    public IAsyncRelayCommand ConfirmDeleteMaterialCommand { get; }
+    public IRelayCommand CancelDeleteMaterialCommand { get; }
 
     partial void OnSearchTermChanged(string? value)
     {
@@ -454,6 +469,67 @@ public partial class RecipesViewModel : ViewModelBase
                 await LoadRecipesAsync();
             };
         }
+    }
+
+    private void AddRecipeMaterial()
+    {
+        if (SelectedRecipe == null) return;
+        EnsureAddMaterialViewModelInitialized();
+        AddRecipeMaterialViewModel!.InitializeForAdd(SelectedRecipe.Id);
+        IsAddMaterialPopupOpen = true;
+    }
+
+    private void EditRecipeMaterial(RecipeMaterialDto? material)
+    {
+        if (SelectedRecipe == null || material == null) return;
+        EnsureAddMaterialViewModelInitialized();
+        AddRecipeMaterialViewModel!.InitializeForEdit(SelectedRecipe.Id, material);
+        IsAddMaterialPopupOpen = true;
+    }
+
+    private void EnsureAddMaterialViewModelInitialized()
+    {
+        if (AddRecipeMaterialViewModel == null)
+        {
+            AddRecipeMaterialViewModel = new AddRecipeMaterialViewModel(_mediator);
+            AddRecipeMaterialViewModel.RequestClose += async () =>
+            {
+                IsAddMaterialPopupOpen = false;
+                await LoadRecipeMaterialsAsync();
+            };
+        }
+    }
+
+    private void DeleteRecipeMaterial(RecipeMaterialDto? material)
+    {
+        if (material == null) return;
+        _materialToDelete = material;
+        IsDeleteMaterialConfirmationOpen = true;
+    }
+
+    private async Task ConfirmDeleteMaterialAsync()
+    {
+        if (_materialToDelete == null) return;
+
+        IsBusy = true;
+        try
+        {
+            var command = new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.RemoveRecipeMaterial.RemoveRecipeMaterialCommand(_materialToDelete.Id);
+            await _mediator.Send(command);
+            IsDeleteMaterialConfirmationOpen = false;
+            _materialToDelete = null;
+            await LoadRecipeMaterialsAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void CancelDeleteMaterial()
+    {
+        IsDeleteMaterialConfirmationOpen = false;
+        _materialToDelete = null;
     }
 
     private void DeleteRecipe()

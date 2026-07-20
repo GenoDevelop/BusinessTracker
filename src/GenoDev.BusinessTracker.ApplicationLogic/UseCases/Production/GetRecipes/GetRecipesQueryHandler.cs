@@ -13,6 +13,11 @@ public class GetRecipesQueryHandler(IBusinessTrackerDbContext dbContext)
             .Include(x => x.Product)
             .AsNoTracking();
 
+        if (request.ProductId.HasValue)
+        {
+            query = query.Where(x => x.ProductId == request.ProductId.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var searchTerm = request.SearchTerm.ToLower();

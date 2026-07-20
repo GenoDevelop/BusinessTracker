@@ -14,6 +14,7 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
         builder.Property(x => x.ProductionDate).IsRequired().HasColumnType("timestamp");
+        builder.Property(x => x.Amount).IsRequired();
         builder.Property(x => x.Description).IsRequired(false);
 
         builder.HasOne(x => x.Product)

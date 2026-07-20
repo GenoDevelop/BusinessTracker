@@ -81,6 +81,8 @@
         </Style>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <infrastructure:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <infrastructure:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
         <infrastructure:NullToAllConverter x:Key="NullToAllConverter" />
         <infrastructure:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <infrastructure:StatusToColorConverter x:Key="StatusToColorConverter" />

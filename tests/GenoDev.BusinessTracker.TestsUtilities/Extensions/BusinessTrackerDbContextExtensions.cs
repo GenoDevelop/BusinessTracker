@@ -183,6 +183,7 @@ public static class BusinessTrackerDbContextExtensions
         public Production Arrange_Production(Product? product = null,
             Guid? id = null,
             DateTime? productionDate = null,
+            int amount = 1,
             string? description = null)
         {
             product ??= db.Arrange_Product();
@@ -192,7 +193,8 @@ public static class BusinessTrackerDbContextExtensions
                 Id = id ?? Guid.NewGuid(),
                 ProductId = product.Id,
                 Product = product,
-                ProductionDate = productionDate ?? DateTime.Now,
+                ProductionDate = productionDate ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                Amount = amount,
                 Description = description,
                 ProductionMaterials = []
             };

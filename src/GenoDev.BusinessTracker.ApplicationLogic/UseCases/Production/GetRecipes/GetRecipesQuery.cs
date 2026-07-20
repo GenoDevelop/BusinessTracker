@@ -6,7 +6,8 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipe
 public record GetRecipesQuery(
     int PageIndex = 0,
     int PageSize = 20,
-    string? SearchTerm = null) : IRequest<PagedList<RecipeDto>>;
+    string? SearchTerm = null,
+    Guid? ProductId = null) : IRequest<PagedList<RecipeDto>>;
 
 public record RecipeDto(
     Guid Id,
