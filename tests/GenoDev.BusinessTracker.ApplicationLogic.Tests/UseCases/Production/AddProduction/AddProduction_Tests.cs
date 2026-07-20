@@ -34,8 +34,8 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
 
         var usedMaterials = new List<MaterialUsageDto>
         {
-            new(materialId1, 20),
-            new(materialId2, 30)
+            new(null, materialId1, 20),
+            new(null, materialId2, 30)
         };
 
         var command = new AddProductionCommand(
@@ -87,8 +87,8 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         // Scenario: same material used twice (e.g. from different recipe steps or manual entries)
         var usedMaterials = new List<MaterialUsageDto>
         {
-            new(materialId, 10),
-            new(materialId, 25)
+            new(null, materialId, 10),
+            new(null, materialId, 25)
         };
 
         var command = new AddProductionCommand(

@@ -6,8 +6,10 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProduction
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProductionMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipeMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.DeleteProduction;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetAll;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateProduction;
 using MediatR;
 using System;
 using System.Collections.ObjectModel;
@@ -161,9 +163,15 @@ public partial class ProductionListViewModel : ViewModelBase
     public IAsyncRelayCommand RefreshCommand { get; }
     public IAsyncRelayCommand RefreshHistoryCommand { get; }
     public IAsyncRelayCommand AddProductionCommand { get; }
+    public IRelayCommand EditProductionCommand { get; }
 
     [ObservableProperty]
     private bool _isAddingProduction;
+
+    [ObservableProperty]
+    private bool _isEditingProduction;
+
+    private Guid? _editingProductionId;
 
     [ObservableProperty]
     private bool _isProductionSaved;
@@ -173,6 +181,9 @@ public partial class ProductionListViewModel : ViewModelBase
 
     [ObservableProperty]
     private string? _productionDescription;
+
+    [ObservableProperty]
+    private DateTime _productionDate = DateTime.Now;
 
     public ObservableCollection<DynamicMaterialInput> MaterialInputs { get; } = new();
 
@@ -191,7 +202,8 @@ public partial class ProductionListViewModel : ViewModelBase
         ClearHistoryFilterCommand = new RelayCommand(ClearHistoryFilter);
         RefreshCommand = new AsyncRelayCommand(ManualRefreshAsync);
         RefreshHistoryCommand = new AsyncRelayCommand(RefreshHistoryAndRecipesAsync);
-        AddProductionCommand = new AsyncRelayCommand(AddProductionAsync, () => SelectedRecipe != null && !IsAddingProduction);
+        AddProductionCommand = new AsyncRelayCommand(AddProductionAsync, () => SelectedRecipe != null && !IsAddingProduction && !IsEditingProduction);
+        EditProductionCommand = new AsyncRelayCommand<ProductionHistoryDto>(EditProductionAsync, (p) => p != null && !IsAddingProduction && !IsEditingProduction);
         SaveProductionCommand = new AsyncRelayCommand(SaveProductionAsync, () => !IsProductionSaved);
         CancelAddProductionCommand = new RelayCommand(CancelAddProduction);
 
@@ -517,14 +529,30 @@ public partial class ProductionListViewModel : ViewModelBase
     {
         if (SelectedProduct == null) return;
 
-        var command = new AddProductionCommand(
-            SelectedProduct.Id,
-            ProductionAmount,
-            ProductionDescription,
-            DateTime.Now,
-            MaterialInputs.Select(x => new MaterialUsageDto(x.MaterialId, x.TotalRequiredAmount)));
+        if (IsEditingProduction)
+        {
+            if (!_editingProductionId.HasValue) return;
 
-        await _mediator.Send(command);
+            var command = new UpdateProductionCommand(
+                _editingProductionId.Value,
+                ProductionAmount,
+                ProductionDescription,
+                ProductionDate,
+                MaterialInputs.Select(x => new MaterialUsageDto(x.ProductionMaterialId, x.MaterialId, x.TotalRequiredAmount)));
+
+            await _mediator.Send(command);
+        }
+        else
+        {
+            var command = new AddProductionCommand(
+                SelectedProduct.Id,
+                ProductionAmount,
+                ProductionDescription,
+                ProductionDate,
+                MaterialInputs.Select(x => new MaterialUsageDto(null, x.MaterialId, x.TotalRequiredAmount)));
+
+            await _mediator.Send(command);
+        }
 
         IsProductionSaved = true;
         SaveProductionCommand.NotifyCanExecuteChanged();
@@ -539,11 +567,79 @@ public partial class ProductionListViewModel : ViewModelBase
         CancelAddProduction();
     }
 
+    [RelayCommand]
+    private async Task DeleteProductionAsync(ProductionHistoryDto production)
+    {
+        if (production == null) return;
+
+        var result = System.Windows.MessageBox.Show(
+            $"Czy na pewno chcesz usunąć tę historię produkcji z dnia {production.ProductionDate:yyyy-MM-dd HH:mm}?\nSpowoduje to cofnięcie zmian w stanach magazynowych produktu i materiałów.",
+            "Potwierdzenie usunięcia",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteProductionCommand(production.Id));
+                await RefreshHistoryAndRecipesAsync();
+                await LoadProductsAsync(); // Update product stock in the main list
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Błąd podczas usuwania produkcji: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+    }
+
     private void CancelAddProduction()
     {
         IsAddingProduction = false;
+        IsEditingProduction = false;
+        _editingProductionId = null;
         IsProductionSaved = false;
         AddProductionCommand.NotifyCanExecuteChanged();
+        EditProductionCommand.NotifyCanExecuteChanged();
+        SaveProductionCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task EditProductionAsync(ProductionHistoryDto? production)
+    {
+        if (production == null) return;
+
+        _editingProductionId = production.Id;
+        ProductionAmount = production.ProductionAmount;
+        ProductionDescription = production.Description;
+        ProductionDate = production.ProductionDate;
+        MaterialInputs.Clear();
+
+        var productionMaterials = await _mediator.Send(new GetProductionMaterialsQuery(production.Id));
+        var materials = await _mediator.Send(new GetMaterialsQuery(0, 1000));
+
+        foreach (var pm in productionMaterials)
+        {
+            var currentStock = materials.Items.FirstOrDefault(m => m.Id == pm.MaterialId)?.Amount ?? 0;
+            var input = new DynamicMaterialInput(this)
+            {
+                ProductionMaterialId = pm.Id,
+                RecipeMaterialId = Guid.Empty, // Not tied to a recipe material in edit mode unless we search for it
+                MaterialId = pm.MaterialId,
+                MaterialName = pm.MaterialName,
+                RecipeAmount = 0, // Not applicable in edit mode from production history
+                UsedAmount = pm.UsedAmount / production.ProductionAmount, // We want the per-unit amount for the form
+                DefaultUsedAmount = pm.UsedAmount / production.ProductionAmount,
+                CurrentStock = currentStock + pm.UsedAmount, // Stock if this production never happened
+                Unit = pm.Unit
+            };
+            MaterialInputs.Add(input);
+            input.UpdateRequiredAmount();
+        }
+
+        IsProductionSaved = false;
+        IsEditingProduction = true;
+        AddProductionCommand.NotifyCanExecuteChanged();
+        EditProductionCommand.NotifyCanExecuteChanged();
         SaveProductionCommand.NotifyCanExecuteChanged();
     }
 
@@ -553,6 +649,7 @@ public partial class ProductionListViewModel : ViewModelBase
 
         ProductionAmount = 1;
         ProductionDescription = string.Empty;
+        ProductionDate = DateTime.Now;
         MaterialInputs.Clear();
 
         await InitializeMaterialInputsAsync(SelectedRecipe);
@@ -632,6 +729,7 @@ public partial class DynamicMaterialInput : ObservableObject
         _parent = parent;
     }
 
+    public Guid? ProductionMaterialId { get; init; }
     public Guid RecipeMaterialId { get; init; }
     public Guid MaterialId { get; init; }
     public string MaterialName { get; init; } = null!;

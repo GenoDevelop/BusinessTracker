@@ -298,7 +298,20 @@
                     <!-- Content Section: History Table + Materials OR Add Production Form -->
                     <Grid Grid.Row="1">
                         <!-- History and Materials View -->
-                        <Grid Visibility="{Binding IsAddingProduction, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAddingProduction}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEditingProduction}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
@@ -380,10 +393,14 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                                        <Button Style="{StaticResource IconButton}" ToolTip="Edytuj" Margin="0,0,5,0">
+                                                        <Button Style="{StaticResource IconButton}" ToolTip="Edytuj" Margin="0,0,5,0"
+                                                                Command="{Binding DataContext.EditProductionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}">
                                                             <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" Fill="SteelBlue" Stretch="Uniform" Width="14" Height="14" />
                                                         </Button>
-                                                        <Button Style="{StaticResource IconButton}" ToolTip="Usuń">
+                                                        <Button Style="{StaticResource IconButton}" ToolTip="Usuń"
+                                                                Command="{Binding DataContext.DeleteProductionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}">
                                                             <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" Fill="LightCoral" Stretch="Uniform" Width="14" Height="14" />
                                                         </Button>
                                                     </StackPanel>
@@ -468,22 +485,56 @@
                             </Grid>
                         </Grid>
 
-                        <!-- Add Production Form -->
-                        <Grid Visibility="{Binding IsAddingProduction, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <!-- Add/Edit Production Form -->
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAddingProduction}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEditingProduction}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                                <StackPanel Margin="0,0,20,0">
-                                    <TextBlock Text="Ilość produkcji" FontWeight="Bold" Margin="0,0,0,2" />
-                                    <TextBox Text="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Width="100" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2" />
-                                    <TextBox Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" Width="300" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
+                                <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Dodaj nową produkcję" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditingProduction}" Value="True">
+                                                    <Setter Property="Text" Value="Edytuj produkcję" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Margin="0,0,20,0">
+                                        <TextBlock Text="Ilość produkcji" FontWeight="Bold" Margin="0,0,0,2" />
+                                        <TextBox Text="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Width="100" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,20,0">
+                                        <TextBlock Text="Data produkcji" FontWeight="Bold" Margin="0,0,0,2" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <DatePicker SelectedDate="{Binding ProductionDate, UpdateSourceTrigger=PropertyChanged}" Width="120" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                            <TextBox Text="{Binding ProductionDate, StringFormat='HH:mm', UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="5,0,0,0" VerticalContentAlignment="Center" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2" />
+                                        <TextBox Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" Width="300" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
 

@@ -3,6 +3,7 @@ using MediatR;
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
 
 public record MaterialUsageDto(
+    Guid? Id,
     Guid MaterialId,
     double Amount);
 
