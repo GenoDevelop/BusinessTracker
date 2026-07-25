@@ -361,6 +361,11 @@ public partial class PaginationControl : UserControl
         return outcome == LoadOutcome.Success;
     }
 
+    public void RequestRefresh()
+    {
+        _ = RefreshAsync();
+    }
+
     /// <summary>
     /// Resets the page to zero and reloads data.
     /// Useful after changing filters or sorting.

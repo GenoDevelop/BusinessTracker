@@ -285,7 +285,7 @@
                                                 Grid.Row="2"
                                                 Layout="SingleLine"
                                                 PageLoader="{Binding RecipeMaterialsPageLoader}"
-                                                InitialPageSize="10"
+                                                InitialPageSize="20"
                                                 HorizontalAlignment="Right"
                                                 PaginationHorizontalAlignment="Right"
                                                 Margin="0,5,0,0" />

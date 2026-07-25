@@ -14,17 +14,14 @@ public class GetRecipesQueryHandler(IBusinessTrackerDbContext dbContext)
             .AsNoTracking();
 
         if (request.ProductId.HasValue)
-        {
             query = query.Where(x => x.ProductId == request.ProductId.Value);
-        }
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            var searchTerm = request.SearchTerm.ToLower();
-            query = query.Where(x => 
-                x.Name.ToLower().Contains(searchTerm) || 
-                x.Product.Name.ToLower().Contains(searchTerm) || 
-                x.Product.Identifier.ToLower().Contains(searchTerm));
+            query = query.WhereContainsAllInAny(request.SearchTerm,
+                x => x.Name, 
+                x => x.Product.Name,
+                x => x.Product.Identifier);
         }
 
         query = query.OrderBy(x => x.Name);

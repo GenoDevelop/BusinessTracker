@@ -16,16 +16,10 @@ public class GetRecipeMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.MaterialNameFilter))
-        {
-            var filter = request.MaterialNameFilter.ToLower();
-            query = query.Where(x => x.Material.Name.ToLower().Contains(filter));
-        }
+            query = query.WhereContainsAll(x => x.Material.Name, request.MaterialNameFilter);
 
         if (!string.IsNullOrWhiteSpace(request.EanFilter))
-        {
-            var filter = request.EanFilter.ToLower();
-            query = query.Where(x => x.Material.Ean != null && x.Material.Ean.ToLower().Contains(filter));
-        }
+            query = query.WhereContainsAll(x => x.Material.Ean, request.EanFilter);
 
         if (request.AmountFilterValue.HasValue && request.AmountOperator.HasValue)
         {

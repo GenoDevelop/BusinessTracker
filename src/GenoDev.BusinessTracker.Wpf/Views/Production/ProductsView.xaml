@@ -3,11 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Production"
              xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:global="clr-namespace:"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance vm:ProductsViewModel}">
+             d:DataContext="{d:DesignInstance global:ProductsViewModel}">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -23,75 +23,66 @@
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"
+                  Background="White"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
-                <DataGridTextColumn Width="2*" SortMemberPath="Name">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Nazwa" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.NameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Name"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
+                <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader
+                            x:Name="NameFilterColumn"
+                            Header="Nazwa"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="ProductsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn Width="1*" SortMemberPath="Identifier">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Identyfikator" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.IdentifierFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Identifier"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
+                <DataGridTemplateColumn Width="1*" SortMemberPath="Identifier">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader
+                            x:Name="IdentifierFilterColumn"
+                            Header="Identyfikator"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="ProductsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Identifier}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn Width="100" SortMemberPath="Amount">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <Grid Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                          SelectedItem="{Binding DataContext.SelectedAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                          DisplayMemberPath="Display" />
-                                <TextBox Grid.Column="1" Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}"
-                                         IsEnabled="{Binding DataContext.IsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                         Margin="2,0,0,0" FontWeight="Normal" />
-                            </Grid>
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Amount"/>
-                    </DataGridTextColumn.Binding>
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="Margin" Value="0,0,10,0"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                    <DataGridTemplateColumn.Header>
+                        <controls:NumericFilterColumnHeader
+                            x:Name="AmountFilterColumn"
+                            Header="Ilość"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="ProductsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Amount}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn Width="3*" SortMemberPath="Description">
                     <DataGridTemplateColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.DescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
+                        <controls:TextFilterColumnHeader
+                            x:Name="DescriptionFilterColumn"
+                            Header="Opis"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="ProductsFilter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -118,26 +109,14 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <TextBlock VerticalAlignment="Center" Margin="10,0">
-                <Run Text="Pozycje:" />
-                <Run Text="{Binding ItemsRange, Mode=OneWay}" />
-            </TextBlock>
-            <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" />
-            <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="60" />
-            <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
-                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-            </Button>
-            <TextBlock VerticalAlignment="Center" Margin="10,0">
-                <Run Text="Strona " />
-                <Run Text="{Binding DisplayPage, Mode=OneWay}" />
-                <Run Text=" z " />
-                <Run Text="{Binding TotalPages, Mode=OneWay}" />
-            </TextBlock>
-            <Button Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
-                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-            </Button>
-        </StackPanel>
+        <!-- Pagination -->
+        <controls:PaginationControl x:Name="ProductsPagination"
+                                    Grid.Row="2"
+                                    Layout="SingleLine"
+                                    PageLoader="{Binding ProductsPageLoader}"
+                                    HorizontalAlignment="Right"
+                                    PaginationHorizontalAlignment="Right"
+                                    Margin="0,5,0,0" />
 
         <!-- Create Product Popup -->
         <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">

@@ -1,132 +1,156 @@
 <UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.Materials.MaterialListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
              xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:MaterialListViewModel}">
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Toolbar -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Materiały" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateMaterialCommand}" Margin="0,0,5,0" />
-            <controls:RefreshButton Command="{Binding LoadMaterialsCommand}" Margin="0,0,5,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
+            <TextBlock Text="Materiały"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Margin="0,0,20,0" />
+            <controls:CreateButton Command="{Binding CreateMaterialCommand}"
+                                   ToolTip="Dodaj materiał"
+                                   Margin="0,0,5,0" />
+            <controls:RefreshButton Click="RefreshButton_Click"
+                                    Margin="0,0,5,0" />
+            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"
+                                         Click="FilterToggleButton_Click" />
         </StackPanel>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True"
+        <!-- Materials -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Materials}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                  Sorting="DataGrid_Sorting">
+                  Sorting="MaterialsDataGrid_Sorting">
             <DataGrid.Columns>
-                <DataGridTextColumn Width="*" SortMemberPath="Name">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Nazwa" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.NameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Name"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTextColumn Width="120" SortMemberPath="Ean">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.EanFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Ean"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTextColumn Width="60" SortMemberPath="Unit">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="J.m." FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.UnitFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Unit"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                <DataGridTemplateColumn Width="*" SortMemberPath="Name">
                     <DataGridTemplateColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <Grid Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox Grid.Column="0" 
-                                          ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                          SelectedItem="{Binding DataContext.SelectedAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                          DisplayMemberPath="Display"
-                                          Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                <TextBox Grid.Column="1" 
-                                         Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                         IsEnabled="{Binding DataContext.IsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                         Margin="0" FontWeight="Normal" />
-                            </Grid>
-                        </StackPanel>
+                        <controls:TextFilterColumnHeader
+                            x:Name="NameFilterColumn"
+                            Header="Nazwa"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="MaterialsFilter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Amount}" VerticalAlignment="Center" Margin="5,0"/>
+                            <TextBlock Text="{Binding Name}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Width="2*" SortMemberPath="Description">
-                    <DataGridTextColumn.Header>
-                        <StackPanel>
-                            <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding DataContext.DescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                     Margin="0" FontWeight="Normal" />
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="Description"/>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTemplateColumn Width="80">
+
+                <DataGridTemplateColumn Width="120" SortMemberPath="Ean">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader
+                            x:Name="EanFilterColumn"
+                            Header="EAN"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="MaterialsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Command="{Binding DataContext.EditMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource IconButton}" 
-                                        ToolTip="Edytuj"
-                                        Padding="0"
-                                        Margin="0,0,5,0">
-                                    <Path
-                                        Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
-                                        Fill="SteelBlue" Stretch="Uniform" Width="18" Height="18" />
-                                </Button>
-                                <Button Command="{Binding DataContext.DeleteMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource IconButton}" 
-                                        ToolTip="Usuń"
-                                        Padding="0">
-                                    <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
-                                          Fill="LightCoral" Stretch="Uniform" Width="18" Height="18" />
-                                </Button>
+                            <TextBlock Text="{Binding Ean}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="70" SortMemberPath="Unit">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader
+                            x:Name="UnitFilterColumn"
+                            Header="J.m."
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="MaterialsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Unit}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                    <DataGridTemplateColumn.Header>
+                        <controls:NumericFilterColumnHeader
+                            x:Name="AmountFilterColumn"
+                            Header="Ilość"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="MaterialsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Amount}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader
+                            x:Name="DescriptionFilterColumn"
+                            Header="Opis"
+                            DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="MaterialsFilter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="5,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Akcje"
+                                   FontWeight="Bold"
+                                   Margin="5,0" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <controls:EditButton
+                                    Command="{Binding DataContext.EditMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"
+                                    ToolTip="Edytuj materiał"
+                                    Margin="2,0" />
+                                <controls:DeleteButton
+                                    Command="{Binding DataContext.DeleteMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"
+                                    ToolTip="Usuń materiał"
+                                    Margin="2,0" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -134,70 +158,104 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
-                <StackPanel Width="400" DataContext="{Binding CreateMaterialViewModel}">
-                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj materiał;Dodaj materiał'}" 
-                               FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+        <!-- Pagination -->
+        <controls:PaginationControl x:Name="MaterialsPagination"
+                                    Grid.Row="2"
+                                    Layout="SingleLine"
+                                    PageLoader="{Binding MaterialsPageLoader}"
+                                    InitialPageSize="20"
+                                    HorizontalAlignment="Right"
+                                    PaginationHorizontalAlignment="Right"
+                                    Margin="0,5,0,0" />
+
+        <!-- Create/Edit Material -->
+        <Popup IsOpen="{Binding IsCreatePopupOpen}"
+               Placement="Mouse"
+               StaysOpen="True">
+            <Border Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    Padding="20"
+                    Width="400"
+                    CornerRadius="5">
+                <StackPanel DataContext="{Binding CreateMaterialViewModel}">
+                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj materiał;Dodaj materiał'}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,15" />
 
                     <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
 
                     <TextBlock Text="EAN:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                    <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
 
                     <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                    <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
 
                     <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
-                             Height="100" Margin="0,0,0,10" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             TextWrapping="Wrap"
+                             Height="100"
+                             Margin="0,0,0,20" />
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Anuluj"
+                                Command="{Binding CancelCommand}"
+                                Margin="0,0,10,0"
+                                Padding="15,5" />
+                        <Button Content="Zapisz"
+                                Command="{Binding SaveCommand}"
+                                Padding="15,5"
+                                Background="DodgerBlue"
+                                Foreground="White"
+                                IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
             </Border>
         </Popup>
 
-        <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
+        <!-- Delete Confirmation -->
+        <Popup IsOpen="{Binding IsDeletePopupOpen}"
+               Placement="Mouse"
+               StaysOpen="True">
+            <Border Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    Padding="20"
+                    CornerRadius="5">
                 <StackPanel Width="300">
-                    <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                    <TextBlock Text="Potwierdź usunięcie"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10" />
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć materiał " />
-                        <Run Text="{Binding MaterialToDelete.Name, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text="{Binding MaterialToDelete.Name, Mode=OneWay}"
+                             FontWeight="Bold" />
                         <Run Text="?" />
                     </TextBlock>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Nie"
+                                Command="{Binding CancelDeleteCommand}"
+                                Margin="0,0,10,0"
+                                Padding="15,5" />
+                        <Button Content="Tak"
+                                Command="{Binding ConfirmDeleteCommand}"
+                                Padding="15,5"
+                                Background="IndianRed"
+                                Foreground="White"
+                                IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
             </Border>
         </Popup>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <TextBlock VerticalAlignment="Center" Margin="10,0">
-                <Run Text="Pozycje:" />
-                <Run Text="{Binding ItemsRange, Mode=OneWay}" />
-            </TextBlock>
-            <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" />
-            <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="60" />
-            <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
-                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-            </Button>
-            <TextBlock VerticalAlignment="Center" Margin="10,0">
-                <Run Text="Strona " />
-                <Run Text="{Binding DisplayPage, Mode=OneWay}" />
-                <Run Text=" z " />
-                <Run Text="{Binding TotalPages, Mode=OneWay}" />
-            </TextBlock>
-            <Button Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
-                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-            </Button>
-        </StackPanel>
     </Grid>
 </UserControl>

@@ -14,7 +14,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Margin="5, 5, 2, 5">
+        <Grid Grid.Column="0" Margin="10, 10, 3, 10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -23,14 +23,19 @@
             </Grid.RowDefinitions>
 
             <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                <TextBlock Text="Produkcja" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <controls:RefreshButton Command="{Binding RefreshCommand}" Margin="0,0,5,0"/>
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Produkcja"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0" />
+                <controls:RefreshButton Click="ProductionsRefreshButton_Click"
+                                        Margin="0,0,5,0" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
             </StackPanel>
 
             <!-- Search Header -->
-            <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="0,0,0,5" Margin="0,0,0,5"
+            <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10"
                     Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -40,13 +45,24 @@
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.41L13.01,15.14C11.87,16.11 10.39,16.7 8.75,16.7A6.5,6.5 0 0,1 2.25,10.2A6.5,6.5 0 0,1 8.75,3.7M8.75,5.2A5,5 0 0,0 3.75,10.2A5,5 0 0,0 8.75,15.2A5,5 0 0,0 13.75,10.2A5,5 0 0,0 8.75,5.2Z" 
                               Fill="Gray" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,5,0" />
-                        <TextBox Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" Width="150" VerticalContentAlignment="Center" />
+                        <TextBox Text="{Binding SearchTerm,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                Delay=500,
+                                                NotifyOnSourceUpdated=True}"
+                                 SourceUpdated="SearchTerm_SourceUpdated"
+                                 Width="150"
+                                 VerticalContentAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Products List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" BorderThickness="0" Padding="0">
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding Products}"
+                     SelectedItem="{Binding SelectedProduct}"
+                     SelectionChanged="ProductsList_SelectionChanged"
+                     BorderThickness="0"
+                     Padding="0">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -107,40 +123,13 @@
             </ListBox>
 
             <!-- Pagination -->
-            <Grid Grid.Row="3" Margin="0,2,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Arrows (Top Row) -->
-                <Button Grid.Row="0" Grid.Column="0" Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" ToolTip="Poprzednia">
-                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11">
-                    <Run Text="{Binding DisplayPage, Mode=OneWay}" />
-                    <Run Text="/" />
-                    <Run Text="{Binding TotalPages, Mode=OneWay}" />
-                </TextBlock>
-                <Button Grid.Row="0" Grid.Column="2" Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" ToolTip="Następna">
-                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-
-                <!-- Page Size and Counters (Bottom Row) -->
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
-                    <TextBlock VerticalAlignment="Center" Text="Na stronie:" FontSize="10" Margin="0,0,3,0" />
-                    <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="42" FontSize="10" Height="20" />
-                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" FontSize="10">
-                        <Run Text="Poz.:" />
-                        <Run Text="{Binding ItemsRange, Mode=OneWay}" />
-                    </TextBlock>
-                </StackPanel>
-            </Grid>
+            <controls:PaginationControl x:Name="ProductionsPagination"
+                                        Grid.Row="3"
+                                        Layout="CompactTwoRows"
+                                        PageLoader="{Binding ProductionsPageLoader}"
+                                        InitialPageSize="20"
+                                        Margin="0,5,0,0"
+                                        FontSize="11" />
         </Grid>
         <!-- Right Panel -->
         <Grid Grid.Column="1" Background="#F9F9F9">
@@ -263,12 +252,21 @@
                     <Grid Grid.Row="0" Margin="0,0,0,10">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <TextBlock Text="Historia Produkcji" FontSize="16" FontWeight="Bold" Margin="0,0,10,0" />
-                            <controls:RefreshButton Command="{Binding RefreshHistoryCommand}" Margin="0,0,5,0" Width="16"/>
-                            <controls:FilterToggleButton IsChecked="{Binding IsHistoryFilterVisible}" Width="16"/>
+                            <controls:RefreshButton Click="HistoryRefreshButton_Click"
+                                                    Margin="0,0,5,0"
+                                                    Width="16" />
+                            <controls:FilterToggleButton IsChecked="{Binding IsHistoryFilterVisible}"
+                                                         Click="HistoryFilterToggleButton_Click"
+                                                         Width="16" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Text="{Binding RecipeSearchTerm, UpdateSourceTrigger=PropertyChanged}" 
-                                     Width="120" Margin="0,0,5,0" 
+                            <TextBox Text="{Binding RecipeSearchTerm,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                Delay=500,
+                                                NotifyOnSourceUpdated=True}"
+                                     SourceUpdated="RecipeSearchTerm_SourceUpdated"
+                                     Width="120"
+                                     Margin="0,0,5,0"
                                      VerticalContentAlignment="Center"
                                      ToolTip="Szukaj receptury" />
                             <ComboBox ItemsSource="{Binding ProductRecipes}" 
@@ -310,21 +308,23 @@
 
                             <!-- Production History Content -->
                             <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-                                <DataGrid ItemsSource="{Binding ProductionHistory}" 
+                                <DataGrid ItemsSource="{Binding ProductionHistory}"
                                           SelectedItem="{Binding SelectedProduction}"
-                                          AutoGenerateColumns="False" IsReadOnly="True"
-                                          BorderThickness="1" BorderBrush="#DDD"
+                                          AutoGenerateColumns="False"
+                                          IsReadOnly="True"
+                                          Background="White"
+                                          BorderThickness="1"
+                                          BorderBrush="#DDD"
                                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Width="Auto">
                                             <DataGridTemplateColumn.Header>
-                                                <StackPanel>
-                                                    <TextBlock Text="Data" FontWeight="Bold" Margin="0,0,0,2"/>
-                                                    <controls:DateRangePicker StartDate="{Binding DataContext.HistoryFromDateFilter, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                                              EndDate="{Binding DataContext.HistoryToDateFilter, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                                              Visibility="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                                              Width="200" HorizontalAlignment="Left" Margin="0" />
-                                                </StackPanel>
+                                                <controls:DateRangeFilterColumnHeader
+                                                    x:Name="HistoryDateFilterColumn"
+                                                    Header="Data"
+                                                    IsFilterVisible="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    MaxFilterWidth="200"
+                                                    FilterChanged="HistoryFilter_FilterChanged" />
                                             </DataGridTemplateColumn.Header>
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
@@ -335,23 +335,12 @@
 
                                         <DataGridTemplateColumn Width="Auto">
                                             <DataGridTemplateColumn.Header>
-                                                <StackPanel>
-                                                    <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                                                    <Grid Visibility="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <ComboBox Grid.Column="0" 
-                                                                  ItemsSource="{Binding DataContext.AvailableHistoryOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                                  SelectedItem="{Binding DataContext.HistoryAmountOperatorFilter, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                                  DisplayMemberPath="Display"
-                                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                                        <TextBox Grid.Column="1" 
-                                                                 Text="{Binding DataContext.HistoryAmountFilterText, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                                 Margin="0" Width="40" FontWeight="Normal" />
-                                                    </Grid>
-                                                </StackPanel>
+                                                <controls:NumericFilterColumnHeader
+                                                    x:Name="HistoryAmountFilterColumn"
+                                                    Header="Ilość"
+                                                    DebounceMilliseconds="500"
+                                                    IsFilterVisible="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    FilterChanged="HistoryFilter_FilterChanged" />
                                             </DataGridTemplateColumn.Header>
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
@@ -362,12 +351,12 @@
 
                                         <DataGridTemplateColumn Width="*">
                                             <DataGridTemplateColumn.Header>
-                                                <StackPanel>
-                                                    <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2"/>
-                                                    <TextBox Text="{Binding DataContext.HistoryDescriptionFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                             Visibility="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                             Margin="0" FontWeight="Normal" />
-                                                </StackPanel>
+                                                <controls:TextFilterColumnHeader
+                                                    x:Name="HistoryDescriptionFilterColumn"
+                                                    Header="Opis"
+                                                    DebounceMilliseconds="500"
+                                                    IsFilterVisible="{Binding DataContext.IsHistoryFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    FilterChanged="HistoryFilter_FilterChanged" />
                                             </DataGridTemplateColumn.Header>
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
@@ -376,7 +365,12 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         
-                                        <DataGridTemplateColumn Header="Akcje" Width="80">
+                                        <DataGridTemplateColumn Width="Auto">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Akcje"
+                                                           FontWeight="Bold"
+                                                           Margin="5,0" />
+                                            </DataGridTemplateColumn.Header>
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -395,25 +389,15 @@
                                 </DataGrid>
                             </Grid>
                             <!-- Pagination for Production History -->
-                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,10,0">
-                                <TextBlock VerticalAlignment="Center" Margin="10,0" FontSize="10">
-                                    <Run Text="Poz.:" />
-                                    <Run Text="{Binding HistoryItemsRange, Mode=OneWay}" />
-                                </TextBlock>
-                                <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" FontSize="10" />
-                                <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding HistoryPageSize}" VerticalAlignment="Center" Width="42" FontSize="10" Height="20" />
-                                <Button Command="{Binding PreviousHistoryPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
-                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                                </Button>
-                                <TextBlock VerticalAlignment="Center" Margin="10,0" FontSize="11">
-                                    <Run Text="{Binding HistoryDisplayPage, Mode=OneWay}" />
-                                    <Run Text="/" />
-                                    <Run Text="{Binding HistoryTotalPages, Mode=OneWay}" />
-                                </TextBlock>
-                                <Button Command="{Binding NextHistoryPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
-                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                                </Button>
-                            </StackPanel>
+                            <controls:PaginationControl x:Name="HistoryPagination"
+                                                        Grid.Row="1"
+                                                        Grid.Column="0"
+                                                        Layout="SingleLine"
+                                                        PageLoader="{Binding HistoryPageLoader}"
+                                                        InitialPageSize="20"
+                                                        HorizontalAlignment="Right"
+                                                        PaginationHorizontalAlignment="Right"
+                                                        Margin="0,5,10,0" />
 
                             <!-- Materials List Content -->
                             <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
@@ -506,18 +490,18 @@
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel Margin="0,0,20,0">
                                         <TextBlock Text="Ilość produkcji" FontWeight="Bold" Margin="0,0,0,2" />
-                                        <TextBox Text="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Width="100" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                        <TextBox Text="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Width="100" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,20,0">
                                         <TextBlock Text="Data produkcji" FontWeight="Bold" Margin="0,0,0,2" />
                                         <StackPanel Orientation="Horizontal">
-                                            <DatePicker SelectedDate="{Binding ProductionDate, UpdateSourceTrigger=PropertyChanged}" Width="120" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
-                                            <TextBox Text="{Binding ProductionDate, StringFormat='HH:mm', UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="5,0,0,0" VerticalContentAlignment="Center" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                            <DatePicker SelectedDate="{Binding ProductionDate, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+                                            <TextBox Text="{Binding ProductionDate, StringFormat='HH:mm', UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="5,0,0,0" VerticalContentAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
                                     <StackPanel>
                                         <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2" />
-                                        <TextBox Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" Width="300" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanConverter}}" />
+                                        <TextBox Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" Width="300" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -555,19 +539,14 @@
                                                             <ColumnDefinition Width="*" />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBox Grid.Column="0" Text="{Binding UsedAmount, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding DataContext.IsProductionSaved, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource InverseBooleanConverter}}" />
-                                                        <Button Grid.Column="1" Content="⟳" Command="{Binding ReloadDefaultCommand}" 
-                                                                IsEnabled="{Binding IsModified}" Margin="5,0,0,0" Width="25" ToolTip="Przywróć domyślną wartość">
-                                                            <Button.Style>
-                                                                <Style TargetType="Button">
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding DataContext.IsProductionSaved, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
-                                                                            <Setter Property="IsEnabled" Value="False" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Button.Style>
-                                                        </Button>
+                                                        <TextBox Grid.Column="0" Text="{Binding UsedAmount, UpdateSourceTrigger=PropertyChanged}" />
+                                                        <Button Grid.Column="1"
+                                                                Content="⟳"
+                                                                Command="{Binding ReloadDefaultCommand}"
+                                                                IsEnabled="{Binding IsModified}"
+                                                                Margin="5,0,0,0"
+                                                                Width="25"
+                                                                ToolTip="Przywróć domyślną wartość" />
                                                     </Grid>
                                                 </StackPanel>
                                             </Border>
@@ -576,13 +555,18 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                <Button Content="Anuluj" Command="{Binding CancelAddProductionCommand}" Margin="0,0,10,0" Padding="15,5" 
-                                        Visibility="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                <Button Content="Zamknij" Command="{Binding CancelAddProductionCommand}" Margin="0,0,10,0" Padding="15,5"
-                                        Visibility="{Binding IsProductionSaved, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <Button Content="Zapisz Produkcję" Command="{Binding SaveProductionCommand}" Padding="15,5" Background="LightBlue"
-                                        Visibility="{Binding IsProductionSaved, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,10,0,0">
+                                <Button Content="Anuluj"
+                                        Command="{Binding CancelAddProductionCommand}"
+                                        Margin="0,0,10,0"
+                                        Padding="15,5" />
+                                <Button Content="Zapisz produkcję"
+                                        Command="{Binding SaveProductionCommand}"
+                                        Padding="15,5"
+                                        Background="LightBlue" />
                             </StackPanel>
                         </Grid>
                     </Grid>

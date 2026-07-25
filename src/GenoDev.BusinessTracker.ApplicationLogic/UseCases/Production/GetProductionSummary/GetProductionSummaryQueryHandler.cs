@@ -14,10 +14,7 @@ public class GetProductionSummaryQueryHandler(IBusinessTrackerDbContext dbContex
             .Where(x => x.ProductRecipes.Any() || x.Productions.Any());
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var search = request.SearchTerm.ToLower();
-            query = query.Where(x => x.Name.ToLower().Contains(search) || x.Identifier.ToLower().Contains(search));
-        }
+            query = query.WhereContainsAllInAny(request.SearchTerm, x => x.Name, x => x.Identifier);
 
         query = query.OrderBy(x => x.Name);
 

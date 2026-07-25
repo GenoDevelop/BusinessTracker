@@ -20,9 +20,7 @@ public class GetProductionHistoryQueryHandler : IRequestHandler<GetProductionHis
             .Where(x => x.ProductId == request.ProductId);
 
         if (!string.IsNullOrWhiteSpace(request.Description))
-        {
-            query = query.Where(x => x.Description != null && x.Description.ToLower().Contains(request.Description.ToLower()));
-        }
+            query = query.WhereContainsAll(x => x.Description, request.Description);
 
         if (request.Amount.HasValue && request.AmountOperator.HasValue)
         {

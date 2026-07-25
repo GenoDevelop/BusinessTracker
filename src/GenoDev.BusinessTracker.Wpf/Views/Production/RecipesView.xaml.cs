@@ -1,7 +1,6 @@
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
-using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;

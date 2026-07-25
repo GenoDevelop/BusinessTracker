@@ -13,19 +13,13 @@ public class GetProductsQueryHandler(IBusinessTrackerDbContext dbContext)
         var query = dbContext.Products.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.NameFilter))
-        {
-            query = query.Where(x => x.Name.ToLower().Contains(request.NameFilter.ToLower()));
-        }
+            query = query.WhereContainsAll(x => x.Name, request.NameFilter);
 
         if (!string.IsNullOrWhiteSpace(request.IdentifierFilter))
-        {
-            query = query.Where(x => x.Identifier.ToLower().Contains(request.IdentifierFilter.ToLower()));
-        }
+            query = query.WhereContainsAll(x => x.Identifier, request.IdentifierFilter);
 
         if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
-        {
-            query = query.Where(x => x.Description != null && x.Description.ToLower().Contains(request.DescriptionFilter.ToLower()));
-        }
+            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
 
         if (request.AmountFilter.HasValue && request.AmountOperator.HasValue)
         {

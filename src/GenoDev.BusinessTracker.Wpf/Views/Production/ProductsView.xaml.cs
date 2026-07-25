@@ -1,40 +1,138 @@
-using System.ComponentModel;
-using System.Windows.Controls;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+using System;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace GenoDev.BusinessTracker.Wpf.Views.Production;
 
 public partial class ProductsView : UserControl
 {
+    private ProductsViewModel? _attachedViewModel;
+
     public ProductsView()
     {
         InitializeComponent();
+
+        Loaded += ProductsView_Loaded;
+        Unloaded += ProductsView_Unloaded;
+        DataContextChanged += ProductsView_DataContextChanged;
     }
 
-    private void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    private void ProductsView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not ProductsViewModel viewModel) return;
+        AttachViewModel(DataContext as ProductsViewModel);
+    }
+
+    private void ProductsView_Unloaded(object sender, RoutedEventArgs e)
+    {
+        AttachViewModel(null);
+    }
+
+    private void ProductsView_DataContextChanged(
+        object sender,
+        DependencyPropertyChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            AttachViewModel(e.NewValue as ProductsViewModel);
+        }
+    }
+
+    private void AttachViewModel(ProductsViewModel? viewModel)
+    {
+        if (ReferenceEquals(_attachedViewModel, viewModel))
+        {
+            return;
+        }
+
+        if (_attachedViewModel is not null)
+        {
+            _attachedViewModel.PaginationRefreshRequested -=
+                ViewModel_PaginationRefreshRequested;
+        }
+
+        _attachedViewModel = viewModel;
+
+        if (_attachedViewModel is not null)
+        {
+            _attachedViewModel.PaginationRefreshRequested +=
+                ViewModel_PaginationRefreshRequested;
+        }
+    }
+
+    private async void ViewModel_PaginationRefreshRequested(
+        ProductsPaginationTarget target)
+    {
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void ProductsRefreshButton_Click(
+        object sender,
+        RoutedEventArgs e)
+    {
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void SearchTerm_SourceUpdated(
+        object sender,
+        DataTransferEventArgs e)
+    {
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void ProductsFilter_FilterChanged(
+        object sender,
+        RoutedEventArgs e)
+    {
+        if (DataContext is not ProductsViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.SetProductsFilter(
+            new ProductsFilterCriteria(
+                NameFilterColumn.FilterText,
+                IdentifierFilterColumn.FilterText,
+                AmountFilterColumn.FilterValue,
+                AmountFilterColumn.SelectedOperator,
+                DescriptionFilterColumn.FilterText));
+
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void DataGrid_Sorting(
+        object sender,
+        DataGridSortingEventArgs e)
+    {
+        if (DataContext is not ProductsViewModel viewModel ||
+            sender is not DataGrid dataGrid ||
+            !Enum.TryParse(
+                e.Column.SortMemberPath,
+                ignoreCase: true,
+                out ProductSortBy sortBy))
+        {
+            return;
+        }
 
         e.Handled = true;
 
-        var column = e.Column;
-        var sortMemberPath = column.SortMemberPath;
+        var isDescending = viewModel.SortBy == sortBy &&
+                           !viewModel.IsDescending;
 
-        if (Enum.TryParse<ProductSortBy>(sortMemberPath, out var sortBy))
+        foreach (var column in dataGrid.Columns)
         {
-            var direction = column.SortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-            viewModel.SortBy = sortBy;
-            viewModel.IsDescending = direction == ListSortDirection.Descending;
-
-            foreach (var col in ((DataGrid)sender).Columns)
-            {
-                col.SortDirection = null;
-            }
-            column.SortDirection = direction;
+            column.SortDirection = null;
         }
+
+        e.Column.SortDirection = isDescending
+            ? ListSortDirection.Descending
+            : ListSortDirection.Ascending;
+
+        viewModel.SetProductsSorting(sortBy, isDescending);
+        await ProductsPagination.RefreshAsync();
     }
 }

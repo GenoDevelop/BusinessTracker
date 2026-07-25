@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +8,8 @@ using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.Delete;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetAll;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Filtering;
+using GenoDev.BusinessTracker.Wpf.Infrastructure.Controls;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,24 +19,36 @@ public partial class MaterialListViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
-    private CancellationTokenSource? _filterCancellationTokenSource;
+    private MaterialFilterCriteria _filter = MaterialFilterCriteria.Empty;
 
-    public MaterialListViewModel(IMediator mediator, IServiceProvider serviceProvider)
+    public MaterialListViewModel(
+        IMediator mediator,
+        IServiceProvider serviceProvider)
     {
         _mediator = mediator;
         _serviceProvider = serviceProvider;
-        LoadMaterialsCommand = new AsyncRelayCommand(LoadMaterialsAsync);
-        NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
-        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
+
         CreateMaterialCommand = new RelayCommand(OpenCreatePopup);
         EditMaterialCommand = new RelayCommand<MaterialDto>(OpenEditPopup);
         DeleteMaterialCommand = new RelayCommand<MaterialDto>(OpenDeletePopup);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
-        AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
-        _selectedAmountOperator = AvailableOperators[0];
-        _ = LoadMaterialsAsync();
     }
+
+    public ObservableCollection<MaterialDto> Materials { get; } = new();
+
+    public PaginationPageLoader MaterialsPageLoader => LoadMaterialsPageAsync;
+
+    public event Action? PaginationRefreshRequested;
+
+    [ObservableProperty]
+    private bool _isFilterVisible;
+
+    [ObservableProperty]
+    private MaterialSortBy _sortBy = MaterialSortBy.Name;
+
+    [ObservableProperty]
+    private bool _isDescending;
 
     [ObservableProperty]
     private bool _isCreatePopupOpen;
@@ -49,273 +62,108 @@ public partial class MaterialListViewModel : ViewModelBase
     [ObservableProperty]
     private MaterialDto? _materialToDelete;
 
-    [ObservableProperty]
-    private bool _isFilterVisible;
-
-    [ObservableProperty]
-    private string? _nameFilter;
-
-    [ObservableProperty]
-    private string? _eanFilter;
-
-    [ObservableProperty]
-    private string? _unitFilter;
-
-    [ObservableProperty]
-    private string? _descriptionFilter;
-
-    [ObservableProperty]
-    private string? _amountFilterValue;
-
-    [ObservableProperty]
-    private NumericOperator? _amountFilterOperator;
-
-    public List<OperatorWrapper> AvailableOperators { get; } = new()
-    {
-        new OperatorWrapper(null, ""),
-        new OperatorWrapper(NumericOperator.Equal, "="),
-        new OperatorWrapper(NumericOperator.NotEqual, "≠"),
-        new OperatorWrapper(NumericOperator.LessThan, "<"),
-        new OperatorWrapper(NumericOperator.LessThanOrEqual, "≤"),
-        new OperatorWrapper(NumericOperator.GreaterThan, ">"),
-        new OperatorWrapper(NumericOperator.GreaterThanOrEqual, "≥")
-    };
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsAmountFilterEnabled))]
-    private OperatorWrapper? _selectedAmountOperator;
-
-    public bool IsAmountFilterEnabled => SelectedAmountOperator?.Operator != null;
-
-    public ObservableCollection<MaterialDto> Materials { get; } = new();
-
-    [ObservableProperty]
-    private MaterialSortBy _sortBy = MaterialSortBy.Name;
-
-    [ObservableProperty]
-    private bool _isDescending;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
-    [NotifyPropertyChangedFor(nameof(DisplayPage))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _pageIndex;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    private int _pageSize = 10;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _totalCount;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
-    private bool _hasNextPage;
-
-    public ObservableCollection<int> AvailablePageSizes { get; }
-
-    public int DisplayPage => PageIndex + 1;
-
-    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
-
-    public string ItemsRange
-    {
-        get
-        {
-            if (TotalCount == 0) return "0-0 / 0";
-            var start = PageIndex * PageSize + 1;
-            var end = Math.Min((PageIndex + 1) * PageSize, TotalCount);
-            return $"{start}-{end} / {TotalCount}";
-        }
-    }
-
-    public IAsyncRelayCommand LoadMaterialsCommand { get; }
-    public IAsyncRelayCommand NextPageCommand { get; }
-    public IAsyncRelayCommand PreviousPageCommand { get; }
     public IRelayCommand CreateMaterialCommand { get; }
+
     public IRelayCommand<MaterialDto> EditMaterialCommand { get; }
+
     public IRelayCommand<MaterialDto> DeleteMaterialCommand { get; }
+
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
+
     public IRelayCommand CancelDeleteCommand { get; }
 
-    partial void OnPageSizeChanged(int value)
+    public void SetFilter(MaterialFilterCriteria filter)
     {
-        PageIndex = 0;
-        _ = LoadMaterialsAsync();
+        _filter = filter;
     }
 
-    partial void OnSortByChanged(MaterialSortBy value)
+    public void SetSorting(MaterialSortBy sortBy, bool isDescending)
     {
-        _ = LoadMaterialsAsync();
+        SortBy = sortBy;
+        IsDescending = isDescending;
     }
 
-    partial void OnIsDescendingChanged(bool value)
+    private async Task<int> LoadMaterialsPageAsync(
+        PaginationState state,
+        CancellationToken cancellationToken)
     {
-        _ = LoadMaterialsAsync();
-    }
-
-    partial void OnNameFilterChanged(string? value) => DebounceLoadMaterials();
-    partial void OnEanFilterChanged(string? value) => DebounceLoadMaterials();
-    partial void OnUnitFilterChanged(string? value) => DebounceLoadMaterials();
-    partial void OnDescriptionFilterChanged(string? value) => DebounceLoadMaterials();
-    partial void OnAmountFilterValueChanged(string? value) => DebounceLoadMaterials();
-    partial void OnSelectedAmountOperatorChanged(OperatorWrapper? value)
-    {
-        AmountFilterOperator = value?.Operator;
-        DebounceLoadMaterials();
-    }
-
-    partial void OnIsFilterVisibleChanged(bool value)
-    {
-        _ = LoadMaterialsAsync();
-    }
-
-    private void DebounceLoadMaterials()
-    {
-        _filterCancellationTokenSource?.Cancel();
-        _filterCancellationTokenSource = new CancellationTokenSource();
-        var token = _filterCancellationTokenSource.Token;
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(500, token);
-                if (!token.IsCancellationRequested)
-                {
-                    App.Current.Dispatcher.Invoke(() => PageIndex = 0);
-                    await LoadMaterialsAsync();
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Ignore
-            }
-        }, token);
-    }
-
-    private double? ParseDouble(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (double.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
-            return result;
-        return null;
-    }
-
-    private async Task LoadMaterialsAsync()
-    {
-        if (!App.Current.Dispatcher.CheckAccess())
-        {
-            await App.Current.Dispatcher.InvokeAsync(LoadMaterialsAsync);
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var query = new GetMaterialsQuery(
-                PageIndex, 
-                PageSize, 
-                SortBy, 
+        var filter = _filter;
+        var result = await _mediator.Send(
+            new GetMaterialsQuery(
+                state.PageIndex,
+                state.PageSize,
+                SortBy,
                 IsDescending,
-                IsFilterVisible ? NameFilter : null,
-                IsFilterVisible ? EanFilter : null,
-                IsFilterVisible ? UnitFilter : null,
-                IsFilterVisible ? DescriptionFilter : null,
-                IsFilterVisible ? ParseDouble(AmountFilterValue) : null,
-                IsFilterVisible ? AmountFilterOperator : null);
-            var result = await _mediator.Send(query);
+                IsFilterVisible ? filter.Name : null,
+                IsFilterVisible ? filter.Ean : null,
+                IsFilterVisible ? filter.Unit : null,
+                IsFilterVisible ? filter.Description : null,
+                IsFilterVisible ? filter.Amount : null,
+                IsFilterVisible ? filter.AmountOperator : null),
+            cancellationToken);
 
-            Materials.Clear();
-            foreach (var item in result.Items)
-            {
-                Materials.Add(item);
-            }
+        cancellationToken.ThrowIfCancellationRequested();
 
-            TotalCount = result.TotalCount;
-            HasNextPage = result.HasNextPage;
-
-            if (PageIndex > 0 && Materials.Count == 0 && TotalCount > 0)
-            {
-                var maxPage = (int)Math.Ceiling((double)TotalCount / PageSize) - 1;
-                if (PageIndex > maxPage)
-                {
-                    PageIndex = Math.Max(0, maxPage);
-                    await LoadMaterialsAsync();
-                }
-            }
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async Task NextPageAsync()
-    {
-        PageIndex++;
-        await LoadMaterialsAsync();
-    }
-
-    private async Task PreviousPageAsync()
-    {
-        if (PageIndex > 0)
-        {
-            PageIndex--;
-            await LoadMaterialsAsync();
-        }
+        ReplaceItems(Materials, result.Items);
+        return result.TotalCount;
     }
 
     private void OpenCreatePopup()
     {
-        CreateMaterialViewModel = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
-        
-        CreateMaterialViewModel.RequestClose += () =>
-        {
-            IsCreatePopupOpen = false;
-            _ = LoadMaterialsAsync();
-        };
-
-        IsCreatePopupOpen = true;
+        OpenEditor();
     }
 
     private void OpenEditPopup(MaterialDto? material)
     {
-        if (material == null) return;
-        
-        CreateMaterialViewModel = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
-        CreateMaterialViewModel.InitializeForEdit(material);
-        
-        CreateMaterialViewModel.RequestClose += () =>
+        if (material is null)
+        {
+            return;
+        }
+
+        OpenEditor(viewModel => viewModel.InitializeForEdit(material));
+    }
+
+    private void OpenEditor(Action<CreateMaterialViewModel>? initialize = null)
+    {
+        var editor = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
+        initialize?.Invoke(editor);
+
+        editor.RequestClose += () =>
         {
             IsCreatePopupOpen = false;
-            _ = LoadMaterialsAsync();
+            RequestPaginationRefresh();
         };
 
+        CreateMaterialViewModel = editor;
         IsCreatePopupOpen = true;
     }
 
     private void OpenDeletePopup(MaterialDto? material)
     {
-        if (material == null) return;
+        if (material is null)
+        {
+            return;
+        }
+
         MaterialToDelete = material;
         IsDeletePopupOpen = true;
     }
 
     private async Task ConfirmDeleteAsync()
     {
-        if (MaterialToDelete == null) return;
+        if (MaterialToDelete is null)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
         {
             await _mediator.Send(new DeleteMaterialCommand(MaterialToDelete.Id));
+
             IsDeletePopupOpen = false;
             MaterialToDelete = null;
-            await LoadMaterialsAsync();
+            RequestPaginationRefresh();
         }
         finally
         {
@@ -329,5 +177,20 @@ public partial class MaterialListViewModel : ViewModelBase
         MaterialToDelete = null;
     }
 
-    public record OperatorWrapper(NumericOperator? Operator, string Display);
+    private void RequestPaginationRefresh()
+    {
+        PaginationRefreshRequested?.Invoke();
+    }
+
+    private static void ReplaceItems<T>(
+        ObservableCollection<T> target,
+        IEnumerable<T> source)
+    {
+        target.Clear();
+
+        foreach (var item in source)
+        {
+            target.Add(item);
+        }
+    }
 }

@@ -18,5 +18,5 @@ public record GetProductsQuery(
     string? NameFilter = null,
     string? IdentifierFilter = null,
     string? DescriptionFilter = null,
-    int? AmountFilter = null,
+    double? AmountFilter = null,
     NumericOperator? AmountOperator = null) : IRequest<PagedList<ProductDto>>;

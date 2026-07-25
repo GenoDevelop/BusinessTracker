@@ -27,8 +27,8 @@
                 <TextBlock Text="Dostawy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
                 
                 <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Margin="0,0,5,0" />
-                <controls:RefreshButton Command="{Binding RefreshCommand}" Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/>
+                <controls:RefreshButton Click="SuppliesRefreshButton_Click" Margin="0,0,5,0" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
             </StackPanel>
 
             <!-- Date Range Picker -->
@@ -37,7 +37,13 @@
             </Grid>
 
             <!-- Supplies List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Supplies}" SelectedItem="{Binding SelectedSupply}" Margin="0,0,0,3" BorderThickness="0" Padding="0">
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding Supplies}"
+                     SelectedItem="{Binding SelectedSupply}"
+                     SelectionChanged="SuppliesList_SelectionChanged"
+                     Margin="0,0,0,3"
+                     BorderThickness="0"
+                     Padding="0">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -285,40 +291,13 @@
             </Popup>
 
             <!-- Pagination -->
-            <Grid Grid.Row="3" Margin="0,5,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Arrows (Top Row) -->
-                <Button Grid.Row="0" Grid.Column="0" Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" ToolTip="Poprzednia">
-                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11">
-                    <Run Text="{Binding DisplayPage, Mode=OneWay}" />
-                    <Run Text="/" />
-                    <Run Text="{Binding TotalPages, Mode=OneWay}" />
-                </TextBlock>
-                <Button Grid.Row="0" Grid.Column="2" Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" ToolTip="Następna">
-                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-
-                <!-- Page Size and Counters (Bottom Row) -->
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,-5">
-                    <TextBlock VerticalAlignment="Center" Text="Na stronie:" FontSize="11" Margin="0,0,5,0" />
-                    <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="45" FontSize="11" Height="22" />
-                    <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" FontSize="11">
-                        <Run Text="Poz.:" />
-                        <Run Text="{Binding ItemsRange, Mode=OneWay}" />
-                    </TextBlock>
-                </StackPanel>
-            </Grid>
+            <controls:PaginationControl x:Name="SuppliesPagination"
+                                        Grid.Row="3"
+                                        Layout="CompactTwoRows"
+                                        PageLoader="{Binding SuppliesPageLoader}"
+                                        InitialPageSize="20"
+                                        Margin="0,5,0,0"
+                                        FontSize="11" />
         </Grid>
 
         <!-- Right Panel -->
@@ -415,24 +394,25 @@
                     <TextBlock Text="Zamówione Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
 
                     <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
-                    <controls:RefreshButton Command="{Binding RefreshSupplyItemsCommand}" Margin="0,0,5,0" />
-                    <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}" />
+                    <controls:RefreshButton Click="SupplyItemsRefreshButton_Click" Margin="0,0,5,0" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
+                                                 Click="SupplyItemsFilterToggleButton_Click" />
                 </StackPanel>
 
                 <!-- Materials DataGrid -->
                 <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True"
                           Background="White"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                          Sorting="DataGrid_Sorting">
+                          Sorting="SupplyItemsDataGrid_Sorting">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
-                                    <TextBlock Text="Materiał" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <TextBox Text="{Binding DataContext.ItemMaterialNameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                             Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                             Margin="0" FontWeight="Normal" />
-                                </StackPanel>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="MaterialNameFilterColumn"
+                                    Header="Materiał"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -443,12 +423,12 @@
 
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel>
-                                    <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <TextBox Text="{Binding DataContext.ItemEanFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                             Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                             Margin="0" FontWeight="Normal" />
-                                </StackPanel>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="EanFilterColumn"
+                                    Header="EAN"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -459,24 +439,13 @@
 
                         <DataGridTemplateColumn Width="0.4*" SortMemberPath="SetsAmount">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Ilość zestawów">
-                                    <TextBlock Text="Zest." FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemSetsAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemSetsAmountFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemSetsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="SetsAmountFilterColumn"
+                                    Header="Zest."
+                                    ToolTip="Ilość zestawów"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -487,24 +456,13 @@
 
                         <DataGridTemplateColumn Width="0.5*" SortMemberPath="UnitsInSet">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Ilość sztuk w zestawie">
-                                    <TextBlock Text="W Zest." FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemUnitsInSetOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemUnitsInSetFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemUnitsInSetFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="UnitsInSetFilterColumn"
+                                    Header="W Zest."
+                                    ToolTip="Ilość sztuk w zestawie"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -517,24 +475,13 @@
 
                         <DataGridTemplateColumn Width="0.5*" SortMemberPath="TotalAmount">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Sumaryczna ilość sztuk we wszystkich zestawach">
-                                    <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemTotalAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemTotalAmountFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemTotalAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="TotalAmountFilterColumn"
+                                    Header="Ilość"
+                                    ToolTip="Sumaryczna ilość sztuk we wszystkich zestawach"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -547,24 +494,13 @@
                         
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetNetPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Cena netto za zestaw">
-                                    <TextBlock Text="Z. Netto" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemSetNetPriceOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemSetNetPriceFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemSetNetPriceFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="SetNetPriceFilterColumn"
+                                    Header="Z. Netto"
+                                    ToolTip="Cena netto za zestaw"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -575,24 +511,13 @@
 
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetGrossPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Cena brutto za zestaw">
-                                    <TextBlock Text="Z. Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemSetGrossPriceOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemSetGrossPriceFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemSetGrossPriceFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="SetGrossPriceFilterColumn"
+                                    Header="Z. Brutto"
+                                    ToolTip="Cena brutto za zestaw"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -603,24 +528,13 @@
                         
                         <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalNetPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Całkowita cena netto za wszystkie zestawy">
-                                    <TextBlock Text="Netto" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemTotalNetPriceOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemTotalNetPriceFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemTotalNetPriceFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="TotalNetPriceFilterColumn"
+                                    Header="Netto"
+                                    ToolTip="Całkowita cena netto za wszystkie zestawy"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -631,24 +545,13 @@
 
                         <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalGrossPrice">
                             <DataGridTemplateColumn.Header>
-                                <StackPanel ToolTip="Całkowita cena brutto za wszystkie zestawy">
-                                    <TextBlock Text="Brutto" FontWeight="Bold" Margin="0,0,0,2"/>
-                                    <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" 
-                                                  ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                  SelectedItem="{Binding DataContext.SelectedItemTotalGrossPriceOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                  DisplayMemberPath="Display"
-                                                  Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding DataContext.ItemTotalGrossPriceFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 IsEnabled="{Binding DataContext.IsItemTotalGrossPriceFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </Grid>
-                                </StackPanel>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="TotalGrossPriceFilterColumn"
+                                    Header="Brutto"
+                                    ToolTip="Całkowita cena brutto za wszystkie zestawy"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -684,26 +587,14 @@
                 </DataGrid>
 
                 <!-- Pagination for Materials -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                    <TextBlock VerticalAlignment="Center" Margin="10,0">
-                        <Run Text="Pozycje:" />
-                        <Run Text="{Binding ItemsItemsRange, Mode=OneWay}" />
-                    </TextBlock>
-                    <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" />
-                    <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding ItemsPageSize}" VerticalAlignment="Center" Width="60" />
-                    <Button Command="{Binding PreviousItemsPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
-                        <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                    </Button>
-                    <TextBlock VerticalAlignment="Center" Margin="10,0">
-                        <Run Text="Strona " />
-                        <Run Text="{Binding DisplayItemsPage, Mode=OneWay}" />
-                        <Run Text=" z " />
-                        <Run Text="{Binding TotalItemsPages, Mode=OneWay}" />
-                    </TextBlock>
-                    <Button Command="{Binding NextItemsPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
-                        <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                    </Button>
-                </StackPanel>
+                <controls:PaginationControl x:Name="SupplyItemsPagination"
+                                            Grid.Row="2"
+                                            Layout="SingleLine"
+                                            PageLoader="{Binding SupplyItemsPageLoader}"
+                                            InitialPageSize="50"
+                                            HorizontalAlignment="Right"
+                                            PaginationHorizontalAlignment="Right"
+                                            Margin="0,5,0,0" />
             </Grid>
 
             <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły" 

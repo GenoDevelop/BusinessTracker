@@ -1,22 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.Delete;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProducts;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Filtering;
+using GenoDev.BusinessTracker.Wpf.Infrastructure.Controls;
 using MediatR;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
+using GenoDev.BusinessTracker.Wpf.ViewModels;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
-namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+public enum ProductsPaginationTarget
+{
+    Products
+}
 
 public partial class ProductsViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
-    private CancellationTokenSource? _filterCancellationTokenSource;
+    private ProductsFilterCriteria _productsFilter = ProductsFilterCriteria.Empty;
 
     public CreateProductViewModel CreateProductViewModel { get; }
 
@@ -24,23 +29,18 @@ public partial class ProductsViewModel : ViewModelBase
     {
         _mediator = mediator;
         CreateProductViewModel = new CreateProductViewModel(mediator);
-        CreateProductViewModel.RequestClose += () =>
+        CreateProductViewModel.RequestClose += async () =>
         {
             IsCreatePopupOpen = false;
-            _ = LoadProductsAsync();
+            RequestPaginationRefresh(ProductsPaginationTarget.Products);
+            await Task.CompletedTask;
         };
 
-        LoadProductsCommand = new AsyncRelayCommand(LoadProductsAsync);
         CreateProductCommand = new RelayCommand(OpenCreatePopup);
         EditProductCommand = new RelayCommand<ProductDto>(OpenEditPopup);
         DeleteProductCommand = new RelayCommand<ProductDto>(OpenDeletePopup);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
-        NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
-        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
-        AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
-        _selectedAmountOperator = AvailableOperators[0];
-        _ = LoadProductsAsync();
     }
 
     private void OpenCreatePopup()
@@ -73,7 +73,7 @@ public partial class ProductsViewModel : ViewModelBase
             await _mediator.Send(new DeleteProductCommand(ProductToDelete.Id));
             IsDeletePopupOpen = false;
             ProductToDelete = null;
-            await LoadProductsAsync();
+            RequestPaginationRefresh(ProductsPaginationTarget.Products);
         }
         finally
         {
@@ -99,39 +99,19 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isFilterVisible;
 
-    [ObservableProperty]
-    private string? _nameFilter;
-
-    [ObservableProperty]
-    private string? _identifierFilter;
-
-    [ObservableProperty]
-    private string? _descriptionFilter;
-
-    [ObservableProperty]
-    private string? _amountFilterValue;
-
-    [ObservableProperty]
-    private NumericOperator? _amountFilterOperator;
-
-    public List<OperatorWrapper> AvailableOperators { get; } = new()
-    {
-        new OperatorWrapper(null, ""),
-        new OperatorWrapper(NumericOperator.Equal, "="),
-        new OperatorWrapper(NumericOperator.NotEqual, "≠"),
-        new OperatorWrapper(NumericOperator.LessThan, "<"),
-        new OperatorWrapper(NumericOperator.LessThanOrEqual, "≤"),
-        new OperatorWrapper(NumericOperator.GreaterThan, ">"),
-        new OperatorWrapper(NumericOperator.GreaterThanOrEqual, "≥")
-    };
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsAmountFilterEnabled))]
-    private OperatorWrapper? _selectedAmountOperator;
-
-    public bool IsAmountFilterEnabled => SelectedAmountOperator?.Operator != null;
-
     public ObservableCollection<ProductDto> Products { get; } = new();
+
+    /// <summary>
+    /// Loadery przekazywane bezpośrednio do kontrolek paginacji.
+    /// Kontrolka dostarcza stan strony i sama przejmuje zwrócony TotalCount.
+    /// </summary>
+    public PaginationPageLoader ProductsPageLoader => LoadProductsPageAsync;
+
+    /// <summary>
+    /// Lekki, niezależny od WPF sygnał używany wyłącznie po operacjach CRUD,
+    /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
+    /// </summary>
+    public event Action<ProductsPaginationTarget>? PaginationRefreshRequested;
 
     [ObservableProperty]
     private ProductSortBy _sortBy = ProductSortBy.Name;
@@ -139,177 +119,63 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDescending;
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
-    [NotifyPropertyChangedFor(nameof(DisplayPage))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _pageIndex;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    private int _pageSize = 10;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _totalCount;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
-    private bool _hasNextPage;
-
-    public ObservableCollection<int> AvailablePageSizes { get; }
-
-    public int DisplayPage => PageIndex + 1;
-
-    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
-
-    public string ItemsRange
-    {
-        get
-        {
-            if (TotalCount == 0) return "0-0 / 0";
-            var start = PageIndex * PageSize + 1;
-            var end = Math.Min((PageIndex + 1) * PageSize, TotalCount);
-            return $"{start}-{end} / {TotalCount}";
-        }
-    }
-
-    public IAsyncRelayCommand LoadProductsCommand { get; }
     public IRelayCommand CreateProductCommand { get; }
     public IRelayCommand<ProductDto> EditProductCommand { get; }
     public IRelayCommand<ProductDto> DeleteProductCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }
-    public IAsyncRelayCommand NextPageCommand { get; }
-    public IAsyncRelayCommand PreviousPageCommand { get; }
 
-    partial void OnPageSizeChanged(int value)
+    public void SetProductsFilter(ProductsFilterCriteria filter)
     {
-        PageIndex = 0;
-        _ = LoadProductsAsync();
+        _productsFilter = filter;
     }
 
-    partial void OnSortByChanged(ProductSortBy value)
+    public void SetProductsSorting(
+        ProductSortBy sortBy,
+        bool isDescending)
     {
-        _ = LoadProductsAsync();
+        SortBy = sortBy;
+        IsDescending = isDescending;
     }
 
-    partial void OnIsDescendingChanged(bool value)
+    private async Task<int> LoadProductsPageAsync(
+        PaginationState state,
+        CancellationToken cancellationToken)
     {
-        _ = LoadProductsAsync();
-    }
-
-    partial void OnNameFilterChanged(string? value) => DebounceLoadProducts();
-    partial void OnIdentifierFilterChanged(string? value) => DebounceLoadProducts();
-    partial void OnDescriptionFilterChanged(string? value) => DebounceLoadProducts();
-    partial void OnAmountFilterValueChanged(string? value) => DebounceLoadProducts();
-    partial void OnSelectedAmountOperatorChanged(OperatorWrapper? value)
-    {
-        AmountFilterOperator = value?.Operator;
-        DebounceLoadProducts();
-    }
-
-    partial void OnIsFilterVisibleChanged(bool value)
-    {
-        _ = LoadProductsAsync();
-    }
-
-    private void DebounceLoadProducts()
-    {
-        _filterCancellationTokenSource?.Cancel();
-        _filterCancellationTokenSource = new CancellationTokenSource();
-        var token = _filterCancellationTokenSource.Token;
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(500, token);
-                if (!token.IsCancellationRequested)
-                {
-                    App.Current.Dispatcher.Invoke(() => PageIndex = 0);
-                    await LoadProductsAsync();
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Ignore
-            }
-        }, token);
-    }
-
-    private int? ParseInt(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (int.TryParse(value, out var result))
-            return result;
-        return null;
-    }
-
-    private async Task LoadProductsAsync()
-    {
-        if (!App.Current.Dispatcher.CheckAccess())
-        {
-            await App.Current.Dispatcher.InvokeAsync(LoadProductsAsync);
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var query = new GetProductsQuery(
-                PageIndex,
-                PageSize,
+        var filter = _productsFilter;
+        var result = await _mediator.Send(
+            new GetProductsQuery(
+                state.PageIndex,
+                state.PageSize,
                 SortBy,
                 IsDescending,
-                IsFilterVisible ? NameFilter : null,
-                IsFilterVisible ? IdentifierFilter : null,
-                IsFilterVisible ? DescriptionFilter : null,
-                IsFilterVisible ? ParseInt(AmountFilterValue) : null,
-                IsFilterVisible ? AmountFilterOperator : null);
-            var result = await _mediator.Send(query);
+                filter.Name,
+                filter.Identifier,
+                filter.Description,
+                filter.Amount,
+                filter.AmountOperator),
+            cancellationToken);
 
-            Products.Clear();
-            foreach (var item in result.Items)
-            {
-                Products.Add(item);
-            }
+        cancellationToken.ThrowIfCancellationRequested();
 
-            TotalCount = result.TotalCount;
-            HasNextPage = result.HasNextPage;
-
-            if (PageIndex > 0 && Products.Count == 0 && TotalCount > 0)
-            {
-                var maxPage = (int)Math.Ceiling((double)TotalCount / PageSize) - 1;
-                if (PageIndex > maxPage)
-                {
-                    PageIndex = Math.Max(0, maxPage);
-                    await LoadProductsAsync();
-                }
-            }
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        ReplaceItems(Products, result.Items);
+        return result.TotalCount;
     }
 
-    private async Task NextPageAsync()
+    private void RequestPaginationRefresh(ProductsPaginationTarget target)
     {
-        PageIndex++;
-        await LoadProductsAsync();
+        PaginationRefreshRequested?.Invoke(target);
     }
 
-    private async Task PreviousPageAsync()
+    private static void ReplaceItems<T>(
+        ObservableCollection<T> target,
+        IEnumerable<T> source)
     {
-        if (PageIndex > 0)
+        target.Clear();
+
+        foreach (var item in source)
         {
-            PageIndex--;
-            await LoadProductsAsync();
+            target.Add(item);
         }
     }
-
-    public record OperatorWrapper(NumericOperator? Operator, string Display);
 }

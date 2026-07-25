@@ -13,19 +13,13 @@ public class GetSuppliersQueryHandler(IBusinessTrackerDbContext dbContext)
         var query = dbContext.Suppliers.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.NameFilter))
-        {
-            query = query.Where(x => x.Name.Contains(request.NameFilter));
-        }
+            query = query.WhereContainsAll(x => x.Name, request.NameFilter);
 
         if (!string.IsNullOrWhiteSpace(request.NipFilter))
-        {
-            query = query.Where(x => x.Nip != null && x.Nip.Contains(request.NipFilter));
-        }
+            query = query.WhereContainsAll(x => x.Nip, request.NipFilter);
 
         if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
-        {
-            query = query.Where(x => x.Description != null && x.Description.Contains(request.DescriptionFilter));
-        }
+            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
 
         query = request.SortBy switch
         {
