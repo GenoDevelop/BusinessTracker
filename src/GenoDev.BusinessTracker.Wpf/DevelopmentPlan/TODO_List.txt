@@ -1,0 +1,7 @@
+- Zmienić statusy w edycji dostawy na polskie
+X Umożliwić wyczyszczenie EAN
+- Zmienić strukturę bazy żeby materiały miały warianty
+- Dodać materiały pakowe do programu
+- Umożliwoć zamawianie materiałów pakowych w dostawach
+- Filtrowania tekstowe zrobić, że każde słowo po spacji ma się znajdować gdzieś w wyszukiwanej frazie
+- Dodać koszty dostawy netto/brutto do zamówienia materiałów

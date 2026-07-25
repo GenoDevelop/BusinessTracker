@@ -12,10 +12,11 @@ public class UpdateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
         var material = await dbContext.Materials
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-        if (material == null) return;
+        if (material == null)
+            return;
 
         material.Name = request.Name;
-        material.Ean = request.Ean;
+        material.Ean = string.IsNullOrWhiteSpace(request.Ean) ? null : request.Ean;
         material.Description = request.Description;
         material.Unit = request.Unit;
 

@@ -13,7 +13,7 @@ public class CreateSupplierCommandHandler(IBusinessTrackerDbContext dbContext)
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            Nip = request.Nip,
+            Nip = string.IsNullOrWhiteSpace(request.Nip) ? null : request.Nip,
             Description = request.Description,
             WebsiteUrl = request.WebsiteUrl,
             MaterialSupplies = []

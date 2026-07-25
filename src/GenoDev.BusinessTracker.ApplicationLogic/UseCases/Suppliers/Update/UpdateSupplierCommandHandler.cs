@@ -18,7 +18,7 @@ public class UpdateSupplierCommandHandler(IBusinessTrackerDbContext dbContext)
         }
 
         supplier.Name = request.Name;
-        supplier.Nip = request.Nip;
+        supplier.Nip = string.IsNullOrWhiteSpace(request.Nip) ? null : request.Nip;
         supplier.Description = request.Description;
         supplier.WebsiteUrl = request.WebsiteUrl;
 

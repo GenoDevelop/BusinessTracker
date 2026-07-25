@@ -32,7 +32,6 @@ public partial class SuppliersViewModel : ViewModelBase
         DeleteSupplierCommand = new RelayCommand<SupplierDto>(OpenDeletePopup);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
-        OpenWebsiteCommand = new RelayCommand<string>(OpenWebsite);
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _ = LoadSuppliersAsync();
     }
@@ -114,7 +113,6 @@ public partial class SuppliersViewModel : ViewModelBase
     public IRelayCommand<SupplierDto> DeleteSupplierCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }
-    public IRelayCommand<string> OpenWebsiteCommand { get; }
 
     partial void OnPageSizeChanged(int value)
     {
@@ -284,24 +282,5 @@ public partial class SuppliersViewModel : ViewModelBase
     {
         IsDeletePopupOpen = false;
         SupplierToDelete = null;
-    }
-
-    private void OpenWebsite(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url)) return;
-        
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            // Fallback or log if needed, but for now just prevent crash
-            System.Diagnostics.Debug.WriteLine($"Failed to open website: {ex.Message}");
-        }
     }
 }

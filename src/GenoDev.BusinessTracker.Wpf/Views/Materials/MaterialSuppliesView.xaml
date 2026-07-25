@@ -25,16 +25,10 @@
             <!-- Toolbar -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <TextBlock Text="Dostawy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-                <Button Command="{Binding CreateSupplyCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj dostawę" Margin="0,0,5,0">
-                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <Button Command="{Binding RefreshCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież" Margin="0,0,5,0">
-                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <ToggleButton IsChecked="{Binding IsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
-                    <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z" 
-                          Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
-                </ToggleButton>
+                
+                <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Margin="0,0,5,0" />
+                <controls:RefreshButton Command="{Binding RefreshCommand}" Margin="0,0,5,0" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/>
             </StackPanel>
 
             <!-- Date Range Picker -->
@@ -356,31 +350,14 @@
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                        <Button Command="{Binding OpenWebsiteCommand}"
-                                CommandParameter="{Binding SelectedSupplyDetails.WebsiteUrl}"
-                                IsEnabled="{Binding SelectedSupplyDetails.WebsiteUrl, Converter={StaticResource NullToAllConverter}, ConverterParameter='True;False'}"
-                                Style="{StaticResource IconButton}" 
-                                Margin="0,0,10,0"
-                                ToolTip="{Binding SelectedSupplyDetails.WebsiteUrl}">
-                            <Path Data="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19H12.28C11.97,18.21 11.67,17.13 11.45,16H14.59M14.34,14H9.66C9.57,13.34 9.5,12.68 9.5,12C9.5,11.32 9.57,10.66 9.66,10H14.34C14.43,10.66 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,14H4.26C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H8C7.92,10.66 7.85,11.32 7.85,12C7.85,12.68 7.92,13.34 8,14M10.59,8H13.41C13.67,6.87 13.97,5.79 14.28,5H9.72C10.03,5.79 10.33,6.87 10.59,8M12,4.04C12.83,5.24 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.24 12,4.04M19.74,8H16.36C16.44,8.66 16.5,9.32 16.5,10H19.74C19.9,9.36 20,8.69 20,8M4.26,8H7.64C7.56,8.66 7.5,9.32 7.5,10H4.26C4.1,9.36 4,8.69 4,8M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,5H17.72C18.5,5.79 19.1,6.82 19.41,8H15.45C15.17,6.87 14.88,5.79 14.59,5M9.41,5C9.12,5.79 8.83,6.87 8.55,8H4.59C4.9,6.82 5.5,5.79 6.28,5M6.28,19C5.5,18.21 4.9,17.18 4.59,16H8.55C8.83,17.13 9.12,18.21 9.41,19M17.72,19H14.59C14.88,18.21 15.17,17.13 15.45,16H19.41C19.1,17.18 18.5,18.21 17.72,19Z" 
-                                  Fill="{Binding SelectedSupplyDetails.WebsiteUrl, Converter={StaticResource NullToAllConverter}, ConverterParameter='DodgerBlue;Gray'}" 
-                                  Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                        
-                        <Button Command="{Binding EditSupplyCommand}" 
-                                Style="{StaticResource IconButton}" 
-                                Margin="0,0,10,0"
-                                ToolTip="Edytuj dostawę">
-                            <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" 
-                                  Fill="SteelBlue" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                        
-                        <Button Command="{Binding DeleteSupplyCommand}" 
-                                Style="{StaticResource IconButton}" 
-                                ToolTip="Usuń dostawę">
-                            <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
-                                  Fill="IndianRed" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
+                        <controls:WebsiteButton
+                            Margin="0,0,5,0"
+                            WebsiteUrl="{Binding SelectedSupplyDetails.WebsiteUrl}"/>
+                        <controls:EditButton Command="{Binding EditSupplyCommand}"
+                                             ToolTip="Edytuj dostawę"
+                                             Margin="0,0,5,0" />
+                        <controls:DeleteButton Command="{Binding DeleteSupplyCommand}"
+                                               ToolTip="Usuń dostawę" />
                     </StackPanel>
                 </Grid>
 
@@ -437,18 +414,9 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                     <TextBlock Text="Zamówione Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
 
-                    <Button Command="{Binding AddMaterialCommand}" Style="{StaticResource IconButton}" Margin="0,0,5,0" ToolTip="Dodaj materiał">
-                        <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
-                              Fill="Green" Stretch="Uniform" Width="20" Height="20" />
-                    </Button>
-                    <Button Command="{Binding RefreshSupplyItemsCommand}" Style="{StaticResource IconButton}" Margin="0,0,5,0" ToolTip="Odśwież">
-                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" 
-                              Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                    </Button>
-                    <ToggleButton IsChecked="{Binding IsItemsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
-                        <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z"
-                              Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
-                    </ToggleButton>
+                    <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
+                    <controls:RefreshButton Command="{Binding RefreshSupplyItemsCommand}" Margin="0,0,5,0" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}" />
                 </StackPanel>
 
                 <!-- Materials DataGrid -->
@@ -696,22 +664,18 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource IconButton}" 
-                                                ToolTip="Edytuj pozycję"
-                                                Margin="2,0">
-                                            <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" 
-                                                  Fill="SteelBlue" Stretch="Uniform" Width="14" Height="14" />
-                                        </Button>
-                                        <Button Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource IconButton}" 
-                                                ToolTip="Usuń pozycję"
-                                                Margin="2,0">
-                                            <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
-                                                  Fill="IndianRed" Stretch="Uniform" Width="14" Height="14" />
-                                        </Button>
+                                        <controls:EditButton
+                                            Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Edytuj pozycję"
+                                            Margin="2,0" 
+                                            Width="14" />
+                                        <controls:DeleteButton
+                                            Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Usuń pozycję"
+                                            Margin="2,0"
+                                            Width="14" />
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

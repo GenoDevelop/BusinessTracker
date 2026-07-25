@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Production"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:RecipesViewModel}">
@@ -24,16 +25,9 @@
             <!-- Toolbar -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <TextBlock Text="Przepisy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-                <Button Command="{Binding CreateRecipeCommand}" Style="{StaticResource IconButton}" ToolTip="Dodaj przepis" Margin="0,0,5,0">
-                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="Green" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <Button Command="{Binding RefreshCommand}" Style="{StaticResource IconButton}" ToolTip="Odśwież" Margin="0,0,5,0">
-                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <ToggleButton IsChecked="{Binding IsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
-                    <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z" 
-                          Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
-                </ToggleButton>
+                <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" />
+                <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
             </StackPanel>
 
             <!-- Search Header -->
@@ -47,13 +41,24 @@
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.41L13.01,15.14C11.87,16.11 10.39,16.7 8.75,16.7A6.5,6.5 0 0,1 2.25,10.2A6.5,6.5 0 0,1 8.75,3.7M8.75,5.2A5,5 0 0,0 3.75,10.2A5,5 0 0,0 8.75,15.2A5,5 0 0,0 13.75,10.2A5,5 0 0,0 8.75,5.2Z" 
                               Fill="Gray" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,5,0" />
-                        <TextBox Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" Width="150" VerticalContentAlignment="Center" />
+                        <TextBox Text="{Binding SearchTerm,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                Delay=500,
+                                                NotifyOnSourceUpdated=True}"
+                                 SourceUpdated="SearchTerm_SourceUpdated"
+                                 Width="150"
+                                 VerticalContentAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Recipes List -->
-            <ListBox Grid.Row="2" ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}" BorderThickness="0" Padding="0">
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding Recipes}"
+                     SelectedItem="{Binding SelectedRecipe}"
+                     SelectionChanged="RecipesList_SelectionChanged"
+                     BorderThickness="0"
+                     Padding="0">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -98,40 +103,12 @@
             </ListBox>
 
             <!-- Pagination -->
-            <Grid Grid.Row="3" Margin="0,5,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Arrows (Top Row) -->
-                <Button Grid.Row="0" Grid.Column="0" Command="{Binding PreviousPageCommand}" Style="{StaticResource IconButton}" ToolTip="Poprzednia">
-                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11">
-                    <Run Text="{Binding DisplayPage, Mode=OneWay}" />
-                    <Run Text="/" />
-                    <Run Text="{Binding TotalPages, Mode=OneWay}" />
-                </TextBlock>
-                <Button Grid.Row="0" Grid.Column="2" Command="{Binding NextPageCommand}" Style="{StaticResource IconButton}" ToolTip="Następna">
-                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="18" Height="18" />
-                </Button>
-
-                <!-- Page Size and Counters (Bottom Row) -->
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,-5">
-                    <TextBlock VerticalAlignment="Center" Text="Na stronie:" FontSize="11" Margin="0,0,5,0" />
-                    <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding PageSize}" VerticalAlignment="Center" Width="45" FontSize="11" Height="22" />
-                    <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" FontSize="11">
-                        <Run Text="Poz.:" />
-                        <Run Text="{Binding ItemsRange, Mode=OneWay}" />
-                    </TextBlock>
-                </StackPanel>
-            </Grid>
+            <controls:PaginationControl x:Name="RecipesPagination"
+                                        Grid.Row="3"
+                                        Layout="CompactTwoRows"
+                                        PageLoader="{Binding RecipesPageLoader}"
+                                        Margin="0,5,0,0"
+                                        FontSize="11" />
         </Grid>
 
         <!-- Right Panel -->
@@ -164,14 +141,8 @@
                         <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="Black" VerticalAlignment="Bottom" />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                            <Button Command="{Binding EditRecipeCommand}" Background="Transparent" BorderThickness="0" Margin="0,0,5,0" ToolTip="Edytuj">
-                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
-                                    Fill="SteelBlue" Stretch="Uniform" Width="18" Height="18" />
-                            </Button>
-                            <Button Command="{Binding DeleteRecipeCommand}" Background="Transparent" BorderThickness="0" ToolTip="Usuń">
-                                <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
-                                    Fill="IndianRed" Stretch="Uniform" Width="18" Height="18" />
-                            </Button>
+                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,5,0" Width="18" Height="18"/>
+                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" Width="18" Height="18"/>
                         </StackPanel>
                     </Grid>
 
@@ -222,18 +193,10 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Potrzebne Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
 
-                        <Button Command="{Binding AddRecipeMaterialCommand}" Style="{StaticResource IconButton}" Margin="0,0,5,0" ToolTip="Dodaj materiał">
-                            <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
-                                  Fill="Green" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                        <Button Command="{Binding RefreshRecipeMaterialsCommand}" Style="{StaticResource IconButton}" Margin="0,0,5,0" ToolTip="Odśwież">
-                            <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" 
-                                  Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                        <ToggleButton IsChecked="{Binding IsItemsFilterVisible}" Style="{StaticResource IconToggleButton}" ToolTip="Filtruj">
-                            <Path Data="M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z"
-                                  Fill="Gray" Stretch="Uniform" Width="20" Height="20" />
-                        </ToggleButton>
+                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
+                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" />
+                        <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
+                                                     Click="RecipeMaterialsFilterToggleButton_Click" />
                     </StackPanel>
 
                     <!-- Materials DataGrid -->
@@ -244,12 +207,12 @@
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
                                 <DataGridTemplateColumn.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="Materiał" FontWeight="Bold" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding DataContext.MaterialNameFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </StackPanel>
+                                    <controls:TextFilterColumnHeader
+                                        x:Name="MaterialNameFilterColumn"
+                                        Header="Materiał"
+                                        DebounceMilliseconds="500"
+                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
                                 </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -260,12 +223,12 @@
 
                             <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean">
                                 <DataGridTemplateColumn.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="EAN" FontWeight="Bold" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding DataContext.EanFilter, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                 Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                 Margin="0" FontWeight="Normal" />
-                                    </StackPanel>
+                                    <controls:TextFilterColumnHeader
+                                        x:Name="EanFilterColumn"
+                                        Header="EAN"
+                                        DebounceMilliseconds="500"
+                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
                                 </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -276,24 +239,12 @@
 
                             <DataGridTemplateColumn Width="100" SortMemberPath="RequiredAmount">
                                 <DataGridTemplateColumn.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="Ilość" FontWeight="Bold" Margin="0,0,0,2"/>
-                                        <Grid Visibility="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox Grid.Column="0" 
-                                                      ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                      SelectedItem="{Binding DataContext.SelectedAmountOperator, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                      DisplayMemberPath="Display"
-                                                      Width="35" Height="18" Margin="0,0,2,0" FontWeight="Normal" Padding="7, -2, 0, 0" VerticalContentAlignment="Center" />
-                                            <TextBox Grid.Column="1" 
-                                                     Text="{Binding DataContext.AmountFilterValue, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" 
-                                                     IsEnabled="{Binding DataContext.IsAmountFilterEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                     Margin="0" FontWeight="Normal" />
-                                        </Grid>
-                                    </StackPanel>
+                                    <controls:NumericFilterColumnHeader
+                                        x:Name="AmountFilterColumn"
+                                        Header="Ilość"
+                                        DebounceMilliseconds="500"
+                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
                                 </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -312,22 +263,16 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Button Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource IconButton}" 
-                                                    ToolTip="Edytuj pozycję"
-                                                    Margin="2,0">
-                                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" 
-                                                      Fill="SteelBlue" Stretch="Uniform" Width="14" Height="14" />
-                                            </Button>
-                                            <Button Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource IconButton}" 
-                                                    ToolTip="Usuń pozycję"
-                                                    Margin="2,0">
-                                                <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
-                                                      Fill="IndianRed" Stretch="Uniform" Width="14" Height="14" />
-                                            </Button>
+                                            <controls:EditButton
+                                                Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Edytuj pozycję"
+                                                Margin="2,0" />
+                                            <controls:DeleteButton
+                                                Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Usuń pozycję"
+                                                Margin="2,0" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -336,26 +281,14 @@
                     </DataGrid>
 
                     <!-- Pagination for Materials -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <TextBlock VerticalAlignment="Center" Margin="10,0">
-                            <Run Text="Pozycje:" />
-                            <Run Text="{Binding RecipeMaterialsRange, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Na stronie:" />
-                        <ComboBox ItemsSource="{Binding AvailablePageSizes}" SelectedItem="{Binding RecipeMaterialsPageSize}" VerticalAlignment="Center" Width="60" />
-                        <Button Command="{Binding PreviousRecipeMaterialsPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Poprzednia">
-                            <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                        <TextBlock VerticalAlignment="Center" Margin="10,0">
-                            <Run Text="Strona " />
-                            <Run Text="{Binding DisplayRecipeMaterialsPage, Mode=OneWay}" />
-                            <Run Text=" z " />
-                            <Run Text="{Binding TotalRecipeMaterialsPages, Mode=OneWay}" />
-                        </TextBlock>
-                        <Button Command="{Binding NextRecipeMaterialsPageCommand}" Style="{StaticResource IconButton}" Margin="5,0" ToolTip="Następna">
-                            <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="DodgerBlue" Stretch="Uniform" Width="20" Height="20" />
-                        </Button>
-                    </StackPanel>
+                    <controls:PaginationControl x:Name="RecipeMaterialsPagination"
+                                                Grid.Row="2"
+                                                Layout="SingleLine"
+                                                PageLoader="{Binding RecipeMaterialsPageLoader}"
+                                                InitialPageSize="10"
+                                                HorizontalAlignment="Right"
+                                                PaginationHorizontalAlignment="Right"
+                                                Margin="0,5,0,0" />
                 </Grid>
             </Grid>
         </Grid>

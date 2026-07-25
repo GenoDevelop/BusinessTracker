@@ -3,22 +3,63 @@ using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.DeleteRecipe;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipeMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipes;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.RemoveRecipeMaterial;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Filtering;
+using GenoDev.BusinessTracker.Wpf.Infrastructure.Controls;
 using MediatR;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+
+public enum RecipesPaginationTarget
+{
+    Recipes,
+    RecipeMaterials
+}
 
 public partial class RecipesViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
-    private CancellationTokenSource? _filterCancellationTokenSource;
-    private CancellationTokenSource? _itemsFilterCancellationTokenSource;
+    private RecipeMaterialsFilterCriteria _recipeMaterialsFilter =
+        RecipeMaterialsFilterCriteria.Empty;
+    private RecipeMaterialDto? _materialToDelete;
+
+    public RecipesViewModel(IMediator mediator)
+    {
+        _mediator = mediator;
+
+        CreateRecipeCommand = new AsyncRelayCommand(CreateRecipeAsync);
+        EditRecipeCommand = new AsyncRelayCommand(EditRecipeAsync);
+        DeleteRecipeCommand = new RelayCommand(DeleteRecipe);
+        ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
+        CancelDeleteCommand = new RelayCommand(CancelDelete);
+
+        AddRecipeMaterialCommand = new RelayCommand(AddRecipeMaterial);
+        EditRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(EditRecipeMaterial);
+        DeleteRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(DeleteRecipeMaterial);
+        ConfirmDeleteMaterialCommand = new AsyncRelayCommand(ConfirmDeleteMaterialAsync);
+        CancelDeleteMaterialCommand = new RelayCommand(CancelDeleteMaterial);
+    }
+
+    public ObservableCollection<RecipeDto> Recipes { get; } = new();
+
+    public ObservableCollection<RecipeMaterialDto> RecipeMaterials { get; } = new();
+
+    /// <summary>
+    /// Loadery przekazywane bezpośrednio do kontrolek paginacji.
+    /// Kontrolka dostarcza stan strony i sama przejmuje zwrócony TotalCount.
+    /// </summary>
+    public PaginationPageLoader RecipesPageLoader => LoadRecipesPageAsync;
+
+    public PaginationPageLoader RecipeMaterialsPageLoader =>
+        LoadRecipeMaterialsPageAsync;
+
+    /// <summary>
+    /// Lekki, niezależny od WPF sygnał używany wyłącznie po operacjach CRUD,
+    /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
+    /// </summary>
+    public event Action<RecipesPaginationTarget>? PaginationRefreshRequested;
 
     [ObservableProperty]
     private bool _isDeleteConfirmationOpen;
@@ -27,154 +68,19 @@ public partial class RecipesViewModel : ViewModelBase
     private bool _isItemsFilterVisible;
 
     [ObservableProperty]
-    private string? _amountFilterValue;
-
-    public List<OperatorWrapper> AvailableOperators { get; } = new()
-    {
-        new OperatorWrapper(null, ""),
-        new OperatorWrapper(NumericOperator.Equal, "="),
-        new OperatorWrapper(NumericOperator.NotEqual, "≠"),
-        new OperatorWrapper(NumericOperator.LessThan, "<"),
-        new OperatorWrapper(NumericOperator.LessThanOrEqual, "≤"),
-        new OperatorWrapper(NumericOperator.GreaterThan, ">"),
-        new OperatorWrapper(NumericOperator.GreaterThanOrEqual, "≥")
-    };
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsAmountFilterEnabled))]
-    private OperatorWrapper? _selectedAmountOperator;
-
-    public bool IsAmountFilterEnabled => SelectedAmountOperator?.Operator != null;
-
-    [ObservableProperty]
     private RecipeMaterialSortBy _materialSortBy = RecipeMaterialSortBy.MaterialName;
 
     [ObservableProperty]
     private bool _isMaterialDescending;
 
-    public RecipesViewModel(IMediator mediator)
-    {
-        _mediator = mediator;
-        _selectedAmountOperator = AvailableOperators[0];
-        LoadRecipesCommand = new AsyncRelayCommand(LoadRecipesAsync);
-        NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
-        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => PageIndex > 0);
-        
-        CreateRecipeCommand = new RelayCommand(CreateRecipe);
-        EditRecipeCommand = new AsyncRelayCommand(EditRecipeAsync);
-        DeleteRecipeCommand = new RelayCommand(DeleteRecipe);
-        ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
-        CancelDeleteCommand = new RelayCommand(CancelDelete);
-        RefreshCommand = new AsyncRelayCommand(ManualRefreshAsync);
-
-        RefreshRecipeMaterialsCommand = new AsyncRelayCommand(LoadRecipeMaterialsAsync);
-        NextRecipeMaterialsPageCommand = new AsyncRelayCommand(NextRecipeMaterialsPageAsync, () => HasNextRecipeMaterialsPage);
-        PreviousRecipeMaterialsPageCommand = new AsyncRelayCommand(PreviousRecipeMaterialsPageAsync, () => RecipeMaterialsPageIndex > 0);
-
-        AddRecipeMaterialCommand = new RelayCommand(AddRecipeMaterial);
-        EditRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(EditRecipeMaterial);
-        DeleteRecipeMaterialCommand = new RelayCommand<RecipeMaterialDto>(DeleteRecipeMaterial);
-        ConfirmDeleteMaterialCommand = new AsyncRelayCommand(ConfirmDeleteMaterialAsync);
-        CancelDeleteMaterialCommand = new RelayCommand(CancelDeleteMaterial);
-
-        AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
-        _ = LoadRecipesAsync();
-    }
-
-    public ObservableCollection<RecipeDto> Recipes { get; } = new();
-    public ObservableCollection<RecipeMaterialDto> RecipeMaterials { get; } = new();
-
     [ObservableProperty]
     private bool _isFilterVisible;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
-    [NotifyPropertyChangedFor(nameof(DisplayPage))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _pageIndex;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    private int _pageSize = 20;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(ItemsRange))]
-    private int _totalCount;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
-    private bool _hasNextPage;
-
-    // Recipe Materials Pagination
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PreviousRecipeMaterialsPageCommand))]
-    [NotifyPropertyChangedFor(nameof(DisplayRecipeMaterialsPage))]
-    [NotifyPropertyChangedFor(nameof(RecipeMaterialsRange))]
-    private int _recipeMaterialsPageIndex;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(RecipeMaterialsRange))]
-    [NotifyPropertyChangedFor(nameof(TotalRecipeMaterialsPages))]
-    private int _recipeMaterialsPageSize = 10;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalRecipeMaterialsPages))]
-    [NotifyPropertyChangedFor(nameof(RecipeMaterialsRange))]
-    private int _totalRecipeMaterialsCount;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(NextRecipeMaterialsPageCommand))]
-    private bool _hasNextRecipeMaterialsPage;
-
-    public ObservableCollection<int> AvailablePageSizes { get; }
-
-    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
-
-    public int DisplayPage => PageIndex + 1;
-
-    public string ItemsRange
-    {
-        get
-        {
-            if (TotalCount == 0) return "0-0 / 0";
-            var start = PageIndex * PageSize + 1;
-            var end = Math.Min((PageIndex + 1) * PageSize, TotalCount);
-            return $"{start}-{end} / {TotalCount}";
-        }
-    }
-
-    public int TotalRecipeMaterialsPages => (int)Math.Ceiling((double)TotalRecipeMaterialsCount / RecipeMaterialsPageSize);
-    public int DisplayRecipeMaterialsPage => RecipeMaterialsPageIndex + 1;
-    public string RecipeMaterialsRange
-    {
-        get
-        {
-            if (TotalRecipeMaterialsCount == 0) return "0-0 / 0";
-            var start = RecipeMaterialsPageIndex * RecipeMaterialsPageSize + 1;
-            var end = Math.Min((RecipeMaterialsPageIndex + 1) * RecipeMaterialsPageSize, TotalRecipeMaterialsCount);
-            return $"{start}-{end} / {TotalRecipeMaterialsCount}";
-        }
-    }
 
     [ObservableProperty]
     private string? _searchTerm;
 
     [ObservableProperty]
-    private string? _materialNameFilter;
-
-    [ObservableProperty]
-    private string? _eanFilter;
-
-    [ObservableProperty]
     private RecipeDto? _selectedRecipe;
-
-    partial void OnSelectedRecipeChanged(RecipeDto? value)
-    {
-        RecipeMaterialsPageIndex = 0;
-        _ = LoadRecipeMaterialsAsync();
-    }
 
     [ObservableProperty]
     private AddRecipeMaterialViewModel? _addRecipeMaterialViewModel;
@@ -185,260 +91,102 @@ public partial class RecipesViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDeleteMaterialConfirmationOpen;
 
-    private RecipeMaterialDto? _materialToDelete;
-
     [ObservableProperty]
     private CreateRecipeViewModel? _createRecipeViewModel;
 
     [ObservableProperty]
     private bool _isCreatePopupOpen;
 
-    public IAsyncRelayCommand LoadRecipesCommand { get; }
-    public IAsyncRelayCommand NextPageCommand { get; }
-    public IAsyncRelayCommand PreviousPageCommand { get; }
-    public IRelayCommand CreateRecipeCommand { get; }
-    public IAsyncRelayCommand EditRecipeCommand { get; }
-    public IRelayCommand DeleteRecipeCommand { get; }
-    public IAsyncRelayCommand ConfirmDeleteCommand { get; }
-    public IRelayCommand CancelDeleteCommand { get; }
-    public IAsyncRelayCommand RefreshCommand { get; }
+    public IAsyncRelayCommand CreateRecipeCommand { get; }
 
-    public IAsyncRelayCommand RefreshRecipeMaterialsCommand { get; }
-    public IAsyncRelayCommand NextRecipeMaterialsPageCommand { get; }
-    public IAsyncRelayCommand PreviousRecipeMaterialsPageCommand { get; }
+    public IAsyncRelayCommand EditRecipeCommand { get; }
+
+    public IRelayCommand DeleteRecipeCommand { get; }
+
+    public IAsyncRelayCommand ConfirmDeleteCommand { get; }
+
+    public IRelayCommand CancelDeleteCommand { get; }
 
     public IRelayCommand AddRecipeMaterialCommand { get; }
+
     public IRelayCommand<RecipeMaterialDto> EditRecipeMaterialCommand { get; }
+
     public IRelayCommand<RecipeMaterialDto> DeleteRecipeMaterialCommand { get; }
+
     public IAsyncRelayCommand ConfirmDeleteMaterialCommand { get; }
+
     public IRelayCommand CancelDeleteMaterialCommand { get; }
 
-    partial void OnSearchTermChanged(string? value)
+    public void SetRecipeMaterialsFilter(RecipeMaterialsFilterCriteria filter)
     {
-        PageIndex = 0;
-        DebounceLoad();
+        _recipeMaterialsFilter = filter;
     }
 
-    partial void OnPageSizeChanged(int value)
+    public void SetRecipeMaterialsSorting(
+        RecipeMaterialSortBy sortBy,
+        bool isDescending)
     {
-        PageIndex = 0;
-        _ = LoadRecipesAsync();
+        MaterialSortBy = sortBy;
+        IsMaterialDescending = isDescending;
     }
 
-    partial void OnRecipeMaterialsPageSizeChanged(int value)
+    private async Task<int> LoadRecipesPageAsync(
+        PaginationState state,
+        CancellationToken cancellationToken)
     {
-        RecipeMaterialsPageIndex = 0;
-        _ = LoadRecipeMaterialsAsync();
+        var selectedId = SelectedRecipe?.Id;
+        var result = await _mediator.Send(
+            new GetRecipesQuery(
+                state.PageIndex,
+                state.PageSize,
+                SearchTerm),
+            cancellationToken);
+
+        // Chroni kolekcję również wtedy, gdy handler MediatR nie przerwie pracy
+        // natychmiast po anulowaniu poprzedniego żądania.
+        cancellationToken.ThrowIfCancellationRequested();
+
+        ReplaceItems(Recipes, result.Items);
+
+        SelectedRecipe = selectedId.HasValue
+            ? Recipes.FirstOrDefault(recipe => recipe.Id == selectedId.Value)
+            : null;
+
+        return result.TotalCount;
     }
 
-    partial void OnMaterialNameFilterChanged(string? value)
+    private async Task<int> LoadRecipeMaterialsPageAsync(
+        PaginationState state,
+        CancellationToken cancellationToken)
     {
-        RecipeMaterialsPageIndex = 0;
-        DebounceLoadItems();
-    }
-
-    partial void OnEanFilterChanged(string? value)
-    {
-        RecipeMaterialsPageIndex = 0;
-        DebounceLoadItems();
-    }
-
-    partial void OnAmountFilterValueChanged(string? value)
-    {
-        RecipeMaterialsPageIndex = 0;
-        DebounceLoadItems();
-    }
-
-    partial void OnSelectedAmountOperatorChanged(OperatorWrapper? value)
-    {
-        RecipeMaterialsPageIndex = 0;
-        DebounceLoadItems();
-    }
-
-    partial void OnMaterialSortByChanged(RecipeMaterialSortBy value)
-    {
-        _ = LoadRecipeMaterialsAsync();
-    }
-
-    partial void OnIsMaterialDescendingChanged(bool value)
-    {
-        _ = LoadRecipeMaterialsAsync();
-    }
-
-    private void DebounceLoad()
-    {
-        _filterCancellationTokenSource?.Cancel();
-        _filterCancellationTokenSource = new CancellationTokenSource();
-        var token = _filterCancellationTokenSource.Token;
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(500, token);
-                if (!token.IsCancellationRequested)
-                {
-                    await App.Current.Dispatcher.InvokeAsync(async () =>
-                    {
-                        PageIndex = 0;
-                        await LoadRecipesAsync();
-                    });
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Ignore
-            }
-        }, token);
-    }
-
-    private void DebounceLoadItems()
-    {
-        _itemsFilterCancellationTokenSource?.Cancel();
-        _itemsFilterCancellationTokenSource = new CancellationTokenSource();
-        var token = _itemsFilterCancellationTokenSource.Token;
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(500, token);
-                if (!token.IsCancellationRequested)
-                {
-                    await App.Current.Dispatcher.InvokeAsync(async () =>
-                    {
-                        RecipeMaterialsPageIndex = 0;
-                        await LoadRecipeMaterialsAsync();
-                    });
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Ignore
-            }
-        }, token);
-    }
-
-    private async Task LoadRecipeMaterialsAsync()
-    {
-        if (!App.Current.Dispatcher.CheckAccess())
-        {
-            await App.Current.Dispatcher.InvokeAsync(LoadRecipeMaterialsAsync);
-            return;
-        }
-
-        if (SelectedRecipe == null)
+        var selectedRecipe = SelectedRecipe;
+        if (selectedRecipe is null)
         {
             RecipeMaterials.Clear();
-            TotalRecipeMaterialsCount = 0;
-            HasNextRecipeMaterialsPage = false;
-            OnPropertyChanged(nameof(TotalRecipeMaterialsPages));
-            OnPropertyChanged(nameof(RecipeMaterialsRange));
-            return;
+            return 0;
         }
 
-        try
-        {
-            var query = new GetRecipeMaterialsQuery(
-                SelectedRecipe.Id,
-                RecipeMaterialsPageIndex,
-                RecipeMaterialsPageSize,
-                MaterialNameFilter,
-                EanFilter,
-                IsItemsFilterVisible ? ParseDouble(AmountFilterValue) : null,
-                IsItemsFilterVisible ? SelectedAmountOperator?.Operator : null,
+        var filter = _recipeMaterialsFilter;
+        var result = await _mediator.Send(
+            new GetRecipeMaterialsQuery(
+                selectedRecipe.Id,
+                state.PageIndex,
+                state.PageSize,
+                filter.MaterialName,
+                filter.Ean,
+                IsItemsFilterVisible ? filter.Amount : null,
+                IsItemsFilterVisible ? filter.AmountOperator : null,
                 MaterialSortBy,
-                IsMaterialDescending);
+                IsMaterialDescending),
+            cancellationToken);
 
-            var result = await _mediator.Send(query);
+        cancellationToken.ThrowIfCancellationRequested();
 
-            RecipeMaterials.Clear();
-            foreach (var item in result.Items)
-            {
-                RecipeMaterials.Add(item);
-            }
-
-            TotalRecipeMaterialsCount = result.TotalCount;
-            HasNextRecipeMaterialsPage = result.HasNextPage;
-            OnPropertyChanged(nameof(TotalRecipeMaterialsPages));
-            OnPropertyChanged(nameof(DisplayRecipeMaterialsPage));
-            OnPropertyChanged(nameof(RecipeMaterialsRange));
-        }
-        catch
-        {
-            // Ignore
-        }
+        ReplaceItems(RecipeMaterials, result.Items);
+        return result.TotalCount;
     }
 
-    private async Task NextRecipeMaterialsPageAsync()
-    {
-        RecipeMaterialsPageIndex++;
-        await LoadRecipeMaterialsAsync();
-    }
-
-    private async Task PreviousRecipeMaterialsPageAsync()
-    {
-        if (RecipeMaterialsPageIndex > 0)
-        {
-            RecipeMaterialsPageIndex--;
-            await LoadRecipeMaterialsAsync();
-        }
-    }
-
-    private async Task LoadRecipesAsync()
-    {
-        if (!App.Current.Dispatcher.CheckAccess())
-        {
-            await App.Current.Dispatcher.InvokeAsync(LoadRecipesAsync);
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            var selectedId = SelectedRecipe?.Id;
-            var query = new GetRecipesQuery(PageIndex, PageSize, SearchTerm);
-            var result = await _mediator.Send(query);
-
-            Recipes.Clear();
-            foreach (var item in result.Items)
-            {
-                Recipes.Add(item);
-            }
-
-            if (selectedId.HasValue)
-            {
-                SelectedRecipe = Recipes.FirstOrDefault(r => r.Id == selectedId.Value);
-            }
-
-            TotalCount = result.TotalCount;
-            HasNextPage = result.HasNextPage;
-            OnPropertyChanged(nameof(TotalPages));
-            OnPropertyChanged(nameof(DisplayPage));
-            OnPropertyChanged(nameof(ItemsRange));
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async Task NextPageAsync()
-    {
-        PageIndex++;
-        await LoadRecipesAsync();
-    }
-
-    private async Task PreviousPageAsync()
-    {
-        if (PageIndex > 0)
-        {
-            PageIndex--;
-            await LoadRecipesAsync();
-        }
-    }
-
-    private async void CreateRecipe()
+    private async Task CreateRecipeAsync()
     {
         EnsureCreateViewModelInitialized();
 
@@ -449,7 +197,10 @@ public partial class RecipesViewModel : ViewModelBase
 
     private async Task EditRecipeAsync()
     {
-        if (SelectedRecipe == null) return;
+        if (SelectedRecipe is null)
+        {
+            return;
+        }
 
         EnsureCreateViewModelInitialized();
 
@@ -460,20 +211,27 @@ public partial class RecipesViewModel : ViewModelBase
 
     private void EnsureCreateViewModelInitialized()
     {
-        if (CreateRecipeViewModel == null)
+        if (CreateRecipeViewModel is not null)
         {
-            CreateRecipeViewModel = new CreateRecipeViewModel(_mediator);
-            CreateRecipeViewModel.RequestClose += async () =>
-            {
-                IsCreatePopupOpen = false;
-                await LoadRecipesAsync();
-            };
+            return;
         }
+
+        CreateRecipeViewModel = new CreateRecipeViewModel(_mediator);
+        CreateRecipeViewModel.RequestClose += async () =>
+        {
+            IsCreatePopupOpen = false;
+            RequestPaginationRefresh(RecipesPaginationTarget.Recipes);
+            await Task.CompletedTask;
+        };
     }
 
     private void AddRecipeMaterial()
     {
-        if (SelectedRecipe == null) return;
+        if (SelectedRecipe is null)
+        {
+            return;
+        }
+
         EnsureAddMaterialViewModelInitialized();
         AddRecipeMaterialViewModel!.InitializeForAdd(SelectedRecipe.Id);
         IsAddMaterialPopupOpen = true;
@@ -481,7 +239,11 @@ public partial class RecipesViewModel : ViewModelBase
 
     private void EditRecipeMaterial(RecipeMaterialDto? material)
     {
-        if (SelectedRecipe == null || material == null) return;
+        if (SelectedRecipe is null || material is null)
+        {
+            return;
+        }
+
         EnsureAddMaterialViewModelInitialized();
         AddRecipeMaterialViewModel!.InitializeForEdit(SelectedRecipe.Id, material);
         IsAddMaterialPopupOpen = true;
@@ -489,36 +251,48 @@ public partial class RecipesViewModel : ViewModelBase
 
     private void EnsureAddMaterialViewModelInitialized()
     {
-        if (AddRecipeMaterialViewModel == null)
+        if (AddRecipeMaterialViewModel is not null)
         {
-            AddRecipeMaterialViewModel = new AddRecipeMaterialViewModel(_mediator);
-            AddRecipeMaterialViewModel.RequestClose += async () =>
-            {
-                IsAddMaterialPopupOpen = false;
-                await LoadRecipeMaterialsAsync();
-            };
+            return;
         }
+
+        AddRecipeMaterialViewModel = new AddRecipeMaterialViewModel(_mediator);
+        AddRecipeMaterialViewModel.RequestClose += async () =>
+        {
+            IsAddMaterialPopupOpen = false;
+            RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
+            await Task.CompletedTask;
+        };
     }
 
     private void DeleteRecipeMaterial(RecipeMaterialDto? material)
     {
-        if (material == null) return;
+        if (material is null)
+        {
+            return;
+        }
+
         _materialToDelete = material;
         IsDeleteMaterialConfirmationOpen = true;
     }
 
     private async Task ConfirmDeleteMaterialAsync()
     {
-        if (_materialToDelete == null) return;
+        if (_materialToDelete is null)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
         {
-            var command = new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.RemoveRecipeMaterial.RemoveRecipeMaterialCommand(_materialToDelete.Id);
+            var command = new RemoveRecipeMaterialCommand(_materialToDelete.Id);
+
             await _mediator.Send(command);
+
             IsDeleteMaterialConfirmationOpen = false;
             _materialToDelete = null;
-            await LoadRecipeMaterialsAsync();
+            RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
         }
         finally
         {
@@ -534,22 +308,29 @@ public partial class RecipesViewModel : ViewModelBase
 
     private void DeleteRecipe()
     {
-        if (SelectedRecipe == null) return;
+        if (SelectedRecipe is null)
+        {
+            return;
+        }
+
         IsDeleteConfirmationOpen = true;
     }
 
     private async Task ConfirmDeleteAsync()
     {
-        if (SelectedRecipe == null) return;
+        if (SelectedRecipe is null)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
         {
-            var command = new DeleteRecipeCommand(SelectedRecipe.Id);
-            await _mediator.Send(command);
+            await _mediator.Send(new DeleteRecipeCommand(SelectedRecipe.Id));
+
             IsDeleteConfirmationOpen = false;
             SelectedRecipe = null;
-            await LoadRecipesAsync();
+            RequestPaginationRefresh(RecipesPaginationTarget.Recipes);
         }
         finally
         {
@@ -562,17 +343,20 @@ public partial class RecipesViewModel : ViewModelBase
         IsDeleteConfirmationOpen = false;
     }
 
-    private async Task ManualRefreshAsync()
+    private void RequestPaginationRefresh(RecipesPaginationTarget target)
     {
-        PageIndex = 0;
-        await LoadRecipesAsync();
+        PaginationRefreshRequested?.Invoke(target);
     }
 
-    private double? ParseDouble(string? value)
+    private static void ReplaceItems<T>(
+        ObservableCollection<T> target,
+        IEnumerable<T> source)
     {
-        if (double.TryParse(value, out var result)) return result;
-        return null;
-    }
+        target.Clear();
 
-    public record OperatorWrapper(NumericOperator? Operator, string Display);
+        foreach (var item in source)
+        {
+            target.Add(item);
+        }
+    }
 }

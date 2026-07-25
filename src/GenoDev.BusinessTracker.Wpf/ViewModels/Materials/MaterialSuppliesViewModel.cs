@@ -32,7 +32,6 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         _refreshSupplyItemsCommand = new AsyncRelayCommand(LoadSupplyItemsAsync);
         _nextItemsPageCommand = new AsyncRelayCommand(NextItemsPageAsync, () => HasNextItemsPage);
         _previousItemsPageCommand = new AsyncRelayCommand(PreviousItemsPageAsync, () => ItemsPageIndex > 0);
-        _openWebsiteCommand = new RelayCommand<string>(OpenWebsite);
 
         AvailablePageSizes = new ObservableCollection<int> { 5, 10, 20, 50 };
         _ = LoadSuppliesAsync();
@@ -385,27 +384,6 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
 
     private readonly IAsyncRelayCommand _previousItemsPageCommand;
     public IAsyncRelayCommand PreviousItemsPageCommand => _previousItemsPageCommand;
-
-    private readonly IRelayCommand<string> _openWebsiteCommand;
-    public IRelayCommand<string> OpenWebsiteCommand => _openWebsiteCommand;
-
-    private void OpenWebsite(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url)) return;
-        
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Failed to open website: {ex.Message}");
-        }
-    }
 
     partial void OnStartDateChanged(DateTime? value)
     {

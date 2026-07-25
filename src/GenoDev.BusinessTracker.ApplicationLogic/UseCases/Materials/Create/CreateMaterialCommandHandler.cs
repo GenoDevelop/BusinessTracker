@@ -13,7 +13,7 @@ public class CreateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            Ean = request.Ean,
+            Ean = string.IsNullOrWhiteSpace(request.Ean) ? null : request.Ean,
             Description = request.Description,
             Unit = request.Unit,
             Amount = 0
