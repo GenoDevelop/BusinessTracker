@@ -165,7 +165,13 @@
                         <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" />
                         <ComboBox ItemsSource="{Binding AvailableStatuses}" 
                                   SelectedItem="{Binding Status}" 
-                                  Margin="0,0,0,15" />
+                                  Margin="0,0,0,15">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource MaterialSupplyStatusToTextConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
                         <TextBlock Text="Numer faktury" Margin="0,0,0,5" Foreground="Gray" />
                         <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
