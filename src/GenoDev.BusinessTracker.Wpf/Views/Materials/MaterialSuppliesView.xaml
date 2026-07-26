@@ -4,608 +4,608 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:MaterialSuppliesViewModel}">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Column="0" Margin="10, 10, 3, 10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Dostawy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-                
-                <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Margin="0,0,5,0" />
-                <controls:RefreshButton Click="SuppliesRefreshButton_Click" Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
-            </StackPanel>
-
-            <!-- Date Range Picker -->
-            <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <controls:DateRangePicker StartDate="{Binding StartDate}" EndDate="{Binding EndDate}" />
-            </Grid>
-
-            <!-- Supplies List -->
-            <ListBox Grid.Row="2"
-                     ItemsSource="{Binding Supplies}"
-                     SelectedItem="{Binding SelectedSupply}"
-                     SelectionChanged="SuppliesList_SelectionChanged"
-                     Margin="0,0,0,3"
-                     BorderThickness="0"
-                     Padding="0">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="{TemplateBinding Background}" 
-                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                            BorderThickness="{TemplateBinding BorderThickness}" 
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#E0EEFF" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F7FF" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="0,3,0,3" Foreground="SteelBlue" FontSize="13" />
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="GroupItem">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="GroupItem">
-                                            <StackPanel>
-                                                <ContentPresenter />
-                                                <ItemsPresenter />
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
-                    </GroupStyle>
-                </ListBox.GroupStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center"
-                                     Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
-                            <StackPanel>
-                                <TextBlock Text="{Binding SupplierName}" FontWeight="Bold" />
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding TotalNetPrice, StringFormat='{}{0:N2}zł'}" Foreground="Gray" FontSize="11" />
-                                    <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
-                                    <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" Foreground="SteelBlue" FontSize="11" FontWeight="SemiBold" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-            <!-- Create Supply Popup -->
-            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding CreateMaterialSupplyViewModel}">
-                        <TextBlock Text="Dodaj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-
-                        <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
-                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Numer faktury:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
-                                 Height="100" Margin="0,0,0,20" />
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Edit Supply Popup -->
-            <Popup IsOpen="{Binding IsEditPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyViewModel}">
-                        <TextBlock Text="Edytuj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
-
-                        <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
-                        <ComboBox ItemsSource="{Binding Suppliers}" 
-                                  SelectedItem="{Binding SelectedSupplier}" 
-                                  DisplayMemberPath="Name" 
-                                  Margin="0,0,0,15" />
-
-                        <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" />
-                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" />
-
-                        <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" />
-                        <ComboBox ItemsSource="{Binding AvailableStatuses}" 
-                                  SelectedItem="{Binding Status}" 
-                                  Margin="0,0,0,15">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource MaterialSupplyStatusToTextConverter}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-
-                        <TextBlock Text="Numer faktury" Margin="0,0,0,5" Foreground="Gray" />
-                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
-
-                        <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" />
-                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                                 AcceptsReturn="True" 
-                                 Height="80" 
-                                 VerticalScrollBarVisibility="Auto" 
-                                 TextWrapping="Wrap" 
-                                 Margin="0,0,0,20" />
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Width="80" Margin="0,0,10,0" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Add Material to Supply Popup -->
-            <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding AddMaterialToSupplyViewModel}">
-                        <TextBlock Text="Dodaj materiał do dostawy" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-
-                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" />
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
-                    <StackPanel Width="300">
-                        <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-                        <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                            <Run Text="Czy na pewno chcesz usunąć dostawę od " />
-                            <Run Text="{Binding SelectedSupply.SupplierName, Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text=" z dnia " />
-                            <Run Text="{Binding SelectedSupply.OrderDate, StringFormat='dd.MM.yyyy', Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text="?" />
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Delete Material Item Popup -->
-            <Popup IsOpen="{Binding IsDeleteItemPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="300">
-                        <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-                        <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                            <Run Text="Czy na pewno chcesz usunąć materiał " />
-                            <Run Text="{Binding SelectedItemToRemove.MaterialName, Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text=" z tej dostawy?" />
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelDeleteItemCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Edit Material Item Popup -->
-            <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyItemViewModel}">
-                        <TextBlock Text="Edytuj materiał w dostawie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-
-                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" />
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Pagination -->
-            <controls:PaginationControl x:Name="SuppliesPagination"
-                                        Grid.Row="3"
-                                        Layout="CompactTwoRows"
-                                        PageLoader="{Binding SuppliesPageLoader}"
-                                        InitialPageSize="20"
-                                        Margin="0,5,0,0"
-                                        FontSize="11" />
-        </Grid>
-
-        <!-- Right Panel -->
-        <Grid Grid.Column="1" Background="#F9F9F9">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- Upper space: Basic Information -->
-            <Grid Grid.Row="0" Margin="10" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Header: [OrderDate] Supplier Name and Delete Button -->
-                <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontSize="18" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Bottom">
-                            <Run Text="{Binding SelectedSupplyDetails.OrderDate, StringFormat='dd.MM.yyyy'}" />
-                        </TextBlock>
-                        <TextBlock Text="{Binding SelectedSupplyDetails.SupplierName}" FontWeight="Bold" FontSize="18" Margin="10,0,0,0" Foreground="Black" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                        <controls:WebsiteButton
-                            Margin="0,0,5,0"
-                            WebsiteUrl="{Binding SelectedSupplyDetails.WebsiteUrl}"/>
-                        <controls:EditButton Command="{Binding EditSupplyCommand}"
-                                             ToolTip="Edytuj dostawę"
-                                             Margin="0,0,5,0" />
-                        <controls:DeleteButton Command="{Binding DeleteSupplyCommand}"
-                                               ToolTip="Usuń dostawę" />
-                    </StackPanel>
-                </Grid>
-
-                <!-- Status, Prices, Invoice Number -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="100"/>
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,5,0"
-                                     Fill="{Binding SelectedSupplyDetails.Status, Converter={StaticResource StatusToColorConverter}}" />
-                            <TextBlock Text="{Binding SelectedSupplyDetails.Status, Converter={StaticResource MaterialSupplyStatusToTextConverter}}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Cena netto suma:" Foreground="Gray" FontSize="11" Width="100"/>
-                        <TextBlock Text="{Binding SelectedSupplyDetails.TotalNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Cena brutto suma:" Foreground="Gray" FontSize="11" Width="100"/>
-                        <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Numer faktury:" Foreground="Gray" FontSize="11" Width="100"/>
-                        <TextBlock Text="{Binding SelectedSupplyDetails.InvoiceNo}" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- Description -->
-                <Grid Grid.Row="1" Grid.Column="1" Height="100">
-                    <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" />
-                        </ScrollViewer>
-                    </Border>
-                </Grid>
-            </Grid>
-
-            <!-- Separator Line -->
-            <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1" 
-                       Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}"/>
-
-            <!-- Bottom Panel: Ordered Materials -->
-            <Grid Grid.Row="2" Margin="10, 10, 0, 5" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <!-- Header for Materials Table -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock Text="Zamówione Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-
-                    <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
-                    <controls:RefreshButton Click="SupplyItemsRefreshButton_Click" Margin="0,0,5,0" />
-                    <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
-                                                 Click="SupplyItemsFilterToggleButton_Click" />
-                </StackPanel>
-
-                <!-- Materials DataGrid -->
-                <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True"
-                          Background="White"
-                          ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                          Sorting="SupplyItemsDataGrid_Sorting">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
-                            <DataGridTemplateColumn.Header>
-                                <controls:TextFilterColumnHeader
-                                    x:Name="MaterialNameFilterColumn"
-                                    Header="Materiał"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding MaterialName}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean">
-                            <DataGridTemplateColumn.Header>
-                                <controls:TextFilterColumnHeader
-                                    x:Name="EanFilterColumn"
-                                    Header="EAN"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.4*" SortMemberPath="SetsAmount">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="SetsAmountFilterColumn"
-                                    Header="Zest."
-                                    ToolTip="Ilość zestawów"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding SetsAmount}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.5*" SortMemberPath="UnitsInSet">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="UnitsInSetFilterColumn"
-                                    Header="W Zest."
-                                    ToolTip="Ilość sztuk w zestawie"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="5,0">
-                                        <TextBlock Text="{Binding UnitsInSet}" VerticalAlignment="Center"/><TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.5*" SortMemberPath="TotalAmount">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="TotalAmountFilterColumn"
-                                    Header="Ilość"
-                                    ToolTip="Sumaryczna ilość sztuk we wszystkich zestawach"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="5,0">
-                                        <TextBlock Text="{Binding TotalAmount}" VerticalAlignment="Center"/><TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        
-                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetNetPrice">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="SetNetPriceFilterColumn"
-                                    Header="Z. Netto"
-                                    ToolTip="Cena netto za zestaw"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding SetNetPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetGrossPrice">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="SetGrossPriceFilterColumn"
-                                    Header="Z. Brutto"
-                                    ToolTip="Cena brutto za zestaw"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding SetGrossPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        
-                        <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalNetPrice">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="TotalNetPriceFilterColumn"
-                                    Header="Netto"
-                                    ToolTip="Całkowita cena netto za wszystkie zestawy"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TotalNetPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalGrossPrice">
-                            <DataGridTemplateColumn.Header>
-                                <controls:NumericFilterColumnHeader
-                                    x:Name="TotalGrossPriceFilterColumn"
-                                    Header="Brutto"
-                                    ToolTip="Całkowita cena brutto za wszystkie zestawy"
-                                    DebounceMilliseconds="500"
-                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Width="Auto">
-                            <DataGridTemplateColumn.Header>
-                                <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <controls:EditButton
-                                            Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Edytuj pozycję"
-                                            Margin="2,0" 
-                                            Width="14" />
-                                        <controls:DeleteButton
-                                            Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Usuń pozycję"
-                                            Margin="2,0"
-                                            Width="14" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <!-- Pagination for Materials -->
-                <controls:PaginationControl x:Name="SupplyItemsPagination"
-                                            Grid.Row="2"
-                                            Layout="SingleLine"
-                                            PageLoader="{Binding SupplyItemsPageLoader}"
-                                            InitialPageSize="50"
-                                            HorizontalAlignment="Right"
-                                            PaginationHorizontalAlignment="Right"
-                                            Margin="0,5,0,0" />
-            </Grid>
-
-            <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły" 
-                       HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"
-                       Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
-        </Grid>
+        <!-- <Grid.ColumnDefinitions> -->
+        <!--     <ColumnDefinition Width="200"/> -->
+        <!--     <ColumnDefinition Width="*"/> -->
+        <!-- </Grid.ColumnDefinitions> -->
+        <!-- -->
+        <!-- <Grid Grid.Column="0" Margin="10, 10, 3, 10"> -->
+        <!--     <Grid.RowDefinitions> -->
+        <!--         <RowDefinition Height="Auto"/> -->
+        <!--         <RowDefinition Height="Auto"/> -->
+        <!--         <RowDefinition Height="*"/> -->
+        <!--         <RowDefinition Height="Auto"/> -->
+        <!--     </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--     ~1~ Toolbar @1@ -->
+        <!--     <StackPanel Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--         <TextBlock Text="Dostawy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" /> -->
+        <!--          -->
+        <!--         <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Margin="0,0,5,0" /> -->
+        <!--         <controls:RefreshButton Click="SuppliesRefreshButton_Click" Margin="0,0,5,0" /> -->
+        <!--         <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" /> -->
+        <!--     </StackPanel> -->
+        <!-- -->
+        <!--     ~1~ Date Range Picker @1@ -->
+        <!--     <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}"> -->
+        <!--         <controls:DateRangePicker StartDate="{Binding StartDate}" EndDate="{Binding EndDate}" /> -->
+        <!--     </Grid> -->
+        <!-- -->
+        <!--     ~1~ Supplies List @1@ -->
+        <!--     <ListBox Grid.Row="2" -->
+        <!--              ItemsSource="{Binding Supplies}" -->
+        <!--              SelectedItem="{Binding SelectedSupply}" -->
+        <!--              SelectionChanged="SuppliesList_SelectionChanged" -->
+        <!--              Margin="0,0,0,3" -->
+        <!--              BorderThickness="0" -->
+        <!--              Padding="0"> -->
+        <!--         <ListBox.ItemContainerStyle> -->
+        <!--             <Style TargetType="ListBoxItem"> -->
+        <!--                 <Setter Property="Padding" Value="0" /> -->
+        <!--                 <Setter Property="Margin" Value="0" /> -->
+        <!--                 <Setter Property="HorizontalContentAlignment" Value="Stretch" /> -->
+        <!--                 <Setter Property="Background" Value="Transparent" /> -->
+        <!--                 <Setter Property="Template"> -->
+        <!--                     <Setter.Value> -->
+        <!--                         <ControlTemplate TargetType="ListBoxItem"> -->
+        <!--                             <Border Background="{TemplateBinding Background}"  -->
+        <!--                                     BorderBrush="{TemplateBinding BorderBrush}"  -->
+        <!--                                     BorderThickness="{TemplateBinding BorderThickness}"  -->
+        <!--                                     Padding="{TemplateBinding Padding}"> -->
+        <!--                                 <ContentPresenter /> -->
+        <!--                             </Border> -->
+        <!--                             <ControlTemplate.Triggers> -->
+        <!--                                 <Trigger Property="IsSelected" Value="True"> -->
+        <!--                                     <Setter Property="Background" Value="#E0EEFF" /> -->
+        <!--                                 </Trigger> -->
+        <!--                                 <Trigger Property="IsMouseOver" Value="True"> -->
+        <!--                                     <Setter Property="Background" Value="#F0F7FF" /> -->
+        <!--                                 </Trigger> -->
+        <!--                             </ControlTemplate.Triggers> -->
+        <!--                         </ControlTemplate> -->
+        <!--                     </Setter.Value> -->
+        <!--                 </Setter> -->
+        <!--             </Style> -->
+        <!--         </ListBox.ItemContainerStyle> -->
+        <!--         <ListBox.GroupStyle> -->
+        <!--             <GroupStyle> -->
+        <!--                 <GroupStyle.HeaderTemplate> -->
+        <!--                     <DataTemplate> -->
+        <!--                         <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="0,3,0,3" Foreground="SteelBlue" FontSize="13" /> -->
+        <!--                     </DataTemplate> -->
+        <!--                 </GroupStyle.HeaderTemplate> -->
+        <!--                 <GroupStyle.ContainerStyle> -->
+        <!--                     <Style TargetType="GroupItem"> -->
+        <!--                         <Setter Property="Template"> -->
+        <!--                             <Setter.Value> -->
+        <!--                                 <ControlTemplate TargetType="GroupItem"> -->
+        <!--                                     <StackPanel> -->
+        <!--                                         <ContentPresenter /> -->
+        <!--                                         <ItemsPresenter /> -->
+        <!--                                     </StackPanel> -->
+        <!--                                 </ControlTemplate> -->
+        <!--                             </Setter.Value> -->
+        <!--                         </Setter> -->
+        <!--                     </Style> -->
+        <!--                 </GroupStyle.ContainerStyle> -->
+        <!--             </GroupStyle> -->
+        <!--         </ListBox.GroupStyle> -->
+        <!--         <ListBox.ItemTemplate> -->
+        <!--             <DataTemplate> -->
+        <!--                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5"> -->
+        <!--                     <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center" -->
+        <!--                              Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}}" /> -->
+        <!--                     <StackPanel> -->
+        <!--                         <TextBlock Text="{Binding SupplierName}" FontWeight="Bold" /> -->
+        <!--                         <StackPanel Orientation="Horizontal"> -->
+        <!--                             <TextBlock Text="{Binding TotalNetPrice, StringFormat='{}{0:N2}zł'}" Foreground="Gray" FontSize="11" /> -->
+        <!--                             <TextBlock Text=" / " Foreground="Gray" FontSize="11" /> -->
+        <!--                             <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" Foreground="SteelBlue" FontSize="11" FontWeight="SemiBold" /> -->
+        <!--                         </StackPanel> -->
+        <!--                     </StackPanel> -->
+        <!--                 </StackPanel> -->
+        <!--             </DataTemplate> -->
+        <!--         </ListBox.ItemTemplate> -->
+        <!--     </ListBox> -->
+        <!-- -->
+        <!--     ~1~ Create Supply Popup @1@ -->
+        <!--     <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--             <Border.Effect> -->
+        <!--                 <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" /> -->
+        <!--             </Border.Effect> -->
+        <!--             <StackPanel Width="400" DataContext="{Binding CreateMaterialSupplyViewModel}"> -->
+        <!--                 <TextBlock Text="Dodaj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" /> -->
+        <!--                 <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" /> -->
+        <!--                 <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Numer faktury:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Opis:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"  -->
+        <!--                          AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"  -->
+        <!--                          Height="100" Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     ~1~ Edit Supply Popup @1@ -->
+        <!--     <Popup IsOpen="{Binding IsEditPopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--             <Border.Effect> -->
+        <!--                 <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" /> -->
+        <!--             </Border.Effect> -->
+        <!--             <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyViewModel}"> -->
+        <!--                 <TextBlock Text="Edytuj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" /> -->
+        <!--                 <ComboBox ItemsSource="{Binding Suppliers}"  -->
+        <!--                           SelectedItem="{Binding SelectedSupplier}"  -->
+        <!--                           DisplayMemberPath="Name"  -->
+        <!--                           Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" /> -->
+        <!--                 <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" /> -->
+        <!--                 <ComboBox ItemsSource="{Binding AvailableStatuses}"  -->
+        <!--                           SelectedItem="{Binding Status}"  -->
+        <!--                           Margin="0,0,0,15"> -->
+        <!--                     <ComboBox.ItemTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding Converter={StaticResource MaterialSupplyStatusToTextConverter}}" /> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </ComboBox.ItemTemplate> -->
+        <!--                 </ComboBox> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Numer faktury" Margin="0,0,0,5" Foreground="Gray" /> -->
+        <!--                 <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" /> -->
+        <!--                 <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"  -->
+        <!--                          AcceptsReturn="True"  -->
+        <!--                          Height="80"  -->
+        <!--                          VerticalScrollBarVisibility="Auto"  -->
+        <!--                          TextWrapping="Wrap"  -->
+        <!--                          Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Width="80" Margin="0,0,10,0" /> -->
+        <!--                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     ~1~ Add Material to Supply Popup @1@ -->
+        <!--     <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--             <Border.Effect> -->
+        <!--                 <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" /> -->
+        <!--             </Border.Effect> -->
+        <!--             <StackPanel Width="400" DataContext="{Binding AddMaterialToSupplyViewModel}"> -->
+        <!--                 <TextBlock Text="Dodaj materiał do dostawy" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" /> -->
+        <!--                 <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20"> -->
+        <!--             <StackPanel Width="300"> -->
+        <!--                 <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!--                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap"> -->
+        <!--                     <Run Text="Czy na pewno chcesz usunąć dostawę od " /> -->
+        <!--                     <Run Text="{Binding SelectedSupply.SupplierName, Mode=OneWay}" FontWeight="Bold" /> -->
+        <!--                     <Run Text=" z dnia " /> -->
+        <!--                     <Run Text="{Binding SelectedSupply.OrderDate, StringFormat='dd.MM.yyyy', Mode=OneWay}" FontWeight="Bold" /> -->
+        <!--                     <Run Text="?" /> -->
+        <!--                 </TextBlock> -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                     <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     ~1~ Delete Material Item Popup @1@ -->
+        <!--     <Popup IsOpen="{Binding IsDeleteItemPopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--             <Border.Effect> -->
+        <!--                 <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" /> -->
+        <!--             </Border.Effect> -->
+        <!--             <StackPanel Width="300"> -->
+        <!--                 <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!--                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap"> -->
+        <!--                     <Run Text="Czy na pewno chcesz usunąć materiał " /> -->
+        <!--                     <Run Text="{Binding SelectedItemToRemove.MaterialName, Mode=OneWay}" FontWeight="Bold" /> -->
+        <!--                     <Run Text=" z tej dostawy?" /> -->
+        <!--                 </TextBlock> -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelDeleteItemCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                     <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     ~1~ Edit Material Item Popup @1@ -->
+        <!--     <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--         <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--             <Border.Effect> -->
+        <!--                 <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" /> -->
+        <!--             </Border.Effect> -->
+        <!--             <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyItemViewModel}"> -->
+        <!--                 <TextBlock Text="Edytuj materiał w dostawie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" /> -->
+        <!--                 <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--                 <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" /> -->
+        <!--                 <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" /> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!--         </Border> -->
+        <!--     </Popup> -->
+        <!-- -->
+        <!--     ~1~ Pagination @1@ -->
+        <!--     <controls:PaginationControl x:Name="SuppliesPagination" -->
+        <!--                                 Grid.Row="3" -->
+        <!--                                 Layout="CompactTwoRows" -->
+        <!--                                 PageLoader="{Binding SuppliesPageLoader}" -->
+        <!--                                 InitialPageSize="20" -->
+        <!--                                 Margin="0,5,0,0" -->
+        <!--                                 FontSize="11" /> -->
+        <!-- </Grid> -->
+        <!-- -->
+        <!-- ~1~ Right Panel @1@ -->
+        <!-- <Grid Grid.Column="1" Background="#F9F9F9"> -->
+        <!--     <Grid.RowDefinitions> -->
+        <!--         <RowDefinition Height="Auto"/> -->
+        <!--         <RowDefinition Height="Auto"/> -->
+        <!--         <RowDefinition Height="*"/> -->
+        <!--     </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--     ~1~ Upper space: Basic Information @1@ -->
+        <!--     <Grid Grid.Row="0" Margin="10" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}"> -->
+        <!--         <Grid.RowDefinitions> -->
+        <!--             <RowDefinition Height="Auto"/> -->
+        <!--             <RowDefinition Height="*"/> -->
+        <!--         </Grid.RowDefinitions> -->
+        <!--         <Grid.ColumnDefinitions> -->
+        <!--             <ColumnDefinition Width="Auto"/> -->
+        <!--             <ColumnDefinition Width="*"/> -->
+        <!--         </Grid.ColumnDefinitions> -->
+        <!-- -->
+        <!--         ~1~ Header: [OrderDate] Supplier Name and Delete Button @1@ -->
+        <!--         <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,15"> -->
+        <!--             <StackPanel Orientation="Horizontal"> -->
+        <!--                 <TextBlock FontSize="18" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Bottom"> -->
+        <!--                     <Run Text="{Binding SelectedSupplyDetails.OrderDate, StringFormat='dd.MM.yyyy'}" /> -->
+        <!--                 </TextBlock> -->
+        <!--                 <TextBlock Text="{Binding SelectedSupplyDetails.SupplierName}" FontWeight="Bold" FontSize="18" Margin="10,0,0,0" Foreground="Black" VerticalAlignment="Bottom"/> -->
+        <!--             </StackPanel> -->
+        <!--              -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"> -->
+        <!--                 <controls:WebsiteButton -->
+        <!--                     Margin="0,0,5,0" -->
+        <!--                     WebsiteUrl="{Binding SelectedSupplyDetails.WebsiteUrl}"/> -->
+        <!--                 <controls:EditButton Command="{Binding EditSupplyCommand}" -->
+        <!--                                      ToolTip="Edytuj dostawę" -->
+        <!--                                      Margin="0,0,5,0" /> -->
+        <!--                 <controls:DeleteButton Command="{Binding DeleteSupplyCommand}" -->
+        <!--                                        ToolTip="Usuń dostawę" /> -->
+        <!--             </StackPanel> -->
+        <!--         </Grid> -->
+        <!-- -->
+        <!--         ~1~ Status, Prices, Invoice Number @1@ -->
+        <!--         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0"> -->
+        <!--             <StackPanel Orientation="Horizontal" Margin="0,0,0,4"> -->
+        <!--                 <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="100"/> -->
+        <!--                 <StackPanel Orientation="Horizontal"> -->
+        <!--                     <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,5,0" -->
+        <!--                              Fill="{Binding SelectedSupplyDetails.Status, Converter={StaticResource StatusToColorConverter}}" /> -->
+        <!--                     <TextBlock Text="{Binding SelectedSupplyDetails.Status, Converter={StaticResource MaterialSupplyStatusToTextConverter}}" FontWeight="SemiBold" VerticalAlignment="Center"/> -->
+        <!--                 </StackPanel> -->
+        <!--             </StackPanel> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" Margin="0,0,0,4"> -->
+        <!--                 <TextBlock Text="Cena netto suma:" Foreground="Gray" FontSize="11" Width="100"/> -->
+        <!--                 <TextBlock Text="{Binding SelectedSupplyDetails.TotalNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/> -->
+        <!--             </StackPanel> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" Margin="0,0,0,4"> -->
+        <!--                 <TextBlock Text="Cena brutto suma:" Foreground="Gray" FontSize="11" Width="100"/> -->
+        <!--                 <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/> -->
+        <!--             </StackPanel> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" Margin="0,0,0,4"> -->
+        <!--                 <TextBlock Text="Numer faktury:" Foreground="Gray" FontSize="11" Width="100"/> -->
+        <!--                 <TextBlock Text="{Binding SelectedSupplyDetails.InvoiceNo}" FontWeight="SemiBold"/> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!-- -->
+        <!--         ~1~ Description @1@ -->
+        <!--         <Grid Grid.Row="1" Grid.Column="1" Height="100"> -->
+        <!--             <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8"> -->
+        <!--                 <ScrollViewer VerticalScrollBarVisibility="Auto"> -->
+        <!--                     <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" /> -->
+        <!--                 </ScrollViewer> -->
+        <!--             </Border> -->
+        <!--         </Grid> -->
+        <!--     </Grid> -->
+        <!-- -->
+        <!--     ~1~ Separator Line @1@ -->
+        <!--     <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1"  -->
+        <!--                Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}"/> -->
+        <!-- -->
+        <!--     ~1~ Bottom Panel: Ordered Materials @1@ -->
+        <!--     <Grid Grid.Row="2" Margin="10, 10, 0, 5" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}"> -->
+        <!--         <Grid.RowDefinitions> -->
+        <!--             <RowDefinition Height="Auto" /> -->
+        <!--             <RowDefinition Height="*" /> -->
+        <!--             <RowDefinition Height="Auto" /> -->
+        <!--         </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--         ~1~ Header for Materials Table @1@ -->
+        <!--         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--             <TextBlock Text="Zamówione Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" /> -->
+        <!-- -->
+        <!--             <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" /> -->
+        <!--             <controls:RefreshButton Click="SupplyItemsRefreshButton_Click" Margin="0,0,5,0" /> -->
+        <!--             <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}" -->
+        <!--                                          Click="SupplyItemsFilterToggleButton_Click" /> -->
+        <!--         </StackPanel> -->
+        <!-- -->
+        <!--         ~1~ Materials DataGrid @1@ -->
+        <!--         <DataGrid Grid.Row="1" ItemsSource="{Binding SupplyItems}" AutoGenerateColumns="False" IsReadOnly="True" -->
+        <!--                   Background="White" -->
+        <!--                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" -->
+        <!--                   Sorting="SupplyItemsDataGrid_Sorting"> -->
+        <!--             <DataGrid.Columns> -->
+        <!--                 <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:TextFilterColumnHeader -->
+        <!--                             x:Name="MaterialNameFilterColumn" -->
+        <!--                             Header="Materiał" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding MaterialName}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:TextFilterColumnHeader -->
+        <!--                             x:Name="EanFilterColumn" -->
+        <!--                             Header="EAN" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.4*" SortMemberPath="SetsAmount"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="SetsAmountFilterColumn" -->
+        <!--                             Header="Zest." -->
+        <!--                             ToolTip="Ilość zestawów" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding SetsAmount}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.5*" SortMemberPath="UnitsInSet"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="UnitsInSetFilterColumn" -->
+        <!--                             Header="W Zest." -->
+        <!--                             ToolTip="Ilość sztuk w zestawie" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <StackPanel Orientation="Horizontal" Margin="5,0"> -->
+        <!--                                 <TextBlock Text="{Binding UnitsInSet}" VerticalAlignment="Center"/><TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/> -->
+        <!--                             </StackPanel> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.5*" SortMemberPath="TotalAmount"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="TotalAmountFilterColumn" -->
+        <!--                             Header="Ilość" -->
+        <!--                             ToolTip="Sumaryczna ilość sztuk we wszystkich zestawach" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <StackPanel Orientation="Horizontal" Margin="5,0"> -->
+        <!--                                 <TextBlock Text="{Binding TotalAmount}" VerticalAlignment="Center"/><TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/> -->
+        <!--                             </StackPanel> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!--                  -->
+        <!--                 <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetNetPrice"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="SetNetPriceFilterColumn" -->
+        <!--                             Header="Z. Netto" -->
+        <!--                             ToolTip="Cena netto za zestaw" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding SetNetPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.6*" SortMemberPath="SetGrossPrice"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="SetGrossPriceFilterColumn" -->
+        <!--                             Header="Z. Brutto" -->
+        <!--                             ToolTip="Cena brutto za zestaw" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding SetGrossPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!--                  -->
+        <!--                 <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalNetPrice"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="TotalNetPriceFilterColumn" -->
+        <!--                             Header="Netto" -->
+        <!--                             ToolTip="Całkowita cena netto za wszystkie zestawy" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding TotalNetPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="0.7*" SortMemberPath="TotalGrossPrice"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <controls:NumericFilterColumnHeader -->
+        <!--                             x:Name="TotalGrossPriceFilterColumn" -->
+        <!--                             Header="Brutto" -->
+        <!--                             ToolTip="Całkowita cena brutto za wszystkie zestawy" -->
+        <!--                             DebounceMilliseconds="500" -->
+        <!--                             IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             FilterChanged="SupplyItemsFilter_FilterChanged" /> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                 <DataGridTemplateColumn Width="Auto"> -->
+        <!--                     <DataGridTemplateColumn.Header> -->
+        <!--                         <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/> -->
+        <!--                     </DataGridTemplateColumn.Header> -->
+        <!--                     <DataGridTemplateColumn.CellTemplate> -->
+        <!--                         <DataTemplate> -->
+        <!--                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"> -->
+        <!--                                 <controls:EditButton -->
+        <!--                                     Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                     CommandParameter="{Binding}" -->
+        <!--                                     ToolTip="Edytuj pozycję" -->
+        <!--                                     Margin="2,0"  -->
+        <!--                                     Width="14" /> -->
+        <!--                                 <controls:DeleteButton -->
+        <!--                                     Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                     CommandParameter="{Binding}" -->
+        <!--                                     ToolTip="Usuń pozycję" -->
+        <!--                                     Margin="2,0" -->
+        <!--                                     Width="14" /> -->
+        <!--                             </StackPanel> -->
+        <!--                         </DataTemplate> -->
+        <!--                     </DataGridTemplateColumn.CellTemplate> -->
+        <!--                 </DataGridTemplateColumn> -->
+        <!--             </DataGrid.Columns> -->
+        <!--         </DataGrid> -->
+        <!-- -->
+        <!--         ~1~ Pagination for Materials @1@ -->
+        <!--         <controls:PaginationControl x:Name="SupplyItemsPagination" -->
+        <!--                                     Grid.Row="2" -->
+        <!--                                     Layout="SingleLine" -->
+        <!--                                     PageLoader="{Binding SupplyItemsPageLoader}" -->
+        <!--                                     InitialPageSize="50" -->
+        <!--                                     HorizontalAlignment="Right" -->
+        <!--                                     PaginationHorizontalAlignment="Right" -->
+        <!--                                     Margin="0,5,0,0" /> -->
+        <!--     </Grid> -->
+        <!-- -->
+        <!--     <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły"  -->
+        <!--                HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" -->
+        <!--                Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/> -->
+        <!-- </Grid> -->
     </Grid>
 </UserControl>

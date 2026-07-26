@@ -4,219 +4,219 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:SuppliersViewModel}">
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <!-- Toolbar -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Dostawcy"
-                       FontSize="24"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"
-                       Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateSupplierCommand}"
-                                   ToolTip="Dodaj dostawcę"
-                                   Margin="0,0,5,0" />
-            <controls:RefreshButton Click="RefreshButton_Click"
-                                    Margin="0,0,5,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"
-                                         Click="FilterToggleButton_Click" />
-        </StackPanel>
-
-        <!-- Suppliers -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Suppliers}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                  Sorting="SuppliersDataGrid_Sorting">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="*" SortMemberPath="Name">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="NameFilterColumn"
-                            Header="Nazwa"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="SupplierFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="120" SortMemberPath="Nip">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="NipFilterColumn"
-                            Header="NIP"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="SupplierFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Nip}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="DescriptionFilterColumn"
-                            Header="Opis"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="SupplierFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Description}"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="80" CanUserSort="False">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <controls:WebsiteButton WebsiteUrl="{Binding WebsiteUrl}"
-                                                        Margin="2,0" />
-                                <controls:EditButton
-                                    Command="{Binding DataContext.EditSupplierCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"
-                                    ToolTip="Edytuj dostawcę"
-                                    Margin="2,0" />
-                                <controls:DeleteButton
-                                    Command="{Binding DataContext.DeleteSupplierCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"
-                                    ToolTip="Usuń dostawcę"
-                                    Margin="2,0" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!-- Pagination -->
-        <controls:PaginationControl x:Name="SuppliersPagination"
-                                    Grid.Row="2"
-                                    Layout="SingleLine"
-                                    PageLoader="{Binding SuppliersPageLoader}"
-                                    InitialPageSize="20"
-                                    HorizontalAlignment="Right"
-                                    PaginationHorizontalAlignment="Right"
-                                    Margin="0,5,0,0" />
-
-        <!-- Create/Edit popup -->
-        <Popup IsOpen="{Binding IsCreatePopupOpen}"
-               Placement="Mouse"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="400"
-                    CornerRadius="5">
-                <StackPanel DataContext="{Binding CreateSupplierViewModel}">
-                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj dostawcę;Dodaj dostawcę'}"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
-
-                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-
-                    <TextBlock Text="NIP:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True"
-                             VerticalScrollBarVisibility="Auto"
-                             TextWrapping="Wrap"
-                             Height="100"
-                             Margin="0,0,0,10" />
-
-                    <TextBlock Text="Strona WWW:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,20" />
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Zapisz"
-                                Command="{Binding SaveCommand}"
-                                Padding="15,5"
-                                Background="LightBlue"
-                                IsDefault="True" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Delete confirmation -->
-        <Popup IsOpen="{Binding IsDeletePopupOpen}"
-               Placement="Mouse"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="300"
-                    CornerRadius="5">
-                <StackPanel>
-                    <TextBlock Text="Potwierdź usunięcie"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
-                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                        <Run Text="Czy na pewno chcesz usunąć dostawcę " />
-                        <Run Text="{Binding SupplierToDelete.Name, Mode=OneWay}"
-                             FontWeight="Bold" />
-                        <Run Text="?" />
-                    </TextBlock>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelDeleteCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Usuń"
-                                Command="{Binding ConfirmDeleteCommand}"
-                                Padding="15,5"
-                                Background="LightCoral"
-                                IsDefault="True" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
+        <!-- <Grid.RowDefinitions> -->
+        <!--     <RowDefinition Height="Auto" /> -->
+        <!--     <RowDefinition Height="*" /> -->
+        <!--     <RowDefinition Height="Auto" /> -->
+        <!-- </Grid.RowDefinitions> -->
+        <!-- -->
+        <!-- ~1~ Toolbar @1@ -->
+        <!-- <StackPanel Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--     <TextBlock Text="Dostawcy" -->
+        <!--                FontSize="24" -->
+        <!--                FontWeight="Bold" -->
+        <!--                VerticalAlignment="Center" -->
+        <!--                Margin="0,0,20,0" /> -->
+        <!--     <controls:CreateButton Command="{Binding CreateSupplierCommand}" -->
+        <!--                            ToolTip="Dodaj dostawcę" -->
+        <!--                            Margin="0,0,5,0" /> -->
+        <!--     <controls:RefreshButton Click="RefreshButton_Click" -->
+        <!--                             Margin="0,0,5,0" /> -->
+        <!--     <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" -->
+        <!--                                  Click="FilterToggleButton_Click" /> -->
+        <!-- </StackPanel> -->
+        <!-- -->
+        <!-- ~1~ Suppliers @1@ -->
+        <!-- <DataGrid Grid.Row="1" -->
+        <!--           ItemsSource="{Binding Suppliers}" -->
+        <!--           AutoGenerateColumns="False" -->
+        <!--           IsReadOnly="True" -->
+        <!--           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" -->
+        <!--           Sorting="SuppliersDataGrid_Sorting"> -->
+        <!--     <DataGrid.Columns> -->
+        <!--         <DataGridTemplateColumn Width="*" SortMemberPath="Name"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="NameFilterColumn" -->
+        <!--                     Header="Nazwa" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="SupplierFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Name}" -->
+        <!--                                VerticalAlignment="Center" -->
+        <!--                                Margin="5,0" /> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="120" SortMemberPath="Nip"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="NipFilterColumn" -->
+        <!--                     Header="NIP" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="SupplierFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Nip}" -->
+        <!--                                VerticalAlignment="Center" -->
+        <!--                                Margin="5,0" /> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="2*" SortMemberPath="Description"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="DescriptionFilterColumn" -->
+        <!--                     Header="Opis" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="SupplierFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Description}" -->
+        <!--                                VerticalAlignment="Center" -->
+        <!--                                TextTrimming="CharacterEllipsis" -->
+        <!--                                Margin="5,0" /> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="80" CanUserSort="False"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <StackPanel Orientation="Horizontal" -->
+        <!--                                 HorizontalAlignment="Center"> -->
+        <!--                         <controls:WebsiteButton WebsiteUrl="{Binding WebsiteUrl}" -->
+        <!--                                                 Margin="2,0" /> -->
+        <!--                         <controls:EditButton -->
+        <!--                             Command="{Binding DataContext.EditSupplierCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             CommandParameter="{Binding}" -->
+        <!--                             ToolTip="Edytuj dostawcę" -->
+        <!--                             Margin="2,0" /> -->
+        <!--                         <controls:DeleteButton -->
+        <!--                             Command="{Binding DataContext.DeleteSupplierCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             CommandParameter="{Binding}" -->
+        <!--                             ToolTip="Usuń dostawcę" -->
+        <!--                             Margin="2,0" /> -->
+        <!--                     </StackPanel> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!--     </DataGrid.Columns> -->
+        <!-- </DataGrid> -->
+        <!-- -->
+        <!-- ~1~ Pagination @1@ -->
+        <!-- <controls:PaginationControl x:Name="SuppliersPagination" -->
+        <!--                             Grid.Row="2" -->
+        <!--                             Layout="SingleLine" -->
+        <!--                             PageLoader="{Binding SuppliersPageLoader}" -->
+        <!--                             InitialPageSize="20" -->
+        <!--                             HorizontalAlignment="Right" -->
+        <!--                             PaginationHorizontalAlignment="Right" -->
+        <!--                             Margin="0,5,0,0" /> -->
+        <!-- -->
+        <!-- ~1~ Create/Edit popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsCreatePopupOpen}" -->
+        <!--        Placement="Mouse" -->
+        <!--        StaysOpen="True"> -->
+        <!--     <Border Background="White" -->
+        <!--             BorderBrush="LightGray" -->
+        <!--             BorderThickness="1" -->
+        <!--             Padding="20" -->
+        <!--             Width="400" -->
+        <!--             CornerRadius="5"> -->
+        <!--         <StackPanel DataContext="{Binding CreateSupplierViewModel}"> -->
+        <!--             <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj dostawcę;Dodaj dostawcę'}" -->
+        <!--                        FontSize="18" -->
+        <!--                        FontWeight="Bold" -->
+        <!--                        Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" -->
+        <!--                      Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="NIP:" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}" -->
+        <!--                      Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Opis:" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" -->
+        <!--                      AcceptsReturn="True" -->
+        <!--                      VerticalScrollBarVisibility="Auto" -->
+        <!--                      TextWrapping="Wrap" -->
+        <!--                      Height="100" -->
+        <!--                      Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Strona WWW:" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}" -->
+        <!--                      Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" -->
+        <!--                         Command="{Binding CancelCommand}" -->
+        <!--                         Margin="0,0,10,0" -->
+        <!--                         Padding="15,5" /> -->
+        <!--                 <Button Content="Zapisz" -->
+        <!--                         Command="{Binding SaveCommand}" -->
+        <!--                         Padding="15,5" -->
+        <!--                         Background="LightBlue" -->
+        <!--                         IsDefault="True" /> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
+        <!-- -->
+        <!-- ~1~ Delete confirmation @1@ -->
+        <!-- <Popup IsOpen="{Binding IsDeletePopupOpen}" -->
+        <!--        Placement="Mouse" -->
+        <!--        StaysOpen="True"> -->
+        <!--     <Border Background="White" -->
+        <!--             BorderBrush="LightGray" -->
+        <!--             BorderThickness="1" -->
+        <!--             Padding="20" -->
+        <!--             Width="300" -->
+        <!--             CornerRadius="5"> -->
+        <!--         <StackPanel> -->
+        <!--             <TextBlock Text="Potwierdź usunięcie" -->
+        <!--                        FontSize="18" -->
+        <!--                        FontWeight="Bold" -->
+        <!--                        Margin="0,0,0,15" /> -->
+        <!--             <TextBlock Margin="0,0,0,20" TextWrapping="Wrap"> -->
+        <!--                 <Run Text="Czy na pewno chcesz usunąć dostawcę " /> -->
+        <!--                 <Run Text="{Binding SupplierToDelete.Name, Mode=OneWay}" -->
+        <!--                      FontWeight="Bold" /> -->
+        <!--                 <Run Text="?" /> -->
+        <!--             </TextBlock> -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" -->
+        <!--                         Command="{Binding CancelDeleteCommand}" -->
+        <!--                         Margin="0,0,10,0" -->
+        <!--                         Padding="15,5" /> -->
+        <!--                 <Button Content="Usuń" -->
+        <!--                         Command="{Binding ConfirmDeleteCommand}" -->
+        <!--                         Padding="15,5" -->
+        <!--                         Background="LightCoral" -->
+        <!--                         IsDefault="True" /> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
     </Grid>
 </UserControl>

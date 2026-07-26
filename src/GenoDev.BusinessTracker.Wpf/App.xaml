@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:GenoDev.BusinessTracker.Wpf"
-             xmlns:infrastructure="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure">
+             xmlns:converters="clr-namespace:GenoDev.BusinessTracker.Wpf.Converters">
     <Application.Resources>
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -81,12 +81,12 @@
         </Style>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <infrastructure:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-        <infrastructure:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
-        <infrastructure:NullToAllConverter x:Key="NullToAllConverter" />
-        <infrastructure:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-        <infrastructure:StatusToColorConverter x:Key="StatusToColorConverter" />
-        <infrastructure:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+        <converters:NullToAllConverter x:Key="NullToAllConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+        <converters:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
 
         <Style TargetType="DataGrid">
             <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0" />

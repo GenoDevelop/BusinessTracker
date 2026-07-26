@@ -14,7 +14,9 @@ public class CreateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
         {
             Id = Guid.NewGuid(),
             SupplierId = request.SupplierId,
-            OrderDate = request.OrderDate,
+            OrderDate = request.OrderDate.Kind != DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(request.OrderDate, DateTimeKind.Unspecified)
+                : request.OrderDate,
             Description = request.Description,
             InvoiceNo = request.InvoiceNo,
             Status = MaterialSupplyStatus.New

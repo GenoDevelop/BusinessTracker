@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
@@ -32,141 +32,263 @@
                                          Click="FilterToggleButton_Click" />
         </StackPanel>
 
-        <!-- Materials -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Materials}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                  Sorting="MaterialsDataGrid_Sorting">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="*" SortMemberPath="Name">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="NameFilterColumn"
-                            Header="Nazwa"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="MaterialsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                <DataGridTemplateColumn Width="120" SortMemberPath="Ean">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="EanFilterColumn"
-                            Header="EAN"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="MaterialsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Ean}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+            <!-- Materials -->
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <DataGrid ItemsSource="{Binding Materials}"
+                          SelectedItem="{Binding SelectedMaterial}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                          Sorting="MaterialsDataGrid_Sorting">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="*" SortMemberPath="Name">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="NameFilterColumn"
+                                    Header="Nazwa"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="MaterialsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"
+                                               VerticalAlignment="Center"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="70" SortMemberPath="Unit">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="UnitFilterColumn"
-                            Header="J.m."
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="MaterialsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Unit}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="150" SortMemberPath="VariantsCount">
+                            <DataGridTemplateColumn.Header>
+                                <controls:NumericFilterColumnHeader
+                                    x:Name="VariantsCountFilterColumn"
+                                    Header="Liczba wariantów"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="MaterialsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding VariantsCount}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
-                    <DataGridTemplateColumn.Header>
-                        <controls:NumericFilterColumnHeader
-                            x:Name="AmountFilterColumn"
-                            Header="Ilość"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="MaterialsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Amount}"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="Akcje"
+                                           FontWeight="Bold"
+                                           Margin="5,0" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <controls:EditButton
+                                            Command="{Binding DataContext.EditMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Edytuj materiał"
+                                            Margin="2,0" />
+                                        <controls:DeleteButton
+                                            Command="{Binding DataContext.DeleteMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Usuń materiał"
+                                            Margin="2,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
 
-                <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="DescriptionFilterColumn"
-                            Header="Opis"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="MaterialsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Description}"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"
-                                       Margin="5,0" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <!-- Pagination for Materials -->
+                <controls:PaginationControl x:Name="MaterialsPagination"
+                                            Grid.Row="1"
+                                            Layout="SingleLine"
+                                            PageLoader="{Binding MaterialsPageLoader}"
+                                            InitialPageSize="20"
+                                            HorizontalAlignment="Right"
+                                            PaginationHorizontalAlignment="Right"
+                                            Margin="0,5,0,0" />
+            </Grid>
 
-                <DataGridTemplateColumn Width="Auto">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Akcje"
-                                   FontWeight="Bold"
-                                   Margin="5,0" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <controls:EditButton
-                                    Command="{Binding DataContext.EditMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"
-                                    ToolTip="Edytuj materiał"
-                                    Margin="2,0" />
-                                <controls:DeleteButton
-                                    Command="{Binding DataContext.DeleteMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"
-                                    ToolTip="Usuń materiał"
-                                    Margin="2,0" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+            <GridSplitter Grid.Row="1"
+                          Height="1"
+                          HorizontalAlignment="Stretch"
+                          Background="LightGray"
+                          Margin="0,5" />
 
-        <!-- Pagination -->
-        <controls:PaginationControl x:Name="MaterialsPagination"
-                                    Grid.Row="2"
-                                    Layout="SingleLine"
-                                    PageLoader="{Binding MaterialsPageLoader}"
-                                    InitialPageSize="20"
-                                    HorizontalAlignment="Right"
-                                    PaginationHorizontalAlignment="Right"
-                                    Margin="0,5,0,0" />
+            <!-- Material Variants -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="Warianty"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,20,0" />
+                    <controls:CreateButton Command="{Binding CreateMaterialVariantCommand}"
+                                           ToolTip="Dodaj wariant"
+                                           Margin="0,0,5,0" />
+                    <controls:RefreshButton Click="VariantsRefreshButton_Click"
+                                            Margin="0,0,5,0" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsVariantFilterVisible}"
+                                                 Click="VariantFilterToggleButton_Click" />
+                </StackPanel>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding MaterialVariants}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                          Sorting="VariantsDataGrid_Sorting">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="*" SortMemberPath="Name">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="VariantNameFilterColumn"
+                                    Header="Nazwa"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsVariantFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="VariantsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"
+                                               VerticalAlignment="Center"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="120" SortMemberPath="Ean">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="VariantEanFilterColumn"
+                                    Header="EAN"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsVariantFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="VariantsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Ean}"
+                                               VerticalAlignment="Center"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="150" SortMemberPath="ManufacturerCode">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="VariantManufacturerCodeFilterColumn"
+                                    Header="Kod producenta"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsVariantFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="VariantsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ManufacturerCode}"
+                                               VerticalAlignment="Center"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="Ilość"
+                                           FontWeight="Bold"
+                                           Margin="5,0" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                                        <TextBlock Text="{Binding TotalCompanyAmount}" />
+                                        <TextBlock Text=" " />
+                                        <TextBlock Text="{Binding Unit}" Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="VariantDescriptionFilterColumn"
+                                    Header="Opis"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsVariantFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="VariantsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Description}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="Akcje"
+                                           FontWeight="Bold"
+                                           Margin="5,0" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <controls:EditButton Command="{Binding DataContext.EditMaterialVariantCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                             CommandParameter="{Binding}"
+                                                             ToolTip="Edytuj wariant"
+                                                             Margin="2,0" />
+                                        <controls:DeleteButton Command="{Binding DataContext.DeleteMaterialVariantCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                               CommandParameter="{Binding}"
+                                                               ToolTip="Usuń wariant"
+                                                               Margin="2,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Pagination for Variants -->
+                <controls:PaginationControl x:Name="VariantsPagination"
+                                            Grid.Row="2"
+                                            Layout="SingleLine"
+                                            PageLoader="{Binding MaterialVariantsPageLoader}"
+                                            InitialPageSize="20"
+                                            HorizontalAlignment="Right"
+                                            PaginationHorizontalAlignment="Right"
+                                            Margin="0,5,0,0" />
+            </Grid>
+        </Grid>
 
         <!-- Create/Edit Material -->
         <Popup IsOpen="{Binding IsCreatePopupOpen}"
@@ -186,11 +308,62 @@
 
                     <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
                     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,20" />
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Anuluj"
+                                Command="{Binding CancelCommand}"
+                                Margin="0,0,10,0"
+                                Padding="15,5" />
+                        <Button Content="Zapisz"
+                                Command="{Binding SaveCommand}"
+                                Padding="15,5"
+                                Background="DodgerBlue"
+                                Foreground="White"
+                                IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Create/Edit Material Variant -->
+        <Popup IsOpen="{Binding IsCreateVariantPopupOpen}"
+               Placement="Mouse"
+               StaysOpen="True">
+            <Border Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    Padding="20"
+                    Width="500"
+                    CornerRadius="5">
+                <StackPanel DataContext="{Binding CreateMaterialVariantViewModel}">
+                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj wariant;Dodaj wariant'}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,15" />
+
+                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,0,10" />
 
-                    <TextBlock Text="EAN:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="EAN:" Margin="0,0,0,5" />
+                            <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,10" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Kod producenta:" Margin="0,0,0,5" />
+                            <TextBox Text="{Binding ManufacturerCode, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,10" />
+                        </StackPanel>
+                    </Grid>
 
                     <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
                     <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
@@ -199,9 +372,9 @@
                     <TextBlock Text="Opis:" Margin="0,0,0,5" />
                     <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
-                             VerticalScrollBarVisibility="Auto"
+                             MinHeight="80"
                              TextWrapping="Wrap"
-                             Height="100"
+                             VerticalScrollBarVisibility="Auto"
                              Margin="0,0,0,20" />
 
                     <StackPanel Orientation="Horizontal"
@@ -238,6 +411,43 @@
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć materiał " />
                         <Run Text="{Binding MaterialToDelete.Name, Mode=OneWay}"
+                             FontWeight="Bold" />
+                        <Run Text="?" />
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Nie"
+                                Command="{Binding CancelDeleteCommand}"
+                                Margin="0,0,10,0"
+                                Padding="15,5" />
+                        <Button Content="Tak"
+                                Command="{Binding ConfirmDeleteCommand}"
+                                Padding="15,5"
+                                Background="IndianRed"
+                                Foreground="White"
+                                IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Delete Variant Confirmation -->
+        <Popup IsOpen="{Binding IsDeleteVariantPopupOpen}"
+               Placement="Mouse"
+               StaysOpen="True">
+            <Border Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    Padding="20"
+                    CornerRadius="5">
+                <StackPanel Width="300">
+                    <TextBlock Text="Potwierdź usunięcie wariantu"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10" />
+                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                        <Run Text="Czy na pewno chcesz usunąć wariant " />
+                        <Run Text="{Binding VariantToDelete.Name, Mode=OneWay}"
                              FontWeight="Bold" />
                         <Run Text="?" />
                     </TextBlock>

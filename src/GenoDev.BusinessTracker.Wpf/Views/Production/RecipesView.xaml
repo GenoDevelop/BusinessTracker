@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Production"
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:RecipesViewModel}">
@@ -14,364 +14,364 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Margin="10, 10, 3, 10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Przepisy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-                <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" />
-                <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
-            </StackPanel>
-
-            <!-- Search Header -->
-            <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10"
-                    Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal">
-                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.41L13.01,15.14C11.87,16.11 10.39,16.7 8.75,16.7A6.5,6.5 0 0,1 2.25,10.2A6.5,6.5 0 0,1 8.75,3.7M8.75,5.2A5,5 0 0,0 3.75,10.2A5,5 0 0,0 8.75,15.2A5,5 0 0,0 13.75,10.2A5,5 0 0,0 8.75,5.2Z" 
-                              Fill="Gray" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,5,0" />
-                        <TextBox Text="{Binding SearchTerm,
-                                                UpdateSourceTrigger=PropertyChanged,
-                                                Delay=500,
-                                                NotifyOnSourceUpdated=True}"
-                                 SourceUpdated="SearchTerm_SourceUpdated"
-                                 Width="150"
-                                 VerticalContentAlignment="Center" />
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Recipes List -->
-            <ListBox Grid.Row="2"
-                     ItemsSource="{Binding Recipes}"
-                     SelectedItem="{Binding SelectedRecipe}"
-                     SelectionChanged="RecipesList_SelectionChanged"
-                     BorderThickness="0"
-                     Padding="0">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="{TemplateBinding Background}" 
-                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                            BorderThickness="{TemplateBinding BorderThickness}" 
-                                            Padding="2,3">
-                                        <ContentPresenter />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#E0EEFF" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F7FF" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="0,0,0,0">
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="12" TextWrapping="Wrap" />
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ProductName}" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
-                                <TextBlock Text=" (" Foreground="Gray" FontSize="11" />
-                                <TextBlock Text="{Binding ProductIdentifier}" Foreground="Gray" FontSize="11" />
-                                <TextBlock Text=")" Foreground="Gray" FontSize="11" />
-                            </StackPanel>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-            <!-- Pagination -->
-            <controls:PaginationControl x:Name="RecipesPagination"
-                                        Grid.Row="3"
-                                        Layout="CompactTwoRows"
-                                        PageLoader="{Binding RecipesPageLoader}"
-                                        Margin="0,5,0,0"
-                                        FontSize="11" />
-        </Grid>
-
-        <!-- Right Panel -->
-        <Grid Grid.Column="1" Background="#F9F9F9">
-            <!-- Empty state -->
-            <TextBlock Text="Wybierz przepis z listy, aby zobaczyć szczegóły" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center" 
-                       Foreground="Gray" 
-                       FontSize="14"
-                       Visibility="{Binding SelectedRecipe, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Inverse'}" />
-
-            <!-- Details section -->
-            <Grid Visibility="{Binding SelectedRecipe, Converter={StaticResource NullToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <!-- Upper space: Basic Information -->
-                <Grid Grid.Row="0" Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <!-- Header -->
-                    <Grid Grid.Row="0" Margin="0,0,0,15">
-                        <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="Black" VerticalAlignment="Bottom" />
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,5,0" Width="18" Height="18"/>
-                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" Width="18" Height="18"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Product Details -->
-                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <StackPanel Orientation="Vertical" Margin="0,0,0,4">
-                                <TextBlock Text="Produkt:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/>
-                                <TextBlock Text="{Binding SelectedRecipe.ProductName}" FontWeight="SemiBold"
-                                           TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Vertical" Margin="0,0,0,4">
-                                <TextBlock Text="Identyfikator:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/>
-                                <TextBlock Text="{Binding SelectedRecipe.ProductIdentifier}" FontWeight="SemiBold"
-                                           TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Description -->
-                        <Grid Grid.Column="1" Height="100" VerticalAlignment="Top">
-                            <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                    <TextBlock Text="{Binding SelectedRecipe.Description}" TextWrapping="Wrap" />
-                                </ScrollViewer>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <!-- Separator Line -->
-                <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1" />
-
-                <!-- Bottom Panel: Required Materials -->
-                <Grid Grid.Row="2" Margin="10, 10, 0, 5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <!-- Header for Materials Table -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="Potrzebne Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-
-                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
-                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" />
-                        <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
-                                                     Click="RecipeMaterialsFilterToggleButton_Click" />
-                    </StackPanel>
-
-                    <!-- Materials DataGrid -->
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding RecipeMaterials}" AutoGenerateColumns="False" IsReadOnly="True"
-                              Background="White"
-                              ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                              Sorting="MaterialsDataGrid_Sorting">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
-                                <DataGridTemplateColumn.Header>
-                                    <controls:TextFilterColumnHeader
-                                        x:Name="MaterialNameFilterColumn"
-                                        Header="Materiał"
-                                        DebounceMilliseconds="500"
-                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding MaterialName}" VerticalAlignment="Center" Margin="5,0"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean">
-                                <DataGridTemplateColumn.Header>
-                                    <controls:TextFilterColumnHeader
-                                        x:Name="EanFilterColumn"
-                                        Header="EAN"
-                                        DebounceMilliseconds="500"
-                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTemplateColumn Width="100" SortMemberPath="RequiredAmount">
-                                <DataGridTemplateColumn.Header>
-                                    <controls:NumericFilterColumnHeader
-                                        x:Name="AmountFilterColumn"
-                                        Header="Ilość"
-                                        DebounceMilliseconds="500"
-                                        IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        FilterChanged="RecipeMaterialsFilter_FilterChanged" />
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Margin="5,0">
-                                            <TextBlock Text="{Binding RequiredAmount}" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTemplateColumn Width="Auto">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <controls:EditButton
-                                                Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip="Edytuj pozycję"
-                                                Margin="2,0" />
-                                            <controls:DeleteButton
-                                                Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip="Usuń pozycję"
-                                                Margin="2,0" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <!-- Pagination for Materials -->
-                    <controls:PaginationControl x:Name="RecipeMaterialsPagination"
-                                                Grid.Row="2"
-                                                Layout="SingleLine"
-                                                PageLoader="{Binding RecipeMaterialsPageLoader}"
-                                                InitialPageSize="20"
-                                                HorizontalAlignment="Right"
-                                                PaginationHorizontalAlignment="Right"
-                                                Margin="0,5,0,0" />
-                </Grid>
-            </Grid>
-        </Grid>
-
-        <!-- Add/Edit Material Popup -->
-        <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5">
-                <StackPanel DataContext="{Binding AddRecipeMaterialViewModel}">
-                    <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
-
-                    <TextBlock Text="Wyszukaj materiał:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding MaterialSearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Wybierz materiał:" Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding Materials}" 
-                              SelectedItem="{Binding SelectedMaterial}" 
-                              DisplayMemberPath="Name"
-                              Margin="0,0,0,10" Height="25"/>
-
-                    <TextBlock Text="Ilość:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20"/>
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Create/Edit Recipe Popup -->
-        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5">
-                <StackPanel DataContext="{Binding CreateRecipeViewModel}">
-                    <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
-
-                    <TextBlock Text="Nazwa:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Produkt:" Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding Products}" 
-                              SelectedItem="{Binding SelectedProduct}" 
-                              DisplayMemberPath="Name"
-                              Margin="0,0,0,10" Height="25"/>
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                             Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Delete Material Confirmation Popup -->
-        <Popup IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5">
-                <StackPanel Width="300">
-                    <TextBlock Text="Potwierdź usunięcie" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Nie" Command="{Binding CancelDeleteMaterialCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Tak" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Delete Recipe Confirmation -->
-        <Popup IsOpen="{Binding IsDeleteConfirmationOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5">
-                <StackPanel Width="300">
-                    <TextBlock Text="Potwierdź usunięcie przepisu" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Nie" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Tak" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
+        <!-- <Grid Grid.Column="0" Margin="10, 10, 3, 10"> -->
+        <!--     <Grid.RowDefinitions> -->
+        <!--         <RowDefinition Height="Auto" /> -->
+        <!--         <RowDefinition Height="Auto" /> -->
+        <!--         <RowDefinition Height="*" /> -->
+        <!--         <RowDefinition Height="Auto" /> -->
+        <!--     </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--     ~1~ Toolbar @1@ -->
+        <!--     <StackPanel Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--         <TextBlock Text="Przepisy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" /> -->
+        <!--         <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" /> -->
+        <!--         <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" /> -->
+        <!--         <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" /> -->
+        <!--     </StackPanel> -->
+        <!-- -->
+        <!--     ~1~ Search Header @1@ -->
+        <!--     <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10" -->
+        <!--             Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}"> -->
+        <!--         <Grid> -->
+        <!--             <Grid.ColumnDefinitions> -->
+        <!--                 <ColumnDefinition Width="Auto" /> -->
+        <!--                 <ColumnDefinition Width="*" /> -->
+        <!--             </Grid.ColumnDefinitions> -->
+        <!--             <StackPanel Orientation="Horizontal"> -->
+        <!--                 <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.41L13.01,15.14C11.87,16.11 10.39,16.7 8.75,16.7A6.5,6.5 0 0,1 2.25,10.2A6.5,6.5 0 0,1 8.75,3.7M8.75,5.2A5,5 0 0,0 3.75,10.2A5,5 0 0,0 8.75,15.2A5,5 0 0,0 13.75,10.2A5,5 0 0,0 8.75,5.2Z"  -->
+        <!--                       Fill="Gray" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,5,0" /> -->
+        <!--                 <TextBox Text="{Binding SearchTerm, -->
+        <!--                                         UpdateSourceTrigger=PropertyChanged, -->
+        <!--                                         Delay=500, -->
+        <!--                                         NotifyOnSourceUpdated=True}" -->
+        <!--                          SourceUpdated="SearchTerm_SourceUpdated" -->
+        <!--                          Width="150" -->
+        <!--                          VerticalContentAlignment="Center" /> -->
+        <!--             </StackPanel> -->
+        <!--         </Grid> -->
+        <!--     </Border> -->
+        <!-- -->
+        <!--     ~1~ Recipes List @1@ -->
+        <!--     <ListBox Grid.Row="2" -->
+        <!--              ItemsSource="{Binding Recipes}" -->
+        <!--              SelectedItem="{Binding SelectedRecipe}" -->
+        <!--              SelectionChanged="RecipesList_SelectionChanged" -->
+        <!--              BorderThickness="0" -->
+        <!--              Padding="0"> -->
+        <!--         <ListBox.ItemContainerStyle> -->
+        <!--             <Style TargetType="ListBoxItem"> -->
+        <!--                 <Setter Property="Padding" Value="0" /> -->
+        <!--                 <Setter Property="Margin" Value="0" /> -->
+        <!--                 <Setter Property="HorizontalContentAlignment" Value="Stretch" /> -->
+        <!--                 <Setter Property="Background" Value="Transparent" /> -->
+        <!--                 <Setter Property="Template"> -->
+        <!--                     <Setter.Value> -->
+        <!--                         <ControlTemplate TargetType="ListBoxItem"> -->
+        <!--                             <Border Background="{TemplateBinding Background}"  -->
+        <!--                                     BorderBrush="{TemplateBinding BorderBrush}"  -->
+        <!--                                     BorderThickness="{TemplateBinding BorderThickness}"  -->
+        <!--                                     Padding="2,3"> -->
+        <!--                                 <ContentPresenter /> -->
+        <!--                             </Border> -->
+        <!--                             <ControlTemplate.Triggers> -->
+        <!--                                 <Trigger Property="IsSelected" Value="True"> -->
+        <!--                                     <Setter Property="Background" Value="#E0EEFF" /> -->
+        <!--                                 </Trigger> -->
+        <!--                                 <Trigger Property="IsMouseOver" Value="True"> -->
+        <!--                                     <Setter Property="Background" Value="#F0F7FF" /> -->
+        <!--                                 </Trigger> -->
+        <!--                             </ControlTemplate.Triggers> -->
+        <!--                         </ControlTemplate> -->
+        <!--                     </Setter.Value> -->
+        <!--                 </Setter> -->
+        <!--             </Style> -->
+        <!--         </ListBox.ItemContainerStyle> -->
+        <!--         <ListBox.ItemTemplate> -->
+        <!--             <DataTemplate> -->
+        <!--                 <StackPanel Margin="0,0,0,0"> -->
+        <!--                     <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="12" TextWrapping="Wrap" /> -->
+        <!--                     <StackPanel Orientation="Horizontal"> -->
+        <!--                         <TextBlock Text="{Binding ProductName}" Foreground="Gray" FontSize="11" TextWrapping="Wrap" /> -->
+        <!--                         <TextBlock Text=" (" Foreground="Gray" FontSize="11" /> -->
+        <!--                         <TextBlock Text="{Binding ProductIdentifier}" Foreground="Gray" FontSize="11" /> -->
+        <!--                         <TextBlock Text=")" Foreground="Gray" FontSize="11" /> -->
+        <!--                     </StackPanel> -->
+        <!--                 </StackPanel> -->
+        <!--             </DataTemplate> -->
+        <!--         </ListBox.ItemTemplate> -->
+        <!--     </ListBox> -->
+        <!-- -->
+        <!--     ~1~ Pagination @1@ -->
+        <!--     <controls:PaginationControl x:Name="RecipesPagination" -->
+        <!--                                 Grid.Row="3" -->
+        <!--                                 Layout="CompactTwoRows" -->
+        <!--                                 PageLoader="{Binding RecipesPageLoader}" -->
+        <!--                                 Margin="0,5,0,0" -->
+        <!--                                 FontSize="11" /> -->
+        <!-- </Grid> -->
+        <!-- -->
+        <!-- ~1~ Right Panel @1@ -->
+        <!-- <Grid Grid.Column="1" Background="#F9F9F9"> -->
+        <!--     ~1~ Empty state @1@ -->
+        <!--     <TextBlock Text="Wybierz przepis z listy, aby zobaczyć szczegóły"  -->
+        <!--                HorizontalAlignment="Center"  -->
+        <!--                VerticalAlignment="Center"  -->
+        <!--                Foreground="Gray"  -->
+        <!--                FontSize="14" -->
+        <!--                Visibility="{Binding SelectedRecipe, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Inverse'}" /> -->
+        <!-- -->
+        <!--     ~1~ Details section @1@ -->
+        <!--     <Grid Visibility="{Binding SelectedRecipe, Converter={StaticResource NullToVisibilityConverter}}"> -->
+        <!--         <Grid.RowDefinitions> -->
+        <!--             <RowDefinition Height="Auto" /> -->
+        <!--             <RowDefinition Height="Auto" /> -->
+        <!--             <RowDefinition Height="*" /> -->
+        <!--         </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--         ~1~ Upper space: Basic Information @1@ -->
+        <!--         <Grid Grid.Row="0" Margin="10"> -->
+        <!--             <Grid.RowDefinitions> -->
+        <!--                 <RowDefinition Height="Auto" /> -->
+        <!--                 <RowDefinition Height="*" /> -->
+        <!--             </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--             ~1~ Header @1@ -->
+        <!--             <Grid Grid.Row="0" Margin="0,0,0,15"> -->
+        <!--                 <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="Black" VerticalAlignment="Bottom" /> -->
+        <!-- -->
+        <!--                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"> -->
+        <!--                     <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,5,0" Width="18" Height="18"/> -->
+        <!--                     <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" Width="18" Height="18"/> -->
+        <!--                 </StackPanel> -->
+        <!--             </Grid> -->
+        <!-- -->
+        <!--             <Grid Grid.Row="1"> -->
+        <!--                 <Grid.ColumnDefinitions> -->
+        <!--                     <ColumnDefinition Width="Auto" /> -->
+        <!--                     <ColumnDefinition Width="*" /> -->
+        <!--                 </Grid.ColumnDefinitions> -->
+        <!-- -->
+        <!--                 ~1~ Product Details @1@ -->
+        <!--                 <StackPanel Grid.Column="0" Margin="0,0,10,0"> -->
+        <!--                     <StackPanel Orientation="Vertical" Margin="0,0,0,4"> -->
+        <!--                         <TextBlock Text="Produkt:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/> -->
+        <!--                         <TextBlock Text="{Binding SelectedRecipe.ProductName}" FontWeight="SemiBold" -->
+        <!--                                    TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/> -->
+        <!--                     </StackPanel> -->
+        <!-- -->
+        <!--                     <StackPanel Orientation="Vertical" Margin="0,0,0,4"> -->
+        <!--                         <TextBlock Text="Identyfikator:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/> -->
+        <!--                         <TextBlock Text="{Binding SelectedRecipe.ProductIdentifier}" FontWeight="SemiBold" -->
+        <!--                                    TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/> -->
+        <!--                     </StackPanel> -->
+        <!--                 </StackPanel> -->
+        <!-- -->
+        <!--                 ~1~ Description @1@ -->
+        <!--                 <Grid Grid.Column="1" Height="100" VerticalAlignment="Top"> -->
+        <!--                     <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8"> -->
+        <!--                         <ScrollViewer VerticalScrollBarVisibility="Auto"> -->
+        <!--                             <TextBlock Text="{Binding SelectedRecipe.Description}" TextWrapping="Wrap" /> -->
+        <!--                         </ScrollViewer> -->
+        <!--                     </Border> -->
+        <!--                 </Grid> -->
+        <!--             </Grid> -->
+        <!--         </Grid> -->
+        <!-- -->
+        <!--         ~1~ Separator Line @1@ -->
+        <!--         <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1" /> -->
+        <!-- -->
+        <!--         ~1~ Bottom Panel: Required Materials @1@ -->
+        <!--         <Grid Grid.Row="2" Margin="10, 10, 0, 5"> -->
+        <!--             <Grid.RowDefinitions> -->
+        <!--                 <RowDefinition Height="Auto" /> -->
+        <!--                 <RowDefinition Height="*" /> -->
+        <!--                 <RowDefinition Height="Auto" /> -->
+        <!--             </Grid.RowDefinitions> -->
+        <!-- -->
+        <!--             ~1~ Header for Materials Table @1@ -->
+        <!--             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--                 <TextBlock Text="Potrzebne Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" /> -->
+        <!-- -->
+        <!--                 <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" /> -->
+        <!--                 <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" /> -->
+        <!--                 <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}" -->
+        <!--                                              Click="RecipeMaterialsFilterToggleButton_Click" /> -->
+        <!--             </StackPanel> -->
+        <!-- -->
+        <!--             ~1~ Materials DataGrid @1@ -->
+        <!--             <DataGrid Grid.Row="1" ItemsSource="{Binding RecipeMaterials}" AutoGenerateColumns="False" IsReadOnly="True" -->
+        <!--                       Background="White" -->
+        <!--                       ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" -->
+        <!--                       Sorting="MaterialsDataGrid_Sorting"> -->
+        <!--                 <DataGrid.Columns> -->
+        <!--                     <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName"> -->
+        <!--                         <DataGridTemplateColumn.Header> -->
+        <!--                             <controls:TextFilterColumnHeader -->
+        <!--                                 x:Name="MaterialNameFilterColumn" -->
+        <!--                                 Header="Materiał" -->
+        <!--                                 DebounceMilliseconds="500" -->
+        <!--                                 IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                 FilterChanged="RecipeMaterialsFilter_FilterChanged" /> -->
+        <!--                         </DataGridTemplateColumn.Header> -->
+        <!--                         <DataGridTemplateColumn.CellTemplate> -->
+        <!--                             <DataTemplate> -->
+        <!--                                 <TextBlock Text="{Binding MaterialName}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                             </DataTemplate> -->
+        <!--                         </DataGridTemplateColumn.CellTemplate> -->
+        <!--                     </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                     <DataGridTemplateColumn Width="0.6*" SortMemberPath="Ean"> -->
+        <!--                         <DataGridTemplateColumn.Header> -->
+        <!--                             <controls:TextFilterColumnHeader -->
+        <!--                                 x:Name="EanFilterColumn" -->
+        <!--                                 Header="EAN" -->
+        <!--                                 DebounceMilliseconds="500" -->
+        <!--                                 IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                 FilterChanged="RecipeMaterialsFilter_FilterChanged" /> -->
+        <!--                         </DataGridTemplateColumn.Header> -->
+        <!--                         <DataGridTemplateColumn.CellTemplate> -->
+        <!--                             <DataTemplate> -->
+        <!--                                 <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                             </DataTemplate> -->
+        <!--                         </DataGridTemplateColumn.CellTemplate> -->
+        <!--                     </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                     <DataGridTemplateColumn Width="100" SortMemberPath="RequiredAmount"> -->
+        <!--                         <DataGridTemplateColumn.Header> -->
+        <!--                             <controls:NumericFilterColumnHeader -->
+        <!--                                 x:Name="AmountFilterColumn" -->
+        <!--                                 Header="Ilość" -->
+        <!--                                 DebounceMilliseconds="500" -->
+        <!--                                 IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                 FilterChanged="RecipeMaterialsFilter_FilterChanged" /> -->
+        <!--                         </DataGridTemplateColumn.Header> -->
+        <!--                         <DataGridTemplateColumn.CellTemplate> -->
+        <!--                             <DataTemplate> -->
+        <!--                                 <StackPanel Orientation="Horizontal" Margin="5,0"> -->
+        <!--                                     <TextBlock Text="{Binding RequiredAmount}" VerticalAlignment="Center"/> -->
+        <!--                                     <TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/> -->
+        <!--                                 </StackPanel> -->
+        <!--                             </DataTemplate> -->
+        <!--                         </DataGridTemplateColumn.CellTemplate> -->
+        <!--                     </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--                     <DataGridTemplateColumn Width="Auto"> -->
+        <!--                         <DataGridTemplateColumn.Header> -->
+        <!--                             <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/> -->
+        <!--                         </DataGridTemplateColumn.Header> -->
+        <!--                         <DataGridTemplateColumn.CellTemplate> -->
+        <!--                             <DataTemplate> -->
+        <!--                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"> -->
+        <!--                                     <controls:EditButton -->
+        <!--                                         Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                         CommandParameter="{Binding}" -->
+        <!--                                         ToolTip="Edytuj pozycję" -->
+        <!--                                         Margin="2,0" /> -->
+        <!--                                     <controls:DeleteButton -->
+        <!--                                         Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                                         CommandParameter="{Binding}" -->
+        <!--                                         ToolTip="Usuń pozycję" -->
+        <!--                                         Margin="2,0" /> -->
+        <!--                                 </StackPanel> -->
+        <!--                             </DataTemplate> -->
+        <!--                         </DataGridTemplateColumn.CellTemplate> -->
+        <!--                     </DataGridTemplateColumn> -->
+        <!--                 </DataGrid.Columns> -->
+        <!--             </DataGrid> -->
+        <!-- -->
+        <!--             ~1~ Pagination for Materials @1@ -->
+        <!--             <controls:PaginationControl x:Name="RecipeMaterialsPagination" -->
+        <!--                                         Grid.Row="2" -->
+        <!--                                         Layout="SingleLine" -->
+        <!--                                         PageLoader="{Binding RecipeMaterialsPageLoader}" -->
+        <!--                                         InitialPageSize="20" -->
+        <!--                                         HorizontalAlignment="Right" -->
+        <!--                                         PaginationHorizontalAlignment="Right" -->
+        <!--                                         Margin="0,5,0,0" /> -->
+        <!--         </Grid> -->
+        <!--     </Grid> -->
+        <!-- </Grid> -->
+        <!-- -->
+        <!-- ~1~ Add/Edit Material Popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5"> -->
+        <!--         <StackPanel DataContext="{Binding AddRecipeMaterialViewModel}"> -->
+        <!--             <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Wyszukaj materiał:" Margin="0,0,0,5"/> -->
+        <!--             <TextBox Text="{Binding MaterialSearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Wybierz materiał:" Margin="0,0,0,5"/> -->
+        <!--             <ComboBox ItemsSource="{Binding Materials}"  -->
+        <!--                       SelectedItem="{Binding SelectedMaterial}"  -->
+        <!--                       DisplayMemberPath="Name" -->
+        <!--                       Margin="0,0,0,10" Height="25"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Ilość:" Margin="0,0,0,5"/> -->
+        <!--             <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20"/> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/> -->
+        <!--                 <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
+        <!-- -->
+        <!-- ~1~ Create/Edit Recipe Popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" Width="400" CornerRadius="5"> -->
+        <!--         <StackPanel DataContext="{Binding CreateRecipeViewModel}"> -->
+        <!--             <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Nazwa:" Margin="0,0,0,5"/> -->
+        <!--             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Produkt:" Margin="0,0,0,5"/> -->
+        <!--             <ComboBox ItemsSource="{Binding Products}"  -->
+        <!--                       SelectedItem="{Binding SelectedProduct}"  -->
+        <!--                       DisplayMemberPath="Name" -->
+        <!--                       Margin="0,0,0,10" Height="25"/> -->
+        <!-- -->
+        <!--             <TextBlock Text="Opis:" Margin="0,0,0,5"/> -->
+        <!--             <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"  -->
+        <!--                      Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/> -->
+        <!--                 <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="DodgerBlue" Foreground="White"/> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
+        <!-- -->
+        <!-- ~1~ Delete Material Confirmation Popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--         <StackPanel Width="300"> -->
+        <!--             <TextBlock Text="Potwierdź usunięcie" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/> -->
+        <!--             <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/> -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Nie" Command="{Binding CancelDeleteMaterialCommand}" Margin="0,0,10,0" Padding="15,5"/> -->
+        <!--                 <Button Content="Tak" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
+        <!-- -->
+        <!-- ~1~ Delete Recipe Confirmation @1@ -->
+        <!-- <Popup IsOpen="{Binding IsDeleteConfirmationOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="20" CornerRadius="5"> -->
+        <!--         <StackPanel Width="300"> -->
+        <!--             <TextBlock Text="Potwierdź usunięcie przepisu" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/> -->
+        <!--             <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/> -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Nie" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/> -->
+        <!--                 <Button Content="Tak" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
     </Grid>
 </UserControl>

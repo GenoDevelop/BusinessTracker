@@ -26,6 +26,31 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.FixedAsset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<double>("TotalCompanyAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0)
+                        .HasColumnName("total_company_amount");
+
+                    b.Property<double>("TotalPrivateAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0)
+                        .HasColumnName("total_private_amount");
+
+                    b.HasKey("Id")
+                        .HasName("pk_fixed_assets");
+
+                    b.ToTable("fixed_assets", "business_tracker");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Material", b =>
                 {
                     b.Property<Guid>("Id")
@@ -51,10 +76,6 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<double>("CompanyAmount")
-                        .HasColumnType("double precision")
-                        .HasColumnName("company_amount");
-
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -76,9 +97,13 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<double>("PrivateAmount")
+                    b.Property<double>("TotalCompanyAmount")
                         .HasColumnType("double precision")
-                        .HasColumnName("private_amount");
+                        .HasColumnName("total_company_amount");
+
+                    b.Property<double>("TotalPrivateAmount")
+                        .HasColumnType("double precision")
+                        .HasColumnName("total_private_amount");
 
                     b.Property<double>("TotalUsedAmount")
                         .HasColumnType("double precision")
@@ -225,10 +250,6 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<double>("CompanyAmount")
-                        .HasColumnType("double precision")
-                        .HasColumnName("company_amount");
-
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -246,9 +267,13 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<double>("PrivateAmount")
+                    b.Property<double>("TotalCompanyAmount")
                         .HasColumnType("double precision")
-                        .HasColumnName("private_amount");
+                        .HasColumnName("total_company_amount");
+
+                    b.Property<double>("TotalPrivateAmount")
+                        .HasColumnType("double precision")
+                        .HasColumnName("total_private_amount");
 
                     b.Property<double>("TotalUsedAmount")
                         .HasColumnType("double precision")
@@ -349,10 +374,6 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("product_recipe_id");
 
-                    b.Property<double>("RequiredAmount")
-                        .HasColumnType("double precision")
-                        .HasColumnName("required_amount");
-
                     b.HasKey("Id")
                         .HasName("pk_product_recipe_materials");
 
@@ -435,6 +456,10 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -479,12 +504,12 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("order_date");
 
-                    b.Property<double>("ShippingGrossPrice")
-                        .HasColumnType("double precision")
+                    b.Property<decimal>("ShippingGrossPrice")
+                        .HasColumnType("numeric")
                         .HasColumnName("shipping_gross_price");
 
-                    b.Property<double>("ShippingNetPrice")
-                        .HasColumnType("double precision")
+                    b.Property<decimal>("ShippingNetPrice")
+                        .HasColumnType("numeric")
                         .HasColumnName("shipping_net_price");
 
                     b.Property<string>("Status")
@@ -511,6 +536,14 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("FixedAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fixed_asset_id");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_type");
 
                     b.Property<Guid>("MaterialSupplyId")
                         .HasColumnType("uuid")
@@ -547,6 +580,9 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_supply_items");
 
+                    b.HasIndex("FixedAssetId")
+                        .HasDatabaseName("ix_supply_items_fixed_asset_id");
+
                     b.HasIndex("MaterialSupplyId")
                         .HasDatabaseName("ix_supply_items_material_supply_id");
 
@@ -556,7 +592,10 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.HasIndex("PackingMaterialId")
                         .HasDatabaseName("ix_supply_items_packing_material_id");
 
-                    b.ToTable("supply_items", "business_tracker");
+                    b.ToTable("supply_items", "business_tracker", t =>
+                        {
+                            t.HasCheckConstraint("CK_SupplyItem_XOR_Type", "(\"item_type\" = 1 AND \"material_variant_id\" IS NOT NULL AND \"packing_material_id\" IS NULL AND \"fixed_asset_id\" IS NULL) OR \r\n              (\"item_type\" = 2 AND \"material_variant_id\" IS NULL AND \"packing_material_id\" IS NOT NULL AND \"fixed_asset_id\" IS NULL) OR \r\n              (\"item_type\" = 3 AND \"material_variant_id\" IS NULL AND \"packing_material_id\" IS NULL AND \"fixed_asset_id\" IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MaterialVariant", b =>
@@ -693,7 +732,12 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.SupplyItem", b =>
                 {
-                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Supply", "MaterialSupply")
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.FixedAsset", "FixedAsset")
+                        .WithMany("SupplyItems")
+                        .HasForeignKey("FixedAssetId")
+                        .HasConstraintName("fk_supply_items_fixed_assets_fixed_asset_id");
+
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Supply", "Supply")
                         .WithMany("SupplyItems")
                         .HasForeignKey("MaterialSupplyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -710,11 +754,18 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasForeignKey("PackingMaterialId")
                         .HasConstraintName("fk_supply_items_packing_materials_packing_material_id");
 
-                    b.Navigation("MaterialSupply");
+                    b.Navigation("FixedAsset");
 
                     b.Navigation("MaterialVariant");
 
                     b.Navigation("PackingMaterial");
+
+                    b.Navigation("Supply");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.FixedAsset", b =>
+                {
+                    b.Navigation("SupplyItems");
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Material", b =>

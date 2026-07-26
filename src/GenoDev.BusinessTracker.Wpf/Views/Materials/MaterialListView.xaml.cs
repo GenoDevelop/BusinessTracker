@@ -52,6 +52,8 @@ public partial class MaterialListView : UserControl
         {
             _attachedViewModel.PaginationRefreshRequested -=
                 ViewModel_PaginationRefreshRequested;
+            _attachedViewModel.VariantsPaginationRefreshRequested -=
+                ViewModel_VariantsPaginationRefreshRequested;
         }
 
         _attachedViewModel = viewModel;
@@ -60,12 +62,19 @@ public partial class MaterialListView : UserControl
         {
             _attachedViewModel.PaginationRefreshRequested +=
                 ViewModel_PaginationRefreshRequested;
+            _attachedViewModel.VariantsPaginationRefreshRequested +=
+                ViewModel_VariantsPaginationRefreshRequested;
         }
     }
 
     private async void ViewModel_PaginationRefreshRequested()
     {
         await MaterialsPagination.RefreshAsync();
+    }
+
+    private async void ViewModel_VariantsPaginationRefreshRequested()
+    {
+        await VariantsPagination.RefreshAsync();
     }
 
     private async void RefreshButton_Click(
@@ -82,6 +91,13 @@ public partial class MaterialListView : UserControl
         await MaterialsPagination.RefreshAsync();
     }
 
+    private async void VariantFilterToggleButton_Click(
+        object sender,
+        RoutedEventArgs e)
+    {
+        await VariantsPagination.RefreshAsync();
+    }
+
     private async void MaterialsFilter_FilterChanged(
         object sender,
         RoutedEventArgs e)
@@ -94,11 +110,8 @@ public partial class MaterialListView : UserControl
         viewModel.SetFilter(
             new MaterialFilterCriteria(
                 NameFilterColumn.FilterText,
-                EanFilterColumn.FilterText,
-                UnitFilterColumn.FilterText,
-                AmountFilterColumn.FilterValue,
-                AmountFilterColumn.SelectedOperator,
-                DescriptionFilterColumn.FilterText));
+                VariantsCountFilterColumn.SelectedOperator,
+                VariantsCountFilterColumn.FilterValue));
 
         await MaterialsPagination.RefreshAsync();
     }
@@ -133,5 +146,63 @@ public partial class MaterialListView : UserControl
 
         viewModel.SetSorting(sortBy, isDescending);
         await MaterialsPagination.RefreshAsync();
+    }
+
+    private async void VariantsRefreshButton_Click(
+        object sender,
+        RoutedEventArgs e)
+    {
+        await VariantsPagination.RefreshAsync();
+    }
+
+    private async void VariantsFilter_FilterChanged(
+        object sender,
+        RoutedEventArgs e)
+    {
+        if (DataContext is not MaterialListViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.SetVariantFilter(
+            new MaterialVariantFilterCriteria(
+                VariantNameFilterColumn.FilterText,
+                VariantEanFilterColumn.FilterText,
+                VariantManufacturerCodeFilterColumn.FilterText,
+                VariantDescriptionFilterColumn.FilterText));
+
+        await VariantsPagination.RefreshAsync();
+    }
+
+    private async void VariantsDataGrid_Sorting(
+        object sender,
+        DataGridSortingEventArgs e)
+    {
+        if (DataContext is not MaterialListViewModel viewModel ||
+            sender is not DataGrid dataGrid ||
+            !Enum.TryParse(
+                e.Column.SortMemberPath,
+                ignoreCase: true,
+                out MaterialVariantSortBy sortBy))
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        var isDescending = viewModel.VariantSortBy == sortBy &&
+                           !viewModel.IsVariantDescending;
+
+        foreach (var column in dataGrid.Columns)
+        {
+            column.SortDirection = null;
+        }
+
+        e.Column.SortDirection = isDescending
+            ? ListSortDirection.Descending
+            : ListSortDirection.Ascending;
+
+        viewModel.SetVariantSorting(sortBy, isDescending);
+        await VariantsPagination.RefreshAsync();
     }
 }

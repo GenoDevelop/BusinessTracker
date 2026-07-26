@@ -2,9 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Infrastructure.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:global="clr-namespace:"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance global:ProductsViewModel}">
@@ -15,151 +15,151 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,5,0"/>
-            <controls:RefreshButton Command="{Binding LoadProductsCommand}" Margin="0,0,5,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/>
-        </StackPanel>
-
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"
-                  Background="White"
-                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                  Sorting="DataGrid_Sorting">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="NameFilterColumn"
-                            Header="Nazwa"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="ProductsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5,0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="1*" SortMemberPath="Identifier">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="IdentifierFilterColumn"
-                            Header="Identyfikator"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="ProductsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Identifier}" VerticalAlignment="Center" Margin="5,0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
-                    <DataGridTemplateColumn.Header>
-                        <controls:NumericFilterColumnHeader
-                            x:Name="AmountFilterColumn"
-                            Header="Ilość"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="ProductsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Amount}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="3*" SortMemberPath="Description">
-                    <DataGridTemplateColumn.Header>
-                        <controls:TextFilterColumnHeader
-                            x:Name="DescriptionFilterColumn"
-                            Header="Opis"
-                            DebounceMilliseconds="500"
-                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            FilterChanged="ProductsFilter_FilterChanged" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" VerticalAlignment="Center" Padding="5"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Width="80">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <controls:EditButton
-                                    Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"
-                                    Margin="0,0,5,0" />
-                                <controls:DeleteButton
-                                    Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!-- Pagination -->
-        <controls:PaginationControl x:Name="ProductsPagination"
-                                    Grid.Row="2"
-                                    Layout="SingleLine"
-                                    PageLoader="{Binding ProductsPageLoader}"
-                                    HorizontalAlignment="Right"
-                                    PaginationHorizontalAlignment="Right"
-                                    Margin="0,5,0,0" />
-
-        <!-- Create Product Popup -->
-        <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
-                <StackPanel Width="400" DataContext="{Binding CreateProductViewModel}">
-                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj produkt;Dodaj produkt'}" 
-                               FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-
-                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                    <TextBlock Text="Identyfikator (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Identifier, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" 
-                             Height="100" Margin="0,0,0,20" />
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Delete Product Confirmation Popup -->
-        <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
-                <StackPanel Width="300">
-                    <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                        <Run Text="Czy na pewno chcesz usunąć produkt " />
-                        <Run Text="{Binding ProductToDelete.Name, Mode=OneWay}" FontWeight="Bold" />
-                        <Run Text="?" />
-                    </TextBlock>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Popup>
+        <!-- <StackPanel Orientation="Horizontal" Margin="0,0,0,10"> -->
+        <!--     <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" /> -->
+        <!--     <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,5,0"/> -->
+        <!--     <controls:RefreshButton Command="{Binding LoadProductsCommand}" Margin="0,0,5,0" /> -->
+        <!--     <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/> -->
+        <!-- </StackPanel> -->
+        <!-- -->
+        <!-- <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True" -->
+        <!--           Background="White" -->
+        <!--           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" -->
+        <!--           Sorting="DataGrid_Sorting"> -->
+        <!--     <DataGrid.Columns> -->
+        <!--         <DataGridTemplateColumn Width="2*" SortMemberPath="Name"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="NameFilterColumn" -->
+        <!--                     Header="Nazwa" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="ProductsFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="1*" SortMemberPath="Identifier"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="IdentifierFilterColumn" -->
+        <!--                     Header="Identyfikator" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="ProductsFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Identifier}" VerticalAlignment="Center" Margin="5,0"/> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="100" SortMemberPath="Amount"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:NumericFilterColumnHeader -->
+        <!--                     x:Name="AmountFilterColumn" -->
+        <!--                     Header="Ilość" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="ProductsFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Amount}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="3*" SortMemberPath="Description"> -->
+        <!--             <DataGridTemplateColumn.Header> -->
+        <!--                 <controls:TextFilterColumnHeader -->
+        <!--                     x:Name="DescriptionFilterColumn" -->
+        <!--                     Header="Opis" -->
+        <!--                     DebounceMilliseconds="500" -->
+        <!--                     IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                     FilterChanged="ProductsFilter_FilterChanged" /> -->
+        <!--             </DataGridTemplateColumn.Header> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap" VerticalAlignment="Center" Padding="5"/> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!-- -->
+        <!--         <DataGridTemplateColumn Width="80"> -->
+        <!--             <DataGridTemplateColumn.CellTemplate> -->
+        <!--                 <DataTemplate> -->
+        <!--                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                         <controls:EditButton -->
+        <!--                             Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             CommandParameter="{Binding}" -->
+        <!--                             Margin="0,0,5,0" /> -->
+        <!--                         <controls:DeleteButton -->
+        <!--                             Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
+        <!--                             CommandParameter="{Binding}"/> -->
+        <!--                     </StackPanel> -->
+        <!--                 </DataTemplate> -->
+        <!--             </DataGridTemplateColumn.CellTemplate> -->
+        <!--         </DataGridTemplateColumn> -->
+        <!--     </DataGrid.Columns> -->
+        <!-- </DataGrid> -->
+        <!-- -->
+        <!-- ~1~ Pagination @1@ -->
+        <!-- <controls:PaginationControl x:Name="ProductsPagination" -->
+        <!--                             Grid.Row="2" -->
+        <!--                             Layout="SingleLine" -->
+        <!--                             PageLoader="{Binding ProductsPageLoader}" -->
+        <!--                             HorizontalAlignment="Right" -->
+        <!--                             PaginationHorizontalAlignment="Right" -->
+        <!--                             Margin="0,5,0,0" /> -->
+        <!-- -->
+        <!-- ~1~ Create Product Popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20"> -->
+        <!--         <StackPanel Width="400" DataContext="{Binding CreateProductViewModel}"> -->
+        <!--             <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj produkt;Dodaj produkt'}"  -->
+        <!--                        FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Identyfikator (wymagane):" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Identifier, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" /> -->
+        <!-- -->
+        <!--             <TextBlock Text="Opis:" Margin="0,0,0,5" /> -->
+        <!--             <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"  -->
+        <!--                      AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"  -->
+        <!--                      Height="100" Margin="0,0,0,20" /> -->
+        <!-- -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                 <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" /> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
+        <!-- -->
+        <!-- ~1~ Delete Product Confirmation Popup @1@ -->
+        <!-- <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True"> -->
+        <!--     <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20"> -->
+        <!--         <StackPanel Width="300"> -->
+        <!--             <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" /> -->
+        <!--             <TextBlock Margin="0,0,0,20" TextWrapping="Wrap"> -->
+        <!--                 <Run Text="Czy na pewno chcesz usunąć produkt " /> -->
+        <!--                 <Run Text="{Binding ProductToDelete.Name, Mode=OneWay}" FontWeight="Bold" /> -->
+        <!--                 <Run Text="?" /> -->
+        <!--             </TextBlock> -->
+        <!--             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"> -->
+        <!--                 <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" /> -->
+        <!--                 <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" /> -->
+        <!--             </StackPanel> -->
+        <!--         </StackPanel> -->
+        <!--     </Border> -->
+        <!-- </Popup> -->
     </Grid>
 </UserControl>

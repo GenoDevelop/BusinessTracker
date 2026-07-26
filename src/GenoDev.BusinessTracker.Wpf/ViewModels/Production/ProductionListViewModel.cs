@@ -10,9 +10,9 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProduction
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipeMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipes;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateProduction;
-using GenoDev.BusinessTracker.Wpf.Infrastructure.Controls;
 using MediatR;
 using System.Collections.ObjectModel;
+using GenoDev.BusinessTracker.Wpf.Controls;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
@@ -24,627 +24,627 @@ public enum ProductionPaginationTarget
 
 public partial class ProductionListViewModel : ViewModelBase
 {
-    private readonly IMediator _mediator;
-    private Guid? _editingProductionId;
-
-    private ProductionHistoryFilterCriteria _historyFilter =
-        ProductionHistoryFilterCriteria.Empty;
-
-    public ProductionListViewModel(IMediator mediator)
-    {
-        _mediator = mediator;
-
-        AddProductionCommand = new AsyncRelayCommand(AddProductionAsync, CanAddProduction);
-        EditProductionCommand = new AsyncRelayCommand<ProductionHistoryDto>(
-            EditProductionAsync,
-            CanEditProduction);
-        DeleteProductionCommand = new RelayCommand<ProductionHistoryDto>(
-            DeleteProduction,
-            CanDeleteProduction);
-        SaveProductionCommand = new AsyncRelayCommand(SaveProductionAsync, CanSaveProduction);
-        CancelAddProductionCommand = new RelayCommand(CancelAddProduction);
-        ConfirmDeleteProductionCommand = new AsyncRelayCommand(ConfirmDeleteProductionAsync);
-        CancelDeleteProductionCommand = new RelayCommand(CancelDeleteProduction);
-    }
-
-    public ObservableCollection<ProductionSummaryDto> Products { get; } = new();
-    public ObservableCollection<RecipeDto> ProductRecipes { get; } = new();
-    public ObservableCollection<ProductionHistoryDto> ProductionHistory { get; } = new();
-    public ObservableCollection<object> SelectedMaterials { get; } = new();
-    public ObservableCollection<DynamicMaterialInput> MaterialInputs { get; } = new();
-
-    /// <summary>
-    /// Loadery przekazywane bezpośrednio do kontrolek paginacji.
-    /// Kontrolka dostarcza stan strony i sama przejmuje zwrócony TotalCount.
-    /// </summary>
-    public PaginationPageLoader ProductionsPageLoader => LoadProductsPageAsync;
-    public PaginationPageLoader HistoryPageLoader => LoadHistoryPageAsync;
-
-    /// <summary>
-    /// Lekki, niezależny od WPF sygnał używany po operacjach CRUD,
-    /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
-    /// </summary>
-    public event Action<ProductionPaginationTarget>? PaginationRefreshRequested;
-
-    [ObservableProperty]
-    private bool _isFilterVisible;
-
-    [ObservableProperty]
-    private string? _searchTerm;
-
-    [ObservableProperty]
-    private bool _isHistoryFilterVisible;
-
-    [ObservableProperty]
-    private string? _recipeSearchTerm;
-
-    [ObservableProperty]
-    private ProductionSummaryDto? _selectedProduct;
-
-    [ObservableProperty]
-    private RecipeDto? _selectedRecipe;
-
-    [ObservableProperty]
-    private ProductionHistoryDto? _selectedProduction;
-
-    [ObservableProperty]
-    private bool _showRecipeDetails;
-
-    [ObservableProperty]
-    private bool _isAddingProduction;
-
-    [ObservableProperty]
-    private bool _isEditingProduction;
-
-    [ObservableProperty]
-    private bool _isDeletePopupOpen;
-
-    [ObservableProperty]
-    private ProductionHistoryDto? _productionToDelete;
-
-    [ObservableProperty]
-    private int _productionAmount = 1;
-
-    [ObservableProperty]
-    private string? _productionDescription;
-
-    [ObservableProperty]
-    private DateTime _productionDate = DateTime.Now;
-
-    public IAsyncRelayCommand AddProductionCommand { get; }
-    public IAsyncRelayCommand<ProductionHistoryDto> EditProductionCommand { get; }
-    public IRelayCommand<ProductionHistoryDto> DeleteProductionCommand { get; }
-    public IAsyncRelayCommand SaveProductionCommand { get; }
-    public IRelayCommand CancelAddProductionCommand { get; }
-    public IAsyncRelayCommand ConfirmDeleteProductionCommand { get; }
-    public IRelayCommand CancelDeleteProductionCommand { get; }
-
-    public void SetHistoryFilter(ProductionHistoryFilterCriteria filter)
-    {
-        _historyFilter = filter;
-    }
-
-    public Task RefreshProductRecipesAsync()
-    {
-        return LoadProductRecipesAsync(SelectedProduct);
-    }
-
-    private async Task<int> LoadProductsPageAsync(
-        PaginationState state,
-        CancellationToken cancellationToken)
-    {
-        var selectedId = SelectedProduct?.Id;
-        var result = await _mediator.Send(
-            new GetProductionSummaryQuery(state.PageIndex, state.PageSize, SearchTerm),
-            cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        ReplaceItems(Products, result.Items);
-
-        SelectedProduct = selectedId.HasValue
-            ? Products.FirstOrDefault(product => product.Id == selectedId.Value)
-            : null;
-
-        return result.TotalCount;
-    }
-
-    private async Task<int> LoadHistoryPageAsync(
-        PaginationState state,
-        CancellationToken cancellationToken)
-    {
-        if (SelectedProduct is null)
-        {
-            ProductionHistory.Clear();
-            SelectedProduction = null;
-            return 0;
-        }
-
-        var selectedId = SelectedProduction?.Id;
-        var filter = _historyFilter;
-
-        var result = await _mediator.Send(
-            new GetProductionHistoryQuery(
-                SelectedProduct.Id,
-                state.PageIndex,
-                state.PageSize,
-                IsHistoryFilterVisible ? filter.Description : null,
-                IsHistoryFilterVisible ? filter.AmountOperator : null,
-                IsHistoryFilterVisible ? (int?)filter.Amount : null,
-                IsHistoryFilterVisible ? filter.FromDate : null,
-                IsHistoryFilterVisible ? filter.ToDate : null),
-            cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        ReplaceItems(ProductionHistory, result.Items);
-
-        SelectedProduction = selectedId.HasValue
-            ? ProductionHistory.FirstOrDefault(item => item.Id == selectedId.Value)
-            : null;
-
-        return result.TotalCount;
-    }
-
-    partial void OnSelectedProductChanged(ProductionSummaryDto? value)
-    {
-        CancelAddProduction();
-        ProductionHistory.Clear();
-        SelectedProduction = null;
-        SelectedMaterials.Clear();
-        _ = LoadProductRecipesAsync(value);
-    }
-
-    partial void OnSelectedRecipeChanged(RecipeDto? value)
-    {
-        NotifyCommandStatesChanged();
-
-        if (IsAddingProduction && value is not null)
-        {
-            _ = InitializeMaterialInputsAsync(value);
-        }
-
-        if (ShowRecipeDetails)
-        {
-            _ = LoadMaterialsAsync();
-        }
-    }
-
-    partial void OnSelectedProductionChanged(ProductionHistoryDto? value)
-    {
-        if (!ShowRecipeDetails)
-        {
-            _ = LoadMaterialsAsync();
-        }
-    }
-
-    partial void OnShowRecipeDetailsChanged(bool value)
-    {
-        _ = LoadMaterialsAsync();
-    }
-
-    partial void OnIsAddingProductionChanged(bool value)
-    {
-        NotifyCommandStatesChanged();
-    }
-
-    partial void OnIsEditingProductionChanged(bool value)
-    {
-        NotifyCommandStatesChanged();
-    }
-
-    partial void OnProductionAmountChanged(int value)
-    {
-        foreach (var input in MaterialInputs)
-        {
-            input.UpdateRequiredAmount();
-        }
-
-        SaveProductionCommand.NotifyCanExecuteChanged();
-    }
-
-    private async Task LoadProductRecipesAsync(ProductionSummaryDto? product)
-    {
-        var selectedId = SelectedRecipe?.Id;
-        ProductRecipes.Clear();
-        SelectedRecipe = null;
-
-        if (product is null)
-        {
-            return;
-        }
-
-        var result = await _mediator.Send(
-            new GetRecipesQuery(0, 100, RecipeSearchTerm, product.Id));
-
-        if (SelectedProduct?.Id != product.Id)
-        {
-            return;
-        }
-
-        ReplaceItems(ProductRecipes, result.Items);
-
-        SelectedRecipe = selectedId.HasValue
-            ? ProductRecipes.FirstOrDefault(recipe => recipe.Id == selectedId.Value)
-            : null;
-
-        SelectedRecipe ??= ProductRecipes.FirstOrDefault();
-    }
-
-    private async Task LoadMaterialsAsync()
-    {
-        if (ShowRecipeDetails)
-        {
-            if (SelectedRecipe is null)
-            {
-                SelectedMaterials.Clear();
-                return;
-            }
-
-            var result = await _mediator.Send(
-                new GetRecipeMaterialsQuery(SelectedRecipe.Id));
-            ReplaceItems(SelectedMaterials, result.Items.Cast<object>());
-            return;
-        }
-
-        if (SelectedProduction is null)
-        {
-            SelectedMaterials.Clear();
-            return;
-        }
-
-        var productionMaterials = await _mediator.Send(
-            new GetProductionMaterialsQuery(SelectedProduction.Id));
-        ReplaceItems(SelectedMaterials, productionMaterials.Cast<object>());
-    }
-
-    private bool CanAddProduction()
-    {
-        return !IsBusy &&
-               !IsAddingProduction &&
-               !IsEditingProduction &&
-               SelectedRecipe is not null;
-    }
-
-    private async Task AddProductionAsync()
-    {
-        if (SelectedRecipe is null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        NotifyCommandStatesChanged();
-        try
-        {
-            ProductionAmount = 1;
-            ProductionDescription = string.Empty;
-            ProductionDate = DateTime.Now;
-            MaterialInputs.Clear();
-
-            await InitializeMaterialInputsAsync(SelectedRecipe);
-
-            IsAddingProduction = true;
-            IsEditingProduction = false;
-            _editingProductionId = null;
-        }
-        finally
-        {
-            IsBusy = false;
-            NotifyCommandStatesChanged();
-        }
-    }
-
-    private bool CanEditProduction(ProductionHistoryDto? production)
-    {
-        return !IsBusy &&
-               !IsAddingProduction &&
-               !IsEditingProduction &&
-               production is not null;
-    }
-
-    private bool CanDeleteProduction(ProductionHistoryDto? production)
-    {
-        return CanEditProduction(production);
-    }
-
-    private async Task EditProductionAsync(ProductionHistoryDto? production)
-    {
-        if (production is null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        NotifyCommandStatesChanged();
-        try
-        {
-            var productionMaterials = await _mediator.Send(
-                new GetProductionMaterialsQuery(production.Id));
-            var materials = await _mediator.Send(new GetMaterialsQuery(0, 1000));
-            var producedAmount = Math.Max(1, production.ProductionAmount);
-
-            MaterialInputs.Clear();
-            foreach (var item in productionMaterials)
-            {
-                var currentStock = materials.Items
-                    .FirstOrDefault(material => material.Id == item.MaterialId)
-                    ?.Amount ?? 0;
-                var usedAmountPerUnit = item.UsedAmount / producedAmount;
-
-                MaterialInputs.Add(new DynamicMaterialInput(this)
-                {
-                    ProductionMaterialId = item.Id,
-                    RecipeMaterialId = Guid.Empty,
-                    MaterialId = item.MaterialId,
-                    MaterialName = item.MaterialName,
-                    RecipeAmount = 0,
-                    UsedAmount = usedAmountPerUnit,
-                    DefaultUsedAmount = usedAmountPerUnit,
-                    CurrentStock = currentStock + item.UsedAmount,
-                    Unit = item.Unit
-                });
-            }
-
-            ProductionAmount = production.ProductionAmount;
-            ProductionDescription = production.Description;
-            ProductionDate = production.ProductionDate;
-            _editingProductionId = production.Id;
-            IsAddingProduction = false;
-            IsEditingProduction = true;
-
-            foreach (var input in MaterialInputs)
-            {
-                input.UpdateRequiredAmount();
-            }
-        }
-        finally
-        {
-            IsBusy = false;
-            NotifyCommandStatesChanged();
-        }
-    }
-
-    private void DeleteProduction(ProductionHistoryDto? production)
-    {
-        if (production is null)
-        {
-            return;
-        }
-
-        ProductionToDelete = production;
-        IsDeletePopupOpen = true;
-    }
-
-    private async Task ConfirmDeleteProductionAsync()
-    {
-        if (ProductionToDelete is null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        NotifyCommandStatesChanged();
-        try
-        {
-            await _mediator.Send(new DeleteProductionCommand(ProductionToDelete.Id));
-
-            IsDeletePopupOpen = false;
-            ProductionToDelete = null;
-
-            await LoadProductRecipesAsync(SelectedProduct);
-            RequestPaginationRefresh(ProductionPaginationTarget.History);
-            RequestPaginationRefresh(ProductionPaginationTarget.Productions);
-        }
-        finally
-        {
-            IsBusy = false;
-            NotifyCommandStatesChanged();
-        }
-    }
-
-    private void CancelDeleteProduction()
-    {
-        IsDeletePopupOpen = false;
-        ProductionToDelete = null;
-    }
-
-    private bool CanSaveProduction()
-    {
-        return !IsBusy &&
-               (IsAddingProduction || IsEditingProduction) &&
-               SelectedProduct is not null &&
-               ProductionAmount > 0;
-    }
-
-    private async Task SaveProductionAsync()
-    {
-        if (SelectedProduct is null)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        NotifyCommandStatesChanged();
-        try
-        {
-            if (IsEditingProduction)
-            {
-                if (!_editingProductionId.HasValue)
-                {
-                    return;
-                }
-
-                await _mediator.Send(new UpdateProductionCommand(
-                    _editingProductionId.Value,
-                    ProductionAmount,
-                    ProductionDescription,
-                    ProductionDate,
-                    MaterialInputs.Select(input => new MaterialUsageDto(
-                        input.ProductionMaterialId,
-                        input.MaterialId,
-                        input.TotalRequiredAmount))));
-            }
-            else
-            {
-                await _mediator.Send(new AddProductionCommand(
-                    SelectedProduct.Id,
-                    ProductionAmount,
-                    ProductionDescription,
-                    ProductionDate,
-                    MaterialInputs.Select(input => new MaterialUsageDto(
-                        null,
-                        input.MaterialId,
-                        input.TotalRequiredAmount))));
-            }
-
-            CancelAddProduction();
-            await LoadProductRecipesAsync(SelectedProduct);
-            RequestPaginationRefresh(ProductionPaginationTarget.History);
-            RequestPaginationRefresh(ProductionPaginationTarget.Productions);
-        }
-        finally
-        {
-            IsBusy = false;
-            NotifyCommandStatesChanged();
-        }
-    }
-
-    private void CancelAddProduction()
-    {
-        IsAddingProduction = false;
-        IsEditingProduction = false;
-        _editingProductionId = null;
-        MaterialInputs.Clear();
-        NotifyCommandStatesChanged();
-    }
-
-    private async Task InitializeMaterialInputsAsync(RecipeDto recipe)
-    {
-        var recipeMaterials = await _mediator.Send(
-            new GetRecipeMaterialsQuery(recipe.Id, 0, 100));
-        var materials = await _mediator.Send(new GetMaterialsQuery(0, 1000));
-        var recipeMaterialIds = recipeMaterials.Items
-            .Select(item => item.Id)
-            .ToHashSet();
-
-        foreach (var obsoleteInput in MaterialInputs
-                     .Where(input => !recipeMaterialIds.Contains(input.RecipeMaterialId))
-                     .ToList())
-        {
-            MaterialInputs.Remove(obsoleteInput);
-        }
-
-        foreach (var item in recipeMaterials.Items)
-        {
-            var currentStock = materials.Items
-                .FirstOrDefault(material => material.Id == item.MaterialId)
-                ?.Amount ?? 0;
-            var existingInput = MaterialInputs.FirstOrDefault(
-                input => input.RecipeMaterialId == item.Id);
-
-            if (existingInput is not null)
-            {
-                if (!existingInput.IsModified)
-                {
-                    existingInput.UsedAmount = item.RequiredAmount;
-                }
-
-                existingInput.DefaultUsedAmount = item.RequiredAmount;
-                existingInput.CurrentStock = currentStock;
-                existingInput.UpdateRequiredAmount();
-                continue;
-            }
-
-            var input = new DynamicMaterialInput(this)
-            {
-                RecipeMaterialId = item.Id,
-                MaterialId = item.MaterialId,
-                MaterialName = item.MaterialName,
-                RecipeAmount = item.RequiredAmount,
-                UsedAmount = item.RequiredAmount,
-                DefaultUsedAmount = item.RequiredAmount,
-                CurrentStock = currentStock,
-                Unit = item.Unit
-            };
-
-            MaterialInputs.Add(input);
-            input.UpdateRequiredAmount();
-        }
-    }
-
-    private void RequestPaginationRefresh(ProductionPaginationTarget target)
-    {
-        PaginationRefreshRequested?.Invoke(target);
-    }
-
-    private void NotifyCommandStatesChanged()
-    {
-        AddProductionCommand.NotifyCanExecuteChanged();
-        EditProductionCommand.NotifyCanExecuteChanged();
-        DeleteProductionCommand.NotifyCanExecuteChanged();
-        SaveProductionCommand.NotifyCanExecuteChanged();
-    }
-
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
-}
-
-public partial class DynamicMaterialInput : ObservableObject
-{
-    private readonly ProductionListViewModel _parent;
-
-    public DynamicMaterialInput(ProductionListViewModel parent)
-    {
-        _parent = parent;
-    }
-
-    public Guid? ProductionMaterialId { get; init; }
-    public Guid RecipeMaterialId { get; init; }
-    public Guid MaterialId { get; init; }
-    public string MaterialName { get; init; } = null!;
-    public double RecipeAmount { get; init; }
-    public string? Unit { get; init; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsModified))]
-    private double _defaultUsedAmount;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsModified))]
-    private double _usedAmount;
-
-    [ObservableProperty]
-    private double _currentStock;
-
-    [ObservableProperty]
-    private double _totalRequiredAmount;
-
-    [ObservableProperty]
-    private bool _hasEnough;
-
-    public bool IsModified => Math.Abs(UsedAmount - DefaultUsedAmount) > 0.0001;
-
-    [RelayCommand]
-    private void ReloadDefault()
-    {
-        UsedAmount = DefaultUsedAmount;
-    }
-
-    public void UpdateRequiredAmount()
-    {
-        TotalRequiredAmount = UsedAmount * _parent.ProductionAmount;
-        HasEnough = CurrentStock >= TotalRequiredAmount;
-    }
-
-    partial void OnDefaultUsedAmountChanged(double value) => UpdateRequiredAmount();
-    partial void OnUsedAmountChanged(double value) => UpdateRequiredAmount();
-    partial void OnCurrentStockChanged(double value) => UpdateRequiredAmount();
+//     private readonly IMediator _mediator;
+//     private Guid? _editingProductionId;
+//
+//     private ProductionHistoryFilterCriteria _historyFilter =
+//         ProductionHistoryFilterCriteria.Empty;
+//
+//     public ProductionListViewModel(IMediator mediator)
+//     {
+//         _mediator = mediator;
+//
+//         AddProductionCommand = new AsyncRelayCommand(AddProductionAsync, CanAddProduction);
+//         EditProductionCommand = new AsyncRelayCommand<ProductionHistoryDto>(
+//             EditProductionAsync,
+//             CanEditProduction);
+//         DeleteProductionCommand = new RelayCommand<ProductionHistoryDto>(
+//             DeleteProduction,
+//             CanDeleteProduction);
+//         SaveProductionCommand = new AsyncRelayCommand(SaveProductionAsync, CanSaveProduction);
+//         CancelAddProductionCommand = new RelayCommand(CancelAddProduction);
+//         ConfirmDeleteProductionCommand = new AsyncRelayCommand(ConfirmDeleteProductionAsync);
+//         CancelDeleteProductionCommand = new RelayCommand(CancelDeleteProduction);
+//     }
+//
+//     public ObservableCollection<ProductionSummaryDto> Products { get; } = new();
+//     public ObservableCollection<RecipeDto> ProductRecipes { get; } = new();
+//     public ObservableCollection<ProductionHistoryDto> ProductionHistory { get; } = new();
+//     public ObservableCollection<object> SelectedMaterials { get; } = new();
+//     public ObservableCollection<DynamicMaterialInput> MaterialInputs { get; } = new();
+//
+//     /// <summary>
+//     /// Loadery przekazywane bezpośrednio do kontrolek paginacji.
+//     /// Kontrolka dostarcza stan strony i sama przejmuje zwrócony TotalCount.
+//     /// </summary>
+//     public PaginationPageLoader ProductionsPageLoader => LoadProductsPageAsync;
+//     public PaginationPageLoader HistoryPageLoader => LoadHistoryPageAsync;
+//
+//     /// <summary>
+//     /// Lekki, niezależny od WPF sygnał używany po operacjach CRUD,
+//     /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
+//     /// </summary>
+//     public event Action<ProductionPaginationTarget>? PaginationRefreshRequested;
+//
+//     [ObservableProperty]
+//     private bool _isFilterVisible;
+//
+//     [ObservableProperty]
+//     private string? _searchTerm;
+//
+//     [ObservableProperty]
+//     private bool _isHistoryFilterVisible;
+//
+//     [ObservableProperty]
+//     private string? _recipeSearchTerm;
+//
+//     [ObservableProperty]
+//     private ProductionSummaryDto? _selectedProduct;
+//
+//     [ObservableProperty]
+//     private RecipeDto? _selectedRecipe;
+//
+//     [ObservableProperty]
+//     private ProductionHistoryDto? _selectedProduction;
+//
+//     [ObservableProperty]
+//     private bool _showRecipeDetails;
+//
+//     [ObservableProperty]
+//     private bool _isAddingProduction;
+//
+//     [ObservableProperty]
+//     private bool _isEditingProduction;
+//
+//     [ObservableProperty]
+//     private bool _isDeletePopupOpen;
+//
+//     [ObservableProperty]
+//     private ProductionHistoryDto? _productionToDelete;
+//
+//     [ObservableProperty]
+//     private int _productionAmount = 1;
+//
+//     [ObservableProperty]
+//     private string? _productionDescription;
+//
+//     [ObservableProperty]
+//     private DateTime _productionDate = DateTime.Now;
+//
+//     public IAsyncRelayCommand AddProductionCommand { get; }
+//     public IAsyncRelayCommand<ProductionHistoryDto> EditProductionCommand { get; }
+//     public IRelayCommand<ProductionHistoryDto> DeleteProductionCommand { get; }
+//     public IAsyncRelayCommand SaveProductionCommand { get; }
+//     public IRelayCommand CancelAddProductionCommand { get; }
+//     public IAsyncRelayCommand ConfirmDeleteProductionCommand { get; }
+//     public IRelayCommand CancelDeleteProductionCommand { get; }
+//
+//     public void SetHistoryFilter(ProductionHistoryFilterCriteria filter)
+//     {
+//         _historyFilter = filter;
+//     }
+//
+//     public Task RefreshProductRecipesAsync()
+//     {
+//         return LoadProductRecipesAsync(SelectedProduct);
+//     }
+//
+//     private async Task<int> LoadProductsPageAsync(
+//         PaginationState state,
+//         CancellationToken cancellationToken)
+//     {
+//         var selectedId = SelectedProduct?.Id;
+//         var result = await _mediator.Send(
+//             new GetProductionSummaryQuery(state.PageIndex, state.PageSize, SearchTerm),
+//             cancellationToken);
+//
+//         cancellationToken.ThrowIfCancellationRequested();
+//         ReplaceItems(Products, result.Items);
+//
+//         SelectedProduct = selectedId.HasValue
+//             ? Products.FirstOrDefault(product => product.Id == selectedId.Value)
+//             : null;
+//
+//         return result.TotalCount;
+//     }
+//
+//     private async Task<int> LoadHistoryPageAsync(
+//         PaginationState state,
+//         CancellationToken cancellationToken)
+//     {
+//         if (SelectedProduct is null)
+//         {
+//             ProductionHistory.Clear();
+//             SelectedProduction = null;
+//             return 0;
+//         }
+//
+//         var selectedId = SelectedProduction?.Id;
+//         var filter = _historyFilter;
+//
+//         var result = await _mediator.Send(
+//             new GetProductionHistoryQuery(
+//                 SelectedProduct.Id,
+//                 state.PageIndex,
+//                 state.PageSize,
+//                 IsHistoryFilterVisible ? filter.Description : null,
+//                 IsHistoryFilterVisible ? filter.AmountOperator : null,
+//                 IsHistoryFilterVisible ? (int?)filter.Amount : null,
+//                 IsHistoryFilterVisible ? filter.FromDate : null,
+//                 IsHistoryFilterVisible ? filter.ToDate : null),
+//             cancellationToken);
+//
+//         cancellationToken.ThrowIfCancellationRequested();
+//         ReplaceItems(ProductionHistory, result.Items);
+//
+//         SelectedProduction = selectedId.HasValue
+//             ? ProductionHistory.FirstOrDefault(item => item.Id == selectedId.Value)
+//             : null;
+//
+//         return result.TotalCount;
+//     }
+//
+//     partial void OnSelectedProductChanged(ProductionSummaryDto? value)
+//     {
+//         CancelAddProduction();
+//         ProductionHistory.Clear();
+//         SelectedProduction = null;
+//         SelectedMaterials.Clear();
+//         _ = LoadProductRecipesAsync(value);
+//     }
+//
+//     partial void OnSelectedRecipeChanged(RecipeDto? value)
+//     {
+//         NotifyCommandStatesChanged();
+//
+//         if (IsAddingProduction && value is not null)
+//         {
+//             _ = InitializeMaterialInputsAsync(value);
+//         }
+//
+//         if (ShowRecipeDetails)
+//         {
+//             _ = LoadMaterialsAsync();
+//         }
+//     }
+//
+//     partial void OnSelectedProductionChanged(ProductionHistoryDto? value)
+//     {
+//         if (!ShowRecipeDetails)
+//         {
+//             _ = LoadMaterialsAsync();
+//         }
+//     }
+//
+//     partial void OnShowRecipeDetailsChanged(bool value)
+//     {
+//         _ = LoadMaterialsAsync();
+//     }
+//
+//     partial void OnIsAddingProductionChanged(bool value)
+//     {
+//         NotifyCommandStatesChanged();
+//     }
+//
+//     partial void OnIsEditingProductionChanged(bool value)
+//     {
+//         NotifyCommandStatesChanged();
+//     }
+//
+//     partial void OnProductionAmountChanged(int value)
+//     {
+//         foreach (var input in MaterialInputs)
+//         {
+//             input.UpdateRequiredAmount();
+//         }
+//
+//         SaveProductionCommand.NotifyCanExecuteChanged();
+//     }
+//
+//     private async Task LoadProductRecipesAsync(ProductionSummaryDto? product)
+//     {
+//         var selectedId = SelectedRecipe?.Id;
+//         ProductRecipes.Clear();
+//         SelectedRecipe = null;
+//
+//         if (product is null)
+//         {
+//             return;
+//         }
+//
+//         var result = await _mediator.Send(
+//             new GetRecipesQuery(0, 100, RecipeSearchTerm, product.Id));
+//
+//         if (SelectedProduct?.Id != product.Id)
+//         {
+//             return;
+//         }
+//
+//         ReplaceItems(ProductRecipes, result.Items);
+//
+//         SelectedRecipe = selectedId.HasValue
+//             ? ProductRecipes.FirstOrDefault(recipe => recipe.Id == selectedId.Value)
+//             : null;
+//
+//         SelectedRecipe ??= ProductRecipes.FirstOrDefault();
+//     }
+//
+//     private async Task LoadMaterialsAsync()
+//     {
+//         if (ShowRecipeDetails)
+//         {
+//             if (SelectedRecipe is null)
+//             {
+//                 SelectedMaterials.Clear();
+//                 return;
+//             }
+//
+//             var result = await _mediator.Send(
+//                 new GetRecipeMaterialsQuery(SelectedRecipe.Id));
+//             ReplaceItems(SelectedMaterials, result.Items.Cast<object>());
+//             return;
+//         }
+//
+//         if (SelectedProduction is null)
+//         {
+//             SelectedMaterials.Clear();
+//             return;
+//         }
+//
+//         var productionMaterials = await _mediator.Send(
+//             new GetProductionMaterialsQuery(SelectedProduction.Id));
+//         ReplaceItems(SelectedMaterials, productionMaterials.Cast<object>());
+//     }
+//
+//     private bool CanAddProduction()
+//     {
+//         return !IsBusy &&
+//                !IsAddingProduction &&
+//                !IsEditingProduction &&
+//                SelectedRecipe is not null;
+//     }
+//
+//     private async Task AddProductionAsync()
+//     {
+//         if (SelectedRecipe is null)
+//         {
+//             return;
+//         }
+//
+//         IsBusy = true;
+//         NotifyCommandStatesChanged();
+//         try
+//         {
+//             ProductionAmount = 1;
+//             ProductionDescription = string.Empty;
+//             ProductionDate = DateTime.Now;
+//             MaterialInputs.Clear();
+//
+//             await InitializeMaterialInputsAsync(SelectedRecipe);
+//
+//             IsAddingProduction = true;
+//             IsEditingProduction = false;
+//             _editingProductionId = null;
+//         }
+//         finally
+//         {
+//             IsBusy = false;
+//             NotifyCommandStatesChanged();
+//         }
+//     }
+//
+//     private bool CanEditProduction(ProductionHistoryDto? production)
+//     {
+//         return !IsBusy &&
+//                !IsAddingProduction &&
+//                !IsEditingProduction &&
+//                production is not null;
+//     }
+//
+//     private bool CanDeleteProduction(ProductionHistoryDto? production)
+//     {
+//         return CanEditProduction(production);
+//     }
+//
+//     private async Task EditProductionAsync(ProductionHistoryDto? production)
+//     {
+//         if (production is null)
+//         {
+//             return;
+//         }
+//
+//         IsBusy = true;
+//         NotifyCommandStatesChanged();
+//         try
+//         {
+//             var productionMaterials = await _mediator.Send(
+//                 new GetProductionMaterialsQuery(production.Id));
+//             var materials = await _mediator.Send(new GetMaterialsQuery(0, 1000));
+//             var producedAmount = Math.Max(1, production.ProductionAmount);
+//
+//             MaterialInputs.Clear();
+//             foreach (var item in productionMaterials)
+//             {
+//                 var currentStock = materials.Items
+//                     .FirstOrDefault(material => material.Id == item.MaterialId)
+//                     ?.Amount ?? 0;
+//                 var usedAmountPerUnit = item.UsedAmount / producedAmount;
+//
+//                 MaterialInputs.Add(new DynamicMaterialInput(this)
+//                 {
+//                     ProductionMaterialId = item.Id,
+//                     RecipeMaterialId = Guid.Empty,
+//                     MaterialId = item.MaterialId,
+//                     MaterialName = item.MaterialName,
+//                     RecipeAmount = 0,
+//                     UsedAmount = usedAmountPerUnit,
+//                     DefaultUsedAmount = usedAmountPerUnit,
+//                     CurrentStock = currentStock + item.UsedAmount,
+//                     Unit = item.Unit
+//                 });
+//             }
+//
+//             ProductionAmount = production.ProductionAmount;
+//             ProductionDescription = production.Description;
+//             ProductionDate = production.ProductionDate;
+//             _editingProductionId = production.Id;
+//             IsAddingProduction = false;
+//             IsEditingProduction = true;
+//
+//             foreach (var input in MaterialInputs)
+//             {
+//                 input.UpdateRequiredAmount();
+//             }
+//         }
+//         finally
+//         {
+//             IsBusy = false;
+//             NotifyCommandStatesChanged();
+//         }
+//     }
+//
+//     private void DeleteProduction(ProductionHistoryDto? production)
+//     {
+//         if (production is null)
+//         {
+//             return;
+//         }
+//
+//         ProductionToDelete = production;
+//         IsDeletePopupOpen = true;
+//     }
+//
+//     private async Task ConfirmDeleteProductionAsync()
+//     {
+//         if (ProductionToDelete is null)
+//         {
+//             return;
+//         }
+//
+//         IsBusy = true;
+//         NotifyCommandStatesChanged();
+//         try
+//         {
+//             await _mediator.Send(new DeleteProductionCommand(ProductionToDelete.Id));
+//
+//             IsDeletePopupOpen = false;
+//             ProductionToDelete = null;
+//
+//             await LoadProductRecipesAsync(SelectedProduct);
+//             RequestPaginationRefresh(ProductionPaginationTarget.History);
+//             RequestPaginationRefresh(ProductionPaginationTarget.Productions);
+//         }
+//         finally
+//         {
+//             IsBusy = false;
+//             NotifyCommandStatesChanged();
+//         }
+//     }
+//
+//     private void CancelDeleteProduction()
+//     {
+//         IsDeletePopupOpen = false;
+//         ProductionToDelete = null;
+//     }
+//
+//     private bool CanSaveProduction()
+//     {
+//         return !IsBusy &&
+//                (IsAddingProduction || IsEditingProduction) &&
+//                SelectedProduct is not null &&
+//                ProductionAmount > 0;
+//     }
+//
+//     private async Task SaveProductionAsync()
+//     {
+//         if (SelectedProduct is null)
+//         {
+//             return;
+//         }
+//
+//         IsBusy = true;
+//         NotifyCommandStatesChanged();
+//         try
+//         {
+//             if (IsEditingProduction)
+//             {
+//                 if (!_editingProductionId.HasValue)
+//                 {
+//                     return;
+//                 }
+//
+//                 await _mediator.Send(new UpdateProductionCommand(
+//                     _editingProductionId.Value,
+//                     ProductionAmount,
+//                     ProductionDescription,
+//                     ProductionDate,
+//                     MaterialInputs.Select(input => new MaterialUsageDto(
+//                         input.ProductionMaterialId,
+//                         input.MaterialId,
+//                         input.TotalRequiredAmount))));
+//             }
+//             else
+//             {
+//                 await _mediator.Send(new AddProductionCommand(
+//                     SelectedProduct.Id,
+//                     ProductionAmount,
+//                     ProductionDescription,
+//                     ProductionDate,
+//                     MaterialInputs.Select(input => new MaterialUsageDto(
+//                         null,
+//                         input.MaterialId,
+//                         input.TotalRequiredAmount))));
+//             }
+//
+//             CancelAddProduction();
+//             await LoadProductRecipesAsync(SelectedProduct);
+//             RequestPaginationRefresh(ProductionPaginationTarget.History);
+//             RequestPaginationRefresh(ProductionPaginationTarget.Productions);
+//         }
+//         finally
+//         {
+//             IsBusy = false;
+//             NotifyCommandStatesChanged();
+//         }
+//     }
+//
+//     private void CancelAddProduction()
+//     {
+//         IsAddingProduction = false;
+//         IsEditingProduction = false;
+//         _editingProductionId = null;
+//         MaterialInputs.Clear();
+//         NotifyCommandStatesChanged();
+//     }
+//
+//     private async Task InitializeMaterialInputsAsync(RecipeDto recipe)
+//     {
+//         var recipeMaterials = await _mediator.Send(
+//             new GetRecipeMaterialsQuery(recipe.Id, 0, 100));
+//         var materials = await _mediator.Send(new GetMaterialsQuery(0, 1000));
+//         var recipeMaterialIds = recipeMaterials.Items
+//             .Select(item => item.Id)
+//             .ToHashSet();
+//
+//         foreach (var obsoleteInput in MaterialInputs
+//                      .Where(input => !recipeMaterialIds.Contains(input.RecipeMaterialId))
+//                      .ToList())
+//         {
+//             MaterialInputs.Remove(obsoleteInput);
+//         }
+//
+//         foreach (var item in recipeMaterials.Items)
+//         {
+//             var currentStock = materials.Items
+//                 .FirstOrDefault(material => material.Id == item.MaterialId)
+//                 ?.Amount ?? 0;
+//             var existingInput = MaterialInputs.FirstOrDefault(
+//                 input => input.RecipeMaterialId == item.Id);
+//
+//             if (existingInput is not null)
+//             {
+//                 if (!existingInput.IsModified)
+//                 {
+//                     existingInput.UsedAmount = item.RequiredAmount;
+//                 }
+//
+//                 existingInput.DefaultUsedAmount = item.RequiredAmount;
+//                 existingInput.CurrentStock = currentStock;
+//                 existingInput.UpdateRequiredAmount();
+//                 continue;
+//             }
+//
+//             var input = new DynamicMaterialInput(this)
+//             {
+//                 RecipeMaterialId = item.Id,
+//                 MaterialId = item.MaterialId,
+//                 MaterialName = item.MaterialName,
+//                 RecipeAmount = item.RequiredAmount,
+//                 UsedAmount = item.RequiredAmount,
+//                 DefaultUsedAmount = item.RequiredAmount,
+//                 CurrentStock = currentStock,
+//                 Unit = item.Unit
+//             };
+//
+//             MaterialInputs.Add(input);
+//             input.UpdateRequiredAmount();
+//         }
+//     }
+//
+//     private void RequestPaginationRefresh(ProductionPaginationTarget target)
+//     {
+//         PaginationRefreshRequested?.Invoke(target);
+//     }
+//
+//     private void NotifyCommandStatesChanged()
+//     {
+//         AddProductionCommand.NotifyCanExecuteChanged();
+//         EditProductionCommand.NotifyCanExecuteChanged();
+//         DeleteProductionCommand.NotifyCanExecuteChanged();
+//         SaveProductionCommand.NotifyCanExecuteChanged();
+//     }
+//
+//     private static void ReplaceItems<T>(
+//         ObservableCollection<T> target,
+//         IEnumerable<T> source)
+//     {
+//         target.Clear();
+//
+//         foreach (var item in source)
+//         {
+//             target.Add(item);
+//         }
+//     }
+// }
+//
+// public partial class DynamicMaterialInput : ObservableObject
+// {
+//     private readonly ProductionListViewModel _parent;
+//
+//     public DynamicMaterialInput(ProductionListViewModel parent)
+//     {
+//         _parent = parent;
+//     }
+//
+//     public Guid? ProductionMaterialId { get; init; }
+//     public Guid RecipeMaterialId { get; init; }
+//     public Guid MaterialId { get; init; }
+//     public string MaterialName { get; init; } = null!;
+//     public double RecipeAmount { get; init; }
+//     public string? Unit { get; init; }
+//
+//     [ObservableProperty]
+//     [NotifyPropertyChangedFor(nameof(IsModified))]
+//     private double _defaultUsedAmount;
+//
+//     [ObservableProperty]
+//     [NotifyPropertyChangedFor(nameof(IsModified))]
+//     private double _usedAmount;
+//
+//     [ObservableProperty]
+//     private double _currentStock;
+//
+//     [ObservableProperty]
+//     private double _totalRequiredAmount;
+//
+//     [ObservableProperty]
+//     private bool _hasEnough;
+//
+//     public bool IsModified => Math.Abs(UsedAmount - DefaultUsedAmount) > 0.0001;
+//
+//     [RelayCommand]
+//     private void ReloadDefault()
+//     {
+//         UsedAmount = DefaultUsedAmount;
+//     }
+//
+//     public void UpdateRequiredAmount()
+//     {
+//         TotalRequiredAmount = UsedAmount * _parent.ProductionAmount;
+//         HasEnough = CurrentStock >= TotalRequiredAmount;
+//     }
+//
+//     partial void OnDefaultUsedAmountChanged(double value) => UpdateRequiredAmount();
+//     partial void OnUsedAmountChanged(double value) => UpdateRequiredAmount();
+//     partial void OnCurrentStockChanged(double value) => UpdateRequiredAmount();
 }

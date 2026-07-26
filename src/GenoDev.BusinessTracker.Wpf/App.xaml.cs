@@ -52,6 +52,7 @@ public partial class App : Application
         services.AddTransient<ProductionListViewModel>();
         services.AddTransient<SalesViewModel>();
         services.AddTransient<OrdersViewModel>();
+        services.AddTransient<CreateMaterialVariantViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>(s => new MainWindow

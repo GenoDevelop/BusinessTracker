@@ -105,4 +105,39 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         result.Items.Should().HaveCount(1);
         result.Items[0].Name.Should().Be("Banana");
     }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByVariantsCount()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var m1 = db.Arrange_Material(name: "One Variant");
+            db.Arrange_MaterialVariant(material: m1);
+
+            var m2 = db.Arrange_Material(name: "Two Variants");
+            db.Arrange_MaterialVariant(material: m2);
+            db.Arrange_MaterialVariant(material: m2);
+
+            var m3 = db.Arrange_Material(name: "No Variants");
+        });
+
+        // Test GreaterThan
+        var queryGt = new GetMaterialsQuery(0, 10, VariantsCountOperator: NumericOperator.GreaterThan, VariantsCountFilter: 1);
+        var resultGt = await Sut.Handle(queryGt, CancellationToken.None);
+        resultGt.Items.Should().HaveCount(1);
+        resultGt.Items[0].Name.Should().Be("Two Variants");
+
+        // Test Equal
+        var queryEq = new GetMaterialsQuery(0, 10, VariantsCountOperator: NumericOperator.Equal, VariantsCountFilter: 1);
+        var resultEq = await Sut.Handle(queryEq, CancellationToken.None);
+        resultEq.Items.Should().HaveCount(1);
+        resultEq.Items[0].Name.Should().Be("One Variant");
+
+        // Test LessThan
+        var queryLt = new GetMaterialsQuery(0, 10, VariantsCountOperator: NumericOperator.LessThan, VariantsCountFilter: 1);
+        var resultLt = await Sut.Handle(queryLt, CancellationToken.None);
+        resultLt.Items.Should().HaveCount(1);
+        resultLt.Items[0].Name.Should().Be("No Variants");
+    }
 }

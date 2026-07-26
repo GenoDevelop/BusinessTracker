@@ -2,5 +2,6 @@ namespace GenoDev.BusinessTracker.Domain.Enums;
 
 public enum MaterialSortBy
 {
-    Name
+    Name,
+    VariantsCount
 }

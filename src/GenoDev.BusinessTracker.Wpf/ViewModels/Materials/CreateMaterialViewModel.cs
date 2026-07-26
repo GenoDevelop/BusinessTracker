@@ -17,23 +17,11 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
     {
         _editingMaterialId = material.Id;
         Name = material.Name;
-        Ean = material.Ean;
-        Description = material.Description;
-        Unit = material.Unit;
     }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     private string _name = string.Empty;
-
-    [ObservableProperty]
-    private string? _ean;
-
-    [ObservableProperty]
-    private string? _description;
-
-    [ObservableProperty]
-    private string? _unit;
 
     public event Action? RequestClose;
 
@@ -45,7 +33,7 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
         {
             if (_editingMaterialId.HasValue)
             {
-                var command = new UpdateMaterialCommand(_editingMaterialId.Value, Name, Ean, Description, Unit);
+                var command = new UpdateMaterialCommand(_editingMaterialId.Value, Name);
                 await mediator.Send(command);
             }
             else

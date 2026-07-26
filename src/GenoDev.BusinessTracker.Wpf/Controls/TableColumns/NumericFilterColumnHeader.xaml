@@ -1,0 +1,56 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Controls.NumericFilterColumnHeader"
+             x:Name="Root"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <TextBlock Text="{Binding Header, ElementName=Root}"
+                   FontWeight="Bold"
+                   Margin="0,0,0,2" />
+
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFilterVisible, ElementName=Root}"
+                                     Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0"
+                      ItemsSource="{Binding AvailableOperators, ElementName=Root}"
+                      DisplayMemberPath="Display"
+                      SelectedValuePath="Operator"
+                      SelectedValue="{Binding SelectedOperator,
+                                              ElementName=Root,
+                                              Mode=TwoWay,
+                                              UpdateSourceTrigger=PropertyChanged}"
+                      Width="35"
+                      Height="18"
+                      Margin="0,0,2,0"
+                      Padding="7,-2,0,0"
+                      FontWeight="Normal"
+                      VerticalContentAlignment="Center" />
+
+            <TextBox x:Name="ValueTextBox"
+                     Grid.Column="1"
+                     Text="{Binding FilterText,
+                                    ElementName=Root,
+                                    Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding IsValueInputEnabled, ElementName=Root}"
+                     PreviewTextInput="ValueTextBox_PreviewTextInput"
+                     DataObject.Pasting="ValueTextBox_Pasting"
+                     Margin="0"
+                     FontWeight="Normal" />
+        </Grid>
+    </StackPanel>
+</UserControl>
