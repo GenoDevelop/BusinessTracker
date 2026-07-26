@@ -38,7 +38,7 @@ public class CreateSupplier_Tests : BusinessTrackerUnitTestsBase<CreateSupplierC
             supplier.Nip.Should().Be(command.Nip);
             supplier.Description.Should().Be(command.Description);
             supplier.WebsiteUrl.Should().Be(command.WebsiteUrl);
-            supplier.MaterialSupplies.Should().BeEmpty();
+            supplier.Supplies.Should().BeEmpty();
         });
     }
 

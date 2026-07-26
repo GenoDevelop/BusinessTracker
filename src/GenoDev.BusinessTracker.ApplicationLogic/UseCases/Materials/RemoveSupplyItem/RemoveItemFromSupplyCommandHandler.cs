@@ -12,6 +12,8 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
         var item = await dbContext.SupplyItems
             .Include(x => x.Supply)
             .Include(x => x.MaterialVariant)
+            .Include(x => x.PackingMaterial)
+            .Include(x => x.FixedAsset)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (item == null)
@@ -21,9 +23,9 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
 
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {
-            if (item.MaterialVariant != null)
+            var amountToSubtract = item.SetsAmount * item.UnitsInSet;
+            if (item.ItemType == SupplyItemType.Material && item.MaterialVariant != null)
             {
-                var amountToSubtract = item.SetsAmount * item.UnitsInSet;
                 if (item.PrivateSupply)
                 {
                     item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
@@ -31,6 +33,28 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
                 else
                 {
                     item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
+                }
+            }
+            else if (item.ItemType == SupplyItemType.Packing && item.PackingMaterial != null)
+            {
+                if (item.PrivateSupply)
+                {
+                    item.PackingMaterial.TotalPrivateAmount -= amountToSubtract;
+                }
+                else
+                {
+                    item.PackingMaterial.TotalCompanyAmount -= amountToSubtract;
+                }
+            }
+            else if (item.ItemType == SupplyItemType.FixedAsset && item.FixedAsset != null)
+            {
+                if (item.PrivateSupply)
+                {
+                    item.FixedAsset.TotalPrivateAmount -= amountToSubtract;
+                }
+                else
+                {
+                    item.FixedAsset.TotalCompanyAmount -= amountToSubtract;
                 }
             }
         }

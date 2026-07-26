@@ -175,6 +175,7 @@ public static class BusinessTrackerDbContextExtensions
             string? ean = null,
             string? description = null,
             string unit = "pcs",
+            string? manufacturerCode = null,
             double totalUsedAmount = 0,
             double totalCompanyAmount = 0,
             double totalPrivateAmount = 0)
@@ -186,6 +187,7 @@ public static class BusinessTrackerDbContextExtensions
                 Ean = ean,
                 Description = description,
                 Unit = unit,
+                ManufacturerCode = manufacturerCode,
                 TotalUsedAmount = totalUsedAmount,
                 TotalCompanyAmount = totalCompanyAmount,
                 TotalPrivateAmount = totalPrivateAmount,
