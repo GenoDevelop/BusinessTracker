@@ -8,4 +8,4 @@ public record UpdateProductionCommand(
     int Amount,
     string? Description,
     DateTime ProductionDate,
-    IEnumerable<MaterialUsageDto> UsedMaterials) : IRequest<Unit>;
+    IEnumerable<MaterialVariantUsageDto> UsedMaterials) : IRequest<Unit>;

@@ -10,8 +10,8 @@ public class MaterialVariant
     public string? Description { get; set; }
     public string? Unit { get; set; }
     public double TotalUsedAmount { get; set; }
-    public double CompanyAmount { get; set; }
-    public double PrivateAmount { get; set; }
+    public double TotalCompanyAmount { get; set; }
+    public double TotalPrivateAmount { get; set; }
 
     public virtual Material Material { get; set; } = null!;
     public virtual ICollection<SupplyItem> SupplyItems { get; set; } = new HashSet<SupplyItem>();

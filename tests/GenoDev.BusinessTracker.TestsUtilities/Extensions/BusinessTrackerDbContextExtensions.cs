@@ -11,7 +11,8 @@ public static class BusinessTrackerDbContextExtensions
         public Supplier Arrange_Supplier(Guid? id = null,
             string name = "Test Supplier",
             string? nip = null,
-            string? websiteUrl = null)
+            string? websiteUrl = null,
+            string? description = null)
         {
             var supplier = new Supplier
             {
@@ -19,6 +20,7 @@ public static class BusinessTrackerDbContextExtensions
                 Name = name,
                 Nip = nip,
                 WebsiteUrl = websiteUrl,
+                Description = description,
                 Supplies = []
             };
         
@@ -65,8 +67,8 @@ public static class BusinessTrackerDbContextExtensions
                 Description = description,
                 Unit = unit,
                 TotalUsedAmount = totalUsedAmount,
-                CompanyAmount = companyAmount,
-                PrivateAmount = privateAmount,
+                TotalCompanyAmount = companyAmount,
+                TotalPrivateAmount = privateAmount,
                 SupplyItems = [],
                 ProductionMaterials = []
             };
@@ -111,6 +113,7 @@ public static class BusinessTrackerDbContextExtensions
         public SupplyItem Arrange_SupplyItem(Supply? supply = null,
             MaterialVariant? materialVariant = null,
             PackingMaterial? packingMaterial = null,
+            FixedAsset? fixedAsset = null,
             Guid? id = null,
             int setsAmount = 1,
             double unitsInSet = 1,
@@ -120,15 +123,22 @@ public static class BusinessTrackerDbContextExtensions
         {
             supply ??= db.Arrange_Supply();
 
+            var itemType = SupplyItemType.Material;
+            if (packingMaterial != null) itemType = SupplyItemType.Packing;
+            else if (fixedAsset != null) itemType = SupplyItemType.FixedAsset;
+
             var item = new SupplyItem
             {
                 Id = id ?? Guid.NewGuid(),
                 MaterialSupplyId = supply.Id,
                 Supply = supply,
+                ItemType = itemType,
                 MaterialVariantId = materialVariant?.Id,
                 MaterialVariant = materialVariant,
                 PackingMaterialId = packingMaterial?.Id,
                 PackingMaterial = packingMaterial,
+                FixedAssetId = fixedAsset?.Id,
+                FixedAsset = fixedAsset,
                 SetsAmount = setsAmount,
                 UnitsInSet = unitsInSet,
                 SetNetPrice = setNetPrice,
@@ -139,9 +149,25 @@ public static class BusinessTrackerDbContextExtensions
             item.Supply.SupplyItems.Add(item);
             item.MaterialVariant?.SupplyItems.Add(item);
             item.PackingMaterial?.SupplyItems.Add(item);
+            item.FixedAsset?.SupplyItems.Add(item);
         
             db.SupplyItems.Add(item);
             return item;
+        }
+
+        public FixedAsset Arrange_FixedAsset(Guid? id = null,
+            double totalCompanyAmount = 0,
+            double totalPrivateAmount = 0)
+        {
+            var asset = new FixedAsset
+            {
+                Id = id ?? Guid.NewGuid(),
+                TotalCompanyAmount = totalCompanyAmount,
+                TotalPrivateAmount = totalPrivateAmount,
+                SupplyItems = []
+            };
+            db.FixedAssets.Add(asset);
+            return asset;
         }
 
         public PackingMaterial Arrange_PackingMaterial(Guid? id = null,
@@ -150,8 +176,8 @@ public static class BusinessTrackerDbContextExtensions
             string? description = null,
             string unit = "pcs",
             double totalUsedAmount = 0,
-            double companyAmount = 0,
-            double privateAmount = 0)
+            double totalCompanyAmount = 0,
+            double totalPrivateAmount = 0)
         {
             var packingMaterial = new PackingMaterial
             {
@@ -161,8 +187,8 @@ public static class BusinessTrackerDbContextExtensions
                 Description = description,
                 Unit = unit,
                 TotalUsedAmount = totalUsedAmount,
-                CompanyAmount = companyAmount,
-                PrivateAmount = privateAmount,
+                TotalCompanyAmount = totalCompanyAmount,
+                TotalPrivateAmount = totalPrivateAmount,
                 SupplyItems = [],
                 OrderPackingMaterials = []
             };
@@ -218,8 +244,7 @@ public static class BusinessTrackerDbContextExtensions
 
         public ProductRecipeMaterial Arrange_ProductRecipeMaterial(ProductRecipe? productRecipe = null,
             Material? material = null,
-            Guid? id = null,
-            double requiredAmount = 1.0)
+            Guid? id = null)
         {
             productRecipe ??= db.Arrange_ProductRecipe();
             material ??= db.Arrange_Material();
@@ -230,8 +255,7 @@ public static class BusinessTrackerDbContextExtensions
                 ProductRecipeId = productRecipe.Id,
                 ProductRecipe = productRecipe,
                 MaterialId = material.Id,
-                Material = material,
-                RequiredAmount = requiredAmount
+                Material = material
             };
 
             recipeMaterial.ProductRecipe.ProductRecipeMaterials.Add(recipeMaterial);

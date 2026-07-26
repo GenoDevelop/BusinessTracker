@@ -15,7 +15,6 @@ public class ProductRecipeMaterialConfiguration : IEntityTypeConfiguration<Produ
 
         builder.Property(x => x.ProductRecipeId).IsRequired();
         builder.Property(x => x.MaterialId).IsRequired();
-        builder.Property(x => x.RequiredAmount).IsRequired();
 
         builder.HasOne(x => x.ProductRecipe)
             .WithMany(x => x.ProductRecipeMaterials)

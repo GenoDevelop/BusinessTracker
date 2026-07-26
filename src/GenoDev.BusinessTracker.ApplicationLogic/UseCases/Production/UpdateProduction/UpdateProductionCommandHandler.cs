@@ -57,14 +57,14 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
         foreach (var usage in request.UsedMaterials)
         {
             var pm = production.ProductionMaterials.First(x => x.Id == usage.Id);
-            var material = await _context.Materials.FindAsync(new object[] { pm.MaterialId }, cancellationToken);
-            if (material == null)
+            var materialVariant = await _context.MaterialVariants.FindAsync(new object[] { pm.MaterialVariantId }, cancellationToken);
+            if (materialVariant == null)
             {
-                throw new KeyNotFoundException($"Material with ID {pm.MaterialId} not found.");
+                throw new KeyNotFoundException($"MaterialVariant with ID {pm.MaterialVariantId} not found.");
             }
 
             // Adjust material stock: Add back old used amount, subtract new amount
-            material.Amount = material.Amount + pm.UsedAmount - usage.Amount;
+            materialVariant.TotalUsedAmount = materialVariant.TotalUsedAmount - pm.UsedAmount + usage.Amount;
             
             pm.UsedAmount = usage.Amount;
         }

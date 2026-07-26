@@ -18,28 +18,9 @@ public class GetRecipeMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
         if (!string.IsNullOrWhiteSpace(request.MaterialNameFilter))
             query = query.WhereContainsAll(x => x.Material.Name, request.MaterialNameFilter);
 
-        if (!string.IsNullOrWhiteSpace(request.EanFilter))
-            query = query.WhereContainsAll(x => x.Material.Ean, request.EanFilter);
-
-        if (request.AmountFilterValue.HasValue && request.AmountOperator.HasValue)
-        {
-            query = request.AmountOperator.Value switch
-            {
-                NumericOperator.Equal => query.Where(x => x.RequiredAmount == request.AmountFilterValue.Value),
-                NumericOperator.NotEqual => query.Where(x => x.RequiredAmount != request.AmountFilterValue.Value),
-                NumericOperator.LessThan => query.Where(x => x.RequiredAmount < request.AmountFilterValue.Value),
-                NumericOperator.LessThanOrEqual => query.Where(x => x.RequiredAmount <= request.AmountFilterValue.Value),
-                NumericOperator.GreaterThan => query.Where(x => x.RequiredAmount > request.AmountFilterValue.Value),
-                NumericOperator.GreaterThanOrEqual => query.Where(x => x.RequiredAmount >= request.AmountFilterValue.Value),
-                _ => query
-            };
-        }
-
         query = request.SortBy switch
         {
             RecipeMaterialSortBy.MaterialName => request.IsDescending ? query.OrderByDescending(x => x.Material.Name) : query.OrderBy(x => x.Material.Name),
-            RecipeMaterialSortBy.Ean => request.IsDescending ? query.OrderByDescending(x => x.Material.Ean) : query.OrderBy(x => x.Material.Ean),
-            RecipeMaterialSortBy.RequiredAmount => request.IsDescending ? query.OrderByDescending(x => x.RequiredAmount) : query.OrderBy(x => x.RequiredAmount),
             _ => query.OrderBy(x => x.Material.Name)
         };
 
@@ -51,10 +32,7 @@ public class GetRecipeMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Select(x => new RecipeMaterialDto(
                 x.Id,
                 x.MaterialId,
-                x.Material.Name,
-                x.Material.Ean,
-                x.RequiredAmount,
-                x.Material.Unit))
+                x.Material.Name))
             .ToListAsync(cancellationToken);
 
         return new PagedList<RecipeMaterialDto>(items, totalCount, request.PageIndex, request.PageSize);

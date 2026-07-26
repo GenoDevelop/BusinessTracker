@@ -34,11 +34,11 @@ public class DeleteSupplyCommandHandler : IRequestHandler<DeleteSupplyCommand>
                 {
                     if (item.PrivateSupply)
                     {
-                        item.MaterialVariant.PrivateAmount -= item.SetsAmount * item.UnitsInSet;
+                        item.MaterialVariant.TotalPrivateAmount -= item.SetsAmount * item.UnitsInSet;
                     }
                     else
                     {
-                        item.MaterialVariant.CompanyAmount -= item.SetsAmount * item.UnitsInSet;
+                        item.MaterialVariant.TotalCompanyAmount -= item.SetsAmount * item.UnitsInSet;
                     }
                 }
             }

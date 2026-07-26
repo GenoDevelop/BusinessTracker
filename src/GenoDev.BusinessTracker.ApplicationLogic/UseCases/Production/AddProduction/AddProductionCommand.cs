@@ -2,9 +2,9 @@ using MediatR;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
 
-public record MaterialUsageDto(
+public record MaterialVariantUsageDto(
     Guid? Id,
-    Guid MaterialId,
+    Guid MaterialVariantId,
     double Amount);
 
 public record AddProductionCommand(
@@ -12,4 +12,4 @@ public record AddProductionCommand(
     int Amount,
     string? Description,
     DateTime ProductionDate,
-    IEnumerable<MaterialUsageDto> UsedMaterials) : IRequest<Unit>;
+    IEnumerable<MaterialVariantUsageDto> UsedMaterials) : IRequest<Unit>;

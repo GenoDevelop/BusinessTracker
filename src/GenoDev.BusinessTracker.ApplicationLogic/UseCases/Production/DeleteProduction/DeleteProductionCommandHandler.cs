@@ -34,12 +34,12 @@ public class DeleteProductionCommandHandler : IRequestHandler<DeleteProductionCo
 
         foreach (var materialUsage in production.ProductionMaterials)
         {
-            var material = await _context.Materials
-                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialId, cancellationToken);
+            var materialVariant = await _context.MaterialVariants
+                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialVariantId, cancellationToken);
 
-            if (material != null)
+            if (materialVariant != null)
             {
-                material.Amount += materialUsage.UsedAmount;
+                materialVariant.TotalUsedAmount -= materialUsage.UsedAmount;
             }
         }
 

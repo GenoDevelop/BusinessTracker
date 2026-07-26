@@ -22,20 +22,22 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var materialId1 = Guid.NewGuid();
-        var materialId2 = Guid.NewGuid();
+        var variantId1 = Guid.NewGuid();
+        var variantId2 = Guid.NewGuid();
 
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Arrange_Product(id: productId, name: "Product 1", amount: 10);
-            db.Arrange_Material(id: materialId1, name: "Material 1", amount: 100);
-            db.Arrange_Material(id: materialId2, name: "Material 2", amount: 200);
+            var m1 = db.Arrange_Material(name: "Material 1");
+            db.Arrange_MaterialVariant(m1, id: variantId1, name: "Variant 1", companyAmount: 100);
+            var m2 = db.Arrange_Material(name: "Material 2");
+            db.Arrange_MaterialVariant(m2, id: variantId2, name: "Variant 2", companyAmount: 200);
         });
 
-        var usedMaterials = new List<MaterialUsageDto>
+        var usedMaterials = new List<MaterialVariantUsageDto>
         {
-            new(null, materialId1, 20),
-            new(null, materialId2, 30)
+            new(null, variantId1, 20),
+            new(null, variantId2, 30)
         };
 
         var command = new AddProductionCommand(
@@ -63,11 +65,13 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
             var product = db.Products.Find(productId);
             product!.Amount.Should().Be(15); // 10 + 5
 
-            var material1 = db.Materials.Find(materialId1);
-            material1!.Amount.Should().Be(80); // 100 - 20
+            var variant1 = db.MaterialVariants.Find(variantId1);
+            variant1!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged
+            variant1.TotalUsedAmount.Should().Be(20);
 
-            var material2 = db.Materials.Find(materialId2);
-            material2!.Amount.Should().Be(170); // 200 - 30
+            var variant2 = db.MaterialVariants.Find(variantId2);
+            variant2!.TotalCompanyAmount.Should().Be(200); // Should remain unchanged
+            variant2.TotalUsedAmount.Should().Be(30);
         });
     }
 
@@ -76,19 +80,20 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var materialId = Guid.NewGuid();
+        var variantId = Guid.NewGuid();
 
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Arrange_Product(id: productId, name: "Product 1", amount: 10);
-            db.Arrange_Material(id: materialId, name: "Material 1", amount: 100);
+            var m = db.Arrange_Material(name: "Material 1");
+            db.Arrange_MaterialVariant(m, id: variantId, name: "Variant 1", companyAmount: 100);
         });
 
         // Scenario: same material used twice (e.g. from different recipe steps or manual entries)
-        var usedMaterials = new List<MaterialUsageDto>
+        var usedMaterials = new List<MaterialVariantUsageDto>
         {
-            new(null, materialId, 10),
-            new(null, materialId, 25)
+            new(null, variantId, 10),
+            new(null, variantId, 25)
         };
 
         var command = new AddProductionCommand(
@@ -116,8 +121,9 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
             var product = db.Products.Find(productId);
             product!.Amount.Should().Be(12); // 10 + 2
 
-            var material = db.Materials.Find(materialId);
-            material!.Amount.Should().Be(65); // 100 - (10 + 25)
+            var variant = db.MaterialVariants.Find(variantId);
+            variant!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged
+            variant.TotalUsedAmount.Should().Be(35);
         });
     }
 }

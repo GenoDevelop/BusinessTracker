@@ -19,6 +19,7 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public DbSet<PackingMaterial> PackingMaterials { get; set; }
     public DbSet<OrderPackingMaterial> OrderPackingMaterials { get; set; }
     public DbSet<MaterialVariant> MaterialVariants { get; set; }
+    public DbSet<FixedAsset> FixedAssets { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductRecipe> ProductRecipes { get; set; }
     public DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; set; }

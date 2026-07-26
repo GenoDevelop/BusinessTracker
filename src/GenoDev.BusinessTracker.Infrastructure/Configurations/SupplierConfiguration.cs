@@ -16,6 +16,7 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.Nip).IsRequired(false).HasMaxLength(20);
         builder.Property(x => x.WebsiteUrl).IsRequired(false);
+        builder.Property(x => x.Description).IsRequired(false);
         
         builder.HasIndex(x => x.Nip)
             .IsUnique()

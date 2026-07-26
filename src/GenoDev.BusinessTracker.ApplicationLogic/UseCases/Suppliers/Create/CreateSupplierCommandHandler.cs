@@ -16,7 +16,7 @@ public class CreateSupplierCommandHandler(IBusinessTrackerDbContext dbContext)
             Nip = string.IsNullOrWhiteSpace(request.Nip) ? null : request.Nip,
             Description = request.Description,
             WebsiteUrl = request.WebsiteUrl,
-            MaterialSupplies = []
+            Supplies = []
         };
 
         dbContext.Suppliers.Add(supplier);

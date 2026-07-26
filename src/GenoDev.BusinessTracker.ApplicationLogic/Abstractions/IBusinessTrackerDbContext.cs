@@ -12,6 +12,7 @@ public interface IBusinessTrackerDbContext
     DbSet<PackingMaterial> PackingMaterials { get; }
     DbSet<OrderPackingMaterial> OrderPackingMaterials { get; }
     DbSet<MaterialVariant> MaterialVariants { get; }
+    DbSet<FixedAsset> FixedAssets { get; }
     DbSet<Product> Products { get; }
     DbSet<ProductRecipe> ProductRecipes { get; }
     DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; }

@@ -24,9 +24,9 @@ public class GetRecipeMaterials_Tests : BusinessTrackerUnitTestsBase<GetRecipeMa
         Arrange_BusinessTrackerDatabase(db =>
         {
             var recipe = db.Arrange_ProductRecipe(id: recipeId);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 10);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 20);
-            db.Arrange_ProductRecipeMaterial(requiredAmount: 30); // Other recipe
+            db.Arrange_ProductRecipeMaterial(productRecipe: recipe);
+            db.Arrange_ProductRecipeMaterial(productRecipe: recipe);
+            db.Arrange_ProductRecipeMaterial(); // Other recipe
         });
 
         var query = new GetRecipeMaterialsQuery(recipeId);
@@ -64,51 +64,6 @@ public class GetRecipeMaterials_Tests : BusinessTrackerUnitTestsBase<GetRecipeMa
     }
 
     [Fact]
-    public async Task Handle_ShouldFilterByAmount_Equal()
-    {
-        // Arrange
-        var recipeId = Guid.NewGuid();
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            var recipe = db.Arrange_ProductRecipe(id: recipeId);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 10);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 20);
-        });
-
-        var query = new GetRecipeMaterialsQuery(recipeId, AmountFilterValue: 10, AmountOperator: NumericOperator.Equal);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Should().HaveCount(1);
-        result.Items.First().RequiredAmount.Should().Be(10);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFilterByAmount_GreaterThan()
-    {
-        // Arrange
-        var recipeId = Guid.NewGuid();
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            var recipe = db.Arrange_ProductRecipe(id: recipeId);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 10);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 20);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 30);
-        });
-
-        var query = new GetRecipeMaterialsQuery(recipeId, AmountFilterValue: 15, AmountOperator: NumericOperator.GreaterThan);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Should().HaveCount(2);
-        result.Items.Should().OnlyContain(x => x.RequiredAmount > 15);
-    }
-
-    [Fact]
     public async Task Handle_ShouldSortByMaterialName()
     {
         // Arrange
@@ -132,28 +87,6 @@ public class GetRecipeMaterials_Tests : BusinessTrackerUnitTestsBase<GetRecipeMa
     }
 
     [Fact]
-    public async Task Handle_ShouldSortByRequiredAmount_Descending()
-    {
-        // Arrange
-        var recipeId = Guid.NewGuid();
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            var recipe = db.Arrange_ProductRecipe(id: recipeId);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 10);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 30);
-            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: 20);
-        });
-
-        var query = new GetRecipeMaterialsQuery(recipeId, SortBy: RecipeMaterialSortBy.RequiredAmount, IsDescending: true);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.RequiredAmount).Should().ContainInOrder(30.0, 20.0, 10.0);
-    }
-
-    [Fact]
     public async Task Handle_ShouldApplyPagination()
     {
         // Arrange
@@ -163,18 +96,19 @@ public class GetRecipeMaterials_Tests : BusinessTrackerUnitTestsBase<GetRecipeMa
             var recipe = db.Arrange_ProductRecipe(id: recipeId);
             for (int i = 1; i <= 5; i++)
             {
-                db.Arrange_ProductRecipeMaterial(productRecipe: recipe, requiredAmount: i);
+                var m = db.Arrange_Material(name: $"Material {i}");
+                db.Arrange_ProductRecipeMaterial(productRecipe: recipe, material: m);
             }
         });
 
-        var query = new GetRecipeMaterialsQuery(recipeId, PageIndex: 1, PageSize: 2, SortBy: RecipeMaterialSortBy.RequiredAmount);
+        var query = new GetRecipeMaterialsQuery(recipeId, PageIndex: 1, PageSize: 2, SortBy: RecipeMaterialSortBy.MaterialName);
 
         // Act
         var result = await Sut.Handle(query, CancellationToken.None);
 
         // Assert
         result.Items.Should().HaveCount(2);
-        result.Items.First().RequiredAmount.Should().Be(3);
+        result.Items.First().MaterialName.Should().Be("Material 3");
         result.TotalCount.Should().Be(5);
         result.HasNextPage.Should().BeTrue();
     }

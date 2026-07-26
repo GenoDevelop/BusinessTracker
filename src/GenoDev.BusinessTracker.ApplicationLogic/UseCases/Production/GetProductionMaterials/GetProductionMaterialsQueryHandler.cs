@@ -19,10 +19,12 @@ public class GetProductionMaterialsQueryHandler : IRequestHandler<GetProductionM
             .Where(x => x.ProductionId == request.ProductionId)
             .Select(x => new ProductionMaterialDto(
                 x.Id,
-                x.MaterialId,
-                x.Material.Name,
+                x.MaterialVariant.MaterialId,
+                x.MaterialVariant.Material.Name,
+                x.MaterialVariantId,
+                x.MaterialVariant.Name,
                 x.UsedAmount,
-                x.Material.Unit))
+                x.MaterialVariant.Unit))
             .ToListAsync(cancellationToken);
     }
 }

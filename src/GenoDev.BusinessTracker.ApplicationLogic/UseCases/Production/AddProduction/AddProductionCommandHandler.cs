@@ -41,18 +41,22 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             {
                 Id = Guid.NewGuid(),
                 ProductionId = production.Id,
-                MaterialId = materialUsage.MaterialId,
+                MaterialVariantId = materialUsage.MaterialVariantId,
                 UsedAmount = materialUsage.Amount
             };
 
             _context.ProductionMaterials.Add(productionMaterial);
 
-            var material = await _context.Materials
-                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialId, cancellationToken);
+            var materialVariant = await _context.MaterialVariants
+                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialVariantId, cancellationToken);
 
-            if (material != null)
+            if (materialVariant != null)
             {
-                material.Amount -= materialUsage.Amount;
+                materialVariant.TotalUsedAmount += materialUsage.Amount;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"MaterialVariant with ID {materialUsage.MaterialVariantId} not found.");
             }
         }
 

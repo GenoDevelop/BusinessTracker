@@ -22,13 +22,15 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var materialId = Guid.NewGuid();
+        var variantId = Guid.NewGuid();
         var productionId = Guid.NewGuid();
 
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
-            db.Materials.Add(new Material { Id = materialId, Name = "Material", Amount = 50 });
+            var material = new Material { Id = Guid.NewGuid(), Name = "Material" };
+            db.Materials.Add(material);
+            db.MaterialVariants.Add(new MaterialVariant { Id = variantId, MaterialId = material.Id, Name = "Variant", TotalCompanyAmount = 50, TotalUsedAmount = 15 });
 
             var production = new Domain.Entities.Production
             {
@@ -41,7 +43,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
                     new ProductionMaterial
                     {
                         Id = Guid.NewGuid(),
-                        MaterialId = materialId,
+                        MaterialVariantId = variantId,
                         UsedAmount = 15
                     }
                 }
@@ -61,8 +63,9 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
             var product = db.Products.First(x => x.Id == productId);
             product.Amount.Should().Be(80); // 100 - 20
 
-            var material = db.Materials.First(x => x.Id == materialId);
-            material.Amount.Should().Be(65); // 50 + 15
+            var variant = db.MaterialVariants.First(x => x.Id == variantId);
+            variant.TotalCompanyAmount.Should().Be(50); // Should remain unchanged
+            variant.TotalUsedAmount.Should().Be(0); // 15 - 15
         });
     }
 

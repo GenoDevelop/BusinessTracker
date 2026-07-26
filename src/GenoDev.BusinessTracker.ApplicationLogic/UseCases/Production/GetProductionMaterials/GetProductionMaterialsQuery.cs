@@ -7,6 +7,8 @@ public record ProductionMaterialDto(
     Guid Id,
     Guid MaterialId,
     string MaterialName,
+    Guid MaterialVariantId,
+    string MaterialVariantName,
     double UsedAmount,
     string? Unit);
 

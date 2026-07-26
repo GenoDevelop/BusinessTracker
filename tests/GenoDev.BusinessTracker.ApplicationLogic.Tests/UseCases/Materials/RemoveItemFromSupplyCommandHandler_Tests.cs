@@ -70,7 +70,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.CompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
+            variant.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
             db.SupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
     }
@@ -104,7 +104,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.PrivateAmount.Should().Be(initialPrivateAmount - (setsAmount * unitsInSet));
+            variant.TotalPrivateAmount.Should().Be(initialPrivateAmount - (setsAmount * unitsInSet));
             db.SupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
     }
@@ -138,7 +138,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.CompanyAmount.Should().Be(initialCompanyAmount);
+            variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
             db.SupplyItems.Any(x => x.Id == itemId).Should().BeFalse();
         });
     }

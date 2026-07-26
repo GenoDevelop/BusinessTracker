@@ -120,7 +120,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.CompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
+            variant.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
         });
     }
 
@@ -163,7 +163,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.PrivateAmount.Should().Be(initialPrivateAmount + (setsAmount * unitsInSet));
+            variant.TotalPrivateAmount.Should().Be(initialPrivateAmount + (setsAmount * unitsInSet));
         });
     }
 
@@ -206,7 +206,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.CompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
+            variant.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
         });
     }
 
@@ -249,7 +249,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         AssertBusinessTracker_Database(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
-            variant.CompanyAmount.Should().Be(initialCompanyAmount);
+            variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
         });
     }
 }

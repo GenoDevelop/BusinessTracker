@@ -23,14 +23,16 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var material1Id = Guid.NewGuid();
+        var variant1Id = Guid.NewGuid();
         var productionId = Guid.NewGuid();
         var productionMaterial1Id = Guid.NewGuid();
 
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
-            db.Materials.Add(new Material { Id = material1Id, Name = "Material 1", Amount = 50 });
+            var material = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
+            db.Materials.Add(material);
+            db.MaterialVariants.Add(new MaterialVariant { Id = variant1Id, MaterialId = material.Id, Name = "Variant 1", TotalCompanyAmount = 50, TotalUsedAmount = 20 });
 
             var production = new Domain.Entities.Production
             {
@@ -40,7 +42,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
                 ProductionDate = DateTime.Now.AddDays(-1),
                 ProductionMaterials = new List<ProductionMaterial>
                 {
-                    new ProductionMaterial { Id = productionMaterial1Id, MaterialId = material1Id, UsedAmount = 20 }
+                    new ProductionMaterial { Id = productionMaterial1Id, MaterialVariantId = variant1Id, UsedAmount = 20 }
                 }
             };
             db.Productions.Add(production);
@@ -51,9 +53,9 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             15,
             "Updated Description",
             DateTime.Now,
-            new List<MaterialUsageDto>
+            new List<MaterialVariantUsageDto>
             {
-                new MaterialUsageDto(productionMaterial1Id, material1Id, 10) // Used 20, now use 10 (should return 10 to stock)
+                new MaterialVariantUsageDto(productionMaterial1Id, variant1Id, 10) // Used 20, now use 10 (should return 10 to stock)
             });
 
         // Act
@@ -70,8 +72,9 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             var product = db.Products.First(x => x.Id == productId);
             product.Amount.Should().Be(105); // 100 - 10 (old) + 15 (new) = 105
 
-            var material1 = db.Materials.First(x => x.Id == material1Id);
-            material1.Amount.Should().Be(60); // 50 + 20 (old) - 10 (new) = 60
+            var variant1 = db.MaterialVariants.First(x => x.Id == variant1Id);
+            variant1.TotalCompanyAmount.Should().Be(50); // Should remain unchanged
+            variant1.TotalUsedAmount.Should().Be(10); // 20 - 20 (old) + 10 (new) = 10
         });
     }
 
@@ -80,16 +83,19 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var material1Id = Guid.NewGuid();
-        var material2Id = Guid.NewGuid();
+        var variant1Id = Guid.NewGuid();
+        var variant2Id = Guid.NewGuid();
         var productionId = Guid.NewGuid();
         var productionMaterial1Id = Guid.NewGuid();
 
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
-            db.Materials.Add(new Material { Id = material1Id, Name = "Material 1", Amount = 50 });
-            db.Materials.Add(new Material { Id = material2Id, Name = "Material 2", Amount = 50 });
+            var m1 = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
+            var m2 = new Material { Id = Guid.NewGuid(), Name = "Material 2" };
+            db.Materials.AddRange(m1, m2);
+            db.MaterialVariants.Add(new MaterialVariant { Id = variant1Id, MaterialId = m1.Id, Name = "Variant 1", TotalCompanyAmount = 50 });
+            db.MaterialVariants.Add(new MaterialVariant { Id = variant2Id, MaterialId = m2.Id, Name = "Variant 2", TotalCompanyAmount = 50 });
 
             var production = new Domain.Entities.Production
             {
@@ -99,7 +105,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
                 ProductionDate = DateTime.Now.AddDays(-1),
                 ProductionMaterials = new List<ProductionMaterial>
                 {
-                    new ProductionMaterial { Id = productionMaterial1Id, MaterialId = material1Id, UsedAmount = 20 }
+                    new ProductionMaterial { Id = productionMaterial1Id, MaterialVariantId = variant1Id, UsedAmount = 20 }
                 }
             };
             db.Productions.Add(production);
@@ -110,10 +116,10 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             15,
             "Updated Description",
             DateTime.Now,
-            new List<MaterialUsageDto>
+            new List<MaterialVariantUsageDto>
             {
-                new MaterialUsageDto(productionMaterial1Id, material1Id, 10),
-                new MaterialUsageDto(null, material2Id, 5) // New material
+                new MaterialVariantUsageDto(productionMaterial1Id, variant1Id, 10),
+                new MaterialVariantUsageDto(null, variant2Id, 5) // New material
             });
 
         // Act & Assert

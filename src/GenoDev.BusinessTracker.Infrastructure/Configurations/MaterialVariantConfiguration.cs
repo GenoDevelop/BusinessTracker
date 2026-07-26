@@ -19,8 +19,8 @@ public class MaterialVariantConfiguration : IEntityTypeConfiguration<MaterialVar
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Unit).IsRequired(false);
         builder.Property(x => x.TotalUsedAmount).IsRequired();
-        builder.Property(x => x.CompanyAmount).IsRequired();
-        builder.Property(x => x.PrivateAmount).IsRequired();
+        builder.Property(x => x.TotalCompanyAmount).IsRequired();
+        builder.Property(x => x.TotalPrivateAmount).IsRequired();
 
         builder.HasIndex(x => x.Ean)
             .IsUnique()

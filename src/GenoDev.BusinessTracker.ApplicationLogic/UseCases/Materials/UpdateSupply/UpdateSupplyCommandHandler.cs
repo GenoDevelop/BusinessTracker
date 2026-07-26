@@ -39,11 +39,11 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
                     var amountToAdd = item.SetsAmount * item.UnitsInSet;
                     if (item.PrivateSupply)
                     {
-                        item.MaterialVariant.PrivateAmount += amountToAdd;
+                        item.MaterialVariant.TotalPrivateAmount += amountToAdd;
                     }
                     else
                     {
-                        item.MaterialVariant.CompanyAmount += amountToAdd;
+                        item.MaterialVariant.TotalCompanyAmount += amountToAdd;
                     }
                 }
             }
@@ -57,11 +57,11 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
                     var amountToSubtract = item.SetsAmount * item.UnitsInSet;
                     if (item.PrivateSupply)
                     {
-                        item.MaterialVariant.PrivateAmount -= amountToSubtract;
+                        item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
                     }
                     else
                     {
-                        item.MaterialVariant.CompanyAmount -= amountToSubtract;
+                        item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
                     }
                 }
             }

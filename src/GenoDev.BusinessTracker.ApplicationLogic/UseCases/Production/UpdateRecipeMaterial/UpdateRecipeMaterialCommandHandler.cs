@@ -17,7 +17,7 @@ public class UpdateRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
             throw new KeyNotFoundException($"Recipe material with ID {request.Id} was not found.");
         }
 
-        recipeMaterial.RequiredAmount = request.Amount;
+        recipeMaterial.MaterialId = request.MaterialId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

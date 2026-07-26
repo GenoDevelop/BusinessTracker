@@ -26,11 +26,11 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
                 var amountToSubtract = item.SetsAmount * item.UnitsInSet;
                 if (item.PrivateSupply)
                 {
-                    item.MaterialVariant.PrivateAmount -= amountToSubtract;
+                    item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
                 }
                 else
                 {
-                    item.MaterialVariant.CompanyAmount -= amountToSubtract;
+                    item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
                 }
             }
         }
