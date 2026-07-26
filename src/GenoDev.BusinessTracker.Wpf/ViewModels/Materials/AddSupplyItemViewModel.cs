@@ -36,16 +36,19 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     private FixedAssetDto? _selectedFixedAsset;
 
     [ObservableProperty]
-    private string _setsAmountText = "1";
+    private int? _setsAmount = 1;
 
     [ObservableProperty]
-    private string _unitsInSetText = "1";
+    private double? _unitsInSet = 1;
 
     [ObservableProperty]
-    private string _setNetPriceText = "0";
+    private decimal? _setNetPrice = 0;
 
     [ObservableProperty]
-    private string _setGrossPriceText = "0";
+    private decimal? _setGrossPrice = 0;
+
+    [ObservableProperty]
+    private bool _privateSupply = false;
 
     public ObservableCollection<SupplyItemType> AvailableTypes { get; } = new(Enum.GetValues<SupplyItemType>());
     public ObservableCollection<MaterialDto> Materials { get; } = new();
@@ -125,11 +128,11 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
                 materialSupplyId,
                 SelectedType,
                 itemId.Value,
-                int.TryParse(SetsAmountText, out var sa) ? sa : 0,
-                ParseDouble(UnitsInSetText) ?? 0,
-                ParseDecimal(SetNetPriceText) ?? 0,
-                ParseDecimal(SetGrossPriceText) ?? 0,
-                false);
+                SetsAmount ?? 0,
+                UnitsInSet ?? 0,
+                SetNetPrice ?? 0,
+                SetGrossPrice ?? 0,
+                PrivateSupply);
 
             await mediator.Send(command);
             RequestClose?.Invoke();
@@ -155,21 +158,5 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     private void Cancel()
     {
         RequestClose?.Invoke();
-    }
-
-    private double? ParseDouble(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (double.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
-            return result;
-        return null;
-    }
-
-    private decimal? ParseDecimal(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (decimal.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
-            return result;
-        return null;
     }
 }

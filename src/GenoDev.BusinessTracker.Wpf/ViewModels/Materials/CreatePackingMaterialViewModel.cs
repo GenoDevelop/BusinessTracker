@@ -14,7 +14,7 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
     private Guid? _id;
 
     [ObservableProperty]
-    private string _title = "Dodaj materiał opakowaniowy";
+    private string _title = "Dodaj pakunek";
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -37,7 +37,7 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
     public void InitializeForEdit(PackingMaterialDto dto)
     {
         _id = dto.Id;
-        Title = "Edytuj materiał opakowaniowy";
+        Title = "Edytuj pakunek";
         Name = dto.Name;
         Ean = dto.Ean;
         ManufacturerCode = dto.ManufacturerCode;

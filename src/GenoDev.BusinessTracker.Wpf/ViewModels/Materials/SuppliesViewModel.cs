@@ -200,7 +200,7 @@ public partial class SuppliesViewModel : ViewModelBase
                 SupplyItemsSortColumn,
                 IsSupplyItemsDescending,
                 filter.ItemName,
-                null, // ItemTypeFilter
+                filter.ItemTypes,
                 filter.Ean,
                 filter.ManufacturerCode,
                 null, // UnitFilter
@@ -217,7 +217,8 @@ public partial class SuppliesViewModel : ViewModelBase
                 filter.SetGrossPrice,
                 filter.SetGrossPriceOperator,
                 filter.TotalGrossPrice,
-                filter.TotalGrossPriceOperator),
+                filter.TotalGrossPriceOperator,
+                filter.IsPrivate),
             cancellationToken);
     
         cancellationToken.ThrowIfCancellationRequested();

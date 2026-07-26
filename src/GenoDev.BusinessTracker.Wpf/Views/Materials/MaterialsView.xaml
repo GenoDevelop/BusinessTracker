@@ -30,7 +30,7 @@
             <TabItem Header="Materiały">
                 <ContentControl Content="{Binding MaterialListViewModel}" />
             </TabItem>
-            <TabItem Header="M. pakowe">
+            <TabItem Header="Pakunki">
                 <ContentControl Content="{Binding PackingMaterialListViewModel}" />
             </TabItem>
             <TabItem Header="Śr. trwałe">

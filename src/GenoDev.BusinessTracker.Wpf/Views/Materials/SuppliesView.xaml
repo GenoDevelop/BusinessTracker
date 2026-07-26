@@ -5,16 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
              xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+             xmlns:enums="clr-namespace:GenoDev.BusinessTracker.Domain.Enums;assembly=GenoDev.BusinessTracker.Domain"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:SuppliesViewModel}">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Grid x:Name="RootGrid" ClipToBounds="True">
+        <Grid x:Name="LayoutGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" MinWidth="0"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="0"/>
+            </Grid.ColumnDefinitions>
         
-        <Grid Grid.Column="0" Margin="10, 10, 3, 10">
+        <Grid Grid.Column="0" Margin="10, 10, 0, 10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -253,7 +256,7 @@
                         </StackPanel>
 
                         <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
-                            <TextBlock Text="Materiał pakunkowy (wymagane):" Margin="0,0,0,5" />
+                            <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
                             <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
                         </StackPanel>
 
@@ -263,16 +266,18 @@
                         </StackPanel>
         
                         <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
         
                         <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
         
                         <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
         
                         <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" />
+                        <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+        
+                        <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
         
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
@@ -351,7 +356,7 @@
                         </StackPanel>
 
                         <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
-                            <TextBlock Text="Materiał pakunkowy (wymagane):" Margin="0,0,0,5" />
+                            <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
                             <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
                         </StackPanel>
 
@@ -361,16 +366,18 @@
                         </StackPanel>
         
                         <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
         
                         <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding UnitsInSetText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
         
                         <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetNetPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
         
                         <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding SetGrossPriceText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" />
+                        <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+        
+                        <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
         
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
@@ -390,10 +397,20 @@
                                         FontSize="11" />
         </Grid>
         
+        <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent">
+            <GridSplitter.Template>
+                <ControlTemplate TargetType="GridSplitter">
+                    <Grid Background="Transparent">
+                        <Rectangle Width="1" Fill="#DDD" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
+                    </Grid>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+        
         <!-- Right Panel -->
-        <Grid Grid.Column="1" Background="#F9F9F9">
+        <Grid Grid.Column="2" Background="#F9F9F9">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" MinHeight="0"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -433,7 +450,7 @@
                 <!-- Status, Prices, Invoice Number -->
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Status:" Foreground="Gray" FontSize="11" Width="60"/>
                         <StackPanel Orientation="Horizontal">
                             <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,5,0"
                                      Fill="{Binding SelectedSupplyDetails.Status, Converter={StaticResource StatusToColorConverter}}" />
@@ -442,27 +459,27 @@
                     </StackPanel>
         
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Cena:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Cena:" Foreground="Gray" FontSize="11" Width="60"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.TotalNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
                         <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
                         <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Dostawa:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Dostawa:" Foreground="Gray" FontSize="11" Width="60"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.ShippingNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
                         <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
                         <TextBlock Text="{Binding SelectedSupplyDetails.ShippingGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
                     </StackPanel>
         
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Nr faktury:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Nr faktury:" Foreground="Gray" FontSize="11" Width="60"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.InvoiceNo}" FontWeight="SemiBold"/>
                     </StackPanel>
                 </StackPanel>
         
                 <!-- Description -->
-                <Grid Grid.Row="1" Grid.Column="1" Height="100">
+                <Grid Grid.Row="1" Grid.Column="1" MinHeight="60">
                     <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" />
@@ -471,10 +488,17 @@
                 </Grid>
             </Grid>
         
-            <!-- Separator Line -->
-            <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1"
-                       Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}"/>
-        
+            <GridSplitter Grid.Row="1" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent"
+                          Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Grid Background="Transparent">
+                            <Rectangle Height="1" Fill="#DDD" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
+            
             <!-- Bottom Panel: Ordered Materials -->
             <Grid Grid.Row="2" Margin="10, 10, 0, 5" Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -502,6 +526,7 @@
                         <DataGridTemplateColumn Width="1.5*" SortMemberPath="ItemName">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader
+                                    ToolTip="Nazwa pozycji"
                                     x:Name="ItemNameFilterColumn"
                                     Header="Pozycja"
                                     DebounceMilliseconds="500"
@@ -511,6 +536,25 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding ItemName}" VerticalAlignment="Center" Margin="5,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="ItemType">
+                            <DataGridTemplateColumn.Header>
+                                <controls:EnumFilterColumnHeader
+                                    x:Name="ItemTypeFilterColumn"
+                                    Header="Typ"
+                                    EnumType="{x:Type enums:SupplyItemType}"
+                                    SelectionMode="Multiple"
+                                    DisplayNameConverter="{StaticResource SupplyItemTypeToTextConverter}"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ItemType, Converter={StaticResource SupplyItemTypeToTextConverter}}" 
+                                               VerticalAlignment="Center" Margin="5,0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -534,6 +578,7 @@
                         <DataGridTemplateColumn Width="0.6*" SortMemberPath="ManufacturerCode">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader
+                                    ToolTip="Kod producenta"
                                     x:Name="ManufacturerCodeFilterColumn"
                                     Header="Kod"
                                     DebounceMilliseconds="500"
@@ -595,9 +640,44 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="5,0">
-                                        <TextBlock Text="{Binding TotalAmount}" VerticalAlignment="Center"/><TextBlock Text="{Binding Unit}" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                                    </StackPanel>
+                                    <Grid Margin="5,0">
+                                        <!-- Normal case: PrivateSupply is false -->
+                                        <TextBlock VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding PrivateSupply}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            <Run Text="{Binding TotalAmount, Mode=OneWay}" /><TextBlock Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}">
+                                                <Run Text=" " /><Run Text="{Binding Unit, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </TextBlock>
+
+                                        <!-- Private supply case: PrivateSupply is true -->
+                                        <TextBlock VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding PrivateSupply}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            <Run Text="0" /><TextBlock Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}">
+                                                <Run Text=" " /><Run Text="{Binding Unit, Mode=OneWay}" />
+                                            </TextBlock><TextBlock Foreground="Gray" FontSize="12" VerticalAlignment="Center">
+                                                <Run Text=" "/><Run Text="+" />
+                                                <Run Text="{Binding TotalAmount, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </TextBlock>
+                                    </Grid>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -670,6 +750,25 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
         
+                        <DataGridTemplateColumn Width="0.3*" SortMemberPath="PrivateSupply">
+                            <DataGridTemplateColumn.Header>
+                                <controls:BooleanFilterColumnHeader
+                                    x:Name="PrivateSupplyFilterColumn"
+                                    Header="Pryw."
+                                    ToolTip="Czy pozycja jest traktowana jako zasób prywatny"
+                                    IsNullable="False"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PrivateSupply, Converter={StaticResource PolishBooleanDisplayConverter}}" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
                         <DataGridTemplateColumn Width="Auto">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
@@ -707,9 +806,10 @@
                                             Margin="0,5,0,0" />
             </Grid>
         
-            <TextBlock Text="Wybierz dostawę z listy, aby zobaczyć szczegóły"
+            <TextBlock Grid.RowSpan="3" Text="Wybierz dostawę z listy, aby zobaczyć szczegóły"
                        HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"
                        Visibility="{Binding SelectedSupplyDetails, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+        </Grid>
         </Grid>
     </Grid>
 </UserControl>

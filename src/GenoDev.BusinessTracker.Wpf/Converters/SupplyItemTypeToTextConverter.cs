@@ -14,8 +14,8 @@ public class SupplyItemTypeToTextConverter : IValueConverter
             return type switch
             {
                 SupplyItemType.Material => "Materiał",
-                SupplyItemType.Packing => "Materiał pakunkowy",
-                SupplyItemType.FixedAsset => "Środek trwały",
+                SupplyItemType.Packing => "Pakunek",
+                SupplyItemType.FixedAsset => "Śr. trwały",
                 _ => value.ToString() ?? string.Empty
             };
         }

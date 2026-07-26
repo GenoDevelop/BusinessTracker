@@ -37,16 +37,19 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     private FixedAssetDto? _selectedFixedAsset;
 
     [ObservableProperty]
-    private string _setsAmountText = item.SetsAmount.ToString();
+    private int? _setsAmount = item.SetsAmount;
 
     [ObservableProperty]
-    private string _unitsInSetText = item.UnitsInSet.ToString();
+    private double? _unitsInSet = item.UnitsInSet;
 
     [ObservableProperty]
-    private string _setNetPriceText = item.SetNetPrice.ToString();
+    private decimal? _setNetPrice = item.SetNetPrice;
 
     [ObservableProperty]
-    private string _setGrossPriceText = item.SetGrossPrice.ToString();
+    private decimal? _setGrossPrice = item.SetGrossPrice;
+
+    [ObservableProperty]
+    private bool _privateSupply = item.PrivateSupply;
 
     public ObservableCollection<SupplyItemType> AvailableTypes { get; } = new(Enum.GetValues<SupplyItemType>());
     public ObservableCollection<MaterialDto> Materials { get; } = new();
@@ -76,9 +79,19 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
             // Set initial selections
             if (SelectedType == SupplyItemType.Material && item.ItemId.HasValue)
             {
-                // We need to find the Material parent of this variant
-                var result = await mediator.Send(new GetMaterialVariantsQuery(Guid.Empty, 0, 1000, NameFilter: item.ItemName));
-                var variant = result.Items.FirstOrDefault(v => v.Id == item.ItemId.Value);
+                // In this system, ItemId for Material type is the MaterialVariant.Id
+                // We need to find the variant to get its MaterialId.
+                // We pass Guid.Empty to search across all materials.
+                var variantResult = await mediator.Send(new GetMaterialVariantsQuery(Guid.Empty, 0, 100, NameFilter: item.ItemName));
+                var variant = variantResult.Items.FirstOrDefault(v => v.Id == item.ItemId.Value);
+                
+                // If not found by name filter (maybe name changed in the meantime), try searching without filter if result is small or we have a direct way
+                if (variant == null)
+                {
+                    variantResult = await mediator.Send(new GetMaterialVariantsQuery(Guid.Empty, 0, 1000));
+                    variant = variantResult.Items.FirstOrDefault(v => v.Id == item.ItemId.Value);
+                }
+                
                 if (variant != null)
                 {
                     SelectedMaterial = Materials.FirstOrDefault(x => x.Id == variant.MaterialId);
@@ -151,11 +164,11 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
                 item.Id,
                 SelectedType,
                 itemId.Value,
-                int.TryParse(SetsAmountText, out var sa) ? sa : 0,
-                ParseDouble(UnitsInSetText) ?? 0,
-                ParseDecimal(SetNetPriceText) ?? 0,
-                ParseDecimal(SetGrossPriceText) ?? 0,
-                item.PrivateSupply);
+                SetsAmount ?? 0,
+                UnitsInSet ?? 0,
+                SetNetPrice ?? 0,
+                SetGrossPrice ?? 0,
+                PrivateSupply);
 
             await mediator.Send(command);
             RequestClose?.Invoke();
@@ -181,21 +194,5 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     private void Cancel()
     {
         RequestClose?.Invoke();
-    }
-
-    private double? ParseDouble(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (double.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
-            return result;
-        return null;
-    }
-
-    private decimal? ParseDecimal(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (decimal.TryParse(value.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
-            return result;
-        return null;
     }
 }

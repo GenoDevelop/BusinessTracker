@@ -181,4 +181,22 @@ public class GetMaterialVariants_Tests : BusinessTrackerUnitTestsBase<GetMateria
         result.Items[0].TotalCompanyAmount.Should().Be(expectedCompany);
         result.Items[0].TotalPrivateAmount.Should().Be(expectedPrivate);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnVariantsWhenMaterialIdIsEmpty()
+    {
+        // Arrange
+        var query = new GetMaterialVariantsQuery(Guid.Empty, 0, 100);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        // We have variants from PrepareTestData and Handle_ShouldReturnCorrectAmounts theory.
+        // There should be at least variants from PrepareTestData (3 variants).
+        result.Items.Count.Should().BeGreaterThanOrEqualTo(3);
+        result.Items.Should().Contain(x => x.Name == "VariantA");
+        result.Items.Should().Contain(x => x.Name == "VariantB");
+        result.Items.Should().Contain(x => x.Name == "VariantC");
+    }
 }

@@ -91,6 +91,7 @@
         <converters:SupplyItemTypeToTextConverter x:Key="SupplyItemTypeToTextConverter" />
         <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
         <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <converters:PolishBooleanDisplayConverter x:Key="PolishBooleanDisplayConverter" />
 
         <Style TargetType="DataGrid">
             <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0" />

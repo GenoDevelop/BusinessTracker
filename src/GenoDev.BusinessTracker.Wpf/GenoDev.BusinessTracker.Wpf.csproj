@@ -43,6 +43,11 @@
     <Page Update="Controls\UtilityControls\DateRangePicker.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Update="Controls\TableColumns\BooleanFilterColumnHeader.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
   <PropertyGroup>

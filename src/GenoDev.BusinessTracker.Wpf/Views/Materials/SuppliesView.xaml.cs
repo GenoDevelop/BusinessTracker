@@ -1,3 +1,4 @@
+using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 using System.ComponentModel;
@@ -161,7 +162,9 @@ public partial class SuppliesView : UserControl
                 (decimal?)SetGrossPriceFilterColumn.FilterValue,
                 SetGrossPriceFilterColumn.SelectedOperator,
                 (decimal?)TotalGrossPriceFilterColumn.FilterValue,
-                TotalGrossPriceFilterColumn.SelectedOperator));
+                TotalGrossPriceFilterColumn.SelectedOperator,
+                PrivateSupplyFilterColumn.FilterValue,
+                ItemTypeFilterColumn.GetSelectedValues<SupplyItemType>()?.ToArray()));
 
         await SupplyItemsPagination.ResetAndRefreshAsync();
     }

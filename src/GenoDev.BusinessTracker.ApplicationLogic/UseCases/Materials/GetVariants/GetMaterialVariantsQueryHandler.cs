@@ -21,9 +21,14 @@ public class GetMaterialVariantsQueryHandler(IBusinessTrackerDbContext dbContext
     public async Task<PagedList<MaterialVariantDto>> Handle(GetMaterialVariantsQuery request, CancellationToken cancellationToken)
     {
         var query = dbContext.MaterialVariants
-            .AsNoTracking()
-            .Where(x => x.MaterialId == request.MaterialId)
-            .WhereContainsAll(x => x.Name, request.NameFilter)
+            .AsNoTracking();
+
+        if (request.MaterialId != Guid.Empty)
+        {
+            query = query.Where(x => x.MaterialId == request.MaterialId);
+        }
+
+        query = query.WhereContainsAll(x => x.Name, request.NameFilter)
             .WhereContainsAll(x => x.Ean, request.EanFilter)
             .WhereContainsAll(x => x.ManufacturerCode, request.ManufacturerCodeFilter)
             .WhereContainsAll(x => x.Description, request.DescriptionFilter)
