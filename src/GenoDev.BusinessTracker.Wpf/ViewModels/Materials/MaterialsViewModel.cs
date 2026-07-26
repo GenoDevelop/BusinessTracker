@@ -6,10 +6,12 @@ public partial class MaterialsViewModel : ViewModelBase
 {
     public MaterialsViewModel(
         MaterialListViewModel materialListViewModel,
+        PackingMaterialListViewModel packingMaterialListViewModel,
         SuppliersViewModel suppliersViewModel,
         MaterialSuppliesViewModel materialSuppliesViewModel)
     {
         MaterialListViewModel = materialListViewModel;
+        PackingMaterialListViewModel = packingMaterialListViewModel;
         SuppliersViewModel = suppliersViewModel;
         MaterialSuppliesViewModel = materialSuppliesViewModel;
     }
@@ -18,6 +20,7 @@ public partial class MaterialsViewModel : ViewModelBase
     private int _selectedTabIndex;
 
     public MaterialListViewModel MaterialListViewModel { get; }
+    public PackingMaterialListViewModel PackingMaterialListViewModel { get; }
     public SuppliersViewModel SuppliersViewModel { get; }
     public MaterialSuppliesViewModel MaterialSuppliesViewModel { get; }
 }

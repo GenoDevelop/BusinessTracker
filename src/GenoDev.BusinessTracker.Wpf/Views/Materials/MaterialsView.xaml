@@ -12,6 +12,9 @@
         <DataTemplate DataType="{x:Type vm:MaterialListViewModel}">
             <local:MaterialListView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PackingMaterialListViewModel}">
+            <local:PackingMaterialListView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SuppliersViewModel}">
             <local:SuppliersView />
         </DataTemplate>
@@ -23,6 +26,9 @@
         <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="Materiały">
                 <ContentControl Content="{Binding MaterialListViewModel}" />
+            </TabItem>
+            <TabItem Header="Materiały opakowaniowe">
+                <ContentControl Content="{Binding PackingMaterialListViewModel}" />
             </TabItem>
             <TabItem Header="Dostawcy">
                 <ContentControl Content="{Binding SuppliersViewModel}" />

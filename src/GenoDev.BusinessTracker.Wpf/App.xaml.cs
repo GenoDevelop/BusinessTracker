@@ -42,6 +42,7 @@ public partial class App : Application
         services.AddSingleton<MainViewModel>();
         services.AddTransient<MaterialsViewModel>();
         services.AddTransient<MaterialListViewModel>();
+        services.AddTransient<PackingMaterialListViewModel>();
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<MaterialSuppliesViewModel>();
         services.AddTransient<CreateSupplierViewModel>();
@@ -53,6 +54,7 @@ public partial class App : Application
         services.AddTransient<SalesViewModel>();
         services.AddTransient<OrdersViewModel>();
         services.AddTransient<CreateMaterialVariantViewModel>();
+        services.AddTransient<CreatePackingMaterialViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>(s => new MainWindow
