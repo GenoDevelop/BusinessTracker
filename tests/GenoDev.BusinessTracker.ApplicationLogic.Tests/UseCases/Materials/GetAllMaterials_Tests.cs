@@ -62,86 +62,6 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
     }
 
     [Fact]
-    public async Task Handle_ShouldSortByEan()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", ean: "333");
-            db.Arrange_Material(name: "M2", ean: "111");
-            db.Arrange_Material(name: "M3", ean: "222");
-        });
-
-        var query = new GetMaterialsQuery(0, 10, MaterialSortBy.Ean, false);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.Ean).Should().ContainInOrder("111", "222", "333");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldSortByDescription()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", description: "C");
-            db.Arrange_Material(name: "M2", description: "A");
-            db.Arrange_Material(name: "M3", description: "B");
-        });
-
-        var query = new GetMaterialsQuery(0, 10, MaterialSortBy.Description, false);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.Description).Should().ContainInOrder("A", "B", "C");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldSortByUnit()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", unit: "kg");
-            db.Arrange_Material(name: "M2", unit: "cm");
-            db.Arrange_Material(name: "M3", unit: "m");
-        });
-
-        var query = new GetMaterialsQuery(0, 10, MaterialSortBy.Unit, false);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.Unit).Should().ContainInOrder("cm", "kg", "m");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldSortByAmount()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", amount: 30);
-            db.Arrange_Material(name: "M2", amount: 10);
-            db.Arrange_Material(name: "M3", amount: 20);
-        });
-
-        var query = new GetMaterialsQuery(0, 10, MaterialSortBy.Amount, false);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Select(x => x.Amount).Should().ContainInOrder(10, 20, 30);
-    }
-
-    [Fact]
     public async Task Handle_ShouldCompleteAllData()
     {
         // Arrange
@@ -150,11 +70,7 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         {
             db.Arrange_Material(
                 id: id,
-                name: "Full Material",
-                ean: "1234567890",
-                description: "Test Description",
-                unit: "kg",
-                amount: 123.45);
+                name: "Full Material");
         });
 
         var query = new GetMaterialsQuery(0, 10);
@@ -167,10 +83,6 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         var item = result.Items[0];
         item.Id.Should().Be(id);
         item.Name.Should().Be("Full Material");
-        item.Ean.Should().Be("1234567890");
-        item.Description.Should().Be("Test Description");
-        item.Unit.Should().Be("kg");
-        item.Amount.Should().Be(123.45);
     }
 
     [Fact]
@@ -192,46 +104,5 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         // Assert
         result.Items.Should().HaveCount(1);
         result.Items[0].Name.Should().Be("Banana");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFilterByAmount_GreaterThan()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", amount: 10);
-            db.Arrange_Material(name: "M2", amount: 20);
-            db.Arrange_Material(name: "M3", amount: 30);
-        });
-
-        var query = new GetMaterialsQuery(0, 10, AmountFilter: 20, AmountOperator: NumericOperator.GreaterThan);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Should().HaveCount(1);
-        result.Items[0].Name.Should().Be("M3");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFilterByAmount_Equal()
-    {
-        // Arrange
-        Arrange_BusinessTrackerDatabase(db =>
-        {
-            db.Arrange_Material(name: "M1", amount: 10.5);
-            db.Arrange_Material(name: "M2", amount: 20.0);
-        });
-
-        var query = new GetMaterialsQuery(0, 10, AmountFilter: 10.5, AmountOperator: NumericOperator.Equal);
-
-        // Act
-        var result = await Sut.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Items.Should().HaveCount(1);
-        result.Items[0].Name.Should().Be("M1");
     }
 }

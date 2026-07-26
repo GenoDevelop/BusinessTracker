@@ -7,7 +7,7 @@ using AutoFixture;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Materials;
 
-public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetMaterialSupplyDetailsQueryHandler>
+public class GetSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetSupplyDetailsQueryHandler>
 {
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
@@ -22,18 +22,20 @@ public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTes
         Arrange_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Arrange_Supplier(name: "Test Supplier", websiteUrl: "https://example.com");
-            var supply = db.Arrange_MaterialSupply(
+            var supply = db.Arrange_Supply(
                 supplier: supplier,
                 orderDate: new DateTime(2026, 7, 16),
                 description: "Test Description",
-                invoiceNo: "INV/123");
+                invoiceNo: "INV/123",
+                shippingNetPrice: 15.5m,
+                shippingGrossPrice: 19.06m);
             supplyId = supply.Id;
 
-            db.Arrange_MaterialSupplyItem(supply, setsAmount: 2, setNetPrice: 10m, setGrossPrice: 12.3m);
-            db.Arrange_MaterialSupplyItem(supply, setsAmount: 1, setNetPrice: 50m, setGrossPrice: 61.5m);
+            db.Arrange_SupplyItem(supply, setsAmount: 2, setNetPrice: 10m, setGrossPrice: 12.3m);
+            db.Arrange_SupplyItem(supply, setsAmount: 1, setNetPrice: 50m, setGrossPrice: 61.5m);
         });
 
-        var query = new GetMaterialSupplyDetailsQuery(supplyId);
+        var query = new GetSupplyDetailsQuery(supplyId);
 
         // Act
         var result = await Sut.Handle(query, CancellationToken.None);
@@ -46,6 +48,8 @@ public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTes
         result.InvoiceNo.Should().Be("INV/123");
         result.TotalNetPrice.Should().Be(70m); // (2 * 10) + (1 * 50)
         result.TotalGrossPrice.Should().Be(86.1m); // (2 * 12.3) + (1 * 61.5) = 24.6 + 61.5 = 86.1
+        result.ShippingNetPrice.Should().Be(15.5m);
+        result.ShippingGrossPrice.Should().Be(19.06m);
         result.WebsiteUrl.Should().Be("https://example.com");
     }
 
@@ -53,7 +57,7 @@ public class GetMaterialSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTes
     public async Task Handle_ShouldReturnNullIfSupplyNotFound()
     {
         // Arrange
-        var query = new GetMaterialSupplyDetailsQuery(Guid.NewGuid());
+        var query = new GetSupplyDetailsQuery(Guid.NewGuid());
 
         // Act
         var result = await Sut.Handle(query, CancellationToken.None);

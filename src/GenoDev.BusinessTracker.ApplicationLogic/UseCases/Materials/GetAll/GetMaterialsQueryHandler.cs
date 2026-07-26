@@ -18,42 +18,9 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             query = query.WhereContainsAll(x => x.Name, request.NameFilter);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.EanFilter))
-        {
-            query = query.WhereContainsAll(x => x.Ean, request.EanFilter);
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.UnitFilter))
-        {
-            query = query.WhereContainsAll(x => x.Unit, request.UnitFilter.ToLower());
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
-        {
-            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter.ToLower());
-        }
-
-        if (request.AmountFilter.HasValue && request.AmountOperator.HasValue)
-        {
-            query = request.AmountOperator.Value switch
-            {
-                NumericOperator.Equal => query.Where(x => x.Amount == request.AmountFilter.Value),
-                NumericOperator.NotEqual => query.Where(x => x.Amount != request.AmountFilter.Value),
-                NumericOperator.LessThan => query.Where(x => x.Amount < request.AmountFilter.Value),
-                NumericOperator.LessThanOrEqual => query.Where(x => x.Amount <= request.AmountFilter.Value),
-                NumericOperator.GreaterThan => query.Where(x => x.Amount > request.AmountFilter.Value),
-                NumericOperator.GreaterThanOrEqual => query.Where(x => x.Amount >= request.AmountFilter.Value),
-                _ => query
-            };
-        }
-
         query = request.SortBy switch
         {
             MaterialSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
-            MaterialSortBy.Ean => request.IsDescending ? query.OrderByDescending(x => x.Ean) : query.OrderBy(x => x.Ean),
-            MaterialSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
-            MaterialSortBy.Unit => request.IsDescending ? query.OrderByDescending(x => x.Unit) : query.OrderBy(x => x.Unit),
-            MaterialSortBy.Amount => request.IsDescending ? query.OrderByDescending(x => x.Amount) : query.OrderBy(x => x.Amount),
             _ => query.OrderBy(x => x.Name)
         };
 
@@ -64,11 +31,7 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Take(request.PageSize)
             .Select(x => new MaterialDto(
                 x.Id,
-                x.Name ?? string.Empty,
-                x.Ean,
-                x.Description,
-                x.Unit,
-                x.Amount))
+                x.Name))
             .ToListAsync(cancellationToken);
 
         return new PagedList<MaterialDto>(items, totalCount, request.PageIndex, request.PageSize);

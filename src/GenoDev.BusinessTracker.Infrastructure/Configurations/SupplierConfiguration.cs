@@ -21,7 +21,7 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             .IsUnique()
             .HasFilter("\"nip\" IS NOT NULL");
         
-        builder.HasMany(x => x.MaterialSupplies)
+        builder.HasMany(x => x.Supplies)
             .WithOne(x => x.Supplier)
             .HasForeignKey(x => x.SupplierId);
     }

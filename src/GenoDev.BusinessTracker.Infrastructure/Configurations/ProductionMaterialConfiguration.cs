@@ -13,12 +13,14 @@ public class ProductionMaterialConfiguration : IEntityTypeConfiguration<Producti
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
+        builder.Property(x => x.UsedAmount).IsRequired();
+
         builder.HasOne(x => x.Production)
             .WithMany(x => x.ProductionMaterials)
             .HasForeignKey(x => x.ProductionId);
 
-        builder.HasOne(x => x.Material)
+        builder.HasOne(x => x.MaterialVariant)
             .WithMany(x => x.ProductionMaterials)
-            .HasForeignKey(x => x.MaterialId);
+            .HasForeignKey(x => x.MaterialVariantId);
     }
 }

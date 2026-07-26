@@ -3,7 +3,7 @@ using MediatR;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.UpdateSupply;
 
-public record UpdateMaterialSupplyCommand(
+public record UpdateSupplyCommand(
     Guid Id,
     Guid SupplierId,
     DateTime OrderDate,

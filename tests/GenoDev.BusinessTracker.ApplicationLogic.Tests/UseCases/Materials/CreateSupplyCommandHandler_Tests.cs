@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Materials;
 
-public class CreateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<CreateMaterialSupplyCommandHandler>
+public class CreateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<CreateSupplyCommandHandler>
 {
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
@@ -17,7 +17,7 @@ public class CreateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateMaterialSupplyWithStatusNew()
+    public async Task Handle_ShouldCreateSupplyWithStatusNew()
     {
         // Arrange
         var supplier = Arrange_BusinessTrackerDatabase(db => db.Arrange_Supplier());
@@ -25,7 +25,7 @@ public class CreateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var description = "Test Description";
         var invoiceNo = "INV/2025/001";
 
-        var command = new CreateMaterialSupplyCommand(
+        var command = new CreateSupplyCommand(
             supplier.Id,
             orderDate,
             description,
@@ -39,7 +39,7 @@ public class CreateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         
         AssertBusinessTracker_Database(db =>
         {
-            var supply = db.MaterialSupplies.Include(x => x.Supplier).FirstOrDefault(x => x.Id == resultId);
+            var supply = db.Supplies.Include(x => x.Supplier).FirstOrDefault(x => x.Id == resultId);
             supply.Should().NotBeNull();
             supply!.SupplierId.Should().Be(supplier.Id);
             supply.OrderDate.Should().BeCloseTo(orderDate, TimeSpan.FromMilliseconds(1));

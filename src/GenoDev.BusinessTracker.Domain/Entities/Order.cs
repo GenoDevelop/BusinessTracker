@@ -14,4 +14,5 @@ public class Order
     public OrderStatus Status { get; set; }
 
     public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new HashSet<OrderProduct>();
+    public virtual ICollection<OrderPackingMaterial> OrderPackingMaterials { get; set; } = new HashSet<OrderPackingMaterial>();
 }

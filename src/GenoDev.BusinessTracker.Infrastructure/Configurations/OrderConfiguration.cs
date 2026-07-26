@@ -25,5 +25,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasMany(x => x.OrderProducts)
             .WithOne(x => x.Order)
             .HasForeignKey(x => x.OrderId);
+
+        builder.HasMany(x => x.OrderPackingMaterials)
+            .WithOne(x => x.Order)
+            .HasForeignKey(x => x.OrderId);
     }
 }

@@ -5,12 +5,12 @@ using MediatR;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.CreateSupply;
 
-public class CreateMaterialSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
-    : IRequestHandler<CreateMaterialSupplyCommand, Guid>
+public class CreateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
+    : IRequestHandler<CreateSupplyCommand, Guid>
 {
-    public async Task<Guid> Handle(CreateMaterialSupplyCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateSupplyCommand request, CancellationToken cancellationToken)
     {
-        var supply = new MaterialSupply
+        var supply = new Supply
         {
             Id = Guid.NewGuid(),
             SupplierId = request.SupplierId,
@@ -20,7 +20,7 @@ public class CreateMaterialSupplyCommandHandler(IBusinessTrackerDbContext dbCont
             Status = MaterialSupplyStatus.New
         };
 
-        dbContext.MaterialSupplies.Add(supply);
+        dbContext.Supplies.Add(supply);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return supply.Id;

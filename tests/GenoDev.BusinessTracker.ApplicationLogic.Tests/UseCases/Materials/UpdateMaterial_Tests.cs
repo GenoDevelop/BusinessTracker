@@ -20,25 +20,17 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
     {
         // Arrange
         var materialId = Guid.NewGuid();
-        const double originalAmount = 50.0;
         
         Arrange_BusinessTrackerDatabase(db =>
         {
             db.Arrange_Material(
                 id: materialId,
-                name: "Old Name",
-                ean: "Old Ean",
-                description: "Old Description",
-                unit: "pcs",
-                amount: originalAmount);
+                name: "Old Name");
         });
 
         var command = new UpdateMaterialCommand(
             Id: materialId,
-            Name: "New Name",
-            Ean: "New Ean",
-            Description: "New Description",
-            Unit: "kg");
+            Name: "New Name");
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -49,10 +41,6 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
             var material = db.Materials.FirstOrDefault(x => x.Id == materialId);
             material.Should().NotBeNull();
             material!.Name.Should().Be(command.Name);
-            material.Ean.Should().Be(command.Ean);
-            material.Description.Should().Be(command.Description);
-            material.Unit.Should().Be(command.Unit);
-            material.Amount.Should().Be(originalAmount); // Amount should remain unchanged
         });
     }
 
@@ -63,10 +51,7 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
         var nonExistentId = Guid.NewGuid();
         var command = new UpdateMaterialCommand(
             Id: nonExistentId,
-            Name: "New Name",
-            Ean: "New Ean",
-            Description: "New Description",
-            Unit: "kg");
+            Name: "New Name");
 
         // Act & Assert
         var act = async () => await Sut.Handle(command, CancellationToken.None);

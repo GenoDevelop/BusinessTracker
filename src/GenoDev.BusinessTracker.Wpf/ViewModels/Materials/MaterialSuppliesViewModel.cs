@@ -369,7 +369,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         try
         {
             await _mediator.Send(
-                new DeleteMaterialSupplyCommand(SelectedSupply.Id));
+                new DeleteSupplyCommand(SelectedSupply.Id));
 
             IsDeletePopupOpen = false;
             SelectedSupply = null;

@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplyDetails;
 
-public class GetMaterialSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbContext)
-    : IRequestHandler<GetMaterialSupplyDetailsQuery, MaterialSupplyDetailsDto?>
+public class GetSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbContext)
+    : IRequestHandler<GetSupplyDetailsQuery, SupplyDetailsDto?>
 {
-    public async Task<MaterialSupplyDetailsDto?> Handle(GetMaterialSupplyDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<SupplyDetailsDto?> Handle(GetSupplyDetailsQuery request, CancellationToken cancellationToken)
     {
-        var supply = await dbContext.MaterialSupplies
+        var supply = await dbContext.Supplies
             .AsNoTracking()
             .Include(x => x.Supplier)
-            .Include(x => x.MaterialSupplyItems)
+            .Include(x => x.SupplyItems)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (supply == null)
@@ -20,14 +20,16 @@ public class GetMaterialSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbCo
             return null;
         }
 
-        return new MaterialSupplyDetailsDto(
+        return new SupplyDetailsDto(
             supply.Id,
             supply.SupplierId,
             supply.Supplier.Name,
             supply.OrderDate,
             supply.Status,
-            supply.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
-            supply.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
+            supply.SupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
+            supply.SupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
+            supply.ShippingNetPrice,
+            supply.ShippingGrossPrice,
             supply.InvoiceNo,
             supply.Description,
             supply.Supplier.WebsiteUrl);

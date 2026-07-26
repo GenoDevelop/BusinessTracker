@@ -3,7 +3,7 @@ using MediatR;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplyDetails;
 
-public record MaterialSupplyDetailsDto(
+public record SupplyDetailsDto(
     Guid Id,
     Guid SupplierId,
     string SupplierName,
@@ -11,8 +11,10 @@ public record MaterialSupplyDetailsDto(
     MaterialSupplyStatus Status,
     decimal TotalNetPrice,
     decimal TotalGrossPrice,
+    decimal ShippingNetPrice,
+    decimal ShippingGrossPrice,
     string? InvoiceNo,
     string? Description,
     string? WebsiteUrl);
 
-public record GetMaterialSupplyDetailsQuery(Guid Id) : IRequest<MaterialSupplyDetailsDto?>;
+public record GetSupplyDetailsQuery(Guid Id) : IRequest<SupplyDetailsDto?>;

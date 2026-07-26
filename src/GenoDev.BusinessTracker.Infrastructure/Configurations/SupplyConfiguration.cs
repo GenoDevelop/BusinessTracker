@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GenoDev.BusinessTracker.Infrastructure.Configurations;
 
-public class MaterialSupplyConfiguration : IEntityTypeConfiguration<MaterialSupply>
+public class SupplyConfiguration : IEntityTypeConfiguration<Supply>
 {
-    public void Configure(EntityTypeBuilder<MaterialSupply> builder)
+    public void Configure(EntityTypeBuilder<Supply> builder)
     {
-        builder.ToTable("material_supplies");
+        builder.ToTable("supplies");
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
@@ -18,13 +18,15 @@ public class MaterialSupplyConfiguration : IEntityTypeConfiguration<MaterialSupp
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Status).HasConversion<string>();
         builder.Property(x => x.InvoiceNo).IsRequired(false);
+        builder.Property(x => x.ShippingNetPrice).IsRequired();
+        builder.Property(x => x.ShippingGrossPrice).IsRequired();
 
         builder.HasOne(x => x.Supplier)
-            .WithMany(x => x.MaterialSupplies)
+            .WithMany(x => x.Supplies)
             .HasForeignKey(x => x.SupplierId);
 
-        builder.HasMany(x => x.MaterialSupplyItems)
-            .WithOne(x => x.MaterialSupply)
+        builder.HasMany(x => x.SupplyItems)
+            .WithOne(x => x.Supply)
             .HasForeignKey(x => x.MaterialSupplyId);
     }
 }

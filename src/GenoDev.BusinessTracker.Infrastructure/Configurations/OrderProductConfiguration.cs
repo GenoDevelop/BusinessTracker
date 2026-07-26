@@ -13,6 +13,13 @@ public class OrderProductConfiguration : IEntityTypeConfiguration<OrderProduct>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
+        builder.Property(x => x.OrderId).IsRequired();
+        builder.Property(x => x.ProductId).IsRequired();
+        builder.Property(x => x.OrderedAmount).IsRequired();
+        builder.Property(x => x.AssignedAmount).IsRequired();
+        builder.Property(x => x.UnitNetPrice).IsRequired();
+        builder.Property(x => x.UnitGrossPrice).IsRequired();
+
         builder.HasOne(x => x.Order)
             .WithMany(x => x.OrderProducts)
             .HasForeignKey(x => x.OrderId);

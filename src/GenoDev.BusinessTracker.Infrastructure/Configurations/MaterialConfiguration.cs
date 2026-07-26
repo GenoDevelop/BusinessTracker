@@ -13,25 +13,13 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.Property(x => x.Name).IsRequired(false);
-        builder.Property(x => x.Ean).IsRequired(false);
-        builder.Property(x => x.Description).IsRequired(false);
-        builder.Property(x => x.Unit).IsRequired(false);
-        builder.Property(x => x.Amount).IsRequired();
+        builder.Property(x => x.Name).IsRequired();
 
-        builder.HasIndex(x => x.Ean)
-            .IsUnique()
-            .HasFilter("\"ean\" IS NOT NULL");
-
-        builder.HasMany(x => x.MaterialSupplyItems)
+        builder.HasMany(x => x.MaterialVariants)
             .WithOne(x => x.Material)
             .HasForeignKey(x => x.MaterialId);
 
         builder.HasMany(x => x.ProductRecipeMaterials)
-            .WithOne(x => x.Material)
-            .HasForeignKey(x => x.MaterialId);
-
-        builder.HasMany(x => x.ProductionMaterials)
             .WithOne(x => x.Material)
             .HasForeignKey(x => x.MaterialId);
     }

@@ -50,7 +50,7 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
             }
             else
             {
-                var command = new CreateMaterialCommand(Name, Ean, Description, Unit);
+                var command = new CreateMaterialCommand(Name);
                 await mediator.Send(command);
             }
             RequestClose?.Invoke();

@@ -7,8 +7,11 @@ public interface IBusinessTrackerDbContext
 {
     DbSet<Supplier> Suppliers { get; }
     DbSet<Material> Materials { get; }
-    DbSet<MaterialSupply> MaterialSupplies { get; }
-    DbSet<MaterialSupplyItem> MaterialSupplyItems { get; }
+    DbSet<Supply> Supplies { get; }
+    DbSet<SupplyItem> SupplyItems { get; }
+    DbSet<PackingMaterial> PackingMaterials { get; }
+    DbSet<OrderPackingMaterial> OrderPackingMaterials { get; }
+    DbSet<MaterialVariant> MaterialVariants { get; }
     DbSet<Product> Products { get; }
     DbSet<ProductRecipe> ProductRecipes { get; }
     DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; }

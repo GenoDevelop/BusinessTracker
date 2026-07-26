@@ -11,7 +11,6 @@ public static class BusinessTrackerDbContextExtensions
         public Supplier Arrange_Supplier(Guid? id = null,
             string name = "Test Supplier",
             string? nip = null,
-            string? description = null,
             string? websiteUrl = null)
         {
             var supplier = new Supplier
@@ -19,9 +18,8 @@ public static class BusinessTrackerDbContextExtensions
                 Id = id ?? Guid.NewGuid(),
                 Name = name,
                 Nip = nip,
-                Description = description,
                 WebsiteUrl = websiteUrl,
-                MaterialSupplies = []
+                Supplies = []
             };
         
             db.Suppliers.Add(supplier);
@@ -29,85 +27,148 @@ public static class BusinessTrackerDbContextExtensions
         }
 
         public Material Arrange_Material(Guid? id = null,
-            string name = "Test Material",
-            string? ean = null,
-            string? description = null,
-            string unit = "pcs",
-            double amount = 0)
+            string name = "Test Material")
         {
             var material = new Material
             {
                 Id = id ?? Guid.NewGuid(),
                 Name = name,
-                Ean = ean,
-                Description = description,
-                Unit = unit,
-                Amount = amount,
-                MaterialSupplyItems = [],
-                ProductRecipeMaterials = [],
-                ProductionMaterials = []
+                MaterialVariants = [],
+                ProductRecipeMaterials = []
             };
         
             db.Materials.Add(material);
             return material;
         }
 
-        public MaterialSupply Arrange_MaterialSupply(Supplier? supplier = null,
+        public MaterialVariant Arrange_MaterialVariant(Material? material = null,
+            Guid? id = null,
+            string name = "Test Variant",
+            string? ean = null,
+            string? manufacturerCode = null,
+            string? description = null,
+            string unit = "pcs",
+            double totalUsedAmount = 0,
+            double companyAmount = 0,
+            double privateAmount = 0)
+        {
+            material ??= db.Arrange_Material();
+
+            var variant = new MaterialVariant
+            {
+                Id = id ?? Guid.NewGuid(),
+                MaterialId = material.Id,
+                Material = material,
+                Name = name,
+                Ean = ean,
+                ManufacturerCode = manufacturerCode,
+                Description = description,
+                Unit = unit,
+                TotalUsedAmount = totalUsedAmount,
+                CompanyAmount = companyAmount,
+                PrivateAmount = privateAmount,
+                SupplyItems = [],
+                ProductionMaterials = []
+            };
+
+            variant.Material.MaterialVariants.Add(variant);
+
+            db.MaterialVariants.Add(variant);
+            return variant;
+        }
+
+        public Supply Arrange_Supply(Supplier? supplier = null,
             Guid? id = null,
             DateTime? orderDate = null,
             string? description = null,
+            MaterialSupplyStatus status = MaterialSupplyStatus.Ordered,
             string? invoiceNo = null,
-            MaterialSupplyStatus status = MaterialSupplyStatus.Ordered)
+            decimal shippingNetPrice = 0,
+            decimal shippingGrossPrice = 0)
         {
             supplier ??= db.Arrange_Supplier();
         
-            var materialSupply = new MaterialSupply
+            var supply = new Supply
             {
                 Id = id ?? Guid.NewGuid(),
                 SupplierId = supplier.Id,
                 Supplier = supplier,
                 OrderDate = orderDate ?? DateTime.Now,
                 Description = description,
-                InvoiceNo = invoiceNo,
                 Status = status,
-                MaterialSupplyItems = []
+                InvoiceNo = invoiceNo,
+                ShippingNetPrice = shippingNetPrice,
+                ShippingGrossPrice = shippingGrossPrice,
+                SupplyItems = []
             };
         
-            materialSupply.Supplier.MaterialSupplies.Add(materialSupply);
+            supply.Supplier.Supplies.Add(supply);
         
-            db.MaterialSupplies.Add(materialSupply);
-            return materialSupply;
+            db.Supplies.Add(supply);
+            return supply;
         }
 
-        public MaterialSupplyItem Arrange_MaterialSupplyItem(MaterialSupply? materialSupply = null,
-            Material? material = null,
+        public SupplyItem Arrange_SupplyItem(Supply? supply = null,
+            MaterialVariant? materialVariant = null,
+            PackingMaterial? packingMaterial = null,
             Guid? id = null,
             int setsAmount = 1,
             double unitsInSet = 1,
             decimal setNetPrice = 10.0m,
-            decimal setGrossPrice = 12.3m)
+            decimal setGrossPrice = 12.3m,
+            bool privateSupply = false)
         {
-            materialSupply ??= db.Arrange_MaterialSupply();
-            material ??= db.Arrange_Material();
+            supply ??= db.Arrange_Supply();
 
-            var item = new MaterialSupplyItem
+            var item = new SupplyItem
             {
                 Id = id ?? Guid.NewGuid(),
-                MaterialSupplyId = materialSupply.Id,
-                MaterialSupply = materialSupply,
-                MaterialId = material.Id,
-                Material = material,
+                MaterialSupplyId = supply.Id,
+                Supply = supply,
+                MaterialVariantId = materialVariant?.Id,
+                MaterialVariant = materialVariant,
+                PackingMaterialId = packingMaterial?.Id,
+                PackingMaterial = packingMaterial,
                 SetsAmount = setsAmount,
                 UnitsInSet = unitsInSet,
                 SetNetPrice = setNetPrice,
-                SetGrossPrice = setGrossPrice
+                SetGrossPrice = setGrossPrice,
+                PrivateSupply = privateSupply
             };
 
-            item.MaterialSupply.MaterialSupplyItems.Add(item);
-            item.Material.MaterialSupplyItems.Add(item);
+            item.Supply.SupplyItems.Add(item);
+            item.MaterialVariant?.SupplyItems.Add(item);
+            item.PackingMaterial?.SupplyItems.Add(item);
         
-            db.MaterialSupplyItems.Add(item);
+            db.SupplyItems.Add(item);
             return item;
+        }
+
+        public PackingMaterial Arrange_PackingMaterial(Guid? id = null,
+            string name = "Test Packing Material",
+            string? ean = null,
+            string? description = null,
+            string unit = "pcs",
+            double totalUsedAmount = 0,
+            double companyAmount = 0,
+            double privateAmount = 0)
+        {
+            var packingMaterial = new PackingMaterial
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = name,
+                Ean = ean,
+                Description = description,
+                Unit = unit,
+                TotalUsedAmount = totalUsedAmount,
+                CompanyAmount = companyAmount,
+                PrivateAmount = privateAmount,
+                SupplyItems = [],
+                OrderPackingMaterials = []
+            };
+
+            db.PackingMaterials.Add(packingMaterial);
+            return packingMaterial;
         }
 
         public Product Arrange_Product(Guid? id = null,
@@ -206,25 +267,25 @@ public static class BusinessTrackerDbContextExtensions
         }
 
         public ProductionMaterial Arrange_ProductionMaterial(Production? production = null,
-            Material? material = null,
+            MaterialVariant? materialVariant = null,
             Guid? id = null,
             double usedAmount = 1.0)
         {
             production ??= db.Arrange_Production();
-            material ??= db.Arrange_Material();
+            materialVariant ??= db.Arrange_MaterialVariant();
 
             var productionMaterial = new ProductionMaterial
             {
                 Id = id ?? Guid.NewGuid(),
                 ProductionId = production.Id,
                 Production = production,
-                MaterialId = material.Id,
-                Material = material,
+                MaterialVariantId = materialVariant.Id,
+                MaterialVariant = materialVariant,
                 UsedAmount = usedAmount
             };
 
             productionMaterial.Production.ProductionMaterials.Add(productionMaterial);
-            productionMaterial.Material.ProductionMaterials.Add(productionMaterial);
+            productionMaterial.MaterialVariant.ProductionMaterials.Add(productionMaterial);
         
             db.ProductionMaterials.Add(productionMaterial);
             return productionMaterial;
@@ -249,7 +310,8 @@ public static class BusinessTrackerDbContextExtensions
                 TrackingNumber = trackingNumber,
                 Carrier = carrier,
                 Status = status,
-                OrderProducts = []
+                OrderProducts = [],
+                OrderPackingMaterials = []
             };
 
             db.Orders.Add(order);
@@ -285,6 +347,31 @@ public static class BusinessTrackerDbContextExtensions
         
             db.OrderProducts.Add(orderProduct);
             return orderProduct;
+        }
+
+        public OrderPackingMaterial Arrange_OrderPackingMaterial(Order? order = null,
+            PackingMaterial? packingMaterial = null,
+            Guid? id = null,
+            double amount = 1.0)
+        {
+            order ??= db.Arrange_Order();
+            packingMaterial ??= db.Arrange_PackingMaterial();
+
+            var opm = new OrderPackingMaterial
+            {
+                Id = id ?? Guid.NewGuid(),
+                OrderId = order.Id,
+                Order = order,
+                PackingMaterialId = packingMaterial.Id,
+                PackingMaterial = packingMaterial,
+                Amount = amount
+            };
+
+            opm.Order.OrderPackingMaterials.Add(opm);
+            opm.PackingMaterial.OrderPackingMaterials.Add(opm);
+
+            db.OrderPackingMaterials.Add(opm);
+            return opm;
         }
     }
 }

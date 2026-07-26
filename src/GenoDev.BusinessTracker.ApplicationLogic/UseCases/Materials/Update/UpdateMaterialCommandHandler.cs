@@ -16,9 +16,6 @@ public class UpdateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
             return;
 
         material.Name = request.Name;
-        material.Ean = string.IsNullOrWhiteSpace(request.Ean) ? null : request.Ean;
-        material.Description = request.Description;
-        material.Unit = request.Unit;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
 
-public class GetMaterialSuppliesQueryHandler(IBusinessTrackerDbContext dbContext)
-    : IRequestHandler<GetMaterialSuppliesQuery, PagedList<MaterialSupplyDto>>
+public class GetSuppliesQueryHandler(IBusinessTrackerDbContext dbContext)
+    : IRequestHandler<GetSuppliesQuery, PagedList<SupplyDto>>
 {
-    public async Task<PagedList<MaterialSupplyDto>> Handle(GetMaterialSuppliesQuery request, CancellationToken cancellationToken)
+    public async Task<PagedList<SupplyDto>> Handle(GetSuppliesQuery request, CancellationToken cancellationToken)
     {
-        var query = dbContext.MaterialSupplies.AsNoTracking();
+        var query = dbContext.Supplies.AsNoTracking();
 
         if (request.StartDate.HasValue)
         {
@@ -30,15 +30,21 @@ public class GetMaterialSuppliesQueryHandler(IBusinessTrackerDbContext dbContext
         var items = await query
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .Select(x => new MaterialSupplyDto(
+            .Select(x => new SupplyDto(
                 x.Id,
+                x.SupplierId,
                 x.Supplier.Name,
                 x.OrderDate,
-                x.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
-                x.MaterialSupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
-                x.Status))
+                x.SupplyItems.Sum(i => i.SetsAmount * i.SetNetPrice),
+                x.SupplyItems.Sum(i => i.SetsAmount * i.SetGrossPrice),
+                x.ShippingNetPrice,
+                x.ShippingGrossPrice,
+                x.Status,
+                x.InvoiceNo,
+                x.Description,
+                x.Supplier.WebsiteUrl))
             .ToListAsync(cancellationToken);
 
-        return new PagedList<MaterialSupplyDto>(items, totalCount, request.PageIndex, request.PageSize);
+        return new PagedList<SupplyDto>(items, totalCount, request.PageIndex, request.PageSize);
     }
 }

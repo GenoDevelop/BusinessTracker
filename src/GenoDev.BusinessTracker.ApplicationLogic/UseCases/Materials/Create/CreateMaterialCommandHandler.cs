@@ -12,11 +12,7 @@ public class CreateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
         var material = new Material
         {
             Id = Guid.NewGuid(),
-            Name = request.Name,
-            Ean = string.IsNullOrWhiteSpace(request.Ean) ? null : request.Ean,
-            Description = request.Description,
-            Unit = request.Unit,
-            Amount = 0
+            Name = request.Name
         };
 
         dbContext.Materials.Add(material);

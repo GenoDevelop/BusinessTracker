@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.Tests.UseCases.Materials;
 
-public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialSupplyCommandHandler>
+public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<UpdateSupplyCommandHandler>
 {
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
@@ -27,7 +27,7 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         {
             var supplier1 = db.Arrange_Supplier();
             var supplier2 = db.Arrange_Supplier();
-            var supply = db.Arrange_MaterialSupply(supplier: supplier1);
+            var supply = db.Arrange_Supply(supplier: supplier1);
             
             supplyId = supply.Id;
             initialSupplierId = supplier1.Id;
@@ -39,7 +39,7 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var newDescription = "Updated Description";
         var newInvoiceNo = "INV-2026-UPDATED";
 
-        var command = new UpdateMaterialSupplyCommand(
+        var command = new UpdateSupplyCommand(
             supplyId,
             newSupplierId,
             newOrderDate,
@@ -53,7 +53,7 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         // Assert
         AssertBusinessTracker_Database(db =>
         {
-            var updatedSupply = db.MaterialSupplies.First(x => x.Id == supplyId);
+            var updatedSupply = db.Supplies.First(x => x.Id == supplyId);
             updatedSupply.SupplierId.Should().Be(newSupplierId);
             updatedSupply.OrderDate.Should().Be(newOrderDate);
             updatedSupply.Status.Should().Be(newStatus);
@@ -66,7 +66,7 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     public async Task Handle_ShouldDoNothingIfSupplyNotFound()
     {
         // Arrange
-        var command = new UpdateMaterialSupplyCommand(
+        var command = new UpdateSupplyCommand(
             Guid.NewGuid(),
             Guid.NewGuid(),
             DateTime.UtcNow,
@@ -86,25 +86,26 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     {
         // Arrange
         Guid supplyId = Guid.Empty;
-        Guid materialId = Guid.Empty;
+        Guid variantId = Guid.Empty;
         int setsAmount = 5;
         double unitsInSet = 10;
-        double initialMaterialAmount = 100;
+        double initialCompanyAmount = 100;
 
         Guid supplierId = Guid.Empty;
         Arrange_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Arrange_Supplier();
-            var material = db.Arrange_Material(amount: initialMaterialAmount);
-            var supply = db.Arrange_MaterialSupply(supplier: supplier, status: MaterialSupplyStatus.Ordered);
-            db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
+            var material = db.Arrange_Material();
+            var variant = db.Arrange_MaterialVariant(material, companyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Ordered);
+            db.Arrange_SupplyItem(supply, variant, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
 
             supplyId = supply.Id;
-            materialId = material.Id;
+            variantId = variant.Id;
             supplierId = supplier.Id;
         });
 
-        var command = new UpdateMaterialSupplyCommand(
+        var command = new UpdateSupplyCommand(
             supplyId,
             supplierId,
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
@@ -118,8 +119,51 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         // Assert
         AssertBusinessTracker_Database(db =>
         {
-            var material = db.Materials.First(x => x.Id == materialId);
-            material.Amount.Should().Be(initialMaterialAmount + (setsAmount * unitsInSet));
+            var variant = db.MaterialVariants.First(x => x.Id == variantId);
+            variant.CompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAddPrivateMaterialAmount_WhenStatusChangedToReceivedAndPrivateSupplyIsTrue()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid variantId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialPrivateAmount = 50;
+
+        Guid supplierId = Guid.Empty;
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supplier = db.Arrange_Supplier();
+            var material = db.Arrange_Material();
+            var variant = db.Arrange_MaterialVariant(material, privateAmount: initialPrivateAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Ordered);
+            db.Arrange_SupplyItem(supply, variant, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: true);
+
+            supplyId = supply.Id;
+            variantId = variant.Id;
+            supplierId = supplier.Id;
+        });
+
+        var command = new UpdateSupplyCommand(
+            supplyId,
+            supplierId,
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+            MaterialSupplyStatus.Received,
+            "Delivered",
+            "INV-123");
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var variant = db.MaterialVariants.First(x => x.Id == variantId);
+            variant.PrivateAmount.Should().Be(initialPrivateAmount + (setsAmount * unitsInSet));
         });
     }
 
@@ -128,25 +172,26 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     {
         // Arrange
         Guid supplyId = Guid.Empty;
-        Guid materialId = Guid.Empty;
+        Guid variantId = Guid.Empty;
         int setsAmount = 5;
         double unitsInSet = 10;
-        double initialMaterialAmount = 150;
+        double initialCompanyAmount = 150;
 
         Guid supplierId = Guid.Empty;
         Arrange_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Arrange_Supplier();
-            var material = db.Arrange_Material(amount: initialMaterialAmount);
-            var supply = db.Arrange_MaterialSupply(supplier: supplier, status: MaterialSupplyStatus.Received);
-            db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
+            var material = db.Arrange_Material();
+            var variant = db.Arrange_MaterialVariant(material, companyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Received);
+            db.Arrange_SupplyItem(supply, variant, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
 
             supplyId = supply.Id;
-            materialId = material.Id;
+            variantId = variant.Id;
             supplierId = supplier.Id;
         });
 
-        var command = new UpdateMaterialSupplyCommand(
+        var command = new UpdateSupplyCommand(
             supplyId,
             supplierId,
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
@@ -160,8 +205,8 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         // Assert
         AssertBusinessTracker_Database(db =>
         {
-            var material = db.Materials.First(x => x.Id == materialId);
-            material.Amount.Should().Be(initialMaterialAmount - (setsAmount * unitsInSet));
+            var variant = db.MaterialVariants.First(x => x.Id == variantId);
+            variant.CompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
         });
     }
 
@@ -170,25 +215,26 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     {
         // Arrange
         Guid supplyId = Guid.Empty;
-        Guid materialId = Guid.Empty;
+        Guid variantId = Guid.Empty;
         int setsAmount = 5;
         double unitsInSet = 10;
-        double initialMaterialAmount = 100;
+        double initialCompanyAmount = 100;
 
         Guid supplierId = Guid.Empty;
         Arrange_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Arrange_Supplier();
-            var material = db.Arrange_Material(amount: initialMaterialAmount);
-            var supply = db.Arrange_MaterialSupply(supplier: supplier, status: MaterialSupplyStatus.New);
-            db.Arrange_MaterialSupplyItem(supply, material, setsAmount: setsAmount, unitsInSet: unitsInSet);
+            var material = db.Arrange_Material();
+            var variant = db.Arrange_MaterialVariant(material, companyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.New);
+            db.Arrange_SupplyItem(supply, variant, setsAmount: setsAmount, unitsInSet: unitsInSet);
 
             supplyId = supply.Id;
-            materialId = material.Id;
+            variantId = variant.Id;
             supplierId = supplier.Id;
         });
 
-        var command = new UpdateMaterialSupplyCommand(
+        var command = new UpdateSupplyCommand(
             supplyId,
             supplierId,
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
@@ -202,8 +248,8 @@ public class UpdateMaterialSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         // Assert
         AssertBusinessTracker_Database(db =>
         {
-            var material = db.Materials.First(x => x.Id == materialId);
-            material.Amount.Should().Be(initialMaterialAmount);
+            var variant = db.MaterialVariants.First(x => x.Id == variantId);
+            variant.CompanyAmount.Should().Be(initialCompanyAmount);
         });
     }
 }
