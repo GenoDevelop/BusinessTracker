@@ -10,10 +10,13 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:SuppliesViewModel}">
     <Grid x:Name="RootGrid" ClipToBounds="True">
-        <Grid x:Name="LayoutGrid">
+        <Grid x:Name="LayoutGrid"
+              SizeChanged="LayoutGrid_SizeChanged">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" MinWidth="0"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition x:Name="SuppliesColumn"
+                                  Width="200"
+                                  MinWidth="0"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*" MinWidth="0"/>
             </Grid.ColumnDefinitions>
         
@@ -397,7 +400,14 @@
                                         FontSize="11" />
         </Grid>
         
-        <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent">
+        <GridSplitter x:Name="SupplyDetailsSplitter"
+                      Grid.Column="1"
+                      Width="8"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Background="Transparent"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext">
             <GridSplitter.Template>
                 <ControlTemplate TargetType="GridSplitter">
                     <Grid Background="Transparent">

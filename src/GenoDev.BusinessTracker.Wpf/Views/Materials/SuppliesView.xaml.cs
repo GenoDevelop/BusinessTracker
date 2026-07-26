@@ -12,6 +12,8 @@ namespace GenoDev.BusinessTracker.Wpf.Views.Materials;
 
 public partial class SuppliesView : UserControl
 {
+    private const double DefaultSplitterWidth = 8d;
+
     private SuppliesViewModel? _attachedViewModel;
 
     public SuppliesView()
@@ -26,6 +28,7 @@ public partial class SuppliesView : UserControl
     private void SuppliesView_Loaded(object sender, RoutedEventArgs e)
     {
         AttachViewModel(DataContext as SuppliesViewModel);
+        UpdateSuppliesColumnMaxWidth(LayoutGrid.ActualWidth);
     }
 
     private void SuppliesView_Unloaded(object sender, RoutedEventArgs e)
@@ -41,6 +44,22 @@ public partial class SuppliesView : UserControl
         {
             AttachViewModel(e.NewValue as SuppliesViewModel);
         }
+    }
+
+    private void LayoutGrid_SizeChanged(
+        object sender,
+        SizeChangedEventArgs e)
+    {
+        UpdateSuppliesColumnMaxWidth(e.NewSize.Width);
+    }
+
+    private void UpdateSuppliesColumnMaxWidth(double layoutWidth)
+    {
+        var splitterWidth = SupplyDetailsSplitter.ActualWidth > 0
+            ? SupplyDetailsSplitter.ActualWidth
+            : DefaultSplitterWidth;
+
+        SuppliesColumn.MaxWidth = Math.Max(0d, layoutWidth - splitterWidth);
     }
 
     private void AttachViewModel(SuppliesViewModel? viewModel)
