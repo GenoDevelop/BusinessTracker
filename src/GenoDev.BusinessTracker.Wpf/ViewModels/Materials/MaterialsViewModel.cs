@@ -9,13 +9,13 @@ public partial class MaterialsViewModel : ViewModelBase
         PackingMaterialListViewModel packingMaterialListViewModel,
         FixedAssetListViewModel fixedAssetListViewModel,
         SuppliersViewModel suppliersViewModel,
-        MaterialSuppliesViewModel materialSuppliesViewModel)
+        SuppliesViewModel suppliesViewModel)
     {
         MaterialListViewModel = materialListViewModel;
         PackingMaterialListViewModel = packingMaterialListViewModel;
         FixedAssetListViewModel = fixedAssetListViewModel;
         SuppliersViewModel = suppliersViewModel;
-        MaterialSuppliesViewModel = materialSuppliesViewModel;
+        SuppliesViewModel = suppliesViewModel;
     }
 
     [ObservableProperty]
@@ -25,5 +25,5 @@ public partial class MaterialsViewModel : ViewModelBase
     public PackingMaterialListViewModel PackingMaterialListViewModel { get; }
     public FixedAssetListViewModel FixedAssetListViewModel { get; }
     public SuppliersViewModel SuppliersViewModel { get; }
-    public MaterialSuppliesViewModel MaterialSuppliesViewModel { get; }
+    public SuppliesViewModel SuppliesViewModel { get; }
 }

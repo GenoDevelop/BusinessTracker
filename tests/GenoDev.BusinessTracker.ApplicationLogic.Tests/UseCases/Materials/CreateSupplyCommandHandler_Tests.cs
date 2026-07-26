@@ -29,7 +29,9 @@ public class CreateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Cre
             supplier.Id,
             orderDate,
             description,
-            invoiceNo);
+            invoiceNo,
+            10.50m,
+            12.91m);
 
         // Act
         var resultId = await Sut.Handle(command, CancellationToken.None);
@@ -45,6 +47,8 @@ public class CreateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Cre
             supply.OrderDate.Should().BeCloseTo(orderDate, TimeSpan.FromMilliseconds(1));
             supply.Description.Should().Be(description);
             supply.InvoiceNo.Should().Be(invoiceNo);
+            supply.ShippingNetPrice.Should().Be(10.50m);
+            supply.ShippingGrossPrice.Should().Be(12.91m);
             supply.Status.Should().Be(MaterialSupplyStatus.New);
         });
     }

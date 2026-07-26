@@ -9,4 +9,6 @@ public record UpdateSupplyCommand(
     DateTime OrderDate,
     MaterialSupplyStatus Status,
     string? Description,
-    string? InvoiceNo) : IRequest;
+    string? InvoiceNo,
+    decimal ShippingNetPrice,
+    decimal ShippingGrossPrice) : IRequest;

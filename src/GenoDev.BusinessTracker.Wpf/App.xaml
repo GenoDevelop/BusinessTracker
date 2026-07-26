@@ -88,6 +88,9 @@
         <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
         <converters:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
         <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibilityConverter" />
+        <converters:SupplyItemTypeToTextConverter x:Key="SupplyItemTypeToTextConverter" />
+        <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
 
         <Style TargetType="DataGrid">
             <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0" />

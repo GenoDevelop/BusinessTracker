@@ -116,8 +116,8 @@ public class GetSuppliesQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetSup
 
         // Assert
         result.Items.Should().HaveCount(1);
-        result.Items[0].ItemsTotalNetPrice.Should().Be(35.0m);
-        result.Items[0].ItemsTotalGrossPrice.Should().Be(43.05m);
+        result.Items[0].TotalNetPrice.Should().Be(40m);
+        result.Items[0].TotalGrossPrice.Should().Be(49.05m);
         result.Items[0].ShippingNetPrice.Should().Be(5m);
         result.Items[0].ShippingGrossPrice.Should().Be(6m);
     }

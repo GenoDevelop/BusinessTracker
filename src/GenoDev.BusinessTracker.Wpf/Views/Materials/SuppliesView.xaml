@@ -1,4 +1,4 @@
-<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.Materials.MaterialSuppliesView"
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.Materials.SuppliesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,7 +7,7 @@
              xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance vm:MaterialSuppliesViewModel}">
+             d:DataContext="{d:DesignInstance vm:SuppliesViewModel}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -119,7 +119,7 @@
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
                     </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding CreateMaterialSupplyViewModel}">
+                    <StackPanel Width="400" DataContext="{Binding CreateSupplyViewModel}">
                         <TextBlock Text="Dodaj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
         
                         <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
@@ -128,9 +128,25 @@
                         <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
                         <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
         
-                        <TextBlock Text="Numer faktury:" Margin="0,0,0,5" />
+                        <TextBlock Text="Nr faktury:" Margin="0,0,0,5" />
                         <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-        
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Cena netto dostawy:" Margin="0,0,0,5" />
+                                <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Cena brutto dostawy:" Margin="0,0,0,5" />
+                                <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                        </Grid>
+
                         <TextBlock Text="Opis:" Margin="0,0,0,5" />
                         <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"
@@ -150,7 +166,7 @@
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
                     </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyViewModel}">
+                    <StackPanel Width="400" DataContext="{Binding EditSupplyViewModel}">
                         <TextBlock Text="Edytuj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
         
                         <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
@@ -173,9 +189,25 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
         
-                        <TextBlock Text="Numer faktury" Margin="0,0,0,5" Foreground="Gray" />
+                        <TextBlock Text="Nr faktury" Margin="0,0,0,5" Foreground="Gray" />
                         <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
-        
+
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Cena netto dostawy" Margin="0,0,0,5" Foreground="Gray" />
+                                <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Cena brutto dostawy" Margin="0,0,0,5" Foreground="Gray" />
+                                <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                        </Grid>
+
                         <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" />
                         <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
@@ -192,17 +224,43 @@
                 </Border>
             </Popup>
         
-            <!-- Add Material to Supply Popup -->
+            <!-- Add Supply Item Popup -->
             <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True">
                 <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
                     </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding AddMaterialToSupplyViewModel}">
-                        <TextBlock Text="Dodaj materiał do dostawy" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                    <StackPanel Width="400" DataContext="{Binding AddSupplyItemViewModel}">
+                        <TextBlock Text="Dodaj pozycję do dostawy" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
         
-                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Conditional Panels for Item Selection -->
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                            <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                            
+                            <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                      IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
+                            <TextBlock Text="Materiał pakunkowy (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
+                            <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        </StackPanel>
         
                         <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
                         <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
@@ -264,17 +322,43 @@
                 </Border>
             </Popup>
         
-            <!-- Edit Material Item Popup -->
+            <!-- Edit Supply Item Popup -->
             <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Mouse" StaysOpen="True">
                 <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
                     </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditMaterialSupplyItemViewModel}">
-                        <TextBlock Text="Edytuj materiał w dostawie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
+                    <StackPanel Width="400" DataContext="{Binding EditSupplyItemViewModel}">
+                        <TextBlock Text="Edytuj pozycję w dostawie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
         
-                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Conditional Panels for Item Selection -->
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                            <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                            
+                            <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                      IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
+                            <TextBlock Text="Materiał pakunkowy (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
+                            <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        </StackPanel>
         
                         <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
                         <TextBox Text="{Binding SetsAmountText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
@@ -358,17 +442,21 @@
                     </StackPanel>
         
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Cena netto suma:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Cena:" Foreground="Gray" FontSize="11" Width="100"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.TotalNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
-                    </StackPanel>
-        
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Cena brutto suma:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
                         <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
                     </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Dostawa:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="{Binding SelectedSupplyDetails.ShippingNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>
+                        <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
+                        <TextBlock Text="{Binding SelectedSupplyDetails.ShippingGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
+                    </StackPanel>
         
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Numer faktury:" Foreground="Gray" FontSize="11" Width="100"/>
+                        <TextBlock Text="Nr faktury:" Foreground="Gray" FontSize="11" Width="100"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.InvoiceNo}" FontWeight="SemiBold"/>
                     </StackPanel>
                 </StackPanel>
@@ -397,9 +485,9 @@
         
                 <!-- Header for Materials Table -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock Text="Zamówione Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <TextBlock Text="Zamówione Pozycje" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
         
-                    <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
+                    <controls:CreateButton Command="{Binding AddMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj pozycję" />
                     <controls:RefreshButton Click="SupplyItemsRefreshButton_Click" Margin="0,0,5,0" />
                     <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
                                                  Click="SupplyItemsFilterToggleButton_Click" />
@@ -411,18 +499,18 @@
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                           Sorting="SupplyItemsDataGrid_Sorting">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
+                        <DataGridTemplateColumn Width="1.5*" SortMemberPath="ItemName">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader
-                                    x:Name="MaterialNameFilterColumn"
-                                    Header="Materiał"
+                                    x:Name="ItemNameFilterColumn"
+                                    Header="Pozycja"
                                     DebounceMilliseconds="500"
                                     IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     FilterChanged="SupplyItemsFilter_FilterChanged" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding MaterialName}" VerticalAlignment="Center" Margin="5,0"/>
+                                    <TextBlock Text="{Binding ItemName}" VerticalAlignment="Center" Margin="5,0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -439,6 +527,22 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="ManufacturerCode">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="ManufacturerCodeFilterColumn"
+                                    Header="Kod"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="SupplyItemsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ManufacturerCode}" VerticalAlignment="Center" Margin="5,0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

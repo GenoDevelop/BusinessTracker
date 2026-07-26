@@ -5,6 +5,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplyDetails;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplyItems;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.RemoveSupplyItem;
+using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using System.Collections.ObjectModel;
 using GenoDev.BusinessTracker.Wpf.Controls;
@@ -12,20 +13,20 @@ using GenoDev.BusinessTracker.Wpf.Filtering;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
-public enum MaterialSuppliesPaginationTarget
+public enum SuppliesPaginationTarget
 {
     Supplies,
     SupplyItems
 }
 
-public partial class MaterialSuppliesViewModel : ViewModelBase
+public partial class SuppliesViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private CancellationTokenSource? _supplyDetailsCancellation;
-    private MaterialSupplyItemsFilterCriteria _supplyItemsFilter =
-        MaterialSupplyItemsFilterCriteria.Empty;
+    private SupplyItemsFilterCriteria _supplyItemsFilter =
+        SupplyItemsFilterCriteria.Empty;
     
-    public MaterialSuppliesViewModel(IMediator mediator)
+    public SuppliesViewModel(IMediator mediator)
     {
         _mediator = mediator;
     }
@@ -47,7 +48,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     /// The view owns the controls and decides whether to refresh the current page
     /// or reset to the first page before loading.
     /// </summary>
-    public event Action<MaterialSuppliesPaginationTarget, bool>?
+    public event Action<SuppliesPaginationTarget, bool>?
         PaginationRefreshRequested;
     
     [ObservableProperty]
@@ -60,15 +61,15 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private bool _isFilterVisible;
     
     [ObservableProperty]
-    private MaterialSupplyDto? _selectedSupply;
+    private SupplyDto? _selectedSupply;
     
     [ObservableProperty]
-    private MaterialSupplyDetailsDto? _selectedSupplyDetails;
+    private SupplyDetailsDto? _selectedSupplyDetails;
     
     [ObservableProperty]
     private bool _isItemsFilterVisible;
     
-    public string? SupplyItemsSortColumn { get; private set; }
+    public SupplyItemSortColumn? SupplyItemsSortColumn { get; private set; }
     
     public bool IsSupplyItemsDescending { get; private set; }
     
@@ -76,25 +77,25 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private bool _isCreatePopupOpen;
     
     [ObservableProperty]
-    private CreateMaterialSupplyViewModel? _createMaterialSupplyViewModel;
+    private CreateSupplyViewModel? _createSupplyViewModel;
     
     [ObservableProperty]
     private bool _isEditPopupOpen;
     
     [ObservableProperty]
-    private EditMaterialSupplyViewModel? _editMaterialSupplyViewModel;
+    private EditSupplyViewModel? _editSupplyViewModel;
     
     [ObservableProperty]
     private bool _isAddMaterialPopupOpen;
     
     [ObservableProperty]
-    private AddMaterialToSupplyViewModel? _addMaterialToSupplyViewModel;
+    private AddSupplyItemViewModel? _addSupplyItemViewModel;
     
     [ObservableProperty]
     private bool _isEditItemPopupOpen;
     
     [ObservableProperty]
-    private EditMaterialSupplyItemViewModel? _editMaterialSupplyItemViewModel;
+    private EditSupplyItemViewModel? _editSupplyItemViewModel;
     
     [ObservableProperty]
     private bool _isDeletePopupOpen;
@@ -103,43 +104,50 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     private bool _isDeleteItemPopupOpen;
     
     [ObservableProperty]
-    private MaterialSupplyItemDto? _selectedItemToRemove;
+    private SupplyItemDto? _selectedItemToRemove;
     
-    public void SetSupplyItemsFilter(MaterialSupplyItemsFilterCriteria filter)
+    public void SetSupplyItemsFilter(SupplyItemsFilterCriteria filter)
     {
         _supplyItemsFilter = filter;
     }
     
     public void SetSupplyItemsSorting(
-        string sortColumn,
+        string sortColumnName,
         bool isDescending)
     {
-        SupplyItemsSortColumn = sortColumn;
+        if (Enum.TryParse<SupplyItemSortColumn>(sortColumnName, out var sortColumn))
+        {
+            SupplyItemsSortColumn = sortColumn;
+        }
+        else
+        {
+            SupplyItemsSortColumn = GenoDev.BusinessTracker.Domain.Enums.SupplyItemSortColumn.ItemName;
+        }
         IsSupplyItemsDescending = isDescending;
     }
     
     partial void OnStartDateChanged(DateTime? value)
     {
         RequestPaginationRefresh(
-            MaterialSuppliesPaginationTarget.Supplies,
+            SuppliesPaginationTarget.Supplies,
             resetPageIndex: true);
     }
     
     partial void OnEndDateChanged(DateTime? value)
     {
         RequestPaginationRefresh(
-            MaterialSuppliesPaginationTarget.Supplies,
+            SuppliesPaginationTarget.Supplies,
             resetPageIndex: true);
     }
     
     partial void OnIsFilterVisibleChanged(bool value)
     {
         RequestPaginationRefresh(
-            MaterialSuppliesPaginationTarget.Supplies,
+            SuppliesPaginationTarget.Supplies,
             resetPageIndex: true);
     }
     
-    partial void OnSelectedSupplyChanged(MaterialSupplyDto? value)
+    partial void OnSelectedSupplyChanged(SupplyDto? value)
     {
         _ = LoadSupplyDetailsAsync(value);
     }
@@ -150,7 +158,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     {
         var selectedId = SelectedSupply?.Id;
         var result = await _mediator.Send(
-            new GetMaterialSuppliesQuery(
+            new GetSuppliesQuery(
                 state.PageIndex,
                 state.PageSize,
                 IsFilterVisible ? StartDate : null,
@@ -181,32 +189,34 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     
         var filter = IsItemsFilterVisible
             ? _supplyItemsFilter
-            : MaterialSupplyItemsFilterCriteria.Empty;
+            : SupplyItemsFilterCriteria.Empty;
     
         var result = await _mediator.Send(
-            new GetMaterialSupplyItemsQuery(
+            new GetSupplyItemsQuery(
                 selectedSupply.Id,
                 state.PageIndex,
                 state.PageSize,
                 null,
                 SupplyItemsSortColumn,
                 IsSupplyItemsDescending,
-                filter.MaterialName,
+                filter.ItemName,
+                null, // ItemTypeFilter
                 filter.Ean,
-                null,
+                filter.ManufacturerCode,
+                null, // UnitFilter
                 filter.SetsAmount,
                 filter.SetsAmountOperator,
                 filter.UnitsInSet,
                 filter.UnitsInSetOperator,
                 filter.TotalAmount,
                 filter.TotalAmountOperator,
-                ToDecimal(filter.SetNetPrice),
+                filter.SetNetPrice,
                 filter.SetNetPriceOperator,
-                ToDecimal(filter.TotalNetPrice),
+                filter.TotalNetPrice,
                 filter.TotalNetPriceOperator,
-                ToDecimal(filter.SetGrossPrice),
+                filter.SetGrossPrice,
                 filter.SetGrossPriceOperator,
-                ToDecimal(filter.TotalGrossPrice),
+                filter.TotalGrossPrice,
                 filter.TotalGrossPriceOperator),
             cancellationToken);
     
@@ -216,7 +226,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         return result.TotalCount;
     }
     
-    private async Task LoadSupplyDetailsAsync(MaterialSupplyDto? supply)
+    private async Task LoadSupplyDetailsAsync(SupplyDto? supply)
     {
         _supplyDetailsCancellation?.Cancel();
         _supplyDetailsCancellation = null;
@@ -236,7 +246,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         try
         {
             var result = await _mediator.Send(
-                new GetMaterialSupplyDetailsQuery(supply.Id),
+                new GetSupplyDetailsQuery(supply.Id),
                 cancellation.Token);
     
             cancellation.Token.ThrowIfCancellationRequested();
@@ -265,15 +275,15 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     [RelayCommand]
     private async Task CreateSupply()
     {
-        CreateMaterialSupplyViewModel = new CreateMaterialSupplyViewModel(_mediator);
-        CreateMaterialSupplyViewModel.RequestClose += async () =>
+        CreateSupplyViewModel = new CreateSupplyViewModel(_mediator);
+        CreateSupplyViewModel.RequestClose += async () =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
             await Task.CompletedTask;
         };
     
-        await CreateMaterialSupplyViewModel.InitializeAsync();
+        await CreateSupplyViewModel.InitializeAsync();
         IsCreatePopupOpen = true;
     }
     
@@ -285,18 +295,18 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
             return;
         }
     
-        EditMaterialSupplyViewModel = new EditMaterialSupplyViewModel(
+        EditSupplyViewModel = new EditSupplyViewModel(
             _mediator,
             SelectedSupplyDetails);
     
-        EditMaterialSupplyViewModel.RequestClose += async () =>
+        EditSupplyViewModel.RequestClose += async () =>
         {
             IsEditPopupOpen = false;
             await LoadSupplyDetailsAsync(SelectedSupply);
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
         };
     
-        await EditMaterialSupplyViewModel.InitializeAsync();
+        await EditSupplyViewModel.InitializeAsync();
         IsEditPopupOpen = true;
     }
     
@@ -308,43 +318,43 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
             return;
         }
     
-        AddMaterialToSupplyViewModel = new AddMaterialToSupplyViewModel(
+        AddSupplyItemViewModel = new AddSupplyItemViewModel(
             _mediator,
             SelectedSupply.Id);
     
-        AddMaterialToSupplyViewModel.RequestClose += async () =>
+        AddSupplyItemViewModel.RequestClose += async () =>
         {
             IsAddMaterialPopupOpen = false;
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.SupplyItems);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
             await LoadSupplyDetailsAsync(SelectedSupply);
         };
     
-        await AddMaterialToSupplyViewModel.InitializeAsync();
+        await AddSupplyItemViewModel.InitializeAsync();
         IsAddMaterialPopupOpen = true;
     }
     
     [RelayCommand]
-    private async Task EditItem(MaterialSupplyItemDto? item)
+    private async Task EditItem(SupplyItemDto? item)
     {
         if (item is null)
         {
             return;
         }
     
-        EditMaterialSupplyItemViewModel = new EditMaterialSupplyItemViewModel(
+        EditSupplyItemViewModel = new EditSupplyItemViewModel(
             _mediator,
             item);
     
-        EditMaterialSupplyItemViewModel.RequestClose += async () =>
+        EditSupplyItemViewModel.RequestClose += async () =>
         {
             IsEditItemPopupOpen = false;
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.SupplyItems);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
             await LoadSupplyDetailsAsync(SelectedSupply);
         };
     
-        await EditMaterialSupplyItemViewModel.InitializeAsync();
+        await EditSupplyItemViewModel.InitializeAsync();
         IsEditItemPopupOpen = true;
     }
     
@@ -373,7 +383,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     
             IsDeletePopupOpen = false;
             SelectedSupply = null;
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
         }
         finally
         {
@@ -388,7 +398,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private void DeleteItem(MaterialSupplyItemDto? item)
+    private void DeleteItem(SupplyItemDto? item)
     {
         if (item is null)
         {
@@ -411,13 +421,13 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
         try
         {
             await _mediator.Send(
-                new RemoveMaterialFromSupplyCommand(SelectedItemToRemove.Id));
+                new RemoveItemFromSupplyCommand(SelectedItemToRemove.Id));
     
             IsDeleteItemPopupOpen = false;
             SelectedItemToRemove = null;
     
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.Supplies);
-            RequestPaginationRefresh(MaterialSuppliesPaginationTarget.SupplyItems);
+            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
             await LoadSupplyDetailsAsync(SelectedSupply);
         }
         finally
@@ -434,7 +444,7 @@ public partial class MaterialSuppliesViewModel : ViewModelBase
     }
     
     private void RequestPaginationRefresh(
-        MaterialSuppliesPaginationTarget target,
+        SuppliesPaginationTarget target,
         bool resetPageIndex = false)
     {
         PaginationRefreshRequested?.Invoke(target, resetPageIndex);

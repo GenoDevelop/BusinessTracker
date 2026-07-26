@@ -29,6 +29,8 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
         supply.Status = request.Status;
         supply.Description = request.Description;
         supply.InvoiceNo = request.InvoiceNo;
+        supply.ShippingNetPrice = request.ShippingNetPrice;
+        supply.ShippingGrossPrice = request.ShippingGrossPrice;
 
         if (oldStatus != MaterialSupplyStatus.Received && newStatus == MaterialSupplyStatus.Received)
         {

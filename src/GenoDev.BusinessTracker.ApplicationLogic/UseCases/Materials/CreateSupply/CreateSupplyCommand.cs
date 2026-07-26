@@ -6,4 +6,6 @@ public record CreateSupplyCommand(
     Guid SupplierId,
     DateTime OrderDate,
     string? Description,
-    string? InvoiceNo) : IRequest<Guid>;
+    string? InvoiceNo,
+    decimal ShippingNetPrice,
+    decimal ShippingGrossPrice) : IRequest<Guid>;

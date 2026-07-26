@@ -4,6 +4,7 @@ public enum SupplyItemSortColumn
 {
     ItemName,
     ItemType,
+    Ean,
     ManufacturerCode,
     SetsAmount,
     UnitsInSet,

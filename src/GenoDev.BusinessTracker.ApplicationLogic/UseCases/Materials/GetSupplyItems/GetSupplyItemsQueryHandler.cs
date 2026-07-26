@@ -18,61 +18,42 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
                 x.Id,
                 ItemId = x.ItemType == SupplyItemType.Material ? x.MaterialVariantId :
                          x.ItemType == SupplyItemType.Packing ? x.PackingMaterialId :
-                         x.ItemType == SupplyItemType.FixedAsset ? x.FixedAssetId : (Guid?)null,
+                         x.ItemType == SupplyItemType.FixedAsset ? x.FixedAssetId : null,
                 x.ItemType,
                 ItemName = x.ItemType == SupplyItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Name : string.Empty) :
                            x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Name : string.Empty) :
-                           x.ItemType == SupplyItemType.FixedAsset ? "Fixed Asset" : string.Empty,
+                           x.ItemType == SupplyItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Name : string.Empty) : string.Empty,
+                Ean = x.ItemType == SupplyItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Ean : null) :
+                      x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Ean : null) :
+                      x.ItemType == SupplyItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Ean : null) : null,
                 ManufacturerCode = x.ItemType == SupplyItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.ManufacturerCode : null) :
-                                   x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.ManufacturerCode : null) : null,
+                                   x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.ManufacturerCode : null) :
+                                   x.ItemType == SupplyItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.ManufacturerCode : null) : null,
                 Unit = x.ItemType == SupplyItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Unit : null) :
-                       x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Unit : null) : null,
+                       x.ItemType == SupplyItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Unit : null) :
+                       x.ItemType == SupplyItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Unit : null) : null,
                 x.SetsAmount,
                 x.UnitsInSet,
                 x.SetNetPrice,
                 x.SetGrossPrice,
                 x.PrivateSupply
-            });
-
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            query = query.WhereContainsAllInAny(request.SearchTerm, x => x.ItemName, x => x.ManufacturerCode);
-
-        if (!string.IsNullOrWhiteSpace(request.ItemNameFilter))
-            query = query.WhereContainsAll(x => x.ItemName, request.ItemNameFilter);
+            })
+            .WhereContainsAllInAny(request.SearchTerm, x => x.ItemName, x => x.ManufacturerCode, x => x.Ean)
+            .WhereContainsAll(x => x.ItemName, request.ItemNameFilter)
+            .WhereContainsAll(x => x.Ean ?? string.Empty, request.EanFilter)
+            .WhereContainsAll(x => x.ManufacturerCode ?? string.Empty, request.ManufacturerCodeFilter)
+            .WhereContainsAll(x => x.Unit, request.UnitFilter)
+            .ApplyNumericFilter(x => x.SetsAmount, request.SetsAmountOperator, request.SetsAmountFilter)
+            .ApplyNumericFilter(x => x.UnitsInSet, request.UnitsInSetOperator, request.UnitsInSetFilter)
+            .ApplyNumericFilter(x => x.SetsAmount * x.UnitsInSet, request.TotalAmountOperator, request.TotalAmountFilter)
+            .ApplyNumericFilter(x => (double)x.SetNetPrice, request.SetNetPriceOperator, (double?)request.SetNetPriceFilter)
+            .ApplyNumericFilter(x => x.SetsAmount * (double)x.SetNetPrice, request.TotalNetPriceOperator, (double?)request.TotalNetPriceFilter)
+            .ApplyNumericFilter(x => (double)x.SetGrossPrice, request.SetGrossPriceOperator, (double?)request.SetGrossPriceFilter)
+            .ApplyNumericFilter(x => x.SetsAmount * (double)x.SetGrossPrice, request.TotalGrossPriceOperator, (double?)request.TotalGrossPriceFilter);
 
         if (request.ItemTypeFilter != null && request.ItemTypeFilter.Length > 0)
             query = query.Where(x => request.ItemTypeFilter.Contains(x.ItemType));
-
-        if (!string.IsNullOrWhiteSpace(request.ManufacturerCodeFilter))
-            query = query.WhereContainsAll(x => x.ManufacturerCode ?? string.Empty, request.ManufacturerCodeFilter);
-
-        if (!string.IsNullOrWhiteSpace(request.UnitFilter))
-        {
-            var filter = request.UnitFilter.ToLower();
-            query = query.Where(x => x.Unit != null && x.Unit.ToLower().Contains(filter));
-        }
-
-        if (request.SetsAmountFilter.HasValue && request.SetsAmountOperator.HasValue)
-            query = query.ApplyNumericFilter(x => (double)x.SetsAmount, request.SetsAmountOperator.Value, (double)request.SetsAmountFilter.Value);
-
-        if (request.UnitsInSetFilter.HasValue && request.UnitsInSetOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.UnitsInSet, request.UnitsInSetOperator.Value, request.UnitsInSetFilter.Value);
-
-        if (request.TotalAmountFilter.HasValue && request.TotalAmountOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * x.UnitsInSet, request.TotalAmountOperator.Value, request.TotalAmountFilter.Value);
-
-        if (request.SetNetPriceFilter.HasValue && request.SetNetPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => (double)x.SetNetPrice, request.SetNetPriceOperator.Value, (double)request.SetNetPriceFilter.Value);
-
-        if (request.TotalNetPriceFilter.HasValue && request.TotalNetPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetNetPrice, request.TotalNetPriceOperator.Value, (double)request.TotalNetPriceFilter.Value);
-
-        if (request.SetGrossPriceFilter.HasValue && request.SetGrossPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => (double)x.SetGrossPrice, request.SetGrossPriceOperator.Value, (double)request.SetGrossPriceFilter.Value);
-
-        if (request.TotalGrossPriceFilter.HasValue && request.TotalGrossPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetGrossPrice, request.TotalGrossPriceOperator.Value, (double)request.TotalGrossPriceFilter.Value);
-
+        
         if (request.PrivateSupplyFilter.HasValue)
             query = query.Where(x => x.PrivateSupply == request.PrivateSupplyFilter.Value);
 
@@ -82,6 +63,8 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
             (SupplyItemSortColumn.ItemName, false) => query.OrderBy(x => x.ItemName),
             (SupplyItemSortColumn.ItemType, true) => query.OrderByDescending(x => x.ItemType),
             (SupplyItemSortColumn.ItemType, false) => query.OrderBy(x => x.ItemType),
+            (SupplyItemSortColumn.Ean, true) => query.OrderByDescending(x => x.Ean),
+            (SupplyItemSortColumn.Ean, false) => query.OrderBy(x => x.Ean),
             (SupplyItemSortColumn.ManufacturerCode, true) => query.OrderByDescending(x => x.ManufacturerCode),
             (SupplyItemSortColumn.ManufacturerCode, false) => query.OrderBy(x => x.ManufacturerCode),
             (SupplyItemSortColumn.SetsAmount, true) => query.OrderByDescending(x => x.SetsAmount),
@@ -113,6 +96,7 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
                 x.ItemId,
                 x.ItemType,
                 x.ItemName,
+                x.Ean,
                 x.ManufacturerCode,
                 x.SetsAmount,
                 x.Unit,

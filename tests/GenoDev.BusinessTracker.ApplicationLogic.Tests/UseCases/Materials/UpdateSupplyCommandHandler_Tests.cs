@@ -45,7 +45,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             newOrderDate,
             newStatus,
             newDescription,
-            newInvoiceNo);
+            newInvoiceNo,
+            15.00m,
+            18.45m);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -59,6 +61,8 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             updatedSupply.Status.Should().Be(newStatus);
             updatedSupply.Description.Should().Be(newDescription);
             updatedSupply.InvoiceNo.Should().Be(newInvoiceNo);
+            updatedSupply.ShippingNetPrice.Should().Be(15.00m);
+            updatedSupply.ShippingGrossPrice.Should().Be(18.45m);
         });
     }
 
@@ -72,7 +76,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             DateTime.UtcNow,
             MaterialSupplyStatus.Ordered,
             "Desc",
-            "INV");
+            "INV",
+            0,
+            0);
 
         // Act
         var act = async () => await Sut.Handle(command, CancellationToken.None);
@@ -111,7 +117,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
             MaterialSupplyStatus.Received,
             "Delivered",
-            "INV-123");
+            "INV-123",
+            0,
+            0);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -154,7 +162,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
             MaterialSupplyStatus.Received,
             "Delivered",
-            "INV-123");
+            "INV-123",
+            0,
+            0);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -197,7 +207,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
             MaterialSupplyStatus.Ordered,
             "Demoted",
-            "INV-123");
+            "INV-123",
+            0,
+            0);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -240,7 +252,9 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
             DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
             MaterialSupplyStatus.Ordered,
             "Updated",
-            "INV-123");
+            "INV-123",
+            0,
+            0);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);

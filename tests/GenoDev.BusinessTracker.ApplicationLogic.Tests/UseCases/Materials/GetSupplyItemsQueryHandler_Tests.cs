@@ -24,8 +24,8 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
         {
             var supply = db.Arrange_Supply();
             var material = db.Arrange_Material(name: "Material A");
-            var variant = db.Arrange_MaterialVariant(material, name: "Variant A", manufacturerCode: "MC001");
-            var packing = db.Arrange_PackingMaterial(name: "Packing P", manufacturerCode: "MC002");
+            var variant = db.Arrange_MaterialVariant(material, name: "Variant A", ean: "EAN001", manufacturerCode: "MC001");
+            var packing = db.Arrange_PackingMaterial(name: "Packing P", ean: "EAN002", manufacturerCode: "MC002");
             var asset = db.Arrange_FixedAsset();
 
             db.Arrange_SupplyItem(supply, materialVariant: variant, setsAmount: 2, unitsInSet: 1, setNetPrice: 10, setGrossPrice: 12.3m);
@@ -45,14 +45,16 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
         
         var mItem = result.Items.First(x => x.ItemType == SupplyItemType.Material);
         mItem.ItemName.Should().Be("Variant A");
+        mItem.Ean.Should().Be("EAN001");
         mItem.ManufacturerCode.Should().Be("MC001");
 
         var pItem = result.Items.First(x => x.ItemType == SupplyItemType.Packing);
         pItem.ItemName.Should().Be("Packing P");
+        pItem.Ean.Should().Be("EAN002");
         pItem.ManufacturerCode.Should().Be("MC002");
 
         var fItem = result.Items.First(x => x.ItemType == SupplyItemType.FixedAsset);
-        fItem.ItemName.Should().Be("Fixed Asset");
+        fItem.ItemName.Should().Be("Test Fixed Asset");
     }
 
     [Fact]
@@ -79,6 +81,32 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
         // Assert
         result.Items.Should().HaveCount(1);
         result.Items.First().ItemType.Should().Be(SupplyItemType.FixedAsset);
+    }
+
+    [Fact]
+    public async Task Handle_WithEanFilter_ShouldFilterItems()
+    {
+        // Arrange
+        var supplyId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supply = db.Arrange_Supply();
+            var material = db.Arrange_Material(name: "A");
+            var variant1 = db.Arrange_MaterialVariant(material, name: "A", ean: "EAN123");
+            var variant2 = db.Arrange_MaterialVariant(material, name: "B", ean: "OTHER");
+
+            db.Arrange_SupplyItem(supply, materialVariant: variant1);
+            db.Arrange_SupplyItem(supply, materialVariant: variant2);
+            return supply.Id;
+        });
+
+        var query = new GetSupplyItemsQuery(supplyId, EanFilter: "EAN123");
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items.First().Ean.Should().Be("EAN123");
     }
 
     [Fact]

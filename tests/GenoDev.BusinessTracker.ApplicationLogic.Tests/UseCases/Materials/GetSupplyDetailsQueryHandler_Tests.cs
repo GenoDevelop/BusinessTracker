@@ -46,8 +46,8 @@ public class GetSupplyDetailsQueryHandler_Tests : BusinessTrackerUnitTestsBase<G
         result.OrderDate.Should().Be(new DateTime(2026, 7, 16));
         result.Description.Should().Be("Test Description");
         result.InvoiceNo.Should().Be("INV/123");
-        result.TotalNetPrice.Should().Be(70m); // (2 * 10) + (1 * 50)
-        result.TotalGrossPrice.Should().Be(86.1m); // (2 * 12.3) + (1 * 61.5) = 24.6 + 61.5 = 86.1
+        result.TotalNetPrice.Should().Be(85.5m); // (2 * 10) + (1 * 50) + 15.5
+        result.TotalGrossPrice.Should().Be(105.16m); // (2 * 12.3) + (1 * 61.5) + 19.06 = 24.6 + 61.5 + 19.06 = 105.16
         result.ShippingNetPrice.Should().Be(15.5m);
         result.ShippingGrossPrice.Should().Be(19.06m);
         result.WebsiteUrl.Should().Be("https://example.com");

@@ -16,9 +16,7 @@ public class GetSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbContext)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (supply == null)
-        {
             return null;
-        }
 
         return new SupplyDetailsDto(
             supply.Id,
@@ -26,10 +24,10 @@ public class GetSupplyDetailsQueryHandler(IBusinessTrackerDbContext dbContext)
             supply.Supplier.Name,
             supply.OrderDate,
             supply.Status,
-            supply.SupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetNetPrice),
-            supply.SupplyItems.Sum(i => (decimal)i.SetsAmount * i.SetGrossPrice),
-            supply.ShippingNetPrice,
-            supply.ShippingGrossPrice,
+            TotalNetPrice: supply.SupplyItems.Sum(i => i.SetsAmount * i.SetNetPrice) + supply.ShippingNetPrice,
+            TotalGrossPrice: supply.SupplyItems.Sum(i => i.SetsAmount * i.SetGrossPrice) + supply.ShippingGrossPrice,
+            ShippingNetPrice: supply.ShippingNetPrice,
+            ShippingGrossPrice: supply.ShippingGrossPrice,
             supply.InvoiceNo,
             supply.Description,
             supply.Supplier.WebsiteUrl);

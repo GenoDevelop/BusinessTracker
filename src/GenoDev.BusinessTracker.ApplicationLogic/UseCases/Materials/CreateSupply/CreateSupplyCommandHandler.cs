@@ -19,6 +19,8 @@ public class CreateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
                 : request.OrderDate,
             Description = request.Description,
             InvoiceNo = request.InvoiceNo,
+            ShippingNetPrice = request.ShippingNetPrice,
+            ShippingGrossPrice = request.ShippingGrossPrice,
             Status = MaterialSupplyStatus.New
         };
 

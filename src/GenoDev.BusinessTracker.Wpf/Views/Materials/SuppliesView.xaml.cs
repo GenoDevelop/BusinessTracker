@@ -9,40 +9,40 @@ using GenoDev.BusinessTracker.Wpf.Filtering;
 
 namespace GenoDev.BusinessTracker.Wpf.Views.Materials;
 
-public partial class MaterialSuppliesView : UserControl
+public partial class SuppliesView : UserControl
 {
-    private MaterialSuppliesViewModel? _attachedViewModel;
+    private SuppliesViewModel? _attachedViewModel;
 
-    public MaterialSuppliesView()
+    public SuppliesView()
     {
         InitializeComponent();
 
-        Loaded += MaterialSuppliesView_Loaded;
-        Unloaded += MaterialSuppliesView_Unloaded;
-        DataContextChanged += MaterialSuppliesView_DataContextChanged;
+        Loaded += SuppliesView_Loaded;
+        Unloaded += SuppliesView_Unloaded;
+        DataContextChanged += SuppliesView_DataContextChanged;
     }
 
-    private void MaterialSuppliesView_Loaded(object sender, RoutedEventArgs e)
+    private void SuppliesView_Loaded(object sender, RoutedEventArgs e)
     {
-        AttachViewModel(DataContext as MaterialSuppliesViewModel);
+        AttachViewModel(DataContext as SuppliesViewModel);
     }
 
-    private void MaterialSuppliesView_Unloaded(object sender, RoutedEventArgs e)
+    private void SuppliesView_Unloaded(object sender, RoutedEventArgs e)
     {
         AttachViewModel(null);
     }
 
-    private void MaterialSuppliesView_DataContextChanged(
+    private void SuppliesView_DataContextChanged(
         object sender,
         DependencyPropertyChangedEventArgs e)
     {
         if (IsLoaded)
         {
-            AttachViewModel(e.NewValue as MaterialSuppliesViewModel);
+            AttachViewModel(e.NewValue as SuppliesViewModel);
         }
     }
 
-    private void AttachViewModel(MaterialSuppliesViewModel? viewModel)
+    private void AttachViewModel(SuppliesViewModel? viewModel)
     {
         if (ReferenceEquals(_attachedViewModel, viewModel))
         {
@@ -69,7 +69,7 @@ public partial class MaterialSuppliesView : UserControl
     }
 
     private static void ConfigureSuppliesView(
-        MaterialSuppliesViewModel viewModel)
+        SuppliesViewModel viewModel)
     {
         var view = CollectionViewSource.GetDefaultView(viewModel.Supplies);
 
@@ -90,10 +90,10 @@ public partial class MaterialSuppliesView : UserControl
     }
 
     private async void ViewModel_PaginationRefreshRequested(
-        MaterialSuppliesPaginationTarget target,
+        SuppliesPaginationTarget target,
         bool resetPageIndex)
     {
-        var pagination = target == MaterialSuppliesPaginationTarget.Supplies
+        var pagination = target == SuppliesPaginationTarget.Supplies
             ? SuppliesPagination
             : SupplyItemsPagination;
 
@@ -138,28 +138,29 @@ public partial class MaterialSuppliesView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not MaterialSuppliesViewModel viewModel)
+        if (DataContext is not SuppliesViewModel viewModel)
         {
             return;
         }
 
         viewModel.SetSupplyItemsFilter(
-            new MaterialSupplyItemsFilterCriteria(
-                MaterialNameFilterColumn.FilterText,
+            new SupplyItemsFilterCriteria(
+                ItemNameFilterColumn.FilterText,
                 EanFilterColumn.FilterText,
+                ManufacturerCodeFilterColumn.FilterText,
                 SetsAmountFilterColumn.FilterValue,
                 SetsAmountFilterColumn.SelectedOperator,
                 UnitsInSetFilterColumn.FilterValue,
                 UnitsInSetFilterColumn.SelectedOperator,
                 TotalAmountFilterColumn.FilterValue,
                 TotalAmountFilterColumn.SelectedOperator,
-                SetNetPriceFilterColumn.FilterValue,
+                (decimal?)SetNetPriceFilterColumn.FilterValue,
                 SetNetPriceFilterColumn.SelectedOperator,
-                TotalNetPriceFilterColumn.FilterValue,
+                (decimal?)TotalNetPriceFilterColumn.FilterValue,
                 TotalNetPriceFilterColumn.SelectedOperator,
-                SetGrossPriceFilterColumn.FilterValue,
+                (decimal?)SetGrossPriceFilterColumn.FilterValue,
                 SetGrossPriceFilterColumn.SelectedOperator,
-                TotalGrossPriceFilterColumn.FilterValue,
+                (decimal?)TotalGrossPriceFilterColumn.FilterValue,
                 TotalGrossPriceFilterColumn.SelectedOperator));
 
         await SupplyItemsPagination.ResetAndRefreshAsync();
@@ -169,7 +170,7 @@ public partial class MaterialSuppliesView : UserControl
         object sender,
         DataGridSortingEventArgs e)
     {
-        if (DataContext is not MaterialSuppliesViewModel viewModel ||
+        if (DataContext is not SuppliesViewModel viewModel ||
             sender is not DataGrid dataGrid ||
             string.IsNullOrWhiteSpace(e.Column.SortMemberPath))
         {
@@ -179,7 +180,7 @@ public partial class MaterialSuppliesView : UserControl
         e.Handled = true;
 
         var sortColumn = e.Column.SortMemberPath;
-        var isDescending = viewModel.SupplyItemsSortColumn == sortColumn &&
+        var isDescending = viewModel.SupplyItemsSortColumn?.ToString() == sortColumn &&
                            !viewModel.IsSupplyItemsDescending;
 
         foreach (var column in dataGrid.Columns)

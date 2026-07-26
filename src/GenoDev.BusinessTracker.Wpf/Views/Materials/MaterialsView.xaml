@@ -21,8 +21,8 @@
         <DataTemplate DataType="{x:Type vm:SuppliersViewModel}">
             <local:SuppliersView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:MaterialSuppliesViewModel}">
-            <local:MaterialSuppliesView />
+        <DataTemplate DataType="{x:Type vm:SuppliesViewModel}">
+            <local:SuppliesView />
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
@@ -40,7 +40,7 @@
                 <ContentControl Content="{Binding SuppliersViewModel}" />
             </TabItem>
             <TabItem Header="Dostawy">
-                <ContentControl Content="{Binding MaterialSuppliesViewModel}" />
+                <ContentControl Content="{Binding SuppliesViewModel}" />
             </TabItem>
         </TabControl>
     </Grid>
