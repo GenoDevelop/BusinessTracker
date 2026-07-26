@@ -43,4 +43,28 @@ public sealed class CreatePackingMaterial_Tests : BusinessTrackerUnitTestsBase<C
             created.Description.Should().Be(command.Description);
         });
     }
+
+    [Fact]
+    public async Task Handle_ShouldNullifyEmptyStrings()
+    {
+        // Arrange
+        var command = new CreatePackingMaterialCommand(
+            "Test Packing Material",
+            " ",
+            "",
+            "pcs",
+            null);
+
+        // Act
+        var result = await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var created = db.PackingMaterials.FirstOrDefault(x => x.Id == result);
+            created.Should().NotBeNull();
+            created!.Ean.Should().BeNull();
+            created.ManufacturerCode.Should().BeNull();
+        });
+    }
 }

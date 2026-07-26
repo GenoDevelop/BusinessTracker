@@ -178,7 +178,7 @@ public sealed class WebsiteButton : Button
         }
 
         ToolTip = isSearch
-            ? $"Wyszukaj w Google: {searchTerm}"
+            ? $"Google: {searchTerm}"
             : uri!.AbsoluteUri;
     }
     

@@ -6,5 +6,6 @@ public enum PackingMaterialSortBy
     Ean,
     ManufacturerCode,
     Amount,
+    TotalUsedAmount,
     Description
 }

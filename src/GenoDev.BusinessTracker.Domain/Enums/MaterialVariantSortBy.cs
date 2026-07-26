@@ -6,5 +6,6 @@ public enum MaterialVariantSortBy
     Ean,
     ManufacturerCode,
     Amount,
+    TotalUsedAmount,
     Description
 }

@@ -6,16 +6,19 @@ using Microsoft.EntityFrameworkCore;
 public static class QueryableSearchExtensions
 {
     public static IQueryable<T> ApplyNumericFilter<T>(this IQueryable<T> query,
-        Expression<Func<T, double>> selector, double value, NumericOperator op)
+        Expression<Func<T, double>> selector, NumericOperator? op, double? value)
     {
+        if (op == null || value == null)
+            return query;
+
         return op switch
         {
-            NumericOperator.Equal => query.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(selector.Body, Expression.Constant(value)), selector.Parameters)),
-            NumericOperator.NotEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.NotEqual(selector.Body, Expression.Constant(value)), selector.Parameters)),
-            NumericOperator.LessThan => query.Where(Expression.Lambda<Func<T, bool>>(Expression.LessThan(selector.Body, Expression.Constant(value)), selector.Parameters)),
-            NumericOperator.LessThanOrEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.LessThanOrEqual(selector.Body, Expression.Constant(value)), selector.Parameters)),
-            NumericOperator.GreaterThan => query.Where(Expression.Lambda<Func<T, bool>>(Expression.GreaterThan(selector.Body, Expression.Constant(value)), selector.Parameters)),
-            NumericOperator.GreaterThanOrEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.GreaterThanOrEqual(selector.Body, Expression.Constant(value)), selector.Parameters)),
+            NumericOperator.Equal => query.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
+            NumericOperator.NotEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.NotEqual(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
+            NumericOperator.LessThan => query.Where(Expression.Lambda<Func<T, bool>>(Expression.LessThan(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
+            NumericOperator.LessThanOrEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.LessThanOrEqual(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
+            NumericOperator.GreaterThan => query.Where(Expression.Lambda<Func<T, bool>>(Expression.GreaterThan(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
+            NumericOperator.GreaterThanOrEqual => query.Where(Expression.Lambda<Func<T, bool>>(Expression.GreaterThanOrEqual(selector.Body, Expression.Constant(value.Value)), selector.Parameters)),
             _ => query
         };
     }

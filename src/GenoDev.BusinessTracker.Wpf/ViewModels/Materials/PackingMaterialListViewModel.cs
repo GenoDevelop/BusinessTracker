@@ -88,8 +88,10 @@ public partial class PackingMaterialListViewModel : ViewModelBase
             _filter.Description,
             _filter.AmountOperator,
             _filter.AmountValue,
-            SortBy,
-            IsDescending);
+            _filter.TotalUsedAmountOperator,
+            _filter.TotalUsedAmountValue,
+            SortBy: SortBy,
+            IsDescending: IsDescending);
 
         var result = await _mediator.Send(query, cancellationToken);
 

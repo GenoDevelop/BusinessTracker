@@ -104,12 +104,13 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="5,0">
-                                <Run Text="{Binding TotalCompanyAmount, Mode=OneWay}" />
-                                <Run Text=" " />
-                                <Run Text="{Binding Unit, Mode=OneWay}" />
+                            <TextBlock VerticalAlignment="Center" Margin="5,0">
+                                <Run Text="{Binding TotalCompanyAmount, Mode=OneWay}" /><TextBlock Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}">
+                                    <Run Text=" " /><Run Text="{Binding Unit, Mode=OneWay}" />
+                                </TextBlock><TextBlock Visibility="{Binding TotalPrivateAmount, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}" Foreground="Gray" FontSize="12" VerticalAlignment="Center">
+                                    <Run Text=" " /><Run Text="+" />
+                                    <Run Text="{Binding TotalPrivateAmount, Mode=OneWay}" />
+                                </TextBlock>
                             </TextBlock>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

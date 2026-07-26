@@ -86,7 +86,9 @@ public partial class PackingMaterialListView : UserControl
             ManufacturerCodeFilterColumn.FilterText,
             DescriptionFilterColumn.FilterText,
             AmountFilterColumn.SelectedOperator,
-            AmountFilterColumn.FilterValue));
+            AmountFilterColumn.FilterValue,
+            TotalUsedAmountFilterColumn.SelectedOperator,
+            TotalUsedAmountFilterColumn.FilterValue));
 
         await Pagination.RefreshAsync();
     }
@@ -106,6 +108,7 @@ public partial class PackingMaterialListView : UserControl
             "Ean" => PackingMaterialSortBy.Ean,
             "ManufacturerCode" => PackingMaterialSortBy.ManufacturerCode,
             "Amount" => PackingMaterialSortBy.Amount,
+            "TotalUsedAmount" => PackingMaterialSortBy.TotalUsedAmount,
             "Description" => PackingMaterialSortBy.Description,
             _ => PackingMaterialSortBy.Name
         };

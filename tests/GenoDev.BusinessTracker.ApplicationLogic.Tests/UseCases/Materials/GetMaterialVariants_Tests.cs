@@ -24,9 +24,9 @@ public class GetMaterialVariants_Tests : BusinessTrackerUnitTestsBase<GetMateria
         {
             var material = db.Arrange_Material(name: "Test Material");
             
-            db.Arrange_MaterialVariant(material: material, name: "VariantA", ean: "111", manufacturerCode: "MFG1", description: "Alpha");
-            db.Arrange_MaterialVariant(material: material, name: "VariantB", ean: "222", manufacturerCode: "MFG2", description: "Beta");
-            db.Arrange_MaterialVariant(material: material, name: "VariantC", ean: "333", manufacturerCode: "MFG3", description: "Gamma");
+            db.Arrange_MaterialVariant(material: material, name: "VariantA", ean: "111", manufacturerCode: "MFG1", description: "Alpha", companyAmount: 10, totalUsedAmount: 5);
+            db.Arrange_MaterialVariant(material: material, name: "VariantB", ean: "222", manufacturerCode: "MFG2", description: "Beta", companyAmount: 20, totalUsedAmount: 15);
+            db.Arrange_MaterialVariant(material: material, name: "VariantC", ean: "333", manufacturerCode: "MFG3", description: "Gamma", companyAmount: 60, totalUsedAmount: 25);
             
             return material.Id;
         });
@@ -100,5 +100,85 @@ public class GetMaterialVariants_Tests : BusinessTrackerUnitTestsBase<GetMateria
         // Assert
         result.Items.Should().HaveCount(1);
         result.Items[0].Description.Should().Be("Beta");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByAmount()
+    {
+        // Arrange
+        var query = new GetMaterialVariantsQuery(_materialId, 0, 10, AmountOperator: NumericOperator.GreaterThan, AmountValue: 25);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Name.Should().Be("VariantC");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByTotalUsedAmount()
+    {
+        // Arrange
+        var query = new GetMaterialVariantsQuery(_materialId, 0, 10, TotalUsedAmountOperator: NumericOperator.LessThan, TotalUsedAmountValue: 10);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Name.Should().Be("VariantA");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldSortByTotalUsedAmount()
+    {
+        // Arrange
+        var query = new GetMaterialVariantsQuery(_materialId, 0, 10, SortBy: MaterialVariantSortBy.TotalUsedAmount, IsDescending: true);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items[0].Name.Should().Be("VariantC");
+        result.Items[1].Name.Should().Be("VariantB");
+        result.Items[2].Name.Should().Be("VariantA");
+    }
+    [Theory]
+    [InlineData(0, 0, 0, 0, 0)]
+    [InlineData(10, 0, 5, 5, 0)]
+    [InlineData(10, 0, 10, 0, 0)]
+    [InlineData(10, 0, 15, -5, 0)]
+    [InlineData(10, 5, 15, 0, 0)]
+    [InlineData(10, 10, 15, 0, 5)]
+    [InlineData(5, 5, 20, -10, 0)]
+    [InlineData(0, 10, 10, 0, 0)]
+    [InlineData(0, 10, 20, -10, 0)]
+    public async Task Handle_ShouldReturnCorrectAmounts(
+        double totalCompanyAmount, double totalPrivateAmount, double totalUsedAmount,
+        double expectedCompany, double expectedPrivate)
+    {
+        // Arrange
+        var materialId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var material = db.Arrange_Material(name: "Math Test Material");
+            db.Arrange_MaterialVariant(
+                material: material,
+                name: "MathVariant",
+                companyAmount: totalCompanyAmount,
+                privateAmount: totalPrivateAmount,
+                totalUsedAmount: totalUsedAmount);
+            return material.Id;
+        });
+
+        var query = new GetMaterialVariantsQuery(materialId, 0, 10);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].TotalCompanyAmount.Should().Be(expectedCompany);
+        result.Items[0].TotalPrivateAmount.Should().Be(expectedPrivate);
     }
 }

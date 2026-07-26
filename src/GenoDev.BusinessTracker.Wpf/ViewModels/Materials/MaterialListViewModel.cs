@@ -183,7 +183,11 @@ public partial class MaterialListViewModel : ViewModelBase
                 IsVariantFilterVisible ? _variantFilter.Name : null,
                 IsVariantFilterVisible ? _variantFilter.Ean : null,
                 IsVariantFilterVisible ? _variantFilter.ManufacturerCode : null,
-                IsVariantFilterVisible ? _variantFilter.Description : null),
+                IsVariantFilterVisible ? _variantFilter.Description : null,
+                IsVariantFilterVisible ? _variantFilter.AmountOperator : null,
+                IsVariantFilterVisible ? _variantFilter.AmountValue : null,
+                IsVariantFilterVisible ? _variantFilter.TotalUsedAmountOperator : null,
+                IsVariantFilterVisible ? _variantFilter.TotalUsedAmountValue : null),
             cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();

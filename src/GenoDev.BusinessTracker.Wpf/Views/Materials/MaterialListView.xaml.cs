@@ -169,7 +169,11 @@ public partial class MaterialListView : UserControl
                 VariantNameFilterColumn.FilterText,
                 VariantEanFilterColumn.FilterText,
                 VariantManufacturerCodeFilterColumn.FilterText,
-                VariantDescriptionFilterColumn.FilterText));
+                VariantDescriptionFilterColumn.FilterText,
+                VariantAmountFilterColumn.SelectedOperator,
+                VariantAmountFilterColumn.FilterValue,
+                VariantTotalUsedAmountFilterColumn.SelectedOperator,
+                VariantTotalUsedAmountFilterColumn.FilterValue));
 
         await VariantsPagination.RefreshAsync();
     }

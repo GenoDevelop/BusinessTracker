@@ -21,9 +21,9 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
         if (request.VariantsCountOperator.HasValue && request.VariantsCountFilter.HasValue)
         {
             query = query.ApplyNumericFilter(
-                x => x.MaterialVariants.Count,
-                request.VariantsCountFilter.Value,
-                request.VariantsCountOperator.Value);
+                x => (double)x.MaterialVariants.Count,
+                request.VariantsCountOperator.Value,
+                request.VariantsCountFilter.Value);
         }
 
         query = request.SortBy switch

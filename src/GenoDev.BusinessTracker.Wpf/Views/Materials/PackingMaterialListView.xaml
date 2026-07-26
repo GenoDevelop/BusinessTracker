@@ -104,13 +104,33 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="5,0">
-                                <Run Text="{Binding TotalCompanyAmount, Mode=OneWay}" />
-                                <Run Text=" " />
-                                <Run Text="{Binding Unit, Mode=OneWay}" />
+                            <TextBlock VerticalAlignment="Center" Margin="5,0">
+                                <Run Text="{Binding TotalCompanyAmount, Mode=OneWay}" /><TextBlock Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}">
+                                    <Run Text=" " /><Run Text="{Binding Unit, Mode=OneWay}" />
+                                </TextBlock><TextBlock Visibility="{Binding TotalPrivateAmount, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}" Foreground="Gray" FontSize="12" VerticalAlignment="Center">
+                                    <Run Text=" " /><Run Text="+" />
+                                    <Run Text="{Binding TotalPrivateAmount, Mode=OneWay}" />
+                                </TextBlock>
                             </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="130" SortMemberPath="TotalUsedAmount">
+                    <DataGridTemplateColumn.Header>
+                        <controls:NumericFilterColumnHeader
+                            x:Name="TotalUsedAmountFilterColumn"
+                            Header="Zużyto"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                                <TextBlock Text="{Binding TotalUsedAmount}" />
+                                <TextBlock Text=" " />
+                                <TextBlock Text="{Binding Unit}" Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}" />
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

@@ -35,7 +35,7 @@ public class GetFixedAssetsQueryHandler(IBusinessTrackerDbContext dbContext)
 
         if (request.AmountOperator.HasValue && request.AmountValue.HasValue)
         {
-            query = query.ApplyNumericFilter(x => x.TotalCompanyAmount, request.AmountValue.Value, request.AmountOperator.Value);
+            query = query.ApplyNumericFilter(x => x.TotalCompanyAmount, request.AmountOperator.Value, request.AmountValue.Value);
         }
 
         query = request.SortBy switch

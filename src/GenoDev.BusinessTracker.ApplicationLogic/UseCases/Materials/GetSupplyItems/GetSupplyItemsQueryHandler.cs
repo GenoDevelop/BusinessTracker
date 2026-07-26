@@ -53,25 +53,25 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
         }
 
         if (request.SetsAmountFilter.HasValue && request.SetsAmountOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount, request.SetsAmountFilter.Value, request.SetsAmountOperator.Value);
+            query = query.ApplyNumericFilter(x => (double)x.SetsAmount, request.SetsAmountOperator.Value, (double)request.SetsAmountFilter.Value);
 
         if (request.UnitsInSetFilter.HasValue && request.UnitsInSetOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.UnitsInSet, request.UnitsInSetFilter.Value, request.UnitsInSetOperator.Value);
+            query = query.ApplyNumericFilter(x => x.UnitsInSet, request.UnitsInSetOperator.Value, request.UnitsInSetFilter.Value);
 
         if (request.TotalAmountFilter.HasValue && request.TotalAmountOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * x.UnitsInSet, request.TotalAmountFilter.Value, request.TotalAmountOperator.Value);
+            query = query.ApplyNumericFilter(x => x.SetsAmount * x.UnitsInSet, request.TotalAmountOperator.Value, request.TotalAmountFilter.Value);
 
         if (request.SetNetPriceFilter.HasValue && request.SetNetPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => (double)x.SetNetPrice, (double)request.SetNetPriceFilter.Value, request.SetNetPriceOperator.Value);
+            query = query.ApplyNumericFilter(x => (double)x.SetNetPrice, request.SetNetPriceOperator.Value, (double)request.SetNetPriceFilter.Value);
 
         if (request.TotalNetPriceFilter.HasValue && request.TotalNetPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetNetPrice, (double)request.TotalNetPriceFilter.Value, request.TotalNetPriceOperator.Value);
+            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetNetPrice, request.TotalNetPriceOperator.Value, (double)request.TotalNetPriceFilter.Value);
 
         if (request.SetGrossPriceFilter.HasValue && request.SetGrossPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => (double)x.SetGrossPrice, (double)request.SetGrossPriceFilter.Value, request.SetGrossPriceOperator.Value);
+            query = query.ApplyNumericFilter(x => (double)x.SetGrossPrice, request.SetGrossPriceOperator.Value, (double)request.SetGrossPriceFilter.Value);
 
         if (request.TotalGrossPriceFilter.HasValue && request.TotalGrossPriceOperator.HasValue)
-            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetGrossPrice, (double)request.TotalGrossPriceFilter.Value, request.TotalGrossPriceOperator.Value);
+            query = query.ApplyNumericFilter(x => x.SetsAmount * (double)x.SetGrossPrice, request.TotalGrossPriceOperator.Value, (double)request.TotalGrossPriceFilter.Value);
 
         if (request.PrivateSupplyFilter.HasValue)
             query = query.Where(x => x.PrivateSupply == request.PrivateSupplyFilter.Value);
