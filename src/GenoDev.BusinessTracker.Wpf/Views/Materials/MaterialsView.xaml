@@ -15,6 +15,9 @@
         <DataTemplate DataType="{x:Type vm:PackingMaterialListViewModel}">
             <local:PackingMaterialListView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FixedAssetListViewModel}">
+            <local:FixedAssetListView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SuppliersViewModel}">
             <local:SuppliersView />
         </DataTemplate>
@@ -27,8 +30,11 @@
             <TabItem Header="Materiały">
                 <ContentControl Content="{Binding MaterialListViewModel}" />
             </TabItem>
-            <TabItem Header="Materiały opakowaniowe">
+            <TabItem Header="M. pakowe">
                 <ContentControl Content="{Binding PackingMaterialListViewModel}" />
+            </TabItem>
+            <TabItem Header="Śr. trwałe">
+                <ContentControl Content="{Binding FixedAssetListViewModel}" />
             </TabItem>
             <TabItem Header="Dostawcy">
                 <ContentControl Content="{Binding SuppliersViewModel}" />

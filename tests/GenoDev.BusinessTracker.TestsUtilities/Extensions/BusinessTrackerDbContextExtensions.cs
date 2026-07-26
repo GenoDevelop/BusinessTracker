@@ -168,12 +168,22 @@ public static class BusinessTrackerDbContextExtensions
         }
 
         public FixedAsset Arrange_FixedAsset(Guid? id = null,
+            string name = "Test Fixed Asset",
+            string? ean = null,
+            string? manufacturerCode = null,
+            string? description = null,
+            string? unit = null,
             double totalCompanyAmount = 0,
             double totalPrivateAmount = 0)
         {
             var asset = new FixedAsset
             {
                 Id = id ?? Guid.NewGuid(),
+                Name = name,
+                Ean = ean,
+                ManufacturerCode = manufacturerCode,
+                Description = description,
+                Unit = unit,
                 TotalCompanyAmount = totalCompanyAmount,
                 TotalPrivateAmount = totalPrivateAmount,
                 SupplyItems = []

@@ -7,11 +7,13 @@ public partial class MaterialsViewModel : ViewModelBase
     public MaterialsViewModel(
         MaterialListViewModel materialListViewModel,
         PackingMaterialListViewModel packingMaterialListViewModel,
+        FixedAssetListViewModel fixedAssetListViewModel,
         SuppliersViewModel suppliersViewModel,
         MaterialSuppliesViewModel materialSuppliesViewModel)
     {
         MaterialListViewModel = materialListViewModel;
         PackingMaterialListViewModel = packingMaterialListViewModel;
+        FixedAssetListViewModel = fixedAssetListViewModel;
         SuppliersViewModel = suppliersViewModel;
         MaterialSuppliesViewModel = materialSuppliesViewModel;
     }
@@ -21,6 +23,7 @@ public partial class MaterialsViewModel : ViewModelBase
 
     public MaterialListViewModel MaterialListViewModel { get; }
     public PackingMaterialListViewModel PackingMaterialListViewModel { get; }
+    public FixedAssetListViewModel FixedAssetListViewModel { get; }
     public SuppliersViewModel SuppliersViewModel { get; }
     public MaterialSuppliesViewModel MaterialSuppliesViewModel { get; }
 }
