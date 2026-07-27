@@ -6,7 +6,7 @@ public class SupplyItem
 {
     public Guid Id { get; set; }
     public Guid MaterialSupplyId { get; set; }
-    public SupplyItemType ItemType { get; set; }
+    public StorageItemType ItemType { get; set; }
     public Guid? MaterialVariantId { get; set; }
     public Guid? PackingMaterialId { get; set; }
     public Guid? FixedAssetId { get; set; }

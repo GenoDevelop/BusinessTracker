@@ -1,6 +1,6 @@
 namespace GenoDev.BusinessTracker.Domain.Enums;
 
-public enum SupplyItemType
+public enum StorageItemType
 {
     Material = 1,
     Packing = 2,

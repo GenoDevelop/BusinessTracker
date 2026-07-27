@@ -43,17 +43,17 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
         result.Items.Should().HaveCount(3);
         result.TotalCount.Should().Be(3);
         
-        var mItem = result.Items.First(x => x.ItemType == SupplyItemType.Material);
+        var mItem = result.Items.First(x => x.ItemType == StorageItemType.Material);
         mItem.ItemName.Should().Be("Variant A");
         mItem.Ean.Should().Be("EAN001");
         mItem.ManufacturerCode.Should().Be("MC001");
 
-        var pItem = result.Items.First(x => x.ItemType == SupplyItemType.Packing);
+        var pItem = result.Items.First(x => x.ItemType == StorageItemType.Packing);
         pItem.ItemName.Should().Be("Packing P");
         pItem.Ean.Should().Be("EAN002");
         pItem.ManufacturerCode.Should().Be("MC002");
 
-        var fItem = result.Items.First(x => x.ItemType == SupplyItemType.FixedAsset);
+        var fItem = result.Items.First(x => x.ItemType == StorageItemType.FixedAsset);
         fItem.ItemName.Should().Be("Test Fixed Asset");
     }
 
@@ -73,14 +73,14 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
             return supply.Id;
         });
 
-        var query = new GetSupplyItemsQuery(supplyId, ItemTypeFilter: [SupplyItemType.FixedAsset]);
+        var query = new GetSupplyItemsQuery(supplyId, ItemTypeFilter: [StorageItemType.FixedAsset]);
 
         // Act
         var result = await Sut.Handle(query, CancellationToken.None);
 
         // Assert
         result.Items.Should().HaveCount(1);
-        result.Items.First().ItemType.Should().Be(SupplyItemType.FixedAsset);
+        result.Items.First().ItemType.Should().Be(StorageItemType.FixedAsset);
     }
 
     [Fact]

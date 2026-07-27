@@ -5,57 +5,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.RemoveSupplyItem;
 
-public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbContext) : IRequestHandler<RemoveItemFromSupplyCommand>
+public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbContext, IItemsService itemsService) : IRequestHandler<RemoveItemFromSupplyCommand>
 {
     public async Task Handle(RemoveItemFromSupplyCommand request, CancellationToken cancellationToken)
     {
         var item = await dbContext.SupplyItems
             .Include(x => x.Supply)
-            .Include(x => x.MaterialVariant)
-            .Include(x => x.PackingMaterial)
-            .Include(x => x.FixedAsset)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (item == null)
-        {
             throw new KeyNotFoundException($"SupplyItem with ID {request.Id} not found.");
-        }
 
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {
             var amountToSubtract = item.SetsAmount * item.UnitsInSet;
-            if (item.ItemType == SupplyItemType.Material && item.MaterialVariant != null)
+            var itemId = item.ItemType switch
             {
-                if (item.PrivateSupply)
-                {
-                    item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
-                }
-                else
-                {
-                    item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
-                }
-            }
-            else if (item.ItemType == SupplyItemType.Packing && item.PackingMaterial != null)
+                StorageItemType.Material => item.MaterialVariantId,
+                StorageItemType.Packing => item.PackingMaterialId,
+                StorageItemType.FixedAsset => item.FixedAssetId,
+                _ => null
+            };
+
+            if (itemId.HasValue)
             {
-                if (item.PrivateSupply)
-                {
-                    item.PackingMaterial.TotalPrivateAmount -= amountToSubtract;
-                }
-                else
-                {
-                    item.PackingMaterial.TotalCompanyAmount -= amountToSubtract;
-                }
-            }
-            else if (item.ItemType == SupplyItemType.FixedAsset && item.FixedAsset != null)
-            {
-                if (item.PrivateSupply)
-                {
-                    item.FixedAsset.TotalPrivateAmount -= amountToSubtract;
-                }
-                else
-                {
-                    item.FixedAsset.TotalCompanyAmount -= amountToSubtract;
-                }
+                await itemsService.AdjustStorageAmountAsync(
+                    itemId.Value,
+                    item.ItemType,
+                    -amountToSubtract,
+                    item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                    cancellationToken);
             }
         }
 

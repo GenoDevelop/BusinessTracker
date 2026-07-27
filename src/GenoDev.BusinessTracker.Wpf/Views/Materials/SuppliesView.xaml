@@ -518,7 +518,7 @@
                                 <controls:EnumFilterColumnHeader
                                     x:Name="ItemTypeFilterColumn"
                                     Header="Typ"
-                                    EnumType="{x:Type enums:SupplyItemType}"
+                                    EnumType="{x:Type enums:StorageItemType}"
                                     SelectionMode="Multiple"
                                     DisplayNameConverter="{StaticResource SupplyItemTypeToTextConverter}"
                                     IsFilterVisible="{Binding DataContext.IsItemsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"

@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.UpdateSupply;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -13,6 +15,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -264,6 +267,182 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAddPackingMaterialAmount_WhenStatusChangedToReceived()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid packingMaterialId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 100;
+
+        Guid supplierId = Guid.Empty;
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supplier = db.Arrange_Supplier();
+            var packing = db.Arrange_PackingMaterial(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Ordered);
+            db.Arrange_SupplyItem(supply, packingMaterial: packing, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+
+            supplyId = supply.Id;
+            packingMaterialId = packing.Id;
+            supplierId = supplier.Id;
+        });
+
+        var command = new UpdateSupplyCommand(
+            supplyId,
+            supplierId,
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+            MaterialSupplyStatus.Received,
+            "Delivered",
+            "INV-123",
+            0,
+            0);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
+            packing.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldSubtractPackingMaterialAmount_WhenStatusDemotedFromReceived()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid packingMaterialId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 150;
+
+        Guid supplierId = Guid.Empty;
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supplier = db.Arrange_Supplier();
+            var packing = db.Arrange_PackingMaterial(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Received);
+            db.Arrange_SupplyItem(supply, packingMaterial: packing, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+
+            supplyId = supply.Id;
+            packingMaterialId = packing.Id;
+            supplierId = supplier.Id;
+        });
+
+        var command = new UpdateSupplyCommand(
+            supplyId,
+            supplierId,
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+            MaterialSupplyStatus.Ordered,
+            "Demoted",
+            "INV-123",
+            0,
+            0);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
+            packing.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAddFixedAssetAmount_WhenStatusChangedToReceived()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid fixedAssetId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 100;
+
+        Guid supplierId = Guid.Empty;
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supplier = db.Arrange_Supplier();
+            var asset = db.Arrange_FixedAsset(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Ordered);
+            db.Arrange_SupplyItem(supply, fixedAsset: asset, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+
+            supplyId = supply.Id;
+            fixedAssetId = asset.Id;
+            supplierId = supplier.Id;
+        });
+
+        var command = new UpdateSupplyCommand(
+            supplyId,
+            supplierId,
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+            MaterialSupplyStatus.Received,
+            "Delivered",
+            "INV-123",
+            0,
+            0);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
+            asset.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldSubtractFixedAssetAmount_WhenStatusDemotedFromReceived()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid fixedAssetId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 150;
+
+        Guid supplierId = Guid.Empty;
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var supplier = db.Arrange_Supplier();
+            var asset = db.Arrange_FixedAsset(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(supplier: supplier, status: MaterialSupplyStatus.Received);
+            db.Arrange_SupplyItem(supply, fixedAsset: asset, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+
+            supplyId = supply.Id;
+            fixedAssetId = asset.Id;
+            supplierId = supplier.Id;
+        });
+
+        var command = new UpdateSupplyCommand(
+            supplyId,
+            supplierId,
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+            MaterialSupplyStatus.Ordered,
+            "Demoted",
+            "INV-123",
+            0,
+            0);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
+            asset.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
         });
     }
 }

@@ -12,7 +12,7 @@ public record GetSupplyItemsQuery(
     SupplyItemSortColumn? SortColumn = null,
     bool SortDescending = false,
     string? ItemNameFilter = null,
-    SupplyItemType[]? ItemTypeFilter = null,
+    StorageItemType[]? ItemTypeFilter = null,
     string? EanFilter = null,
     string? ManufacturerCodeFilter = null,
     string? UnitFilter = null,
@@ -35,7 +35,7 @@ public record GetSupplyItemsQuery(
 public record SupplyItemDto(
     Guid Id,
     Guid? ItemId,
-    SupplyItemType ItemType,
+    StorageItemType ItemType,
     string ItemName,
     string? Ean,
     string? ManufacturerCode,

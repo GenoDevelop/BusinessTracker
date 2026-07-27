@@ -5,7 +5,7 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.AddItemToS
 
 public record AddItemToSupplyCommand(
     Guid SupplyId,
-    SupplyItemType ItemType,
+    StorageItemType ItemType,
     Guid ItemId,
     int SetsAmount,
     double UnitsInSet,

@@ -17,7 +17,7 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSupplyId) : ViewModelBase
 {
     [ObservableProperty]
-    private SupplyItemType _selectedType = SupplyItemType.Material;
+    private StorageItemType _selectedType = StorageItemType.Material;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -50,7 +50,7 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     [ObservableProperty]
     private bool _privateSupply = false;
 
-    public ObservableCollection<SupplyItemType> AvailableTypes { get; } = new(Enum.GetValues<SupplyItemType>());
+    public ObservableCollection<StorageItemType> AvailableTypes { get; } = new(Enum.GetValues<StorageItemType>());
     public ObservableCollection<MaterialDto> Materials { get; } = new();
     public ObservableCollection<MaterialVariantDto> MaterialVariants { get; } = new();
     public ObservableCollection<PackingMaterialDto> PackingMaterials { get; } = new();
@@ -116,9 +116,9 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
         {
             Guid? itemId = SelectedType switch
             {
-                SupplyItemType.Material => SelectedMaterialVariant?.Id,
-                SupplyItemType.Packing => SelectedPackingMaterial?.Id,
-                SupplyItemType.FixedAsset => SelectedFixedAsset?.Id,
+                StorageItemType.Material => SelectedMaterialVariant?.Id,
+                StorageItemType.Packing => SelectedPackingMaterial?.Id,
+                StorageItemType.FixedAsset => SelectedFixedAsset?.Id,
                 _ => null
             };
 
@@ -147,9 +147,9 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     {
         return SelectedType switch
         {
-            SupplyItemType.Material => SelectedMaterialVariant != null,
-            SupplyItemType.Packing => SelectedPackingMaterial != null,
-            SupplyItemType.FixedAsset => SelectedFixedAsset != null,
+            StorageItemType.Material => SelectedMaterialVariant != null,
+            StorageItemType.Packing => SelectedPackingMaterial != null,
+            StorageItemType.FixedAsset => SelectedFixedAsset != null,
             _ => false
         };
     }

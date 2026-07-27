@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.RemoveSupplyItem;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -14,6 +16,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]

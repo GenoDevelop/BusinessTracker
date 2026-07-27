@@ -5,21 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.UpdateSupply;
 
-public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
+public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext, IItemsService itemsService)
     : IRequestHandler<UpdateSupplyCommand>
 {
     public async Task Handle(UpdateSupplyCommand request, CancellationToken cancellationToken)
     {
         var supply = await dbContext.Supplies
             .Include(x => x.SupplyItems)
-            .ThenInclude(x => x.MaterialVariant)
-            .ThenInclude(x => x.Material)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (supply == null)
-        {
             return;
-        }
 
         var oldStatus = supply.Status;
         var newStatus = request.Status;
@@ -32,39 +28,31 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext)
         supply.ShippingNetPrice = request.ShippingNetPrice;
         supply.ShippingGrossPrice = request.ShippingGrossPrice;
 
-        if (oldStatus != MaterialSupplyStatus.Received && newStatus == MaterialSupplyStatus.Received)
+        var isNowReceived = oldStatus != MaterialSupplyStatus.Received && newStatus == MaterialSupplyStatus.Received;
+        var wasPreviouslyReceived = oldStatus == MaterialSupplyStatus.Received && newStatus != MaterialSupplyStatus.Received;
+
+        if (isNowReceived || wasPreviouslyReceived)
         {
+            var multiplier = isNowReceived ? 1 : -1;
             foreach (var item in supply.SupplyItems)
             {
-                if (item.MaterialVariant != null)
+                var amountToAdjust = item.SetsAmount * item.UnitsInSet * multiplier;
+                var itemId = item.ItemType switch
                 {
-                    var amountToAdd = item.SetsAmount * item.UnitsInSet;
-                    if (item.PrivateSupply)
-                    {
-                        item.MaterialVariant.TotalPrivateAmount += amountToAdd;
-                    }
-                    else
-                    {
-                        item.MaterialVariant.TotalCompanyAmount += amountToAdd;
-                    }
-                }
-            }
-        }
-        else if (oldStatus == MaterialSupplyStatus.Received && newStatus != MaterialSupplyStatus.Received)
-        {
-            foreach (var item in supply.SupplyItems)
-            {
-                if (item.MaterialVariant != null)
+                    StorageItemType.Material => item.MaterialVariantId,
+                    StorageItemType.Packing => item.PackingMaterialId,
+                    StorageItemType.FixedAsset => item.FixedAssetId,
+                    _ => null
+                };
+
+                if (itemId.HasValue)
                 {
-                    var amountToSubtract = item.SetsAmount * item.UnitsInSet;
-                    if (item.PrivateSupply)
-                    {
-                        item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
-                    }
-                    else
-                    {
-                        item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
-                    }
+                    await itemsService.AdjustStorageAmountAsync(
+                        itemId.Value,
+                        item.ItemType,
+                        amountToAdjust,
+                        item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                        cancellationToken);
                 }
             }
         }

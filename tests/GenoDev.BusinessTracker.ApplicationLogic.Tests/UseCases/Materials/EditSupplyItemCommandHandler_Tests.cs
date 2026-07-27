@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.EditSupplyItem;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -14,6 +16,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -31,7 +34,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
 
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: 10,
             UnitsInSet: 5,
@@ -50,7 +53,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             item.UnitsInSet.Should().Be(5);
             item.SetNetPrice.Should().Be(50);
             item.SetGrossPrice.Should().Be(61.5m);
-            item.ItemType.Should().Be(SupplyItemType.Material);
+            item.ItemType.Should().Be(StorageItemType.Material);
             item.MaterialVariantId.Should().Be(variantId);
         });
     }
@@ -76,7 +79,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Old total: 5 * 10 = 50. New total: 8 * 10 = 80. Difference: +30.
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: 8,
             UnitsInSet: 10,
@@ -121,7 +124,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Company should decrease by 50, Private should increase by 50.
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,
@@ -168,7 +171,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Change from Material (50) to Fixed Asset (20)
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.FixedAsset,
+            StorageItemType.FixedAsset,
             assetId,
             SetsAmount: 2,
             UnitsInSet: 10,
@@ -210,7 +213,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
 
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: 10,
             UnitsInSet: 10,
@@ -250,7 +253,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Old total: 10 * 100 = 1000. New total: 5 * 100 = 500. Difference: -500.
         var command = new EditSupplyItemCommand(
             itemId,
-            SupplyItemType.Packing,
+            StorageItemType.Packing,
             packingId,
             SetsAmount: 5,
             UnitsInSet: 100,
@@ -275,7 +278,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Arrange
         var command = new EditSupplyItemCommand(
             Guid.NewGuid(),
-            SupplyItemType.Material,
+            StorageItemType.Material,
             Guid.NewGuid(),
             1, 1, 1, 1, false);
 

@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.AddItemToSupply;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -15,6 +17,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -31,7 +34,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: 5,
             UnitsInSet: 10,
@@ -53,7 +56,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
             item.UnitsInSet.Should().Be(10);
             item.SetNetPrice.Should().Be(100);
             item.SetGrossPrice.Should().Be(123);
-            item.ItemType.Should().Be(SupplyItemType.Material);
+            item.ItemType.Should().Be(StorageItemType.Material);
         });
     }
 
@@ -69,7 +72,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             Guid.NewGuid(),
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             5, 10, 100, 123, false);
 
@@ -90,7 +93,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             Guid.NewGuid(),
             5, 10, 100, 123, false);
 
@@ -120,7 +123,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            SupplyItemType.Material,
+            StorageItemType.Material,
             variantId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,
@@ -160,7 +163,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            SupplyItemType.FixedAsset,
+            StorageItemType.FixedAsset,
             assetId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,
@@ -200,7 +203,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            SupplyItemType.Packing,
+            StorageItemType.Packing,
             packingId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,

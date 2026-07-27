@@ -6,15 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.EditSupplyItem;
 
-public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext) : IRequestHandler<EditSupplyItemCommand>
+public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, IItemsService itemsService) : IRequestHandler<EditSupplyItemCommand>
 {
     public async Task Handle(EditSupplyItemCommand request, CancellationToken cancellationToken)
     {
         var item = await dbContext.SupplyItems
             .Include(x => x.Supply)
-            .Include(x => x.MaterialVariant)
-            .Include(x => x.FixedAsset)
-            .Include(x => x.PackingMaterial)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (item == null)
@@ -23,7 +20,12 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext) :
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {
             await RevertOldAmount(item, cancellationToken);
-            await ApplyNewAmount(request, cancellationToken);
+            await itemsService.AdjustStorageAmountAsync(
+                request.ItemId,
+                request.ItemType,
+                request.SetsAmount * request.UnitsInSet,
+                request.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                cancellationToken);
         }
 
         item.ItemType = request.ItemType;
@@ -39,13 +41,13 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext) :
 
         switch (request.ItemType)
         {
-            case SupplyItemType.Material:
+            case StorageItemType.Material:
                 item.MaterialVariantId = request.ItemId;
                 break;
-            case SupplyItemType.Packing:
+            case StorageItemType.Packing:
                 item.PackingMaterialId = request.ItemId;
                 break;
-            case SupplyItemType.FixedAsset:
+            case StorageItemType.FixedAsset:
                 item.FixedAssetId = request.ItemId;
                 break;
             default:
@@ -58,79 +60,22 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext) :
     private async Task RevertOldAmount(SupplyItem item, CancellationToken cancellationToken)
     {
         var amountToSubtract = item.SetsAmount * item.UnitsInSet;
-        switch (item.ItemType)
+        var itemId = item.ItemType switch
         {
-            case SupplyItemType.Material:
-                if (item.MaterialVariant != null)
-                {
-                    if (item.PrivateSupply)
-                        item.MaterialVariant.TotalPrivateAmount -= amountToSubtract;
-                    else
-                        item.MaterialVariant.TotalCompanyAmount -= amountToSubtract;
-                }
-                break;
-            case SupplyItemType.FixedAsset:
-                if (item.FixedAsset != null)
-                {
-                    if (item.PrivateSupply)
-                        item.FixedAsset.TotalPrivateAmount -= amountToSubtract;
-                    else
-                        item.FixedAsset.TotalCompanyAmount -= amountToSubtract;
-                }
-                break;
-            case SupplyItemType.Packing:
-                if (item.PackingMaterial != null)
-                {
-                    if (item.PrivateSupply)
-                        item.PackingMaterial.TotalPrivateAmount -= amountToSubtract;
-                    else
-                        item.PackingMaterial.TotalCompanyAmount -= amountToSubtract;
-                }
-                break;
-        }
+            StorageItemType.Material => item.MaterialVariantId,
+            StorageItemType.Packing => item.PackingMaterialId,
+            StorageItemType.FixedAsset => item.FixedAssetId,
+            _ => null
+        };
 
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task ApplyNewAmount(EditSupplyItemCommand request, CancellationToken cancellationToken)
-    {
-        var amountToAdd = request.SetsAmount * request.UnitsInSet;
-        switch (request.ItemType)
+        if (itemId.HasValue)
         {
-            case SupplyItemType.Material:
-                var variant = await dbContext.MaterialVariants
-                    .FirstOrDefaultAsync(x => x.Id == request.ItemId, cancellationToken);
-                if (variant == null)
-                    throw new KeyNotFoundException($"MaterialVariant with ID {request.ItemId} not found.");
-
-                if (request.PrivateSupply)
-                    variant.TotalPrivateAmount += amountToAdd;
-                else
-                    variant.TotalCompanyAmount += amountToAdd;
-                break;
-
-            case SupplyItemType.FixedAsset:
-                var asset = await dbContext.FixedAssets
-                    .FirstOrDefaultAsync(x => x.Id == request.ItemId, cancellationToken);
-                if (asset == null)
-                    throw new KeyNotFoundException($"FixedAsset with ID {request.ItemId} not found.");
-
-                if (request.PrivateSupply)
-                    asset.TotalPrivateAmount += amountToAdd;
-                else
-                    asset.TotalCompanyAmount += amountToAdd;
-                break;
-            case SupplyItemType.Packing:
-                var packing = await dbContext.PackingMaterials
-                    .FirstOrDefaultAsync(x => x.Id == request.ItemId, cancellationToken);
-                if (packing == null)
-                    throw new KeyNotFoundException($"PackingMaterial with ID {request.ItemId} not found.");
-
-                if (request.PrivateSupply)
-                    packing.TotalPrivateAmount += amountToAdd;
-                else
-                    packing.TotalCompanyAmount += amountToAdd;
-                break;
+            await itemsService.AdjustStorageAmountAsync(
+                itemId.Value,
+                item.ItemType,
+                -amountToSubtract,
+                item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                cancellationToken);
         }
     }
 }

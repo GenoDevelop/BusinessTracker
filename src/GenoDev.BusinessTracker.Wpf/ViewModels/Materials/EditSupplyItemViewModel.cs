@@ -18,7 +18,7 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto item) : ViewModelBase
 {
     [ObservableProperty]
-    private SupplyItemType _selectedType = item.ItemType;
+    private StorageItemType _selectedType = item.ItemType;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -51,7 +51,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     [ObservableProperty]
     private bool _privateSupply = item.PrivateSupply;
 
-    public ObservableCollection<SupplyItemType> AvailableTypes { get; } = new(Enum.GetValues<SupplyItemType>());
+    public ObservableCollection<StorageItemType> AvailableTypes { get; } = new(Enum.GetValues<StorageItemType>());
     public ObservableCollection<MaterialDto> Materials { get; } = new();
     public ObservableCollection<MaterialVariantDto> MaterialVariants { get; } = new();
     public ObservableCollection<PackingMaterialDto> PackingMaterials { get; } = new();
@@ -77,7 +77,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
             foreach (var a in assetsResult.Items) FixedAssets.Add(a);
 
             // Set initial selections
-            if (SelectedType == SupplyItemType.Material && item.ItemId.HasValue)
+            if (SelectedType == StorageItemType.Material && item.ItemId.HasValue)
             {
                 // In this system, ItemId for Material type is the MaterialVariant.Id
                 // We need to find the variant to get its MaterialId.
@@ -102,11 +102,11 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
                     }
                 }
             }
-            else if (SelectedType == SupplyItemType.Packing && item.ItemId.HasValue)
+            else if (SelectedType == StorageItemType.Packing && item.ItemId.HasValue)
             {
                 SelectedPackingMaterial = PackingMaterials.FirstOrDefault(x => x.Id == item.ItemId.Value);
             }
-            else if (SelectedType == SupplyItemType.FixedAsset && item.ItemId.HasValue)
+            else if (SelectedType == StorageItemType.FixedAsset && item.ItemId.HasValue)
             {
                 SelectedFixedAsset = FixedAssets.FirstOrDefault(x => x.Id == item.ItemId.Value);
             }
@@ -152,9 +152,9 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
         {
             Guid? itemId = SelectedType switch
             {
-                SupplyItemType.Material => SelectedMaterialVariant?.Id,
-                SupplyItemType.Packing => SelectedPackingMaterial?.Id,
-                SupplyItemType.FixedAsset => SelectedFixedAsset?.Id,
+                StorageItemType.Material => SelectedMaterialVariant?.Id,
+                StorageItemType.Packing => SelectedPackingMaterial?.Id,
+                StorageItemType.FixedAsset => SelectedFixedAsset?.Id,
                 _ => null
             };
 
@@ -183,9 +183,9 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     {
         return SelectedType switch
         {
-            SupplyItemType.Material => SelectedMaterialVariant != null,
-            SupplyItemType.Packing => SelectedPackingMaterial != null,
-            SupplyItemType.FixedAsset => SelectedFixedAsset != null,
+            StorageItemType.Material => SelectedMaterialVariant != null,
+            StorageItemType.Packing => SelectedPackingMaterial != null,
+            StorageItemType.FixedAsset => SelectedFixedAsset != null,
             _ => false
         };
     }

@@ -4,6 +4,8 @@ using GenoDev.BusinessTracker.TestsUtilities;
 using GenoDev.BusinessTracker.TestsUtilities.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using AutoFixture;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using Microsoft.EntityFrameworkCore;
 using GenoDev.BusinessTracker.Domain.Enums;
 
@@ -14,6 +16,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -147,6 +150,69 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         {
             var variant = db.MaterialVariants.First(x => x.Id == materialVariantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
+        });
+    }
+    [Fact]
+    public async Task Handle_ShouldSubtractPackingMaterialAmount_WhenDeletingReceivedSupply()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid packingMaterialId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 100;
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var packing = db.Arrange_PackingMaterial(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(status: MaterialSupplyStatus.Received);
+            db.Arrange_SupplyItem(supply, packingMaterial: packing, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+            supplyId = supply.Id;
+            packingMaterialId = packing.Id;
+        });
+
+        var command = new DeleteSupplyCommand(supplyId);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
+            packing.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldSubtractFixedAssetAmount_WhenDeletingReceivedSupply()
+    {
+        // Arrange
+        Guid supplyId = Guid.Empty;
+        Guid fixedAssetId = Guid.Empty;
+        int setsAmount = 5;
+        double unitsInSet = 10;
+        double initialCompanyAmount = 100;
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var asset = db.Arrange_FixedAsset(totalCompanyAmount: initialCompanyAmount);
+            var supply = db.Arrange_Supply(status: MaterialSupplyStatus.Received);
+            db.Arrange_SupplyItem(supply, fixedAsset: asset, setsAmount: setsAmount, unitsInSet: unitsInSet, privateSupply: false);
+            supplyId = supply.Id;
+            fixedAssetId = asset.Id;
+        });
+
+        var command = new DeleteSupplyCommand(supplyId);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
+            asset.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
         });
     }
 }

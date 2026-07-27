@@ -9,13 +9,13 @@ public class SupplyItemTypeToTextConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is SupplyItemType type)
+        if (value is StorageItemType type)
         {
             return type switch
             {
-                SupplyItemType.Material => "Materiał",
-                SupplyItemType.Packing => "Pakunek",
-                SupplyItemType.FixedAsset => "Śr. trwały",
+                StorageItemType.Material => "Materiał",
+                StorageItemType.Packing => "Pakunek",
+                StorageItemType.FixedAsset => "Śr. trwały",
                 _ => value.ToString() ?? string.Empty
             };
         }

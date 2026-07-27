@@ -123,19 +123,19 @@ public static class BusinessTrackerDbContextExtensions
         {
             supply ??= db.Arrange_Supply();
 
-            SupplyItemType itemType;
-            if (materialVariant != null) itemType = SupplyItemType.Material;
-            else if (packingMaterial != null) itemType = SupplyItemType.Packing;
-            else if (fixedAsset != null) itemType = SupplyItemType.FixedAsset;
+            StorageItemType itemType;
+            if (materialVariant != null) itemType = StorageItemType.Material;
+            else if (packingMaterial != null) itemType = StorageItemType.Packing;
+            else if (fixedAsset != null) itemType = StorageItemType.FixedAsset;
             else
             {
-                itemType = Enum.GetValues<SupplyItemType>()
+                itemType = Enum.GetValues<StorageItemType>()
                     .OrderBy(_ => Random.Shared.Next())
                     .First();
 
-                if (itemType == SupplyItemType.Material) materialVariant = db.Arrange_MaterialVariant();
-                else if (itemType == SupplyItemType.Packing) packingMaterial = db.Arrange_PackingMaterial();
-                else if (itemType == SupplyItemType.FixedAsset) fixedAsset = db.Arrange_FixedAsset();
+                if (itemType == StorageItemType.Material) materialVariant = db.Arrange_MaterialVariant();
+                else if (itemType == StorageItemType.Packing) packingMaterial = db.Arrange_PackingMaterial();
+                else if (itemType == StorageItemType.FixedAsset) fixedAsset = db.Arrange_FixedAsset();
                 else throw new InvalidOperationException("Invalid supply item type");
             }
 

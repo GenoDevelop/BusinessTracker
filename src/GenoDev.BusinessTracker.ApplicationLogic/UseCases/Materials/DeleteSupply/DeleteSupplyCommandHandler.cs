@@ -5,46 +5,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.DeleteSupply;
 
-public class DeleteSupplyCommandHandler : IRequestHandler<DeleteSupplyCommand>
+public class DeleteSupplyCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService) : IRequestHandler<DeleteSupplyCommand>
 {
-    private readonly IBusinessTrackerDbContext _context;
-
-    public DeleteSupplyCommandHandler(IBusinessTrackerDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task Handle(DeleteSupplyCommand request, CancellationToken cancellationToken)
     {
-        var supply = await _context.Supplies
+        var supply = await context.Supplies
             .Include(x => x.SupplyItems)
-            .ThenInclude(x => x.MaterialVariant)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (supply == null)
-        {
             return;
-        }
 
         if (supply.Status == MaterialSupplyStatus.Received)
         {
             foreach (var item in supply.SupplyItems)
             {
-                if (item.MaterialVariant != null)
+                var amountToSubtract = item.SetsAmount * item.UnitsInSet;
+                var itemId = item.ItemType switch
                 {
-                    if (item.PrivateSupply)
-                    {
-                        item.MaterialVariant.TotalPrivateAmount -= item.SetsAmount * item.UnitsInSet;
-                    }
-                    else
-                    {
-                        item.MaterialVariant.TotalCompanyAmount -= item.SetsAmount * item.UnitsInSet;
-                    }
+                    StorageItemType.Material => item.MaterialVariantId,
+                    StorageItemType.Packing => item.PackingMaterialId,
+                    StorageItemType.FixedAsset => item.FixedAssetId,
+                    _ => null
+                };
+
+                if (itemId.HasValue)
+                {
+                    await itemsService.AdjustStorageAmountAsync(
+                        itemId.Value,
+                        item.ItemType,
+                        -amountToSubtract,
+                        item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                        cancellationToken);
                 }
             }
         }
 
-        _context.Supplies.Remove(supply);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Supplies.Remove(supply);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

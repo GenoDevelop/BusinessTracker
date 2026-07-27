@@ -5,7 +5,7 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.EditSupply
 
 public record EditSupplyItemCommand(
     Guid Id,
-    SupplyItemType ItemType,
+    StorageItemType ItemType,
     Guid ItemId,
     int SetsAmount,
     double UnitsInSet,

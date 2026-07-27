@@ -21,7 +21,7 @@ public sealed record SupplyItemsFilterCriteria(
     decimal? TotalGrossPrice = null,
     NumericOperator? TotalGrossPriceOperator = null,
     bool? IsPrivate = null,
-    SupplyItemType[]? ItemTypes = null)
+    StorageItemType[]? ItemTypes = null)
 {
     public static SupplyItemsFilterCriteria Empty { get; } = new();
 }
