@@ -24,7 +24,6 @@
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}}"
-                                FocusManager.IsFocusScope="True"
                                 KeyboardNavigation.TabNavigation="Cycle"
                                 SnapsToDevicePixels="True">
 

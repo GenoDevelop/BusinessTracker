@@ -785,6 +785,13 @@ public partial class EnumFilterColumnHeader : UserControl
         ToggleOption(option);
     }
 
+    private void OptionItem_PreviewMouseLeftButtonUp(
+        object sender,
+        MouseButtonEventArgs eventArgs)
+    {
+        eventArgs.Handled = true;
+    }
+
     private void OptionItem_PreviewKeyDown(
         object sender,
         KeyEventArgs eventArgs)
@@ -838,7 +845,10 @@ public partial class EnumFilterColumnHeader : UserControl
             option.IsSelected = false;
         }
 
-        FilterComboBox.IsDropDownOpen = false;
+        if (SelectionMode == EnumFilterSelectionMode.Single)
+        {
+            FilterComboBox.IsDropDownOpen = false;
+        }
 
         CommitSelection(raiseFilterChanged: true);
     }
