@@ -8,9 +8,9 @@ public sealed record PackingMaterialFilterCriteria(
     string? ManufacturerCode,
     string? Description,
     NumericOperator? AmountOperator = null,
-    double? AmountValue = null,
+    decimal? AmountValue = null,
     NumericOperator? TotalUsedAmountOperator = null,
-    double? TotalUsedAmountValue = null)
+    decimal? TotalUsedAmountValue = null)
 {
     public static PackingMaterialFilterCriteria Empty { get; } =
         new(null, null, null, null, null, null, null, null);

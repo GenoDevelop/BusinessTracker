@@ -5,8 +5,8 @@ X Dodać materiały pakowe do programu
 X Umożliwoć zamawianie materiałów pakowych w dostawach
 X Filtrowania tekstowe zrobić, że każde słowo po spacji ma się znajdować gdzieś w wyszukiwanej frazie
 X Dodać koszty dostawy netto/brutto do zamówienia materiałów
-- Możliwość przesuwania popupów
-- Popupy nie powinny być widoczne zawsze na wierzchu / OPCJONALNIE dodać do popupów pineskę i wtedy będą na wierzchu, ale musi się dać je wtedy klikać
+X Możliwość przesuwania popupów
+X Popupy nie powinny być widoczne zawsze na wierzchu / OPCJONALNIE dodać do popupów pineskę i wtedy będą na wierzchu, ale musi się dać je wtedy klikać
 X Na widoku dostaw zrobić slider do zmieniania ratio listy dostaw i szczegółów dostawy
 X -||- do zmieniania ratio listy zamówionych przedmiotów i szczegółów (góra/dół)
 X Umieścić Cenę netto brutto faktury jako jedna pozycja Cena:

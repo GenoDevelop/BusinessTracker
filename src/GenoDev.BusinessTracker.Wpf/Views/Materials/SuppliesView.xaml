@@ -120,275 +120,238 @@
             </ListBox>
         
             <!-- Create Supply Popup -->
-            <Popup IsOpen="{Binding IsCreatePopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding CreateSupplyViewModel}">
-                        <TextBlock Text="Dodaj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-        
-                        <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
-                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Nr faktury:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+            <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj dostawę" StaysOpen="True">
+                <StackPanel Width="400" DataContext="{Binding CreateSupplyViewModel}">
+                    <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
+                    <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Nr faktury:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="10" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Cena netto dostawy:" Margin="0,0,0,5" />
-                                <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Cena brutto dostawy:" Margin="0,0,0,5" />
-                                <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
-                            </StackPanel>
-                        </Grid>
-
-                        <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"
-                                 Height="100" Margin="0,0,0,20" />
-        
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Cena netto dostawy:" Margin="0,0,0,5" />
+                            <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
                         </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Cena brutto dostawy:" Margin="0,0,0,5" />
+                            <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"
+                             Height="100" Margin="0,0,0,20" />
+    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
                     </StackPanel>
-                </Border>
-            </Popup>
+                </StackPanel>
+            </controls:DraggablePopup>
         
             <!-- Edit Supply Popup -->
-            <Popup IsOpen="{Binding IsEditPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditSupplyViewModel}">
-                        <TextBlock Text="Edytuj dostawę" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
-        
-                        <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
-                        <ComboBox ItemsSource="{Binding Suppliers}"
-                                  SelectedItem="{Binding SelectedSupplier}"
-                                  DisplayMemberPath="Name"
-                                  Margin="0,0,0,15" />
-        
-                        <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" />
-                        <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" />
-        
-                        <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" />
-                        <ComboBox ItemsSource="{Binding AvailableStatuses}"
-                                  SelectedItem="{Binding Status}"
-                                  Margin="0,0,0,15">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource MaterialSupplyStatusToTextConverter}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-        
-                        <TextBlock Text="Nr faktury" Margin="0,0,0,5" Foreground="Gray" />
-                        <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
+            <controls:DraggablePopup IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj dostawę" StaysOpen="True">
+                <StackPanel Width="400" DataContext="{Binding EditSupplyViewModel}">
+                    <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
+                    <ComboBox ItemsSource="{Binding Suppliers}"
+                              SelectedItem="{Binding SelectedSupplier}"
+                              DisplayMemberPath="Name"
+                              Margin="0,0,0,15" />
+    
+                    <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" />
+                    <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" />
+    
+                    <TextBlock Text="Status" Margin="0,0,0,5" Foreground="Gray" />
+                    <ComboBox ItemsSource="{Binding AvailableStatuses}"
+                              SelectedItem="{Binding Status}"
+                              Margin="0,0,0,15">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource MaterialSupplyStatusToTextConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+    
+                    <TextBlock Text="Nr faktury" Margin="0,0,0,5" Foreground="Gray" />
+                    <TextBox Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
 
-                        <Grid Margin="0,0,0,15">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="10" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Cena netto dostawy" Margin="0,0,0,5" Foreground="Gray" />
-                                <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Cena brutto dostawy" Margin="0,0,0,5" Foreground="Gray" />
-                                <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
-                            </StackPanel>
-                        </Grid>
-
-                        <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" />
-                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                 AcceptsReturn="True"
-                                 Height="80"
-                                 VerticalScrollBarVisibility="Auto"
-                                 TextWrapping="Wrap"
-                                 Margin="0,0,0,20" />
-        
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Width="80" Margin="0,0,10,0" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" />
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Cena netto dostawy" Margin="0,0,0,5" Foreground="Gray" />
+                            <controls:NumericTextBox Value="{Binding ShippingNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
                         </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Cena brutto dostawy" Margin="0,0,0,5" Foreground="Gray" />
+                            <controls:NumericTextBox Value="{Binding ShippingGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Opis" Margin="0,0,0,5" Foreground="Gray" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
+                             Height="80"
+                             VerticalScrollBarVisibility="Auto"
+                             TextWrapping="Wrap"
+                             Margin="0,0,0,20" />
+    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Width="80" Margin="0,0,10,0" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" />
                     </StackPanel>
-                </Border>
-            </Popup>
+                </StackPanel>
+            </controls:DraggablePopup>
         
             <!-- Add Supply Item Popup -->
-            <Popup IsOpen="{Binding IsAddMaterialPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding AddSupplyItemViewModel}">
-                        <TextBlock Text="Dodaj pozycję do dostawy" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-        
-                        <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+            <controls:DraggablePopup IsOpen="{Binding IsAddMaterialPopupOpen}" Title="Dodaj pozycję do dostawy" StaysOpen="True">
+                <StackPanel Width="400" DataContext="{Binding AddSupplyItemViewModel}">
+                    <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                        <!-- Conditional Panels for Item Selection -->
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
-                            <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                            
-                            <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
-                                      IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
-                        </StackPanel>
-
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
-                            <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                        </StackPanel>
-
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
-                            <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                        </StackPanel>
-        
-                        <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
-        
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                        </StackPanel>
+                    <!-- Conditional Panels for Item Selection -->
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        
+                        <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                  IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
                     </StackPanel>
-                </Border>
-            </Popup>
-        
-            <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20">
-                    <StackPanel Width="300">
-                        <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-                        <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                            <Run Text="Czy na pewno chcesz usunąć dostawę od " />
-                            <Run Text="{Binding SelectedSupply.SupplierName, Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text=" z dnia " />
-                            <Run Text="{Binding SelectedSupply.OrderDate, StringFormat='dd.MM.yyyy', Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text="?" />
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
-                        </StackPanel>
+
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
+                        <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
                     </StackPanel>
-                </Border>
-            </Popup>
+
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
+                        <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                    </StackPanel>
+    
+                    <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
+    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </controls:DraggablePopup>
+        
+            <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+                <StackPanel Width="300">
+                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                        <Run Text="Czy na pewno chcesz usunąć dostawę od " />
+                        <Run Text="{Binding SelectedSupply.SupplierName, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text=" z dnia " />
+                        <Run Text="{Binding SelectedSupply.OrderDate, StringFormat='dd.MM.yyyy', Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text="?" />
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </controls:DraggablePopup>
         
             <!-- Delete Material Item Popup -->
-            <Popup IsOpen="{Binding IsDeleteItemPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="300">
-                        <TextBlock Text="Potwierdź usunięcie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-                        <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                            <Run Text="Czy na pewno chcesz usunąć materiał " />
-                            <Run Text="{Binding SelectedItemToRemove.MaterialName, Mode=OneWay}" FontWeight="Bold" />
-                            <Run Text=" z tej dostawy?" />
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelDeleteItemCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
-                        </StackPanel>
+            <controls:DraggablePopup IsOpen="{Binding IsDeleteItemPopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+                <StackPanel Width="300">
+                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                        <Run Text="Czy na pewno chcesz usunąć materiał " />
+                        <Run Text="{Binding SelectedItemToRemove.MaterialName, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text=" z tej dostawy?" />
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelDeleteItemCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
                     </StackPanel>
-                </Border>
-            </Popup>
+                </StackPanel>
+            </controls:DraggablePopup>
         
             <!-- Edit Supply Item Popup -->
-            <Popup IsOpen="{Binding IsEditItemPopupOpen}" Placement="Mouse" StaysOpen="True">
-                <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="20" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" />
-                    </Border.Effect>
-                    <StackPanel Width="400" DataContext="{Binding EditSupplyItemViewModel}">
-                        <TextBlock Text="Edytuj pozycję w dostawie" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" />
-        
-                        <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+            <controls:DraggablePopup IsOpen="{Binding IsEditItemPopupOpen}" Title="Edytuj pozycję w dostawie" StaysOpen="True">
+                <StackPanel Width="400" DataContext="{Binding EditSupplyItemViewModel}">
+                    <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource SupplyItemTypeToTextConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                        <!-- Conditional Panels for Item Selection -->
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
-                            <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                            
-                            <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
-                                      IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
-                        </StackPanel>
-
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
-                            <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                        </StackPanel>
-
-                        <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
-                            <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
-                            <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
-                        </StackPanel>
-        
-                        <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
-                        <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
-        
-                        <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
-        
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
-                        </StackPanel>
+                    <!-- Conditional Panels for Item Selection -->
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                        <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        
+                        <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                  IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
                     </StackPanel>
-                </Border>
-            </Popup>
+
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
+                        <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
+                        <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                    </StackPanel>
+    
+                    <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetsAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Ilość sztuk w zestawie:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding UnitsInSet, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Cena netto zestawu:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <TextBlock Text="Cena brutto zestawu:" Margin="0,0,0,5" />
+                    <controls:NumericTextBox Value="{Binding SetGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,10" />
+    
+                    <CheckBox Content="Pozycja prywatna" IsChecked="{Binding PrivateSupply}" Margin="0,0,0,20" />
+    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </controls:DraggablePopup>
         
             <!-- Pagination -->
             <controls:PaginationControl x:Name="SuppliesPagination"

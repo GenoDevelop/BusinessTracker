@@ -182,7 +182,7 @@ public partial class SuppliesView : UserControl
                 SetGrossPriceFilterColumn.SelectedOperator,
                 (decimal?)TotalGrossPriceFilterColumn.FilterValue,
                 TotalGrossPriceFilterColumn.SelectedOperator,
-                PrivateSupplyFilterColumn.FilterValue,
+                PrivateSupplyFilterColumn.IsFilterActive ? PrivateSupplyFilterColumn.FilterValue : null,
                 ItemTypeFilterColumn.GetSelectedValues<SupplyItemType>()?.ToArray()));
 
         await SupplyItemsPagination.ResetAndRefreshAsync();

@@ -8,7 +8,7 @@ public sealed record FixedAssetFilterCriteria(
     string? ManufacturerCode,
     string? Description,
     NumericOperator? AmountOperator = null,
-    double? AmountValue = null)
+    decimal? AmountValue = null)
 {
     public static FixedAssetFilterCriteria Empty { get; } =
         new(null, null, null, null);

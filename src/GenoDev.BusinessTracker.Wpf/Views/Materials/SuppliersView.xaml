@@ -133,90 +133,67 @@
                                     Margin="0,5,0,0" />
         
         <!-- Create/Edit popup -->
-        <Popup IsOpen="{Binding IsCreatePopupOpen}"
-               Placement="Mouse"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="400"
-                    CornerRadius="5">
-                <StackPanel DataContext="{Binding CreateSupplierViewModel}">
-                    <TextBlock Text="{Binding Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj dostawcę;Dodaj dostawcę'}"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
-        
-                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-        
-                    <TextBlock Text="NIP:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-        
-                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True"
-                             VerticalScrollBarVisibility="Auto"
-                             TextWrapping="Wrap"
-                             Height="100"
-                             Margin="0,0,0,10" />
-        
-                    <TextBlock Text="Strona WWW:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,20" />
-        
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Zapisz"
-                                Command="{Binding SaveCommand}"
-                                Padding="15,5"
-                                Background="LightBlue"
-                                IsDefault="True" />
-                    </StackPanel>
+        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}"
+                                 Title="{Binding CreateSupplierViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj dostawcę;Dodaj dostawcę'}"
+                                 StaysOpen="True">
+            <StackPanel DataContext="{Binding CreateSupplierViewModel}" Width="400">
+                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,10" />
+
+                <TextBlock Text="NIP:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,10" />
+
+                <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         TextWrapping="Wrap"
+                         Height="100"
+                         Margin="0,0,0,10" />
+
+                <TextBlock Text="Strona WWW:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,20" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj"
+                            Command="{Binding CancelCommand}"
+                            Margin="0,0,10,0"
+                            Padding="15,5" />
+                    <Button Content="Zapisz"
+                            Command="{Binding SaveCommand}"
+                            Padding="15,5"
+                            Background="LightBlue"
+                            IsDefault="True" />
                 </StackPanel>
-            </Border>
-        </Popup>
+            </StackPanel>
+        </controls:DraggablePopup>
         
         <!-- Delete confirmation -->
-        <Popup IsOpen="{Binding IsDeletePopupOpen}"
-               Placement="Mouse"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="300"
-                    CornerRadius="5">
-                <StackPanel>
-                    <TextBlock Text="Potwierdź usunięcie"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
-                    <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
-                        <Run Text="Czy na pewno chcesz usunąć dostawcę " />
-                        <Run Text="{Binding SupplierToDelete.Name, Mode=OneWay}"
-                             FontWeight="Bold" />
-                        <Run Text="?" />
-                    </TextBlock>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelDeleteCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Usuń"
-                                Command="{Binding ConfirmDeleteCommand}"
-                                Padding="15,5"
-                                Background="LightCoral"
-                                IsDefault="True" />
-                    </StackPanel>
+        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}"
+                                 Title="Potwierdź usunięcie"
+                                 StaysOpen="True">
+            <StackPanel Width="300">
+                <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                    <Run Text="Czy na pewno chcesz usunąć dostawcę " />
+                    <Run Text="{Binding SupplierToDelete.Name, Mode=OneWay}"
+                         FontWeight="Bold" />
+                    <Run Text="?" />
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj"
+                            Command="{Binding CancelDeleteCommand}"
+                            Margin="0,0,10,0"
+                            Padding="15,5" />
+                    <Button Content="Usuń"
+                            Command="{Binding ConfirmDeleteCommand}"
+                            Padding="15,5"
+                            Background="LightCoral"
+                            IsDefault="True" />
                 </StackPanel>
-            </Border>
-        </Popup>
+            </StackPanel>
+        </controls:DraggablePopup>
     </Grid>
 </UserControl>

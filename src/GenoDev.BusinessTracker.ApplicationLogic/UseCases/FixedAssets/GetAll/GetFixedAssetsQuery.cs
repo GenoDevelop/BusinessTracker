@@ -21,6 +21,6 @@ public record GetFixedAssetsQuery(
     string? ManufacturerCodeFilter = null,
     string? DescriptionFilter = null,
     NumericOperator? AmountOperator = null,
-    double? AmountValue = null,
+    decimal? AmountValue = null,
     FixedAssetSortBy SortBy = FixedAssetSortBy.Name,
     bool IsDescending = false) : IRequest<PagedList<FixedAssetDto>>;

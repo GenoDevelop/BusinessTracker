@@ -46,10 +46,10 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
             .ApplyNumericFilter(x => x.SetsAmount, request.SetsAmountOperator, request.SetsAmountFilter)
             .ApplyNumericFilter(x => x.UnitsInSet, request.UnitsInSetOperator, request.UnitsInSetFilter)
             .ApplyNumericFilter(x => x.SetsAmount * x.UnitsInSet, request.TotalAmountOperator, request.TotalAmountFilter)
-            .ApplyNumericFilter(x => (double)x.SetNetPrice, request.SetNetPriceOperator, (double?)request.SetNetPriceFilter)
-            .ApplyNumericFilter(x => x.SetsAmount * (double)x.SetNetPrice, request.TotalNetPriceOperator, (double?)request.TotalNetPriceFilter)
-            .ApplyNumericFilter(x => (double)x.SetGrossPrice, request.SetGrossPriceOperator, (double?)request.SetGrossPriceFilter)
-            .ApplyNumericFilter(x => x.SetsAmount * (double)x.SetGrossPrice, request.TotalGrossPriceOperator, (double?)request.TotalGrossPriceFilter);
+            .ApplyNumericFilter(x => x.SetNetPrice, request.SetNetPriceOperator, request.SetNetPriceFilter)
+            .ApplyNumericFilter(x => (decimal)x.SetsAmount * x.SetNetPrice, request.TotalNetPriceOperator, request.TotalNetPriceFilter)
+            .ApplyNumericFilter(x => x.SetGrossPrice, request.SetGrossPriceOperator, request.SetGrossPriceFilter)
+            .ApplyNumericFilter(x => (decimal)x.SetsAmount * x.SetGrossPrice, request.TotalGrossPriceOperator, request.TotalGrossPriceFilter);
 
         if (request.ItemTypeFilter != null && request.ItemTypeFilter.Length > 0)
             query = query.Where(x => request.ItemTypeFilter.Contains(x.ItemType));

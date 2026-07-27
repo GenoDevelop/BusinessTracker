@@ -27,7 +27,7 @@
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <TabControl SelectedIndex="{Binding SelectedMainTabIndex}">
-            <TabItem Header="Materiały">
+            <TabItem Header="Magazyn">
                 <ContentControl Content="{Binding MaterialsViewModel}" />
             </TabItem>
             <TabItem Header="Produkcja">

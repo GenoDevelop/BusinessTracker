@@ -22,8 +22,8 @@ public record GetPackingMaterialsQuery(
     string? ManufacturerCodeFilter = null,
     string? DescriptionFilter = null,
     NumericOperator? AmountOperator = null,
-    double? AmountValue = null,
+    decimal? AmountValue = null,
     NumericOperator? TotalUsedAmountOperator = null,
-    double? TotalUsedAmountValue = null,
+    decimal? TotalUsedAmountValue = null,
     PackingMaterialSortBy SortBy = PackingMaterialSortBy.Name,
     bool IsDescending = false) : IRequest<PagedList<PackingMaterialDto>>;

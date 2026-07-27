@@ -191,107 +191,84 @@
                                     Margin="0,5,0,0" />
 
         <!-- Create Packing Material Popup -->
-        <Popup IsOpen="{Binding IsCreatePopupOpen}"
-               Placement="Mouse"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="500"
-                    CornerRadius="5">
-                <StackPanel DataContext="{Binding CreatePackingMaterialViewModel}">
-                    <TextBlock Text="{Binding Title}"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
+        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}"
+                                 Title="{Binding CreatePackingMaterialViewModel.Title}"
+                                 StaysOpen="True">
+            <StackPanel Width="500" DataContext="{Binding CreatePackingMaterialViewModel}">
+                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,10" />
 
-                    <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="EAN:" Margin="0,0,0,5" />
-                            <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,10" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Kod producenta:" Margin="0,0,0,5" />
-                            <TextBox Text="{Binding ManufacturerCode, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,10" />
-                        </StackPanel>
-                    </Grid>
-
-                    <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,10" />
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True"
-                             MinHeight="80"
-                             TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"
-                             Margin="0,0,0,20" />
-
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Zapisz"
-                                Command="{Binding SaveCommand}"
-                                Padding="15,5"
-                                Background="DodgerBlue"
-                                Foreground="White"
-                                IsDefault="True" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="EAN:" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,10" />
                     </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Kod producenta:" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding ManufacturerCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,10" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,10" />
+
+                <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         MinHeight="80"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         Margin="0,0,0,20" />
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="Anuluj"
+                            Command="{Binding CancelCommand}"
+                            Margin="0,0,10,0"
+                            Padding="15,5" />
+                    <Button Content="Zapisz"
+                            Command="{Binding SaveCommand}"
+                            Padding="15,5"
+                            Background="DodgerBlue"
+                            Foreground="White"
+                            IsDefault="True" />
                 </StackPanel>
-            </Border>
-        </Popup>
+            </StackPanel>
+        </controls:DraggablePopup>
         <!-- Delete Confirmation Popup -->
-        <Popup IsOpen="{Binding IsDeletePopupOpen}"
-               Placement="Center"
-               StaysOpen="True">
-            <Border Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Padding="20"
-                    Width="400"
-                    CornerRadius="5">
-                <StackPanel>
-                    <TextBlock Text="Usuń pakunek"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15" />
+        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}"
+                                 Title="Potwierdź usunięcie"
+                                 StaysOpen="True">
+            <StackPanel Width="300">
+                <TextBlock Margin="0,0,0,20"
+                           TextWrapping="Wrap">
+                    <Run Text="Czy na pewno chcesz usunąć pakunek" />
+                    <Run Text="{Binding MaterialToDelete.Name, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="?" />
+                </TextBlock>
 
-                    <TextBlock Margin="0,0,0,20"
-                               TextWrapping="Wrap">
-                        <Run Text="Czy na pewno chcesz usunąć pakunek" />
-                        <Run Text="{Binding MaterialToDelete.Name, Mode=OneWay}" FontWeight="Bold" /><Run Text="?" />
-                    </TextBlock>
-
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right">
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelDeleteCommand}"
-                                Margin="0,0,10,0"
-                                Padding="15,5" />
-                        <Button Content="Usuń"
-                                Command="{Binding ConfirmDeleteCommand}"
-                                Padding="15,5"
-                                Background="Red"
-                                Foreground="White" />
-                    </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="Anuluj"
+                            Command="{Binding CancelDeleteCommand}"
+                            Margin="0,0,10,0"
+                            Padding="15,5" />
+                    <Button Content="Usuń"
+                            Command="{Binding ConfirmDeleteCommand}"
+                            Padding="15,5"
+                            Background="LightCoral"
+                            IsDefault="True" />
                 </StackPanel>
-            </Border>
-        </Popup>
+            </StackPanel>
+        </controls:DraggablePopup>
     </Grid>
 </UserControl>

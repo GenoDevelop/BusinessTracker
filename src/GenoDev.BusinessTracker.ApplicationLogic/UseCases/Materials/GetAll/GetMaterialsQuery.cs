@@ -15,4 +15,4 @@ public record GetMaterialsQuery(
     bool IsDescending = false,
     string? NameFilter = null,
     NumericOperator? VariantsCountOperator = null,
-    double? VariantsCountFilter = null) : IRequest<PagedList<MaterialDto>>;
+    decimal? VariantsCountFilter = null) : IRequest<PagedList<MaterialDto>>;

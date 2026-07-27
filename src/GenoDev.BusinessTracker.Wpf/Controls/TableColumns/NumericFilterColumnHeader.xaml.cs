@@ -10,10 +10,6 @@ namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public partial class NumericFilterColumnHeader : UserControl
 {
-    private static readonly Regex AllowedInputRegex = new(
-        @"^[+-]?\d*([\.,]\d*)?$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
     private readonly DispatcherTimer _debounceTimer;
 
     public NumericFilterColumnHeader()
@@ -87,18 +83,20 @@ public partial class NumericFilterColumnHeader : UserControl
         set => SetValue(SelectedOperatorProperty, value);
     }
 
-    private static readonly DependencyPropertyKey FilterValuePropertyKey = DependencyProperty.RegisterReadOnly(
+    public static readonly DependencyProperty FilterValueProperty = DependencyProperty.Register(
         nameof(FilterValue),
-        typeof(double?),
+        typeof(decimal?),
         typeof(NumericFilterColumnHeader),
-        new PropertyMetadata(null));
-
-    public static readonly DependencyProperty FilterValueProperty = FilterValuePropertyKey.DependencyProperty;
+        new PropertyMetadata(null, OnFilterValueChanged));
 
     /// <summary>
     /// Sparsowana wartość liczbowa. Zarówno przecinek, jak i kropka są interpretowane jako separator dziesiętny.
     /// </summary>
-    public double? FilterValue => (double?)GetValue(FilterValueProperty);
+    public decimal? FilterValue
+    {
+        get => (decimal?)GetValue(FilterValueProperty);
+        set => SetValue(FilterValueProperty, value);
+    }
 
     private static readonly DependencyPropertyKey IsValueValidPropertyKey = DependencyProperty.RegisterReadOnly(
         nameof(IsValueValid),
@@ -159,7 +157,16 @@ public partial class NumericFilterColumnHeader : UserControl
     private static void OnFilterTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumericFilterColumnHeader)d;
-        control.UpdateParsedValue(e.NewValue as string);
+
+        if (control.IsLoaded)
+        {
+            control.RestartDebounce();
+        }
+    }
+
+    private static void OnFilterValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (NumericFilterColumnHeader)d;
 
         if (control.IsLoaded)
         {
@@ -191,21 +198,23 @@ public partial class NumericFilterColumnHeader : UserControl
 
     private void UpdateParsedValue(string? text)
     {
+        // Metoda pozostawiona dla kompatybilności wstecznej (jeśli ktoś bezpośrednio ustawia FilterText),
+        // ale teraz NumericTextBox zajmuje się parsowaniem i aktualizacją FilterValue.
         if (string.IsNullOrWhiteSpace(text))
         {
-            SetValue(FilterValuePropertyKey, null);
+            FilterValue = null;
             SetValue(IsValueValidPropertyKey, true);
             return;
         }
 
         var normalized = text.Trim().Replace(',', '.');
-        var parsed = double.TryParse(
+        var parsed = decimal.TryParse(
             normalized,
             NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
             CultureInfo.InvariantCulture,
             out var value);
 
-        SetValue(FilterValuePropertyKey, parsed ? value : null);
+        FilterValue = parsed ? value : null;
         SetValue(IsValueValidPropertyKey, parsed);
     }
 
@@ -220,42 +229,6 @@ public partial class NumericFilterColumnHeader : UserControl
     {
         _debounceTimer.Stop();
         RaiseEvent(new RoutedEventArgs(FilterChangedEvent, this));
-    }
-
-    private void ValueTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-        if (sender is not TextBox textBox)
-        {
-            return;
-        }
-
-        var proposedText = BuildProposedText(textBox, e.Text);
-        e.Handled = !AllowedInputRegex.IsMatch(proposedText);
-    }
-
-    private void ValueTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-    {
-        if (sender is not TextBox textBox ||
-            !e.DataObject.GetDataPresent(DataFormats.UnicodeText))
-        {
-            e.CancelCommand();
-            return;
-        }
-
-        var pastedText = e.DataObject.GetData(DataFormats.UnicodeText) as string ?? string.Empty;
-        var proposedText = BuildProposedText(textBox, pastedText);
-
-        if (!AllowedInputRegex.IsMatch(proposedText))
-        {
-            e.CancelCommand();
-        }
-    }
-
-    private static string BuildProposedText(TextBox textBox, string insertedText)
-    {
-        var currentText = textBox.Text ?? string.Empty;
-        var withoutSelection = currentText.Remove(textBox.SelectionStart, textBox.SelectionLength);
-        return withoutSelection.Insert(textBox.SelectionStart, insertedText);
     }
 
     public sealed record NumericOperatorOption(NumericOperator? Operator, string Display);

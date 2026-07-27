@@ -118,7 +118,7 @@ public class GetPackingMaterials_Tests : BusinessTrackerUnitTestsBase<GetPacking
     [InlineData(NumericOperator.GreaterThanOrEqual, 5, 3)]
     [InlineData(NumericOperator.LessThanOrEqual, 5, 2)]
     [InlineData(NumericOperator.NotEqual, 35, 2)]
-    public async Task Handle_ShouldFilterByAmount(NumericOperator op, double value, int expectedCount)
+    public async Task Handle_ShouldFilterByAmount(NumericOperator op, decimal value, int expectedCount)
     {
         // Arrange
         var query = new GetPackingMaterialsQuery(0, 10, AmountOperator: op, AmountValue: value);
@@ -134,7 +134,7 @@ public class GetPackingMaterials_Tests : BusinessTrackerUnitTestsBase<GetPacking
     public async Task Handle_ShouldFilterByTotalUsedAmount()
     {
         // Arrange
-        var query = new GetPackingMaterialsQuery(0, 10, TotalUsedAmountOperator: NumericOperator.LessThan, TotalUsedAmountValue: 10);
+        var query = new GetPackingMaterialsQuery(0, 10, TotalUsedAmountOperator: NumericOperator.LessThan, TotalUsedAmountValue: 10m);
 
         // Act
         var result = await Sut.Handle(query, CancellationToken.None);

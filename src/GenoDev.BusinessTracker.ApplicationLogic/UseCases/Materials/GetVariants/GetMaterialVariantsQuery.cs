@@ -26,6 +26,6 @@ public record GetMaterialVariantsQuery(
     string? ManufacturerCodeFilter = null,
     string? DescriptionFilter = null,
     NumericOperator? AmountOperator = null,
-    double? AmountValue = null,
+    decimal? AmountValue = null,
     NumericOperator? TotalUsedAmountOperator = null,
-    double? TotalUsedAmountValue = null) : IRequest<PagedList<MaterialVariantDto>>;
+    decimal? TotalUsedAmountValue = null) : IRequest<PagedList<MaterialVariantDto>>;

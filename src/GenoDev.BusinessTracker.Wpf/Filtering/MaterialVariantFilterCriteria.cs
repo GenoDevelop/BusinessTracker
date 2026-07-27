@@ -7,9 +7,9 @@ public sealed record MaterialVariantFilterCriteria(
     string? ManufacturerCode,
     string? Description,
     NumericOperator? AmountOperator,
-    double? AmountValue,
+    decimal? AmountValue,
     NumericOperator? TotalUsedAmountOperator,
-    double? TotalUsedAmountValue)
+    decimal? TotalUsedAmountValue)
 {
     public static MaterialVariantFilterCriteria Empty { get; } =
         new(null, null, null, null, null, null, null, null);

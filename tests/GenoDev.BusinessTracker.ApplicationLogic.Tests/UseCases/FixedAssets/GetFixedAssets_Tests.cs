@@ -118,7 +118,7 @@ public class GetFixedAssets_Tests : BusinessTrackerUnitTestsBase<GetFixedAssetsQ
     [InlineData(NumericOperator.GreaterThanOrEqual, 20, 2)]
     [InlineData(NumericOperator.LessThanOrEqual, 20, 2)]
     [InlineData(NumericOperator.NotEqual, 20, 2)]
-    public async Task Handle_ShouldFilterByAmount(NumericOperator op, double value, int expectedCount)
+    public async Task Handle_ShouldFilterByAmount(NumericOperator op, decimal value, int expectedCount)
     {
         // Arrange
         var query = new GetFixedAssetsQuery(0, 10, AmountOperator: op, AmountValue: value);
