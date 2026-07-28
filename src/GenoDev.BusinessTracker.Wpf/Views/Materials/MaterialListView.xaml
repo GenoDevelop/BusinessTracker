@@ -69,7 +69,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-
+                        
                         <DataGridTemplateColumn Width="150" SortMemberPath="VariantsCount">
                             <DataGridTemplateColumn.Header>
                                 <controls:NumericFilterColumnHeader
@@ -84,6 +84,25 @@
                                     <TextBlock Text="{Binding VariantsCount}"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Right"
+                                               Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
+                            <DataGridTemplateColumn.Header>
+                                <controls:TextFilterColumnHeader
+                                    x:Name="DescriptionFilterColumn"
+                                    Header="Opis"
+                                    DebounceMilliseconds="500"
+                                    IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    FilterChanged="MaterialsFilter_FilterChanged" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Description}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
                                                Margin="5,0" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -332,6 +351,14 @@
             <StackPanel Width="400" DataContext="{Binding CreateMaterialViewModel}">
                 <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,10" />
+
+                <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         MinHeight="80"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
                          Margin="0,0,0,20" />
 
                 <StackPanel Orientation="Horizontal"

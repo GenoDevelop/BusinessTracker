@@ -4,4 +4,5 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.Update;
 
 public record UpdateMaterialCommand(
     Guid Id,
-    string Name) : IRequest;
+    string Name,
+    string? Description) : IRequest;

@@ -27,6 +27,51 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public DbSet<ProductionMaterial> ProductionMaterials { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderProduct> OrderProducts { get; set; }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ReplaceWhitespaceWithNull();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ReplaceWhitespaceWithNull();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void ReplaceWhitespaceWithNull()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified);
+
+        foreach (var entry in entries)
+        {
+            var properties = entry.Metadata.GetProperties()
+                .Where(p => p.ClrType == typeof(string));
+
+            foreach (var property in properties)
+            {
+                if (property.IsPrimaryKey())
+                {
+                    continue;
+                }
+
+                var currentValue = (string?)entry.Property(property.Name).CurrentValue;
+                if (string.IsNullOrWhiteSpace(currentValue))
+                {
+                    if (property.IsNullable)
+                    {
+                        entry.Property(property.Name).CurrentValue = null;
+                    }
+                    else if (currentValue == null)
+                    {
+                        entry.Property(property.Name).CurrentValue = string.Empty;
+                    }
+                }
+            }
+        }
+    }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

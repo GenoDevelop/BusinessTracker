@@ -16,6 +16,7 @@ public class UpdateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
             return;
 
         material.Name = request.Name;
+        material.Description = request.Description;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

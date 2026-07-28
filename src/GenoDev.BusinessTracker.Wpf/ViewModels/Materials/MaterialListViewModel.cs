@@ -153,6 +153,7 @@ public partial class MaterialListViewModel : ViewModelBase
                 SortBy,
                 IsDescending,
                 IsFilterVisible ? _filter.Name : null,
+                IsFilterVisible ? _filter.Description : null,
                 IsFilterVisible ? _filter.VariantsCountOperator : null,
                 IsFilterVisible ? _filter.VariantsCountFilter : null),
             cancellationToken);

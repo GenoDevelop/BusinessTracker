@@ -110,6 +110,7 @@ public partial class MaterialListView : UserControl
         viewModel.SetFilter(
             new MaterialFilterCriteria(
                 NameFilterColumn.FilterText,
+                DescriptionFilterColumn.FilterText,
                 VariantsCountFilterColumn.SelectedOperator,
                 VariantsCountFilterColumn.FilterValue));
 

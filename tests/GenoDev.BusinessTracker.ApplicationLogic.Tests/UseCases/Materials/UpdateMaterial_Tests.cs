@@ -30,7 +30,8 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
 
         var command = new UpdateMaterialCommand(
             Id: materialId,
-            Name: "New Name");
+            Name: "New Name",
+            Description: "New Description");
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -41,6 +42,7 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
             var material = db.Materials.FirstOrDefault(x => x.Id == materialId);
             material.Should().NotBeNull();
             material!.Name.Should().Be(command.Name);
+            material.Description.Should().Be(command.Description);
         });
     }
 
@@ -51,7 +53,8 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
         var nonExistentId = Guid.NewGuid();
         var command = new UpdateMaterialCommand(
             Id: nonExistentId,
-            Name: "New Name");
+            Name: "New Name",
+            Description: "New Description");
 
         // Act & Assert
         var act = async () => await Sut.Handle(command, CancellationToken.None);

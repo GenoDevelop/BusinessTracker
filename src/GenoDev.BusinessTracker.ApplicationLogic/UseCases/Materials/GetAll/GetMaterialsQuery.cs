@@ -6,6 +6,7 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetAll;
 public record MaterialDto(
     Guid Id,
     string Name,
+    string? Description,
     int VariantsCount);
 
 public record GetMaterialsQuery(
@@ -14,5 +15,6 @@ public record GetMaterialsQuery(
     MaterialSortBy SortBy = MaterialSortBy.Name,
     bool IsDescending = false,
     string? NameFilter = null,
+    string? DescriptionFilter = null,
     NumericOperator? VariantsCountOperator = null,
     decimal? VariantsCountFilter = null) : IRequest<PagedList<MaterialDto>>;

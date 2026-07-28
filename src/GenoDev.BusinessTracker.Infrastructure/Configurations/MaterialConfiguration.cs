@@ -14,6 +14,7 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
         builder.Property(x => x.Name).IsRequired();
+        builder.Property(x => x.Description).IsRequired(false);
 
         builder.HasMany(x => x.MaterialVariants)
             .WithOne(x => x.Material)

@@ -29,12 +29,14 @@ public static class BusinessTrackerDbContextExtensions
         }
 
         public Material Arrange_Material(Guid? id = null,
-            string name = "Test Material")
+            string name = "Test Material",
+            string? description = null)
         {
             var material = new Material
             {
                 Id = id ?? Guid.NewGuid(),
                 Name = name,
+                Description = description,
                 MaterialVariants = [],
                 ProductRecipeMaterials = []
             };

@@ -18,6 +18,11 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             query = query.WhereContainsAll(x => x.Name, request.NameFilter);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
+        {
+            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
+        }
+
         if (request.VariantsCountOperator.HasValue && request.VariantsCountFilter.HasValue)
         {
             query = query.ApplyNumericFilter(
@@ -29,6 +34,7 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
         query = request.SortBy switch
         {
             MaterialSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
+            MaterialSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
             MaterialSortBy.VariantsCount => request.IsDescending
                 ? query.OrderByDescending(x => x.MaterialVariants.Count)
                 : query.OrderBy(x => x.MaterialVariants.Count),
@@ -43,6 +49,7 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Select(x => new MaterialDto(
                 x.Id,
                 x.Name,
+                x.Description,
                 x.MaterialVariants.Count))
             .ToListAsync(cancellationToken);
 

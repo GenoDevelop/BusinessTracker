@@ -76,4 +76,40 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
             .Should().ThrowAsync<InvalidOperationException>()
             .WithMessage($"Material with ID {command.MaterialId} does not exist.");
     }
+
+    [Fact]
+    public async Task Handle_ShouldSucceed_WhenMultipleVariantsHaveEmptyEan()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var existingVariant = new MaterialVariant
+            {
+                Id = Guid.NewGuid(),
+                MaterialId = _materialId,
+                Name = "Existing Variant",
+                Ean = "" // Arranging with empty string EAN as requested
+            };
+            db.MaterialVariants.Add(existingVariant);
+        });
+
+        var command = new CreateMaterialVariantCommand(
+            MaterialId: _materialId,
+            Name: "New Variant",
+            Ean: "", // Attempting to create new one with empty string EAN as requested
+            ManufacturerCode: "MFG-002",
+            Unit: "pcs",
+            Description: "New variant description");
+
+        // Act
+        var resultId = await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var variant = db.MaterialVariants.FirstOrDefault(x => x.Id == resultId);
+            variant.Should().NotBeNull();
+            variant!.Ean.Should().BeNull(); // Handler converts "" to null
+        });
+    }
 }

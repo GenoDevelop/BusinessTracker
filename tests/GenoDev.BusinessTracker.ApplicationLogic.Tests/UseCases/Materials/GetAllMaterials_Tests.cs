@@ -70,7 +70,8 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         {
             db.Arrange_Material(
                 id: id,
-                name: "Full Material");
+                name: "Full Material",
+                description: "Material Description");
         });
 
         var query = new GetMaterialsQuery(0, 10);
@@ -83,6 +84,7 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         var item = result.Items[0];
         item.Id.Should().Be(id);
         item.Name.Should().Be("Full Material");
+        item.Description.Should().Be("Material Description");
     }
 
     [Fact]
@@ -104,6 +106,47 @@ public class GetAllMaterials_Tests : BusinessTrackerUnitTestsBase<GetMaterialsQu
         // Assert
         result.Items.Should().HaveCount(1);
         result.Items[0].Name.Should().Be("Banana");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterByDescription()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_Material(name: "A", description: "Apple");
+            db.Arrange_Material(name: "B", description: "Banana");
+            db.Arrange_Material(name: "C", description: "Cherry");
+        });
+
+        var query = new GetMaterialsQuery(0, 10, DescriptionFilter: "an");
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Should().HaveCount(1);
+        result.Items[0].Description.Should().Be("Banana");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldSortByDescriptionDescending()
+    {
+        // Arrange
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            db.Arrange_Material(name: "A", description: "Alpha");
+            db.Arrange_Material(name: "C", description: "Gamma");
+            db.Arrange_Material(name: "B", description: "Beta");
+        });
+
+        var query = new GetMaterialsQuery(0, 10, MaterialSortBy.Description, true);
+
+        // Act
+        var result = await Sut.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Items.Select(x => x.Description).Should().ContainInOrder("Gamma", "Beta", "Alpha");
     }
 
     [Fact]

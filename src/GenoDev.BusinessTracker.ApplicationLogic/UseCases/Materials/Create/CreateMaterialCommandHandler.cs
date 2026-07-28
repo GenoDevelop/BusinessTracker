@@ -12,7 +12,8 @@ public class CreateMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
         var material = new Material
         {
             Id = Guid.NewGuid(),
-            Name = request.Name
+            Name = request.Name,
+            Description = request.Description
         };
 
         dbContext.Materials.Add(material);

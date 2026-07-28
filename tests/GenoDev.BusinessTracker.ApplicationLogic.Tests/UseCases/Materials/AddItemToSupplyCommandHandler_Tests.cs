@@ -87,7 +87,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
         // Arrange
         var supplyId = Arrange_BusinessTrackerDatabase(db =>
         {
-            var supply = db.Arrange_Supply();
+            var supply = db.Arrange_Supply(status: MaterialSupplyStatus.Received);
             return supply.Id;
         });
 
