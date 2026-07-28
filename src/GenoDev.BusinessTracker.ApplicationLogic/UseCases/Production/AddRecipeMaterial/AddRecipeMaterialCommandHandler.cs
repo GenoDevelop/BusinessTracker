@@ -30,7 +30,8 @@ public class AddRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbContext
         {
             Id = Guid.NewGuid(),
             ProductRecipeId = request.RecipeId,
-            MaterialId = request.MaterialId
+            MaterialId = request.MaterialId,
+            Description = request.Description
         };
 
         dbContext.ProductRecipeMaterials.Add(recipeMaterial);

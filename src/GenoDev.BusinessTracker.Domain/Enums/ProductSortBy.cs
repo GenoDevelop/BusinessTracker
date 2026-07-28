@@ -5,5 +5,7 @@ public enum ProductSortBy
     Name,
     Identifier,
     Amount,
+    TotalAmount,
+    TotalSoldAmount,
     Description
 }

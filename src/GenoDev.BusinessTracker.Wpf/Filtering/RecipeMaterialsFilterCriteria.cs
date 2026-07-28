@@ -4,9 +4,7 @@ namespace GenoDev.BusinessTracker.Wpf.Filtering;
 
 public sealed record RecipeMaterialsFilterCriteria(
     string? MaterialName,
-    string? Ean,
-    double? Amount,
-    NumericOperator? AmountOperator)
+    string? Description)
 {
-    public static RecipeMaterialsFilterCriteria Empty { get; } = new(null, null, null, null);
+    public static RecipeMaterialsFilterCriteria Empty { get; } = new(null, null);
 }

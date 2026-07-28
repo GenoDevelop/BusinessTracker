@@ -6,7 +6,8 @@ public class Product
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string Identifier { get; set; } = null!;
-    public int Amount { get; set; }
+    public int TotalAmount { get; set; }
+    public int TotalSoldAmount { get; set; }
 
     public virtual ICollection<ProductRecipe> ProductRecipes { get; set; } = new HashSet<ProductRecipe>();
     public virtual ICollection<Production> Productions { get; set; } = new HashSet<Production>();

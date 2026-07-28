@@ -34,7 +34,7 @@ public class CreateProduct_Tests : BusinessTrackerUnitTestsBase<CreateProductCom
             product!.Name.Should().Be(command.Name);
             product.Identifier.Should().Be(command.Identifier);
             product.Description.Should().Be(command.Description);
-            product.Amount.Should().Be(0); // Initial amount must be 0
+            product.TotalAmount.Should().Be(0); // Initial amount must be 0
         });
     }
 
@@ -58,7 +58,7 @@ public class CreateProduct_Tests : BusinessTrackerUnitTestsBase<CreateProductCom
             product!.Name.Should().Be(command.Name);
             product.Identifier.Should().Be(command.Identifier);
             product.Description.Should().BeNull();
-            product.Amount.Should().Be(0);
+            product.TotalAmount.Should().Be(0);
         });
     }
 }

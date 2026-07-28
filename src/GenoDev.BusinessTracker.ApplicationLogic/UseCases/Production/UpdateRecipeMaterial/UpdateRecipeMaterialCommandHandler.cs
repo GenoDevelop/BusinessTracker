@@ -18,6 +18,7 @@ public class UpdateRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
         }
 
         recipeMaterial.MaterialId = request.MaterialId;
+        recipeMaterial.Description = request.Description;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

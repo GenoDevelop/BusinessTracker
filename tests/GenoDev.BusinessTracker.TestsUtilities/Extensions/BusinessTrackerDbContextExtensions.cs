@@ -235,7 +235,7 @@ public static class BusinessTrackerDbContextExtensions
                 Name = name,
                 Description = description,
                 Identifier = identifier ?? Guid.NewGuid().ToString(),
-                Amount = amount,
+                TotalAmount = amount,
                 ProductRecipes = [],
                 Productions = [],
                 OrderProducts = []

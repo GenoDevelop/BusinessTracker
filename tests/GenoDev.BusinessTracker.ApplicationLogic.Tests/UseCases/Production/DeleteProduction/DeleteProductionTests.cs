@@ -27,7 +27,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
+            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
             var material = new Material { Id = Guid.NewGuid(), Name = "Material" };
             db.Materials.Add(material);
             db.MaterialVariants.Add(new MaterialVariant { Id = variantId, MaterialId = material.Id, Name = "Variant", TotalCompanyAmount = 50, TotalUsedAmount = 15 });
@@ -61,7 +61,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
             deletedProduction.Should().BeNull();
 
             var product = db.Products.First(x => x.Id == productId);
-            product.Amount.Should().Be(80); // 100 - 20
+            product.TotalAmount.Should().Be(80); // 100 - 20
 
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(50); // Should remain unchanged

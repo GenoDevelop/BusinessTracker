@@ -1,5 +1,6 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,52 +11,38 @@ public class GetProductsQueryHandler(IBusinessTrackerDbContext dbContext)
 {
     public async Task<PagedList<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var query = dbContext.Products.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(request.NameFilter))
-            query = query.WhereContainsAll(x => x.Name, request.NameFilter);
-
-        if (!string.IsNullOrWhiteSpace(request.IdentifierFilter))
-            query = query.WhereContainsAll(x => x.Identifier, request.IdentifierFilter);
-
-        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
-            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
-
-        if (request.AmountFilter.HasValue && request.AmountOperator.HasValue)
-        {
-            query = request.AmountOperator.Value switch
-            {
-                NumericOperator.Equal => query.Where(x => x.Amount == request.AmountFilter.Value),
-                NumericOperator.NotEqual => query.Where(x => x.Amount != request.AmountFilter.Value),
-                NumericOperator.LessThan => query.Where(x => x.Amount < request.AmountFilter.Value),
-                NumericOperator.LessThanOrEqual => query.Where(x => x.Amount <= request.AmountFilter.Value),
-                NumericOperator.GreaterThan => query.Where(x => x.Amount > request.AmountFilter.Value),
-                NumericOperator.GreaterThanOrEqual => query.Where(x => x.Amount >= request.AmountFilter.Value),
-                _ => query
-            };
-        }
+        var query = dbContext.Products.AsNoTracking()
+            .WhereContainsAll(x => x.Name, request.NameFilter)
+            .WhereContainsAll(x => x.Identifier, request.IdentifierFilter)
+            .WhereContainsAll(x => x.Description, request.DescriptionFilter)
+            .ApplyNumericFilter(x => x.TotalAmount - x.TotalSoldAmount, request.AmountOperator, request.AmountFilter)
+            .ApplyNumericFilter(x => x.TotalSoldAmount, request.TotalSoldAmountOperator, request.TotalSoldAmountFilter);
 
         query = request.SortBy switch
         {
             ProductSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             ProductSortBy.Identifier => request.IsDescending ? query.OrderByDescending(x => x.Identifier) : query.OrderBy(x => x.Identifier),
-            ProductSortBy.Amount => request.IsDescending ? query.OrderByDescending(x => x.Amount) : query.OrderBy(x => x.Amount),
+            ProductSortBy.Amount => request.IsDescending ? query.OrderByDescending(x => x.TotalAmount - x.TotalSoldAmount) : query.OrderBy(x => x.TotalAmount - x.TotalSoldAmount),
+            ProductSortBy.TotalAmount => request.IsDescending ? query.OrderByDescending(x => x.TotalAmount) : query.OrderBy(x => x.TotalAmount),
+            ProductSortBy.TotalSoldAmount => request.IsDescending ? query.OrderByDescending(x => x.TotalSoldAmount) : query.OrderBy(x => x.TotalSoldAmount),
             ProductSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
             _ => query.OrderBy(x => x.Name)
         };
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = (await query
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
+            .ToListAsync(cancellationToken))
             .Select(x => new ProductDto(
                 x.Id,
                 x.Name,
                 x.Identifier,
-                x.Amount,
+                x.TotalAmount - x.TotalSoldAmount,
+                x.TotalSoldAmount,
                 x.Description))
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         return new PagedList<ProductDto>(items, totalCount, request.PageIndex, request.PageSize);
     }

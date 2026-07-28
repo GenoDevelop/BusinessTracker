@@ -15,7 +15,7 @@ public class StatusToColorConverter : IValueConverter
             {
                 MaterialSupplyStatus.New => Brushes.Gray,
                 MaterialSupplyStatus.Ordered => Brushes.DodgerBlue,
-                MaterialSupplyStatus.Received => Brushes.Green,
+                MaterialSupplyStatus.Received => Brushes.LimeGreen,
                 _ => Brushes.Transparent
             };
         }

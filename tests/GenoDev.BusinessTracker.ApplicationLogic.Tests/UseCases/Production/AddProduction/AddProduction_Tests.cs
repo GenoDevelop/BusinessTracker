@@ -63,7 +63,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
             production.ProductionMaterials.Should().HaveCount(2);
 
             var product = db.Products.Find(productId);
-            product!.Amount.Should().Be(15); // 10 + 5
+            product!.TotalAmount.Should().Be(15); // 10 + 5
 
             var variant1 = db.MaterialVariants.Find(variantId1);
             variant1!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged
@@ -119,7 +119,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
             production.ProductionMaterials.Sum(pm => pm.UsedAmount).Should().Be(35);
 
             var product = db.Products.Find(productId);
-            product!.Amount.Should().Be(12); // 10 + 2
+            product!.TotalAmount.Should().Be(12); // 10 + 2
 
             var variant = db.MaterialVariants.Find(variantId);
             variant!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged

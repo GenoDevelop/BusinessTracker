@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish GenoDev.BusinessTracker to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" delete_existing_files="true" platform="x64" self_contained="true" target_folder="$PROJECT_DIR$/src/GenoDev.BusinessTracker.Wpf/bin/Release/net10.0-windows/win-x64/publish" target_framework="net10.0-windows" uuid_high="6720871964137833590" uuid_low="-6129272578052509754">
+      <runtimes>
+        <item value="win-x64" />
+      </runtimes>
+    </riderPublish>
+    <method v="2" />
+  </configuration>
+</component>

@@ -22,6 +22,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         var recipeMaterialId = Guid.NewGuid();
         var oldMaterialId = Guid.NewGuid();
         var newMaterialId = Guid.NewGuid();
+        var newDescription = "New description";
 
         Arrange_BusinessTrackerDatabase(db =>
         {
@@ -30,7 +31,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
             db.Arrange_ProductRecipeMaterial(id: recipeMaterialId, material: oldMaterial);
         });
 
-        var command = new UpdateRecipeMaterialCommand(recipeMaterialId, newMaterialId);
+        var command = new UpdateRecipeMaterialCommand(recipeMaterialId, newMaterialId, newDescription);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -41,6 +42,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
             var updated = db.ProductRecipeMaterials.Find(recipeMaterialId);
             updated.Should().NotBeNull();
             updated!.MaterialId.Should().Be(newMaterialId);
+            updated!.Description.Should().Be(newDescription);
         });
     }
 
@@ -48,7 +50,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
     public async Task Handle_ShouldThrowException_WhenNotFound()
     {
         // Arrange
-        var command = new UpdateRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid());
+        var command = new UpdateRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid(), "desc");
 
         // Act
         Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);

@@ -18,9 +18,13 @@ public class GetRecipeMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
         if (!string.IsNullOrWhiteSpace(request.MaterialNameFilter))
             query = query.WhereContainsAll(x => x.Material.Name, request.MaterialNameFilter);
 
+        if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
+            query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
+
         query = request.SortBy switch
         {
             RecipeMaterialSortBy.MaterialName => request.IsDescending ? query.OrderByDescending(x => x.Material.Name) : query.OrderBy(x => x.Material.Name),
+            RecipeMaterialSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
             _ => query.OrderBy(x => x.Material.Name)
         };
 
@@ -32,7 +36,8 @@ public class GetRecipeMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Select(x => new RecipeMaterialDto(
                 x.Id,
                 x.MaterialId,
-                x.Material.Name))
+                x.Material.Name,
+                x.Description))
             .ToListAsync(cancellationToken);
 
         return new PagedList<RecipeMaterialDto>(items, totalCount, request.PageIndex, request.PageSize);

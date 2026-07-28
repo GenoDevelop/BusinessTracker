@@ -71,13 +71,16 @@ public static class QueryableSearchExtensions
         if (string.IsNullOrWhiteSpace(searchText))
             return query;
 
-        var terms = searchText
-            .Split(
-                (char[]?)null,
-                StringSplitOptions.RemoveEmptyEntries |
-                StringSplitOptions.TrimEntries)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
+        searchText = searchText.Trim();
+        var terms = searchText.Length > 1 && searchText[0] == '\"' && searchText[^1] == '\"'
+            ? [searchText[1..^1]]
+            : searchText
+                .Split(
+                    (char[]?)null,
+                    StringSplitOptions.RemoveEmptyEntries |
+                    StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
 
         if (terms.Length == 0)
             return query;
@@ -131,7 +134,10 @@ public static class QueryableSearchExtensions
                 "Należy przekazać przynajmniej jedną kolumnę.",
                 nameof(columns));
 
-        var terms = searchText
+        searchText = searchText.Trim();
+        var terms = searchText.Length > 1 && searchText[0] == '\"' && searchText[^1] == '\"'
+            ? [searchText[1..^1]]
+            : searchText
             .Split(
                 (char[]?)null,
                 StringSplitOptions.RemoveEmptyEntries |

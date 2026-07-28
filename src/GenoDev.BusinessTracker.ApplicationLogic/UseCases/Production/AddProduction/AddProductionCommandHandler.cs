@@ -60,7 +60,7 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             }
         }
 
-        product.Amount += request.Amount;
+        product.TotalAmount += request.Amount;
 
         await _context.SaveChangesAsync(cancellationToken);
 

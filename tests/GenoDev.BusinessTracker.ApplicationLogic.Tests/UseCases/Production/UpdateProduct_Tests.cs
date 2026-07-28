@@ -49,7 +49,7 @@ public class UpdateProduct_Tests : BusinessTrackerUnitTestsBase<UpdateProductCom
             product!.Name.Should().Be(command.Name);
             product.Identifier.Should().Be(command.Identifier);
             product.Description.Should().Be(command.Description);
-            product.Amount.Should().Be(10); // Amount should remain unchanged
+            product.TotalAmount.Should().Be(10); // Amount should remain unchanged
         });
     }
 

@@ -8,6 +8,7 @@ public record ProductDto(
     string Name,
     string Identifier,
     int Amount,
+    int TotalSoldAmount,
     string? Description);
 
 public record GetProductsQuery(
@@ -18,5 +19,7 @@ public record GetProductsQuery(
     string? NameFilter = null,
     string? IdentifierFilter = null,
     string? DescriptionFilter = null,
-    double? AmountFilter = null,
-    NumericOperator? AmountOperator = null) : IRequest<PagedList<ProductDto>>;
+    decimal? AmountFilter = null,
+    NumericOperator? AmountOperator = null,
+    decimal? TotalSoldAmountFilter = null,
+    NumericOperator? TotalSoldAmountOperator = null) : IRequest<PagedList<ProductDto>>;

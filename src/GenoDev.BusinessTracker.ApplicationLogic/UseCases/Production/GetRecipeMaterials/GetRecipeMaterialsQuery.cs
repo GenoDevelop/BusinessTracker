@@ -9,10 +9,12 @@ public record GetRecipeMaterialsQuery(
     int PageIndex = 0,
     int PageSize = 50,
     string? MaterialNameFilter = null,
+    string? DescriptionFilter = null,
     RecipeMaterialSortBy SortBy = RecipeMaterialSortBy.MaterialName,
     bool IsDescending = false) : IRequest<PagedList<RecipeMaterialDto>>;
 
 public record RecipeMaterialDto(
     Guid Id,
     Guid MaterialId,
-    string MaterialName);
+    string MaterialName,
+    string Description);

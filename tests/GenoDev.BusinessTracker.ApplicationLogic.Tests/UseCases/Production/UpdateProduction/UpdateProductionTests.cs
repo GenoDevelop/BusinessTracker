@@ -29,7 +29,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
+            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
             var material = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
             db.Materials.Add(material);
             db.MaterialVariants.Add(new MaterialVariant { Id = variant1Id, MaterialId = material.Id, Name = "Variant 1", TotalCompanyAmount = 50, TotalUsedAmount = 20 });
@@ -70,7 +70,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             production.ProductionMaterials.Should().HaveCount(1);
 
             var product = db.Products.First(x => x.Id == productId);
-            product.Amount.Should().Be(105); // 100 - 10 (old) + 15 (new) = 105
+            product.TotalAmount.Should().Be(105); // 100 - 10 (old) + 15 (new) = 105
 
             var variant1 = db.MaterialVariants.First(x => x.Id == variant1Id);
             variant1.TotalCompanyAmount.Should().Be(50); // Should remain unchanged
@@ -90,7 +90,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", Amount = 100 });
+            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
             var m1 = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
             var m2 = new Material { Id = Guid.NewGuid(), Name = "Material 2" };
             db.Materials.AddRange(m1, m2);

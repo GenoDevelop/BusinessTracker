@@ -1,5 +1,6 @@
 {
   "ConnectionStrings": {
-    "BusinessTracker": "Host=192.168.0.150;Port=5432;Database=business_tracker;Username=homeassistant;Password=3$bJ@07ykW9B*8@Ho!^T"
+    "BusinessTracker": "Host=localhost;Port=5434;Database=business_tracker;Username=postgres;Password=postgres"
+//    "BusinessTracker": "Host=192.168.0.150;Port=5432;Database=business_tracker;Username=homeassistant;Password=3$bJ@07ykW9B*8@Ho!^T"
   }
 }

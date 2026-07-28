@@ -21,6 +21,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         // Arrange
         var recipeId = Guid.NewGuid();
         var materialId = Guid.NewGuid();
+        var description = "Test description";
 
         Arrange_BusinessTrackerDatabase(db =>
         {
@@ -28,7 +29,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
             db.Arrange_Material(id: materialId);
         });
 
-        var command = new AddRecipeMaterialCommand(recipeId, materialId);
+        var command = new AddRecipeMaterialCommand(recipeId, materialId, description);
 
         // Act
         await Sut.Handle(command, CancellationToken.None);
@@ -38,6 +39,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         {
             var recipeMaterial = db.ProductRecipeMaterials.FirstOrDefault(rm => rm.ProductRecipeId == recipeId && rm.MaterialId == materialId);
             recipeMaterial.Should().NotBeNull();
+            recipeMaterial!.Description.Should().Be(description);
         });
     }
 
@@ -45,7 +47,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
     public async Task Handle_ShouldThrowException_WhenRecipeNotFound()
     {
         // Arrange
-        var command = new AddRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid());
+        var command = new AddRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid(), "desc");
 
         // Act
         Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
@@ -63,7 +65,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         {
             db.Arrange_ProductRecipe(id: recipeId);
         });
-        var command = new AddRecipeMaterialCommand(recipeId, Guid.NewGuid());
+        var command = new AddRecipeMaterialCommand(recipeId, Guid.NewGuid(), "desc");
 
         // Act
         Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);

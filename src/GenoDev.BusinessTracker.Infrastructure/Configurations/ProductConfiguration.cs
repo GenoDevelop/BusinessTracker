@@ -17,6 +17,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Description).IsRequired(false);
         builder.Property(x => x.Identifier).IsRequired();
         builder.HasIndex(x => x.Identifier).IsUnique();
+        builder.Property(x => x.TotalAmount).IsRequired();
+        builder.Property(x => x.TotalSoldAmount).IsRequired();
 
         builder.HasMany(x => x.ProductRecipes)
             .WithOne(x => x.Product)

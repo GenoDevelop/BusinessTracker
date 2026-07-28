@@ -15,7 +15,7 @@ public class CreateProductCommandHandler(IBusinessTrackerDbContext dbContext)
             Name = request.Name,
             Identifier = request.Identifier,
             Description = request.Description,
-            Amount = 0
+            TotalAmount = 0
         };
 
         dbContext.Products.Add(product);

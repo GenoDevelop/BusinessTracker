@@ -29,7 +29,7 @@ public class DeleteProductionCommandHandler : IRequestHandler<DeleteProductionCo
 
         if (product != null)
         {
-            product.Amount -= production.Amount;
+            product.TotalAmount -= production.Amount;
         }
 
         foreach (var materialUsage in production.ProductionMaterials)

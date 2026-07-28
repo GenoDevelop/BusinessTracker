@@ -28,7 +28,7 @@ public class GetProductionSummaryQueryHandler(IBusinessTrackerDbContext dbContex
                 x.Name,
                 x.Identifier,
                 x.ProductRecipes.Count(),
-                x.Amount,
+                x.TotalAmount,
                 x.Productions.Sum(p => p.Amount),
                 x.Description))
             .ToListAsync(cancellationToken);

@@ -46,7 +46,7 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
         }
 
         // Adjust product stock: Subtract old amount, add new amount
-        product.Amount = product.Amount - production.Amount + request.Amount;
+        product.TotalAmount = product.TotalAmount - production.Amount + request.Amount;
 
         // Update production details
         production.Amount = request.Amount;
