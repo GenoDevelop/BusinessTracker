@@ -87,9 +87,9 @@ public class GetProductsQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetPro
         // Arrange
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Arrange_Product(name: "P1", amount: 30);
-            db.Arrange_Product(name: "P2", amount: 10);
-            db.Arrange_Product(name: "P3", amount: 20);
+            db.Arrange_Product(name: "P1", totalAmount: 30);
+            db.Arrange_Product(name: "P2", totalAmount: 10);
+            db.Arrange_Product(name: "P3", totalAmount: 20);
         });
 
         var query = new GetProductsQuery(0, 10, ProductSortBy.Amount, false);
@@ -133,7 +133,7 @@ public class GetProductsQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetPro
                 name: "Full Product",
                 identifier: "IDENT-123",
                 description: "Test Description",
-                amount: 123);
+                totalAmount: 123);
         });
 
         var query = new GetProductsQuery(0, 10);
@@ -199,9 +199,9 @@ public class GetProductsQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetPro
         // Arrange
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Arrange_Product(name: "P1", amount: 10);
-            db.Arrange_Product(name: "P2", amount: 20);
-            db.Arrange_Product(name: "P3", amount: 30);
+            db.Arrange_Product(name: "P1", totalAmount: 10);
+            db.Arrange_Product(name: "P2", totalAmount: 20);
+            db.Arrange_Product(name: "P3", totalAmount: 30);
         });
 
         var query = new GetProductsQuery(0, 10, AmountFilter: 20, AmountOperator: NumericOperator.GreaterThan);

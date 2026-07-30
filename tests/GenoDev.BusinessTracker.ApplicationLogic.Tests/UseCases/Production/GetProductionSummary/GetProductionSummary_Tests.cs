@@ -80,7 +80,7 @@ public class GetProductionSummary_Tests : BusinessTrackerUnitTestsBase<GetProduc
         // Arrange
         Arrange_BusinessTrackerDatabase(db =>
         {
-            var product = db.Arrange_Product(name: "Counter", amount: 100);
+            var product = db.Arrange_Product(name: "Counter", totalAmount: 100);
             db.Arrange_ProductRecipe(product, name: "R1");
             db.Arrange_ProductRecipe(product, name: "R2");
             db.Arrange_Production(product);

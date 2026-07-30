@@ -58,4 +58,62 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
+
+    [Fact]
+    public async Task Handle_ShouldThrowException_WhenMaterialAlreadyExistsInRecipe()
+    {
+        // Arrange
+        var recipeId = Guid.NewGuid();
+        var material1Id = Guid.NewGuid();
+        var material2Id = Guid.NewGuid();
+        var recipeMaterial1Id = Guid.NewGuid();
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var recipe = db.Arrange_ProductRecipe(id: recipeId);
+            var m1 = db.Arrange_Material(id: material1Id);
+            var m2 = db.Arrange_Material(id: material2Id);
+
+            db.Arrange_ProductRecipeMaterial(id: recipeMaterial1Id, productRecipe: recipe, material: m1);
+            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, material: m2);
+        });
+
+        // Try to update recipeMaterial1 to use material2 (which is already in the recipe)
+        var command = new UpdateRecipeMaterialCommand(recipeMaterial1Id, material2Id, "Duplicate Update");
+
+        // Act
+        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already added to this recipe*");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAllowUpdatingOtherFieldsWithoutChangingMaterial()
+    {
+        // Arrange
+        var recipeMaterialId = Guid.NewGuid();
+        var materialId = Guid.NewGuid();
+        var newDescription = "Only description changed";
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var material = db.Arrange_Material(id: materialId);
+            db.Arrange_ProductRecipeMaterial(id: recipeMaterialId, material: material, description: "Old description");
+        });
+
+        var command = new UpdateRecipeMaterialCommand(recipeMaterialId, materialId, newDescription);
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var updated = db.ProductRecipeMaterials.Find(recipeMaterialId);
+            updated.Should().NotBeNull();
+            updated!.MaterialId.Should().Be(materialId);
+            updated!.Description.Should().Be(newDescription);
+        });
+    }
 }

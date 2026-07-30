@@ -126,7 +126,7 @@ public static class BusinessTrackerDbContextExtensions
             supply ??= db.Arrange_Supply();
 
             StorageItemType itemType;
-            if (materialVariant != null) itemType = StorageItemType.Material;
+            if (materialVariant != null) itemType = StorageItemType.MaterialVariant;
             else if (packingMaterial != null) itemType = StorageItemType.Packing;
             else if (fixedAsset != null) itemType = StorageItemType.FixedAsset;
             else
@@ -135,7 +135,7 @@ public static class BusinessTrackerDbContextExtensions
                     .OrderBy(_ => Random.Shared.Next())
                     .First();
 
-                if (itemType == StorageItemType.Material) materialVariant = db.Arrange_MaterialVariant();
+                if (itemType == StorageItemType.MaterialVariant) materialVariant = db.Arrange_MaterialVariant();
                 else if (itemType == StorageItemType.Packing) packingMaterial = db.Arrange_PackingMaterial();
                 else if (itemType == StorageItemType.FixedAsset) fixedAsset = db.Arrange_FixedAsset();
                 else throw new InvalidOperationException("Invalid supply item type");
@@ -227,7 +227,8 @@ public static class BusinessTrackerDbContextExtensions
             string name = "Test Product",
             string? description = null,
             string? identifier = null,
-            int amount = 0)
+            int totalAmount = 0,
+            int soldAmount = 0)
         {
             var product = new Product
             {
@@ -235,7 +236,8 @@ public static class BusinessTrackerDbContextExtensions
                 Name = name,
                 Description = description,
                 Identifier = identifier ?? Guid.NewGuid().ToString(),
-                TotalAmount = amount,
+                TotalAmount = totalAmount,
+                TotalSoldAmount = soldAmount,
                 ProductRecipes = [],
                 Productions = [],
                 OrderProducts = []
@@ -270,7 +272,8 @@ public static class BusinessTrackerDbContextExtensions
 
         public ProductRecipeMaterial Arrange_ProductRecipeMaterial(ProductRecipe? productRecipe = null,
             Material? material = null,
-            Guid? id = null)
+            Guid? id = null,
+            string? description = null)
         {
             productRecipe ??= db.Arrange_ProductRecipe();
             material ??= db.Arrange_Material();
@@ -281,7 +284,8 @@ public static class BusinessTrackerDbContextExtensions
                 ProductRecipeId = productRecipe.Id,
                 ProductRecipe = productRecipe,
                 MaterialId = material.Id,
-                Material = material
+                Material = material,
+                Description = description
             };
 
             recipeMaterial.ProductRecipe.ProductRecipeMaterials.Add(recipeMaterial);

@@ -5,6 +5,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetAll;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddRecipeMaterial;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipeMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateRecipeMaterial;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.ProductRecipes.GetMaterialsForRecipe;
 using MediatR;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
@@ -13,6 +14,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
 {
     private Guid? _recipeId;
     private Guid? _recipeMaterialId;
+    private Guid? _initialMaterialId;
 
     [ObservableProperty]
     private string _title = "Dodaj materiał do przepisu";
@@ -38,14 +40,20 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
 
     public async Task LoadMaterialsAsync()
     {
+        if (!_recipeId.HasValue) return;
+
         IsBusy = true;
         try
         {
-            var query = new GetMaterialsQuery(0, 100, NameFilter: MaterialSearchTerm);
+            var query = new GetMaterialsForRecipeQuery(
+                _recipeId.Value,
+                ExcludedMaterialId: _initialMaterialId,
+                SearchTerm: MaterialSearchTerm);
+
             var result = await mediator.Send(query);
             
             Materials.Clear();
-            foreach (var material in result.Items)
+            foreach (var material in result)
             {
                 Materials.Add(material);
             }
@@ -65,6 +73,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     {
         _recipeId = recipeId;
         _recipeMaterialId = null;
+        _initialMaterialId = null;
         Title = "Dodaj materiał do przepisu";
         SelectedMaterial = null;
         Description = string.Empty;
@@ -75,6 +84,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     {
         _recipeId = recipeId;
         _recipeMaterialId = material.Id;
+        _initialMaterialId = material.MaterialId;
         Title = "Edytuj materiał w przepisie";
         Description = material.Description;
         

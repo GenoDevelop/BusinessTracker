@@ -23,6 +23,7 @@ public class GetProductionMaterialsQueryHandler_Tests : BusinessTrackerUnitTests
         var materialId = Guid.NewGuid();
         var variantId = Guid.NewGuid();
         var usedAmount = 5.5;
+        var productionAmount = 10;
         var unit = "kg";
         var materialName = "Wood";
         var variantName = "Oak Plank";
@@ -31,7 +32,7 @@ public class GetProductionMaterialsQueryHandler_Tests : BusinessTrackerUnitTests
         {
             var material = db.Arrange_Material(id: materialId, name: materialName);
             var variant = db.Arrange_MaterialVariant(material: material, id: variantId, name: variantName, unit: unit);
-            var production = db.Arrange_Production(id: productionId);
+            var production = db.Arrange_Production(id: productionId, amount: productionAmount);
             db.Arrange_ProductionMaterial(production: production, materialVariant: variant, usedAmount: usedAmount);
             
             // Other production material to ignore
@@ -51,6 +52,7 @@ public class GetProductionMaterialsQueryHandler_Tests : BusinessTrackerUnitTests
         item.MaterialVariantId.Should().Be(variantId);
         item.MaterialVariantName.Should().Be(variantName);
         item.UsedAmount.Should().Be(usedAmount);
+        item.TotalUsedAmount.Should().Be(usedAmount * productionAmount);
         item.Unit.Should().Be(unit);
     }
 }

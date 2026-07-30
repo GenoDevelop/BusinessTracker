@@ -77,7 +77,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
             foreach (var a in assetsResult.Items) FixedAssets.Add(a);
 
             // Set initial selections
-            if (SelectedType == StorageItemType.Material && item.ItemId.HasValue)
+            if (SelectedType == StorageItemType.MaterialVariant && item.ItemId.HasValue)
             {
                 // In this system, ItemId for Material type is the MaterialVariant.Id
                 // We need to find the variant to get its MaterialId.
@@ -152,7 +152,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
         {
             Guid? itemId = SelectedType switch
             {
-                StorageItemType.Material => SelectedMaterialVariant?.Id,
+                StorageItemType.MaterialVariant => SelectedMaterialVariant?.Id,
                 StorageItemType.Packing => SelectedPackingMaterial?.Id,
                 StorageItemType.FixedAsset => SelectedFixedAsset?.Id,
                 _ => null
@@ -183,7 +183,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     {
         return SelectedType switch
         {
-            StorageItemType.Material => SelectedMaterialVariant != null,
+            StorageItemType.MaterialVariant => SelectedMaterialVariant != null,
             StorageItemType.Packing => SelectedPackingMaterial != null,
             StorageItemType.FixedAsset => SelectedFixedAsset != null,
             _ => false

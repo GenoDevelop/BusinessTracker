@@ -10,4 +10,9 @@ public class Production
 
     public virtual Product Product { get; set; } = null!;
     public virtual ICollection<ProductionMaterial> ProductionMaterials { get; set; } = new HashSet<ProductionMaterial>();
+
+    public static int CalculateProductionAmountDifference(int oldAmount, int newAmount)
+    {
+        return newAmount - oldAmount;
+    }
 }

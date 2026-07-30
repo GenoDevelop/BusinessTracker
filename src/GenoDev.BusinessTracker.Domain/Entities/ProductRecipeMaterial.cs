@@ -6,7 +6,7 @@ public class ProductRecipeMaterial
     public Guid ProductRecipeId { get; set; }
     public Guid MaterialId { get; set; }
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; } = string.Empty;
 
     public virtual ProductRecipe ProductRecipe { get; set; } = null!;
     public virtual Material Material { get; set; } = null!;

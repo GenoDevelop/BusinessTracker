@@ -18,10 +18,9 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
 
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {
-            var amountToSubtract = item.SetsAmount * item.UnitsInSet;
             var itemId = item.ItemType switch
             {
-                StorageItemType.Material => item.MaterialVariantId,
+                StorageItemType.MaterialVariant => item.MaterialVariantId,
                 StorageItemType.Packing => item.PackingMaterialId,
                 StorageItemType.FixedAsset => item.FixedAssetId,
                 _ => null
@@ -32,8 +31,8 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
                 await itemsService.AdjustStorageAmountAsync(
                     itemId.Value,
                     item.ItemType,
-                    -amountToSubtract,
-                    item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                    -item.GetTotalAmount(),
+                    item.PrivateSupply ? StorageAmountType.TotalPrivate : StorageAmountType.TotalCompany,
                     cancellationToken);
             }
         }

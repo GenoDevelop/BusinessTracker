@@ -16,20 +16,20 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Select(x => new
             {
                 x.Id,
-                ItemId = x.ItemType == StorageItemType.Material ? x.MaterialVariantId :
+                ItemId = x.ItemType == StorageItemType.MaterialVariant ? x.MaterialVariantId :
                          x.ItemType == StorageItemType.Packing ? x.PackingMaterialId :
                          x.ItemType == StorageItemType.FixedAsset ? x.FixedAssetId : null,
                 x.ItemType,
-                ItemName = x.ItemType == StorageItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Name : string.Empty) :
+                ItemName = x.ItemType == StorageItemType.MaterialVariant ? (x.MaterialVariant != null ? x.MaterialVariant.Name : string.Empty) :
                            x.ItemType == StorageItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Name : string.Empty) :
                            x.ItemType == StorageItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Name : string.Empty) : string.Empty,
-                Ean = x.ItemType == StorageItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Ean : null) :
+                Ean = x.ItemType == StorageItemType.MaterialVariant ? (x.MaterialVariant != null ? x.MaterialVariant.Ean : null) :
                       x.ItemType == StorageItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Ean : null) :
                       x.ItemType == StorageItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Ean : null) : null,
-                ManufacturerCode = x.ItemType == StorageItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.ManufacturerCode : null) :
+                ManufacturerCode = x.ItemType == StorageItemType.MaterialVariant ? (x.MaterialVariant != null ? x.MaterialVariant.ManufacturerCode : null) :
                                    x.ItemType == StorageItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.ManufacturerCode : null) :
                                    x.ItemType == StorageItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.ManufacturerCode : null) : null,
-                Unit = x.ItemType == StorageItemType.Material ? (x.MaterialVariant != null ? x.MaterialVariant.Unit : null) :
+                Unit = x.ItemType == StorageItemType.MaterialVariant ? (x.MaterialVariant != null ? x.MaterialVariant.Unit : null) :
                        x.ItemType == StorageItemType.Packing ? (x.PackingMaterial != null ? x.PackingMaterial.Unit : null) :
                        x.ItemType == StorageItemType.FixedAsset ? (x.FixedAsset != null ? x.FixedAsset.Unit : null) : null,
                 x.SetsAmount,

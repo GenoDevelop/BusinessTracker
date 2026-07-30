@@ -10,6 +10,7 @@ public record ProductionMaterialDto(
     Guid MaterialVariantId,
     string MaterialVariantName,
     double UsedAmount,
+    double TotalUsedAmount,
     string? Unit);
 
 public record GetProductionMaterialsQuery(

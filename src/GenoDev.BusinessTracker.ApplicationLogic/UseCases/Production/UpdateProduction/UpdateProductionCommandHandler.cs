@@ -1,5 +1,6 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +9,12 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdatePro
 public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCommand, Unit>
 {
     private readonly IBusinessTrackerDbContext _context;
+    private readonly IItemsService _itemsService;
 
-    public UpdateProductionCommandHandler(IBusinessTrackerDbContext context)
+    public UpdateProductionCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService)
     {
         _context = context;
+        _itemsService = itemsService;
     }
 
     public async Task<Unit> Handle(UpdateProductionCommand request, CancellationToken cancellationToken)
@@ -21,53 +24,89 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (production == null)
-        {
             throw new KeyNotFoundException($"Production with ID {request.Id} not found.");
+
+        if (request.UsedMaterials.Select(x => x.MaterialVariantId).Distinct().Count() != request.UsedMaterials.Count())
+        {
+            throw new InvalidOperationException("Duplicate material variants are not allowed in a single production.");
         }
 
-        var product = await _context.Products.FindAsync(new object[] { production.ProductId }, cancellationToken);
+        var product = await _context.Products.FindAsync([production.ProductId], cancellationToken);
         if (product == null)
-        {
             throw new KeyNotFoundException($"Product with ID {production.ProductId} not found.");
+
+        // Materials processing
+        var requestMaterialsWithId = request.UsedMaterials.Where(um => um.Id.HasValue).ToList();
+        var requestMaterialIds = requestMaterialsWithId.Select(um => um.Id!.Value).ToHashSet();
+        
+        // 1. Remove materials that are not in the request
+        var materialsToRemove = production.ProductionMaterials
+            .Where(pm => !requestMaterialIds.Contains(pm.Id))
+            .ToList();
+
+        foreach (var pm in materialsToRemove)
+        {
+            var materialVariant = await _context.MaterialVariants.FindAsync([pm.MaterialVariantId], cancellationToken);
+            if (materialVariant != null)
+            {
+                var amount = ProductionMaterial.CalculateTotalUsedAmountDifference(pm.UsedAmount, production.Amount, 0, 0);
+                await _itemsService.AdjustStorageAmountAsync(materialVariant.Id, StorageItemType.MaterialVariant, amount,
+                    StorageAmountType.TotalUsed, cancellationToken);
+            }
+            production.ProductionMaterials.Remove(pm);
         }
 
-        // Validate that all current materials are present in the request and no new ones added
-        var existingMaterialIds = production.ProductionMaterials.Select(pm => pm.Id).ToHashSet();
-        var requestMaterialIds = request.UsedMaterials.Select(um => um.Id).Where(id => id.HasValue).Select(id => id!.Value).ToHashSet();
-
-        if (request.UsedMaterials.Any(um => !um.Id.HasValue))
+        // 2. Update existing materials and Add new ones
+        foreach (var usage in request.UsedMaterials)
         {
-            throw new InvalidOperationException("New materials cannot be added to production history.");
-        }
+            if (usage.Id.HasValue)
+            {
+                // Update existing
+                var pm = production.ProductionMaterials.FirstOrDefault(x => x.Id == usage.Id.Value);
+                if (pm == null) continue; // Should not happen if logic is correct
 
-        if (!existingMaterialIds.SetEquals(requestMaterialIds))
-        {
-            throw new InvalidOperationException("All current materials must be present in the request, and no materials can be deleted.");
+                var materialVariant = await _context.MaterialVariants.FindAsync([pm.MaterialVariantId], cancellationToken);
+                if (materialVariant == null)
+                    throw new KeyNotFoundException($"MaterialVariant with ID {pm.MaterialVariantId} not found.");
+
+                // Adjust material stock: Add back old used amount, subtract new amount (TotalUsedAmount tracks how much was USED)
+                var adjustment = ProductionMaterial.CalculateTotalUsedAmountDifference(pm.UsedAmount, production.Amount, usage.Amount, request.Amount);
+                await _itemsService.AdjustStorageAmountAsync(materialVariant.Id, StorageItemType.MaterialVariant, adjustment,
+                    StorageAmountType.TotalUsed, cancellationToken);
+                
+                pm.UsedAmount = usage.Amount;
+            }
+            else
+            {
+                // Add new material
+                var materialVariant = await _context.MaterialVariants.FindAsync([usage.MaterialVariantId], cancellationToken);
+                if (materialVariant == null)
+                    throw new KeyNotFoundException($"MaterialVariant with ID {usage.MaterialVariantId} not found.");
+
+                var totalAmount = ProductionMaterial.CalculateTotalUsedAmount(usage.Amount, request.Amount);
+                await _itemsService.AdjustStorageAmountAsync(materialVariant.Id, StorageItemType.MaterialVariant, totalAmount,
+                    StorageAmountType.TotalUsed, cancellationToken);
+
+                var pm = new ProductionMaterial
+                {
+                    ProductionId = production.Id,
+                    MaterialVariantId = usage.MaterialVariantId,
+                    UsedAmount = usage.Amount
+                };
+                
+                production.ProductionMaterials.Add(pm);
+            }
         }
 
         // Adjust product stock: Subtract old amount, add new amount
-        product.TotalAmount = product.TotalAmount - production.Amount + request.Amount;
+        var amountDifference = Domain.Entities.Production.CalculateProductionAmountDifference(production.Amount, request.Amount);
+        await _itemsService.AdjustProductAmountAsync(product.Id, amountDifference, ProductAmountType.TotalAmount,
+            cancellationToken);
 
         // Update production details
         production.Amount = request.Amount;
         production.Description = request.Description;
         production.ProductionDate = request.ProductionDate;
-
-        // Update material usages
-        foreach (var usage in request.UsedMaterials)
-        {
-            var pm = production.ProductionMaterials.First(x => x.Id == usage.Id);
-            var materialVariant = await _context.MaterialVariants.FindAsync(new object[] { pm.MaterialVariantId }, cancellationToken);
-            if (materialVariant == null)
-            {
-                throw new KeyNotFoundException($"MaterialVariant with ID {pm.MaterialVariantId} not found.");
-            }
-
-            // Adjust material stock: Add back old used amount, subtract new amount
-            materialVariant.TotalUsedAmount = materialVariant.TotalUsedAmount - pm.UsedAmount + usage.Amount;
-            
-            pm.UsedAmount = usage.Amount;
-        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

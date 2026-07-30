@@ -36,10 +36,9 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext, IIt
             var multiplier = isNowReceived ? 1 : -1;
             foreach (var item in supply.SupplyItems)
             {
-                var amountToAdjust = item.SetsAmount * item.UnitsInSet * multiplier;
                 var itemId = item.ItemType switch
                 {
-                    StorageItemType.Material => item.MaterialVariantId,
+                    StorageItemType.MaterialVariant => item.MaterialVariantId,
                     StorageItemType.Packing => item.PackingMaterialId,
                     StorageItemType.FixedAsset => item.FixedAssetId,
                     _ => null
@@ -50,8 +49,8 @@ public class UpdateSupplyCommandHandler(IBusinessTrackerDbContext dbContext, IIt
                     await itemsService.AdjustStorageAmountAsync(
                         itemId.Value,
                         item.ItemType,
-                        amountToAdjust,
-                        item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                        item.GetTotalAmount() * multiplier,
+                        item.PrivateSupply ? StorageAmountType.TotalPrivate : StorageAmountType.TotalCompany,
                         cancellationToken);
                 }
             }

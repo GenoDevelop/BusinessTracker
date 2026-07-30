@@ -34,7 +34,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: 5,
             UnitsInSet: 10,
@@ -56,7 +56,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
             item.UnitsInSet.Should().Be(10);
             item.SetNetPrice.Should().Be(100);
             item.SetGrossPrice.Should().Be(123);
-            item.ItemType.Should().Be(StorageItemType.Material);
+            item.ItemType.Should().Be(StorageItemType.MaterialVariant);
         });
     }
 
@@ -72,7 +72,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             Guid.NewGuid(),
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             5, 10, 100, 123, false);
 
@@ -93,7 +93,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             Guid.NewGuid(),
             5, 10, 100, 123, false);
 
@@ -123,7 +123,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         var command = new AddItemToSupplyCommand(
             supplyId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,

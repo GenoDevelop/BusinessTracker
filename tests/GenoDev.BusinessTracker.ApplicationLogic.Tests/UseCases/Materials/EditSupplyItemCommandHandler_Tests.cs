@@ -34,7 +34,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
 
         var command = new EditSupplyItemCommand(
             itemId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: 10,
             UnitsInSet: 5,
@@ -53,7 +53,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             item.UnitsInSet.Should().Be(5);
             item.SetNetPrice.Should().Be(50);
             item.SetGrossPrice.Should().Be(61.5m);
-            item.ItemType.Should().Be(StorageItemType.Material);
+            item.ItemType.Should().Be(StorageItemType.MaterialVariant);
             item.MaterialVariantId.Should().Be(variantId);
         });
     }
@@ -79,7 +79,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Old total: 5 * 10 = 50. New total: 8 * 10 = 80. Difference: +30.
         var command = new EditSupplyItemCommand(
             itemId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: 8,
             UnitsInSet: 10,
@@ -124,7 +124,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Company should decrease by 50, Private should increase by 50.
         var command = new EditSupplyItemCommand(
             itemId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: setsAmount,
             UnitsInSet: unitsInSet,
@@ -213,7 +213,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
 
         var command = new EditSupplyItemCommand(
             itemId,
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             variantId,
             SetsAmount: 10,
             UnitsInSet: 10,
@@ -278,7 +278,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         // Arrange
         var command = new EditSupplyItemCommand(
             Guid.NewGuid(),
-            StorageItemType.Material,
+            StorageItemType.MaterialVariant,
             Guid.NewGuid(),
             1, 1, 1, 1, false);
 

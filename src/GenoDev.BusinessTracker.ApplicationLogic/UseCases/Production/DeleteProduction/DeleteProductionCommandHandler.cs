@@ -1,4 +1,6 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +9,12 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.DeletePro
 public class DeleteProductionCommandHandler : IRequestHandler<DeleteProductionCommand, Unit>
 {
     private readonly IBusinessTrackerDbContext _context;
+    private readonly IItemsService _itemsService;
 
-    public DeleteProductionCommandHandler(IBusinessTrackerDbContext context)
+    public DeleteProductionCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService)
     {
         _context = context;
+        _itemsService = itemsService;
     }
 
     public async Task<Unit> Handle(DeleteProductionCommand request, CancellationToken cancellationToken)
@@ -20,31 +24,22 @@ public class DeleteProductionCommandHandler : IRequestHandler<DeleteProductionCo
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (production == null)
-        {
             throw new KeyNotFoundException($"Production with ID {request.Id} not found.");
-        }
-
-        var product = await _context.Products
-            .FirstOrDefaultAsync(p => p.Id == production.ProductId, cancellationToken);
-
-        if (product != null)
-        {
-            product.TotalAmount -= production.Amount;
-        }
 
         foreach (var materialUsage in production.ProductionMaterials)
         {
-            var materialVariant = await _context.MaterialVariants
-                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialVariantId, cancellationToken);
+            var difference = ProductionMaterial.CalculateTotalUsedAmountDifference(materialUsage.UsedAmount,
+                production.Amount, 0, 0);
 
-            if (materialVariant != null)
-            {
-                materialVariant.TotalUsedAmount -= materialUsage.UsedAmount;
-            }
+            await _itemsService.AdjustStorageAmountAsync(materialUsage.MaterialVariantId, StorageItemType.MaterialVariant,
+                difference, StorageAmountType.TotalUsed, cancellationToken);
         }
 
+        var productionDifference = Domain.Entities.Production.CalculateProductionAmountDifference(production.Amount, 0);
+        await _itemsService.AdjustProductAmountAsync(production.ProductId, productionDifference,
+            ProductAmountType.TotalAmount, cancellationToken);
+        
         _context.Productions.Remove(production);
-
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

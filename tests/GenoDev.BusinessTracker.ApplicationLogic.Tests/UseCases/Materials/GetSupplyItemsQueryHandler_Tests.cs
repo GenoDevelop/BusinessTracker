@@ -43,7 +43,7 @@ public class GetSupplyItemsQueryHandler_Tests : BusinessTrackerUnitTestsBase<Get
         result.Items.Should().HaveCount(3);
         result.TotalCount.Should().Be(3);
         
-        var mItem = result.Items.First(x => x.ItemType == StorageItemType.Material);
+        var mItem = result.Items.First(x => x.ItemType == StorageItemType.MaterialVariant);
         mItem.ItemName.Should().Be("Variant A");
         mItem.Ean.Should().Be("EAN001");
         mItem.ManufacturerCode.Should().Be("MC001");

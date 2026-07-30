@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -15,6 +17,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -27,7 +30,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Arrange_Product(id: productId, name: "Product 1", amount: 10);
+            db.Arrange_Product(id: productId, name: "Product 1", totalAmount: 10);
             var m1 = db.Arrange_Material(name: "Material 1");
             db.Arrange_MaterialVariant(m1, id: variantId1, name: "Variant 1", companyAmount: 100);
             var m2 = db.Arrange_Material(name: "Material 2");
@@ -36,8 +39,8 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
 
         var usedMaterials = new List<MaterialVariantUsageDto>
         {
-            new(null, variantId1, 20),
-            new(null, variantId2, 30)
+            new(null, variantId1, 4),
+            new(null, variantId2, 6)
         };
 
         var command = new AddProductionCommand(
@@ -67,16 +70,16 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
 
             var variant1 = db.MaterialVariants.Find(variantId1);
             variant1!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged
-            variant1.TotalUsedAmount.Should().Be(20);
+            variant1.TotalUsedAmount.Should().Be(20); // 4 * 5 = 20
 
             var variant2 = db.MaterialVariants.Find(variantId2);
             variant2!.TotalCompanyAmount.Should().Be(200); // Should remain unchanged
-            variant2.TotalUsedAmount.Should().Be(30);
+            variant2.TotalUsedAmount.Should().Be(30); // 6 * 5 = 30
         });
     }
 
     [Fact]
-    public async Task Handle_ShouldHandleDuplicateMaterialUsagesCorrectly()
+    public async Task Handle_ShouldThrowExceptionWhenDuplicateMaterialVariantsAreUsed()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -84,12 +87,12 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Arrange_Product(id: productId, name: "Product 1", amount: 10);
+            db.Arrange_Product(id: productId, name: "Product 1", totalAmount: 10);
             var m = db.Arrange_Material(name: "Material 1");
             db.Arrange_MaterialVariant(m, id: variantId, name: "Variant 1", companyAmount: 100);
         });
 
-        // Scenario: same material used twice (e.g. from different recipe steps or manual entries)
+        // Scenario: same material used twice
         var usedMaterials = new List<MaterialVariantUsageDto>
         {
             new(null, variantId, 10),
@@ -105,25 +108,10 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
-        {
-            var production = db.Productions
-                .Include(p => p.ProductionMaterials)
-                .FirstOrDefault(p => p.ProductId == productId && p.Description == "Duplicate Material Test");
-
-            production.Should().NotBeNull();
-            production!.ProductionMaterials.Should().HaveCount(2);
-            production.ProductionMaterials.Sum(pm => pm.UsedAmount).Should().Be(35);
-
-            var product = db.Products.Find(productId);
-            product!.TotalAmount.Should().Be(12); // 10 + 2
-
-            var variant = db.MaterialVariants.Find(variantId);
-            variant!.TotalCompanyAmount.Should().Be(100); // Should remain unchanged
-            variant.TotalUsedAmount.Should().Be(35);
-        });
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Duplicate material variants are not allowed in a single production.");
     }
 }

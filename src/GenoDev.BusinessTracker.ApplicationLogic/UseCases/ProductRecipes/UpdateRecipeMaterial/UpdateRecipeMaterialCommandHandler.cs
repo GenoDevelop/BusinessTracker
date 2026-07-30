@@ -17,6 +17,14 @@ public class UpdateRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
             throw new KeyNotFoundException($"Recipe material with ID {request.Id} was not found.");
         }
 
+        var alreadyExists = await dbContext.ProductRecipeMaterials
+            .AnyAsync(rm => rm.Id != request.Id && rm.ProductRecipeId == recipeMaterial.ProductRecipeId && rm.MaterialId == request.MaterialId, cancellationToken);
+
+        if (alreadyExists)
+        {
+            throw new InvalidOperationException($"Material with ID {request.MaterialId} is already added to this recipe.");
+        }
+
         recipeMaterial.MaterialId = request.MaterialId;
         recipeMaterial.Description = request.Description;
 

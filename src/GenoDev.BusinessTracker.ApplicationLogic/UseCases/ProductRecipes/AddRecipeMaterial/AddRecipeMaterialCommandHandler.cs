@@ -14,16 +14,20 @@ public class AddRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbContext
             .FirstOrDefaultAsync(r => r.Id == request.RecipeId, cancellationToken);
 
         if (recipe == null)
-        {
             throw new KeyNotFoundException($"Recipe with ID {request.RecipeId} was not found.");
-        }
 
         var material = await dbContext.Materials
             .FirstOrDefaultAsync(m => m.Id == request.MaterialId, cancellationToken);
 
         if (material == null)
-        {
             throw new KeyNotFoundException($"Material with ID {request.MaterialId} was not found.");
+
+        var alreadyExists = await dbContext.ProductRecipeMaterials
+            .AnyAsync(rm => rm.ProductRecipeId == request.RecipeId && rm.MaterialId == request.MaterialId, cancellationToken);
+
+        if (alreadyExists)
+        {
+            throw new InvalidOperationException($"Material with ID {request.MaterialId} is already added to this recipe.");
         }
 
         var recipeMaterial = new ProductRecipeMaterial

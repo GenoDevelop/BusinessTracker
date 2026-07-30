@@ -401,9 +401,7 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<Guid>("MaterialId")

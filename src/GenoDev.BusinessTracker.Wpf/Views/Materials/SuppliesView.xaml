@@ -123,7 +123,7 @@
             <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj dostawę" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding CreateSupplyViewModel}">
                     <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
-                    <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                    <controls:SearchableComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" SearchPropertyPaths="Nip" Margin="0,0,0,10" />
     
                     <TextBlock Text="Data zamówienia:" Margin="0,0,0,5" />
                     <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,10" />
@@ -163,10 +163,11 @@
             <controls:DraggablePopup IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj dostawę" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding EditSupplyViewModel}">
                     <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="Gray" />
-                    <ComboBox ItemsSource="{Binding Suppliers}"
-                              SelectedItem="{Binding SelectedSupplier}"
-                              DisplayMemberPath="Name"
-                              Margin="0,0,0,15" />
+                    <controls:SearchableComboBox ItemsSource="{Binding Suppliers}"
+                                              SelectedItem="{Binding SelectedSupplier}"
+                                              DisplayMemberPath="Name"
+                                              SearchPropertyPaths="Nip"
+                                              Margin="0,0,0,15" />
     
                     <TextBlock Text="Data zamówienia" Margin="0,0,0,5" Foreground="Gray" />
                     <DatePicker SelectedDate="{Binding OrderDate}" Margin="0,0,0,15" />
@@ -229,23 +230,28 @@
                     </ComboBox>
 
                     <!-- Conditional Panels for Item Selection -->
-                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=MaterialVariant}">
                         <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
                         
                         <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                        <controls:SearchableComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
                                   IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
                         <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
+                                  Margin="0,0,0,10" />
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
                         <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
+                                  Margin="0,0,0,10" />
                     </StackPanel>
     
                     <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
@@ -313,23 +319,28 @@
                     </ComboBox>
 
                     <!-- Conditional Panels for Item Selection -->
-                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Material}">
+                    <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=MaterialVariant}">
                         <TextBlock Text="Materiał (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
                         
                         <TextBlock Text="Wariant (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                        <controls:SearchableComboBox ItemsSource="{Binding MaterialVariants}" SelectedItem="{Binding SelectedMaterialVariant}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
                                   IsEnabled="{Binding SelectedMaterial, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,0,10" />
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Packing}">
                         <TextBlock Text="Pakunek (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedPackingMaterial}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
+                                  Margin="0,0,0,10" />
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding SelectedType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=FixedAsset}">
                         <TextBlock Text="Środek trwały (wymagane):" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" Margin="0,0,0,10" />
+                        <controls:SearchableComboBox ItemsSource="{Binding FixedAssets}" SelectedItem="{Binding SelectedFixedAsset}" DisplayMemberPath="Name" 
+                                  SearchPropertyPaths="Ean,ManufacturerCode"
+                                  Margin="0,0,0,10" />
                     </StackPanel>
     
                     <TextBlock Text="Ilość zestawów:" Margin="0,0,0,5" />
@@ -437,7 +448,7 @@
                         <TextBlock Text=" / " Foreground="Gray" FontSize="11" />
                         <TextBlock Text="{Binding SelectedSupplyDetails.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold" Foreground="SteelBlue"/>
                     </StackPanel>
-
+                    
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="Dostawa:" Foreground="Gray" FontSize="11" Width="60"/>
                         <TextBlock Text="{Binding SelectedSupplyDetails.ShippingNetPrice, StringFormat='{}{0:N2} zł'}" FontWeight="SemiBold"/>

@@ -1,5 +1,6 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +9,12 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduc
 public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand, Unit>
 {
     private readonly IBusinessTrackerDbContext _context;
+    private readonly IItemsService _itemsService;
 
-    public AddProductionCommandHandler(IBusinessTrackerDbContext context)
+    public AddProductionCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService)
     {
         _context = context;
+        _itemsService = itemsService;
     }
 
     public async Task<Unit> Handle(AddProductionCommand request, CancellationToken cancellationToken)
@@ -20,8 +23,11 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
 
         if (product == null)
-        {
             throw new KeyNotFoundException($"Product with ID {request.ProductId} not found.");
+
+        if (request.UsedMaterials.Select(x => x.MaterialVariantId).Distinct().Count() != request.UsedMaterials.Count())
+        {
+            throw new InvalidOperationException("Duplicate material variants are not allowed in a single production.");
         }
 
         var production = new Domain.Entities.Production
@@ -46,24 +52,16 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             };
 
             _context.ProductionMaterials.Add(productionMaterial);
+            var usedAmount = ProductionMaterial.CalculateTotalUsedAmount(productionMaterial.UsedAmount, production.Amount);
 
-            var materialVariant = await _context.MaterialVariants
-                .FirstOrDefaultAsync(m => m.Id == materialUsage.MaterialVariantId, cancellationToken);
-
-            if (materialVariant != null)
-            {
-                materialVariant.TotalUsedAmount += materialUsage.Amount;
-            }
-            else
-            {
-                throw new KeyNotFoundException($"MaterialVariant with ID {materialUsage.MaterialVariantId} not found.");
-            }
+            await _itemsService.AdjustStorageAmountAsync(materialUsage.MaterialVariantId, StorageItemType.MaterialVariant,
+                usedAmount, StorageAmountType.TotalUsed, cancellationToken);
         }
 
-        product.TotalAmount += request.Amount;
+        await _itemsService.AdjustProductAmountAsync(production.ProductId, production.Amount, ProductAmountType.TotalAmount,
+            cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
-
         return Unit.Value;
     }
 }

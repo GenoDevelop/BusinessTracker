@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.DeleteProduction;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -15,6 +17,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -27,28 +30,13 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
-            var material = new Material { Id = Guid.NewGuid(), Name = "Material" };
-            db.Materials.Add(material);
-            db.MaterialVariants.Add(new MaterialVariant { Id = variantId, MaterialId = material.Id, Name = "Variant", TotalCompanyAmount = 50, TotalUsedAmount = 15 });
+            db.Arrange_Product(id: productId, name: "Product", totalAmount: 100);
+            var m = db.Arrange_Material(name: "Material");
+            db.Arrange_MaterialVariant(m, id: variantId, name: "Variant", companyAmount: 50, totalUsedAmount: 15);
 
-            var production = new Domain.Entities.Production
-            {
-                Id = productionId,
-                ProductId = productId,
-                Amount = 20,
-                ProductionDate = DateTime.Now,
-                ProductionMaterials = new List<ProductionMaterial>
-                {
-                    new ProductionMaterial
-                    {
-                        Id = Guid.NewGuid(),
-                        MaterialVariantId = variantId,
-                        UsedAmount = 15
-                    }
-                }
-            };
-            db.Productions.Add(production);
+            var production = db.Arrange_Production(id: productionId, product: db.Products.Find(productId), amount: 20);
+            db.Arrange_ProductionMaterial(production: production, materialVariant: db.MaterialVariants.Find(variantId), usedAmount: 0.75);
+            // 20 * 0.75 = 15
         });
 
         // Act

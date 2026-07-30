@@ -47,6 +47,44 @@ public class NumericTextBox : TextBox
         set => SetValue(ModeProperty, value);
     }
 
+    public static readonly DependencyProperty MinValueProperty =
+        DependencyProperty.Register(
+            nameof(MinValue),
+            typeof(decimal?),
+            typeof(NumericTextBox),
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.None,
+                OnInputRulesChanged));
+
+    /// <summary>
+    /// Minimalna dozwolona wartość.
+    /// </summary>
+    public decimal? MinValue
+    {
+        get => (decimal?)GetValue(MinValueProperty);
+        set => SetValue(MinValueProperty, value);
+    }
+
+    public static readonly DependencyProperty MaxValueProperty =
+        DependencyProperty.Register(
+            nameof(MaxValue),
+            typeof(decimal?),
+            typeof(NumericTextBox),
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.None,
+                OnInputRulesChanged));
+
+    /// <summary>
+    /// Maksymalna dozwolona wartość.
+    /// </summary>
+    public decimal? MaxValue
+    {
+        get => (decimal?)GetValue(MaxValueProperty);
+        set => SetValue(MaxValueProperty, value);
+    }
+
     public static readonly DependencyProperty MaxDecimalPlacesProperty =
         DependencyProperty.Register(
             nameof(MaxDecimalPlaces),
@@ -215,6 +253,36 @@ public class NumericTextBox : TextBox
         }
 
         control.UpdateTextFromValue(newValue);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Key == Key.Enter)
+        {
+            ClampValue();
+        }
+    }
+
+    protected override void OnLostFocus(RoutedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        ClampValue();
+    }
+
+    private void ClampValue()
+    {
+        if (Value is not { } current) return;
+
+        var clamped = current;
+        if (MinValue is { } min && clamped < min) clamped = min;
+        if (MaxValue is { } max && clamped > max) clamped = max;
+
+        if (clamped != current)
+        {
+            SetCurrentValue(ValueProperty, clamped);
+            UpdateTextFromValue(clamped);
+        }
     }
 
     private void UpdateValueFromText(string? text)

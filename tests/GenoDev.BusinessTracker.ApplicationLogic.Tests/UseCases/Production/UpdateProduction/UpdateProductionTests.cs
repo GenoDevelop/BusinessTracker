@@ -1,5 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
+using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateProduction;
 using GenoDev.BusinessTracker.Domain.Entities;
@@ -16,6 +18,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
     protected override void RegisterMockedDependencies(IServiceCollection services, IFixture autoSubstitute)
     {
         RegisterBusinessTrackingPostgresDatabase(services);
+        services.AddScoped<IItemsService, ItemsService>();
     }
 
     [Fact]
@@ -29,23 +32,13 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
-            var material = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
-            db.Materials.Add(material);
-            db.MaterialVariants.Add(new MaterialVariant { Id = variant1Id, MaterialId = material.Id, Name = "Variant 1", TotalCompanyAmount = 50, TotalUsedAmount = 20 });
+            db.Arrange_Product(id: productId, name: "Product", totalAmount: 100);
+            var m = db.Arrange_Material(name: "Material 1");
+            db.Arrange_MaterialVariant(m, id: variant1Id, name: "Variant 1", companyAmount: 50, totalUsedAmount: 20);
 
-            var production = new Domain.Entities.Production
-            {
-                Id = productionId,
-                ProductId = productId,
-                Amount = 10,
-                ProductionDate = DateTime.Now.AddDays(-1),
-                ProductionMaterials = new List<ProductionMaterial>
-                {
-                    new ProductionMaterial { Id = productionMaterial1Id, MaterialVariantId = variant1Id, UsedAmount = 20 }
-                }
-            };
-            db.Productions.Add(production);
+            var production = db.Arrange_Production(id: productionId, amount: 10, product: db.Products.Find(productId));
+            db.Arrange_ProductionMaterial(id: productionMaterial1Id, production: production, materialVariant: db.MaterialVariants.Find(variant1Id), usedAmount: 2);
+            // 2 * 10 = 20 used amount in storage
         });
 
         var command = new UpdateProductionCommand(
@@ -55,7 +48,9 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             DateTime.Now,
             new List<MaterialVariantUsageDto>
             {
-                new MaterialVariantUsageDto(productionMaterial1Id, variant1Id, 10) // Used 20, now use 10 (should return 10 to stock)
+                new MaterialVariantUsageDto(productionMaterial1Id, variant1Id, 1) // Used 2 per item, now use 1 per item
+                // Old total used = 2 * 10 = 20. New total used = 1 * 15 = 15.
+                // Adjustment should be 15 - 20 = -5 (TotalUsedAmount tracks cumulative usage)
             });
 
         // Act
@@ -74,12 +69,12 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
 
             var variant1 = db.MaterialVariants.First(x => x.Id == variant1Id);
             variant1.TotalCompanyAmount.Should().Be(50); // Should remain unchanged
-            variant1.TotalUsedAmount.Should().Be(10); // 20 - 20 (old) + 10 (new) = 10
+            variant1.TotalUsedAmount.Should().Be(15); // 20 - 20 (old) + 15 (new) = 15
         });
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowException_WhenAddingNewMaterial()
+    public async Task Handle_ShouldSupportAddingAndRemovingMaterials()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -90,25 +85,14 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
 
         Arrange_BusinessTrackerDatabase(db =>
         {
-            db.Products.Add(new Product { Id = productId, Name = "Product", Identifier = "P1", TotalAmount = 100 });
-            var m1 = new Material { Id = Guid.NewGuid(), Name = "Material 1" };
-            var m2 = new Material { Id = Guid.NewGuid(), Name = "Material 2" };
-            db.Materials.AddRange(m1, m2);
-            db.MaterialVariants.Add(new MaterialVariant { Id = variant1Id, MaterialId = m1.Id, Name = "Variant 1", TotalCompanyAmount = 50 });
-            db.MaterialVariants.Add(new MaterialVariant { Id = variant2Id, MaterialId = m2.Id, Name = "Variant 2", TotalCompanyAmount = 50 });
+            db.Arrange_Product(id: productId, name: "Product", totalAmount: 100);
+            var m1 = db.Arrange_Material(name: "Material 1");
+            var m2 = db.Arrange_Material(name: "Material 2");
+            db.Arrange_MaterialVariant(m1, id: variant1Id, name: "Variant 1", companyAmount: 50, totalUsedAmount: 20);
+            db.Arrange_MaterialVariant(m2, id: variant2Id, name: "Variant 2", companyAmount: 50, totalUsedAmount: 0);
 
-            var production = new Domain.Entities.Production
-            {
-                Id = productionId,
-                ProductId = productId,
-                Amount = 10,
-                ProductionDate = DateTime.Now.AddDays(-1),
-                ProductionMaterials = new List<ProductionMaterial>
-                {
-                    new ProductionMaterial { Id = productionMaterial1Id, MaterialVariantId = variant1Id, UsedAmount = 20 }
-                }
-            };
-            db.Productions.Add(production);
+            var production = db.Arrange_Production(id: productionId, amount: 10, product: db.Products.Find(productId));
+            db.Arrange_ProductionMaterial(id: productionMaterial1Id, production: production, materialVariant: db.MaterialVariants.Find(variant1Id), usedAmount: 2);
         });
 
         var command = new UpdateProductionCommand(
@@ -118,13 +102,63 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             DateTime.Now,
             new List<MaterialVariantUsageDto>
             {
-                new MaterialVariantUsageDto(productionMaterial1Id, variant1Id, 10),
-                new MaterialVariantUsageDto(null, variant2Id, 5) // New material
+                // Removed productionMaterial1Id
+                new MaterialVariantUsageDto(null, variant2Id, 5) // New material, 5 per item
+                // variant1: 20 (old total) -> removed -> should be 0
+                // variant2: 0 (old total) -> added -> 5 * 15 = 75
             });
 
-        // Act & Assert
+        // Act
+        await Sut.Handle(command, default);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var production = db.Productions.Include(p => p.ProductionMaterials).First(x => x.Id == productionId);
+            production.Amount.Should().Be(15);
+            production.ProductionMaterials.Should().HaveCount(1);
+            production.ProductionMaterials.First().MaterialVariantId.Should().Be(variant2Id);
+            production.ProductionMaterials.First().UsedAmount.Should().Be(5);
+
+            var variant1 = db.MaterialVariants.First(x => x.Id == variant1Id);
+            variant1.TotalUsedAmount.Should().Be(0); // 20 - 20 (removed) = 0
+
+            var variant2 = db.MaterialVariants.First(x => x.Id == variant2Id);
+            variant2.TotalUsedAmount.Should().Be(75); // 0 + 5 * 15 = 75
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldThrowExceptionWhenDuplicateMaterialVariantsAreUsed()
+    {
+        // Arrange
+        var productionId = Guid.NewGuid();
+        var variantId = Guid.NewGuid();
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var p = db.Arrange_Product(name: "Product");
+            db.Arrange_Production(id: productionId, product: p);
+            var m = db.Arrange_Material();
+            db.Arrange_MaterialVariant(m, id: variantId);
+        });
+
+        var command = new UpdateProductionCommand(
+            productionId,
+            1,
+            "Duplicate Test",
+            DateTime.Now,
+            new List<MaterialVariantUsageDto>
+            {
+                new(null, variantId, 1),
+                new(null, variantId, 2)
+            });
+
+        // Act
         var act = () => Sut.Handle(command, default);
+
+        // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("New materials cannot be added to production history.");
+            .WithMessage("Duplicate material variants are not allowed in a single production.");
     }
 }

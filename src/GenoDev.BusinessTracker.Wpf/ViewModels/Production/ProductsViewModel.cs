@@ -42,6 +42,7 @@ public partial class ProductsViewModel : ViewModelBase
         DeleteProductCommand = new RelayCommand<ProductDto>(OpenDeletePopup);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
+        LoadProductsCommand = new RelayCommand(() => RequestPaginationRefresh(ProductsPaginationTarget.Products));
     }
     
     private void OpenCreatePopup()
@@ -123,6 +124,7 @@ public partial class ProductsViewModel : ViewModelBase
     public IRelayCommand CreateProductCommand { get; }
     public IRelayCommand<ProductDto> EditProductCommand { get; }
     public IRelayCommand<ProductDto> DeleteProductCommand { get; }
+    public IRelayCommand LoadProductsCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }
     

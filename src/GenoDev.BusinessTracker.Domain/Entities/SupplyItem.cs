@@ -20,4 +20,11 @@ public class SupplyItem
     public virtual MaterialVariant? MaterialVariant { get; set; }
     public virtual PackingMaterial? PackingMaterial { get; set; }
     public virtual FixedAsset? FixedAsset { get; set; }
+    
+    public double GetTotalAmount() => CalculateTotalAmount(SetsAmount, UnitsInSet);
+    
+    public static double CalculateTotalAmount(int setsAmount, double unitsInSet)
+    {
+        return setsAmount * unitsInSet;
+    }
 }

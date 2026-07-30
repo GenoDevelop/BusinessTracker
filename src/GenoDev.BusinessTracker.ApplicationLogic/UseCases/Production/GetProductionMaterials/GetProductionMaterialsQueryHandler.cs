@@ -24,6 +24,7 @@ public class GetProductionMaterialsQueryHandler : IRequestHandler<GetProductionM
                 x.MaterialVariantId,
                 x.MaterialVariant.Name,
                 x.UsedAmount,
+                x.UsedAmount * x.Production.Amount,
                 x.MaterialVariant.Unit))
             .ToListAsync(cancellationToken);
     }

@@ -23,8 +23,8 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
             await itemsService.AdjustStorageAmountAsync(
                 request.ItemId,
                 request.ItemType,
-                request.SetsAmount * request.UnitsInSet,
-                request.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                SupplyItem.CalculateTotalAmount(request.SetsAmount, request.UnitsInSet),
+                request.PrivateSupply ? StorageAmountType.TotalPrivate : StorageAmountType.TotalCompany,
                 cancellationToken);
         }
 
@@ -41,7 +41,7 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
 
         switch (request.ItemType)
         {
-            case StorageItemType.Material:
+            case StorageItemType.MaterialVariant:
                 item.MaterialVariantId = request.ItemId;
                 break;
             case StorageItemType.Packing:
@@ -59,10 +59,10 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
 
     private async Task RevertOldAmount(SupplyItem item, CancellationToken cancellationToken)
     {
-        var amountToSubtract = item.SetsAmount * item.UnitsInSet;
+        var amountToSubtract = -item.GetTotalAmount();
         var itemId = item.ItemType switch
         {
-            StorageItemType.Material => item.MaterialVariantId,
+            StorageItemType.MaterialVariant => item.MaterialVariantId,
             StorageItemType.Packing => item.PackingMaterialId,
             StorageItemType.FixedAsset => item.FixedAssetId,
             _ => null
@@ -73,8 +73,8 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
             await itemsService.AdjustStorageAmountAsync(
                 itemId.Value,
                 item.ItemType,
-                -amountToSubtract,
-                item.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                amountToSubtract,
+                item.PrivateSupply ? StorageAmountType.TotalPrivate : StorageAmountType.TotalCompany,
                 cancellationToken);
         }
     }

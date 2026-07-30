@@ -13,7 +13,7 @@ public class SupplyItemTypeToTextConverter : IValueConverter
         {
             return type switch
             {
-                StorageItemType.Material => "Materiał",
+                StorageItemType.MaterialVariant => "Materiał",
                 StorageItemType.Packing => "Pakunek",
                 StorageItemType.FixedAsset => "Śr. trwały",
                 _ => value.ToString() ?? string.Empty

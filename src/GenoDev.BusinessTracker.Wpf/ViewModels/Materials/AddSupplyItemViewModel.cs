@@ -17,7 +17,7 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSupplyId) : ViewModelBase
 {
     [ObservableProperty]
-    private StorageItemType _selectedType = StorageItemType.Material;
+    private StorageItemType _selectedType = StorageItemType.MaterialVariant;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -116,7 +116,7 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
         {
             Guid? itemId = SelectedType switch
             {
-                StorageItemType.Material => SelectedMaterialVariant?.Id,
+                StorageItemType.MaterialVariant => SelectedMaterialVariant?.Id,
                 StorageItemType.Packing => SelectedPackingMaterial?.Id,
                 StorageItemType.FixedAsset => SelectedFixedAsset?.Id,
                 _ => null
@@ -147,7 +147,7 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     {
         return SelectedType switch
         {
-            StorageItemType.Material => SelectedMaterialVariant != null,
+            StorageItemType.MaterialVariant => SelectedMaterialVariant != null,
             StorageItemType.Packing => SelectedPackingMaterial != null,
             StorageItemType.FixedAsset => SelectedFixedAsset != null,
             _ => false

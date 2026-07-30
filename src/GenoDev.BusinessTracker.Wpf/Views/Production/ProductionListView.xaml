@@ -9,13 +9,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:ProductionListViewModel}">
-    <Grid>
+    <Grid x:Name="LayoutGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200" MinWidth="0"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*" MinWidth="0"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Margin="10, 10, 3, 10">
+        <Grid Grid.Column="0" Margin="10, 10, 0, 10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -132,8 +133,25 @@
                                         Margin="0,5,0,0"
                                         FontSize="11" />
         </Grid>
+
+        <GridSplitter Grid.Column="1"
+                      Width="8"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Background="Transparent"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext">
+            <GridSplitter.Template>
+                <ControlTemplate TargetType="GridSplitter">
+                    <Grid Background="Transparent">
+                        <Rectangle Width="1" Fill="#DDD" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
+                    </Grid>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+
         <!-- Right Panel -->
-        <Grid Grid.Column="1" Background="#F9F9F9">
+        <Grid Grid.Column="2" Background="#F9F9F9">
             <!-- Empty state -->
             <TextBlock Text="Wybierz produkt z listy, aby zobaczyć szczegóły" 
                        HorizontalAlignment="Center" 
@@ -153,7 +171,7 @@
                 <!-- Upper space: Basic Information -->
                 <Grid Grid.Row="0" Margin="10">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" MinHeight="0"/>
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
@@ -218,7 +236,7 @@
                         </StackPanel>
 
                         <!-- Description -->
-                        <Grid Grid.Column="1" Height="100" VerticalAlignment="Top">
+                        <Grid Grid.Column="1" MinHeight="100" VerticalAlignment="Stretch">
                             <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <TextBlock TextWrapping="Wrap">
@@ -239,8 +257,15 @@
                     </Grid>
                 </Grid>
 
-                <!-- Separator Line -->
-                <Separator Grid.Row="1" Background="#DDD" Margin="15,0" Height="1" />
+                <GridSplitter Grid.Row="1" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="GridSplitter">
+                            <Grid Background="Transparent">
+                                <Rectangle Height="1" Fill="#DDD" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            </Grid>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
 
                 <!-- Bottom Section: History and Materials -->
                 <Grid Grid.Row="2" Margin="10">
@@ -261,20 +286,11 @@
                                                          Width="16" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Text="{Binding RecipeSearchTerm,
-                                                UpdateSourceTrigger=PropertyChanged,
-                                                Delay=500,
-                                                NotifyOnSourceUpdated=True}"
-                                     SourceUpdated="RecipeSearchTerm_SourceUpdated"
-                                     Width="120"
-                                     Margin="0,0,5,0"
-                                     VerticalContentAlignment="Center"
-                                     ToolTip="Szukaj receptury" />
-                            <ComboBox ItemsSource="{Binding ProductRecipes}" 
-                                      SelectedItem="{Binding SelectedRecipe}" 
-                                      DisplayMemberPath="Name"
-                                      Width="170" Margin="0,0,5,0" 
-                                      VerticalAlignment="Center" />
+                            <controls:SearchableComboBox ItemsSource="{Binding ProductRecipes}" 
+                                                        SelectedItem="{Binding SelectedRecipe}" 
+                                                        DisplayMemberPath="Name"
+                                                        Width="200" Margin="0,0,5,0" 
+                                                        VerticalAlignment="Center" />
                             <controls:CreateButton Command="{Binding AddProductionCommand}" ToolTip="Dodaj produkcję"
                                                    Width="18"
                                                    Height="18"/>
@@ -303,12 +319,13 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="2*" MinWidth="0" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" MinWidth="0" />
                             </Grid.ColumnDefinitions>
 
                             <!-- Production History Content -->
-                            <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+                            <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,0,0">
                                 <DataGrid ItemsSource="{Binding ProductionHistory}"
                                           SelectedItem="{Binding SelectedProduction}"
                                           AutoGenerateColumns="False"
@@ -398,10 +415,28 @@
                                                         InitialPageSize="20"
                                                         HorizontalAlignment="Right"
                                                         PaginationHorizontalAlignment="Right"
-                                                        Margin="0,5,10,0" />
+                                                        Margin="0,5,0,0" />
+
+                            <GridSplitter Grid.Column="1"
+                                          Grid.Row="0"
+                                          Grid.RowSpan="2"
+                                          Width="8"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          Background="Transparent"
+                                          ResizeDirection="Columns"
+                                          ResizeBehavior="PreviousAndNext">
+                                <GridSplitter.Template>
+                                    <ControlTemplate TargetType="GridSplitter">
+                                        <Grid Background="Transparent">
+                                            <Rectangle Width="1" Fill="#DDD" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </GridSplitter.Template>
+                            </GridSplitter>
 
                             <!-- Materials List Content -->
-                            <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
+                            <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
@@ -421,9 +456,20 @@
                                 </TextBlock>
 
                                 <ListView Grid.Row="1" ItemsSource="{Binding SelectedMaterials}" BorderThickness="1" BorderBrush="#DDD">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="MinHeight" Value="20" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowRecipeDetails}" Value="False">
+                                                    <Setter Property="MinHeight" Value="35" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Margin="0,2">
+                                            <Grid Margin="4,2">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
@@ -431,14 +477,29 @@
                                                  
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding MaterialName}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                                    <TextBlock Text="{Binding MaterialVariantName}" FontSize="10" Foreground="Gray" Visibility="{Binding MaterialVariantName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                    <TextBlock Text="{Binding MaterialVariantName}" FontSize="10" Foreground="Gray">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowRecipeDetails}" Value="False" />
+                                                                            <Condition Binding="{Binding MaterialVariantName, Converter={StaticResource NullToVisibilityConverter}}" Value="Visible" />
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </MultiDataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
                                                 </StackPanel>
                                                  
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
                                                     <TextBlock FontWeight="Bold" Foreground="DodgerBlue">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="{Binding UsedAmount}" />
+                                                                <Setter Property="Text" Value="{Binding TotalUsedAmount}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowRecipeDetails}" Value="True">
                                                                         <Setter Property="Text" Value="{Binding RequiredAmount}" />
@@ -478,8 +539,12 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
-                                <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10">
+                            <Grid Grid.Row="0" Margin="0,0,0,10" VerticalAlignment="Stretch">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" FontSize="14" FontWeight="Bold" Margin="0,0,0,10">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="Dodaj nową produkcję" />
@@ -491,77 +556,120 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel Margin="0,0,20,0">
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
                                         <TextBlock Text="Ilość produkcji" FontWeight="Bold" Margin="0,0,0,2" />
-                                        <TextBox Text="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                                        <controls:NumericTextBox Value="{Binding ProductionAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" Width="100" />
                                     </StackPanel>
-                                    <StackPanel Margin="0,0,20,0">
+                                    <StackPanel Grid.Column="1" Margin="0,0,20,0">
                                         <TextBlock Text="Data produkcji" FontWeight="Bold" Margin="0,0,0,2" />
                                         <StackPanel Orientation="Horizontal">
                                             <DatePicker SelectedDate="{Binding ProductionDate, UpdateSourceTrigger=PropertyChanged}" Width="120" />
                                             <TextBox Text="{Binding ProductionDate, StringFormat='HH:mm', UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="5,0,0,0" VerticalContentAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <StackPanel>
-                                        <TextBlock Text="Opis" FontWeight="Bold" Margin="0,0,0,2" />
-                                        <TextBox Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" Width="300" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
+                                    <Grid Grid.Column="2" VerticalAlignment="Stretch">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="Opis" FontWeight="Bold" Margin="0,0,0,2" />
+                                        <TextBox Grid.Row="1" Text="{Binding ProductionDescription, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" VerticalScrollBarVisibility="Auto" />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding MaterialInputs}">
+                                <ItemsControl ItemsSource="{Binding MaterialInputsWithAdd}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <WrapPanel Orientation="Horizontal" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
+                                    <ItemsControl.Resources>
                                         <DataTemplate DataType="{x:Type vm:DynamicMaterialInput}">
                                             <Border BorderBrush="#DDD" BorderThickness="1" Margin="0,0,10,10" Padding="8" Width="220" CornerRadius="4">
-                                                <StackPanel>
-                                                    <TextBlock FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,5">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="Black" />
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding HasEnough}" Value="False">
-                                                                        <Setter Property="Foreground" Value="Red" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                        <Run Text="{Binding MaterialName, Mode=OneWay}" />
-                                                        <LineBreak />
-                                                        <Run Text="(" FontSize="10" /><Run Text="{Binding TotalRequiredAmount, Mode=OneWay}" FontSize="10" />
-                                                        <Run Text=" " FontSize="10" /><Run Text="{Binding Unit, Mode=OneWay}" FontSize="10" /><Run Text=")" FontSize="10" />
-                                                    </TextBlock>
+                                                <Grid>
+                                                    <Button Command="{Binding RemoveCommand}"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Top"
+                                                            Width="18" Height="18"
+                                                            FontSize="10"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            Foreground="Gray"
+                                                            Margin="0,-5,-5,0"
+                                                            ToolTip="Usuń materiał z tej produkcji">
+                                                        <TextBlock Text="✕" />
+                                                    </Button>
                                                     
-                                                    <TextBlock Text="Wariant:" FontSize="10" Foreground="Gray" Margin="0,0,0,2"/>
-                                                    <ComboBox ItemsSource="{Binding Variants}" 
-                                                              SelectedItem="{Binding SelectedVariant}"
-                                                              DisplayMemberPath="Name"
-                                                              Margin="0,0,0,5"/>
-
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBox Grid.Column="0" Text="{Binding UsedAmount, UpdateSourceTrigger=PropertyChanged}" />
-                                                        <Button Grid.Column="1"
-                                                                Content="⟳"
-                                                                Command="{Binding ReloadDefaultCommand}"
-                                                                IsEnabled="{Binding IsModified}"
-                                                                Margin="5,0,0,0"
-                                                                Width="25"
-                                                                ToolTip="Przywróć domyślną wartość" />
-                                                    </Grid>
-                                                </StackPanel>
+                                                    <StackPanel>
+                                                        <TextBlock FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,18,5">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasEnough}" Value="False">
+                                                                            <Setter Property="Foreground" Value="Red" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                            <Run Text="{Binding MaterialName, Mode=OneWay}" />
+                                                            <LineBreak />
+                                                            <Run Text="(" FontSize="10" /><Run Text="{Binding TotalRequiredAmount, Mode=OneWay}" FontSize="10" />
+                                                            <Run Text=" / " FontSize="10" /><Run Text="{Binding AvailableAmount, Mode=OneWay}" FontSize="10" />
+                                                            <Run Text=" " FontSize="10" /><Run Text="{Binding Unit, Mode=OneWay}" FontSize="10" /><Run Text=")" FontSize="10" />
+                                                        </TextBlock>
+                                                        
+                                                        <TextBlock Text="Wariant:" FontSize="10" Foreground="Gray" Margin="0,0,0,2"/>
+                                                        <controls:SearchableComboBox ItemsSource="{Binding Variants}" 
+                                                                  SelectedItem="{Binding SelectedVariant}"
+                                                                  DisplayMemberPath="Name"
+                                                                  SearchPropertyPaths="Ean,ManufacturerCode"
+                                                                  Margin="0,0,0,5"/>
+    
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <controls:NumericTextBox Grid.Column="0" Value="{Binding UsedAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                                                            <Button Grid.Column="1"
+                                                                    Command="{Binding ReloadDefaultCommand}"
+                                                                    IsEnabled="{Binding IsModified}"
+                                                                    Margin="5,0,0,0"
+                                                                    Width="25"
+                                                                    ToolTip="Przywróć domyślną wartość">
+                                                                <TextBlock Text="⟳" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
+                                        
+                                        <DataTemplate DataType="{x:Type vm:AddMaterialButtonViewModel}">
+                                            <Button Command="{Binding Parent.OpenAddMaterialPopupCommand}"
+                                                    Margin="0,0,10,10" 
+                                                    Width="220" 
+                                                    Height="120"
+                                                    Background="Transparent"
+                                                    BorderBrush="#DDD"
+                                                    BorderThickness="1"
+                                                    Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <TextBlock Text="+" FontSize="40" Foreground="#DDD" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Dodaj materiał" Foreground="Gray"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.Resources>
                                 </ItemsControl>
                             </ScrollViewer>
 
@@ -606,5 +714,31 @@
                 </StackPanel>
             </Border>
         </Popup>
+
+        <!-- Add Material Popup -->
+        <controls:DraggablePopup IsOpen="{Binding IsAddingNewMaterial}" Title="Dodaj nowy materiał" StaysOpen="True">
+            <StackPanel Width="350">
+                <TextBlock Text="Materiał:" Margin="0,0,0,2" />
+                <controls:SearchableComboBox ItemsSource="{Binding AllMaterials}" 
+                          SelectedItem="{Binding SelectedMaterialToAdd}" 
+                          DisplayMemberPath="Name" 
+                          Margin="0,0,0,10" />
+
+                <TextBlock Text="Wariant:" Margin="0,0,0,2" />
+                <controls:SearchableComboBox ItemsSource="{Binding NewMaterialVariants}" 
+                          SelectedItem="{Binding SelectedVariantToAdd}" 
+                          DisplayMemberPath="Name" 
+                          SearchPropertyPaths="Ean,ManufacturerCode"
+                          Margin="0,0,0,10" />
+
+                <TextBlock Text="Ilość (na jedną sztukę produkcji):" Margin="0,0,0,2" />
+                <controls:NumericTextBox Value="{Binding NewMaterialAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" Margin="0,0,0,15" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelAddNewMaterialCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Dodaj" Command="{Binding ConfirmAddMaterialCommand}" Padding="15,5" Background="LightBlue" />
+                </StackPanel>
+            </StackPanel>
+        </controls:DraggablePopup>
     </Grid>
 </UserControl>

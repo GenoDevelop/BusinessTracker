@@ -29,7 +29,7 @@ public class UpdateProduct_Tests : BusinessTrackerUnitTestsBase<UpdateProductCom
                 name: "Original Name",
                 identifier: "ORIG-ID",
                 description: "Original Description",
-                amount: 10);
+                totalAmount: 10);
         });
 
         var command = new UpdateProductCommand(

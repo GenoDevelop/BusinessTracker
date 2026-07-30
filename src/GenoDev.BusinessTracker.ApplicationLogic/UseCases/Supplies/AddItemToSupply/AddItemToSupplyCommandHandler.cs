@@ -28,11 +28,9 @@ public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, II
             PrivateSupply = request.PrivateSupply
         };
 
-        var amountToAdd = request.SetsAmount * request.UnitsInSet;
-
         switch (request.ItemType)
         {
-            case StorageItemType.Material:
+            case StorageItemType.MaterialVariant:
                 item.MaterialVariantId = request.ItemId;
                 break;
 
@@ -53,8 +51,8 @@ public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, II
             await itemsService.AdjustStorageAmountAsync(
                 request.ItemId,
                 request.ItemType,
-                amountToAdd,
-                request.PrivateSupply ? StorageAmountType.Private : StorageAmountType.Company,
+                item.GetTotalAmount(),
+                request.PrivateSupply ? StorageAmountType.TotalPrivate : StorageAmountType.TotalCompany,
                 cancellationToken);
         }
 

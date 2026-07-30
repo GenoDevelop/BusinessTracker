@@ -73,4 +73,27 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*Material with ID*");
     }
+
+    [Fact]
+    public async Task Handle_ShouldThrowException_WhenMaterialAlreadyExistsInRecipe()
+    {
+        // Arrange
+        var recipeId = Guid.NewGuid();
+        var materialId = Guid.NewGuid();
+
+        Arrange_BusinessTrackerDatabase(db =>
+        {
+            var recipe = db.Arrange_ProductRecipe(id: recipeId);
+            var material = db.Arrange_Material(id: materialId);
+            db.Arrange_ProductRecipeMaterial(productRecipe: recipe, material: material);
+        });
+
+        var command = new AddRecipeMaterialCommand(recipeId, materialId, "Duplicate");
+
+        // Act
+        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already added to this recipe*");
+    }
 }

@@ -92,15 +92,6 @@ public partial class ProductionListView : UserControl
         await ProductionsPagination.RefreshAsync();
     }
 
-    private async void RecipeSearchTerm_SourceUpdated(
-        object sender,
-        DataTransferEventArgs e)
-    {
-        if (DataContext is ProductionListViewModel viewModel)
-        {
-            await viewModel.RefreshProductRecipesAsync();
-        }
-    }
 
     private async void ProductsList_SelectionChanged(
         object sender,

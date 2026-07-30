@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.Wpf.Filtering;
+using GenoDev.BusinessTracker.ApplicationLogic;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetAll;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetVariants;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
@@ -10,9 +11,12 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProduction
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetProductionSummary;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipeMaterials;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetRecipes;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetMaterialsForProduction;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.GetMaterialVariantsForProduction;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.UpdateProduction;
 using MediatR;
 using System.Collections.ObjectModel;
+using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.Wpf.Controls;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
@@ -46,6 +50,19 @@ public partial class ProductionListViewModel : ViewModelBase
         CancelAddProductionCommand = new RelayCommand(CancelAddProduction);
         ConfirmDeleteProductionCommand = new AsyncRelayCommand(ConfirmDeleteProductionAsync);
         CancelDeleteProductionCommand = new RelayCommand(CancelDeleteProduction);
+
+        MaterialInputs.CollectionChanged += (s, e) => RefreshMaterialInputsWithAdd();
+        RefreshMaterialInputsWithAdd();
+    }
+
+    private void RefreshMaterialInputsWithAdd()
+    {
+        MaterialInputsWithAdd.Clear();
+        foreach (var input in MaterialInputs)
+        {
+            MaterialInputsWithAdd.Add(input);
+        }
+        MaterialInputsWithAdd.Add(new AddMaterialButtonViewModel(this));
     }
 
     public ObservableCollection<ProductionSummaryDto> Products { get; } = new();
@@ -53,6 +70,7 @@ public partial class ProductionListViewModel : ViewModelBase
     public ObservableCollection<ProductionHistoryDto> ProductionHistory { get; } = new();
     public ObservableCollection<object> SelectedMaterials { get; } = new();
     public ObservableCollection<DynamicMaterialInput> MaterialInputs { get; } = new();
+    public ObservableCollection<object> MaterialInputsWithAdd { get; } = new();
 
     /// <summary>
     /// Loadery przekazywane bezpośrednio do kontrolek paginacji.
@@ -75,9 +93,6 @@ public partial class ProductionListViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isHistoryFilterVisible;
-
-    [ObservableProperty]
-    private string? _recipeSearchTerm;
 
     [ObservableProperty]
     private ProductionSummaryDto? _selectedProduct;
@@ -119,6 +134,100 @@ public partial class ProductionListViewModel : ViewModelBase
     public IRelayCommand CancelAddProductionCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteProductionCommand { get; }
     public IRelayCommand CancelDeleteProductionCommand { get; }
+
+    public ObservableCollection<MaterialDto> AllMaterials { get; } = new();
+    public ObservableCollection<MaterialVariantDto> NewMaterialVariants { get; } = new();
+
+    [ObservableProperty]
+    private bool _isAddingNewMaterial;
+
+    [ObservableProperty]
+    private MaterialDto? _selectedMaterialToAdd;
+
+    [ObservableProperty]
+    private MaterialVariantDto? _selectedVariantToAdd;
+
+    [ObservableProperty]
+    private double _newMaterialAmount = 1.0;
+
+    [RelayCommand]
+    private async Task OpenAddMaterialPopupAsync()
+    {
+        IsAddingNewMaterial = true;
+        SelectedMaterialToAdd = null;
+        SelectedVariantToAdd = null;
+        NewMaterialAmount = 1.0;
+
+        var usedVariantIds = MaterialInputs
+            .Select(m => m.SelectedVariant?.Id)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .ToList();
+
+        var materials = await _mediator.Send(new GetMaterialsForProductionQuery(usedVariantIds));
+
+        ReplaceItems(AllMaterials, materials);
+    }
+
+    [RelayCommand]
+    private void CancelAddNewMaterial()
+    {
+        IsAddingNewMaterial = false;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmAddMaterialAsync()
+    {
+        if (SelectedMaterialToAdd == null || SelectedVariantToAdd == null) return;
+
+        // Check if this variant is already used in ANY input
+        if (MaterialInputs.Any(m => m.SelectedVariant?.Id == SelectedVariantToAdd.Id))
+        {
+            IsAddingNewMaterial = false;
+            return;
+        }
+
+        var input = new DynamicMaterialInput(this, _mediator)
+        {
+            MaterialId = SelectedMaterialToAdd.Id,
+            MaterialName = SelectedMaterialToAdd.Name,
+            UsedAmount = NewMaterialAmount,
+            DefaultUsedAmount = 0,
+            Unit = SelectedVariantToAdd.Unit
+        };
+
+        // Fetch all variants for this material so the user can change it later if they want
+        var variantsResult = await _mediator.Send(new GetMaterialVariantsQuery(SelectedMaterialToAdd.Id, 0, 1000));
+        input.Variants.Clear();
+        foreach (var v in variantsResult.Items) input.Variants.Add(v);
+        input.SelectedVariant = input.Variants.FirstOrDefault(v => v.Id == SelectedVariantToAdd.Id);
+
+        MaterialInputs.Add(input);
+        input.UpdateRequiredAmount();
+        IsAddingNewMaterial = false;
+    }
+
+    async partial void OnSelectedMaterialToAddChanged(MaterialDto? value)
+    {
+        NewMaterialVariants.Clear();
+        SelectedVariantToAdd = null;
+        if (value == null) return;
+
+        var usedVariantIds = MaterialInputs
+            .Select(m => m.SelectedVariant?.Id)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .ToList();
+
+        var variants = await _mediator.Send(new GetMaterialVariantsForProductionQuery(value.Id, usedVariantIds));
+        
+        foreach (var v in variants)
+        {
+            NewMaterialVariants.Add(v);
+        }
+        
+        SelectedVariantToAdd = NewMaterialVariants.FirstOrDefault();
+    }
 
     public void SetHistoryFilter(ProductionHistoryFilterCriteria filter)
     {
@@ -254,7 +363,7 @@ public partial class ProductionListViewModel : ViewModelBase
         }
 
         var result = await _mediator.Send(
-            new GetRecipesQuery(0, 100, RecipeSearchTerm, product.Id));
+            new GetRecipesQuery(0, 1000, null, product.Id));
 
         if (SelectedProduct?.Id != product.Id)
         {
@@ -360,7 +469,6 @@ public partial class ProductionListViewModel : ViewModelBase
         {
             var productionMaterials = await _mediator.Send(
                 new GetProductionMaterialsQuery(production.Id));
-            var producedAmount = Math.Max(1, production.ProductionAmount);
 
             MaterialInputs.Clear();
             foreach (var item in productionMaterials)
@@ -368,8 +476,6 @@ public partial class ProductionListViewModel : ViewModelBase
                 // Fetch variants for this material
                 var variantsResult = await _mediator.Send(new GetMaterialVariantsQuery(item.MaterialId, 0, 1000));
                 
-                var usedAmountPerUnit = item.UsedAmount / producedAmount;
-
                 var input = new DynamicMaterialInput(this, _mediator)
                 {
                     ProductionMaterialId = item.Id,
@@ -377,8 +483,8 @@ public partial class ProductionListViewModel : ViewModelBase
                     MaterialId = item.MaterialId,
                     MaterialName = item.MaterialName,
                     RecipeAmount = 0,
-                    UsedAmount = usedAmountPerUnit,
-                    DefaultUsedAmount = usedAmountPerUnit,
+                    UsedAmount = item.UsedAmount,
+                    DefaultUsedAmount = item.UsedAmount,
                     Unit = item.Unit
                 };
                 
@@ -453,10 +559,21 @@ public partial class ProductionListViewModel : ViewModelBase
 
     private bool CanSaveProduction()
     {
-        return !IsBusy &&
-               (IsAddingProduction || IsEditingProduction) &&
-               SelectedProduct is not null &&
-               ProductionAmount > 0;
+        if (IsBusy) return false;
+        if (!IsAddingProduction && !IsEditingProduction) return false;
+        if (SelectedProduct is null) return false;
+        if (ProductionAmount <= 0) return false;
+
+        var selectedVariantIds = MaterialInputs
+            .Select(m => m.SelectedVariant?.Id)
+            .Where(id => id.HasValue)
+            .ToList();
+
+        // Must have at least one variant and no duplicates
+        if (selectedVariantIds.Count == 0) return false;
+        if (selectedVariantIds.Distinct().Count() != selectedVariantIds.Count) return false;
+
+        return true;
     }
 
     private async Task SaveProductionAsync()
@@ -487,7 +604,7 @@ public partial class ProductionListViewModel : ViewModelBase
                         .Select(input => new MaterialVariantUsageDto(
                             input.ProductionMaterialId,
                             input.SelectedVariant!.Id,
-                            input.TotalRequiredAmount))));
+                            input.UsedAmount))));
             }
             else
             {
@@ -501,7 +618,7 @@ public partial class ProductionListViewModel : ViewModelBase
                         .Select(input => new MaterialVariantUsageDto(
                             null,
                             input.SelectedVariant!.Id,
-                            input.TotalRequiredAmount))));
+                            input.UsedAmount))));
             }
 
             CancelAddProduction();
@@ -622,7 +739,9 @@ public partial class DynamicMaterialInput : ObservableObject
     public Guid MaterialId { get; init; }
     public string MaterialName { get; init; } = null!;
     public double RecipeAmount { get; init; }
-    public string? Unit { get; init; }
+
+    [ObservableProperty]
+    private string? _unit;
 
     public ObservableCollection<MaterialVariantDto> Variants { get; } = new();
 
@@ -641,6 +760,9 @@ public partial class DynamicMaterialInput : ObservableObject
     private double _totalRequiredAmount;
 
     [ObservableProperty]
+    private double _availableAmount;
+
+    [ObservableProperty]
     private bool _hasEnough;
 
     public bool IsModified => Math.Abs(UsedAmount - DefaultUsedAmount) > 0.0001;
@@ -651,14 +773,30 @@ public partial class DynamicMaterialInput : ObservableObject
         UsedAmount = DefaultUsedAmount;
     }
 
+    [RelayCommand]
+    private void Remove()
+    {
+        _parent.MaterialInputs.Remove(this);
+    }
+
     public void UpdateRequiredAmount()
     {
-        TotalRequiredAmount = UsedAmount * _parent.ProductionAmount;
-        var stock = (SelectedVariant?.TotalCompanyAmount ?? 0) + (SelectedVariant?.TotalPrivateAmount ?? 0) - (SelectedVariant?.TotalUsedAmount ?? 0);
-        HasEnough = stock >= TotalRequiredAmount;
+        TotalRequiredAmount = ProductionMaterial.CalculateTotalUsedAmount(UsedAmount, _parent.ProductionAmount);
+        AvailableAmount = SelectedVariant != null 
+            ? MaterialVariant.CalculateTotalAvailableAmount(SelectedVariant.TotalCompanyAmount, SelectedVariant.TotalPrivateAmount, SelectedVariant.TotalUsedAmount)
+            : 0;
+        HasEnough = AvailableAmount >= TotalRequiredAmount;
+        Unit = SelectedVariant?.Unit;
+        _parent.SaveProductionCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnDefaultUsedAmountChanged(double value) => UpdateRequiredAmount();
     partial void OnUsedAmountChanged(double value) => UpdateRequiredAmount();
     partial void OnSelectedVariantChanged(MaterialVariantDto? value) => UpdateRequiredAmount();
+}
+
+public class AddMaterialButtonViewModel
+{
+    public ProductionListViewModel Parent { get; }
+    public AddMaterialButtonViewModel(ProductionListViewModel parent) => Parent = parent;
 }

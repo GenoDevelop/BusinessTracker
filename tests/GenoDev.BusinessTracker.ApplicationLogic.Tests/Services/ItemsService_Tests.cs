@@ -29,7 +29,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.Material, adjustment, StorageAmountType.Private);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -52,7 +52,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.Material, adjustment, StorageAmountType.Company);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -75,7 +75,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.Material, adjustment, StorageAmountType.TotalUsed);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalUsed);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -98,7 +98,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.Private);
+        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -121,7 +121,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.Company);
+        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -167,7 +167,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.Private);
+        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -190,7 +190,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.Company);
+        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
         AssertBusinessTracker_Database(db =>
@@ -220,13 +220,13 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
     public async Task AdjustStorageAmountAsync_MissingItem_ShouldThrowKeyNotFoundException()
     {
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.Material, 10.0, StorageAmountType.Company))
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.MaterialVariant, 10.0, StorageAmountType.TotalCompany))
             .Should().ThrowAsync<KeyNotFoundException>();
         
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.Packing, 10.0, StorageAmountType.Company))
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.Packing, 10.0, StorageAmountType.TotalCompany))
             .Should().ThrowAsync<KeyNotFoundException>();
 
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.FixedAsset, 10.0, StorageAmountType.Company))
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.FixedAsset, 10.0, StorageAmountType.TotalCompany))
             .Should().ThrowAsync<KeyNotFoundException>();
     }
 
@@ -234,7 +234,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
     public async Task AdjustStorageAmountAsync_InvalidItemType_ShouldThrowArgumentOutOfRangeException()
     {
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), (StorageItemType)999, 10.0, StorageAmountType.Company))
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), (StorageItemType)999, 10.0, StorageAmountType.TotalCompany))
             .Should().ThrowAsync<ArgumentOutOfRangeException>();
     }
 
@@ -249,7 +249,76 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(materialVariantId, StorageItemType.Material, 10.0, (StorageAmountType)999))
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, 10.0, (StorageAmountType)999))
+            .Should().ThrowAsync<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public async Task AdjustProductAmountAsync_TotalAmount_ShouldAdjustAmount()
+    {
+        // Arrange
+        var initialAmount = 100;
+        var adjustment = 50;
+        var productId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var product = db.Arrange_Product(totalAmount: initialAmount);
+            return product.Id;
+        });
+
+        // Act
+        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalAmount);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var product = db.Products.Find(productId);
+            product!.TotalAmount.Should().Be(initialAmount + adjustment);
+        });
+    }
+
+    [Fact]
+    public async Task AdjustProductAmountAsync_SoldAmount_ShouldAdjustAmount()
+    {
+        // Arrange
+        var initialAmount = 100;
+        var adjustment = 50;
+        var productId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var product = db.Arrange_Product(soldAmount: initialAmount);
+            return product.Id;
+        });
+
+        // Act
+        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalSoldAmount);
+
+        // Assert
+        AssertBusinessTracker_Database(db =>
+        {
+            var product = db.Products.Find(productId);
+            product!.TotalSoldAmount.Should().Be(initialAmount + adjustment);
+        });
+    }
+
+    [Fact]
+    public async Task AdjustProductAmountAsync_MissingProduct_ShouldThrowKeyNotFoundException()
+    {
+        // Act & Assert
+        await Sut.Invoking(x => x.AdjustProductAmountAsync(Guid.NewGuid(), 10.0, ProductAmountType.TotalAmount))
+            .Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task AdjustProductAmountAsync_InvalidAmountType_ShouldThrowArgumentOutOfRangeException()
+    {
+        // Arrange
+        var productId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var product = db.Arrange_Product();
+            return product.Id;
+        });
+
+        // Act & Assert
+        await Sut.Invoking(x => x.AdjustProductAmountAsync(productId, 10.0, (ProductAmountType)999))
             .Should().ThrowAsync<ArgumentOutOfRangeException>();
     }
 }
