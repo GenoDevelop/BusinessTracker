@@ -37,7 +37,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var deletedSupply = db.Supplies.FirstOrDefault(x => x.Id == supplyId);
             deletedSupply.Should().BeNull();
@@ -82,7 +82,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == materialVariantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
@@ -114,7 +114,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == materialVariantId);
             variant.TotalPrivateAmount.Should().Be(initialPrivateAmount - (setsAmount * unitsInSet));
@@ -146,7 +146,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == materialVariantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
@@ -177,7 +177,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
             packing.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
@@ -209,7 +209,7 @@ public class DeleteSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Del
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
             asset.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));

@@ -352,7 +352,13 @@ public static class BusinessTrackerDbContextExtensions
             string? paymentIdentifier = null,
             string? trackingNumber = null,
             Carrier? carrier = null,
-            OrderStatus status = OrderStatus.New)
+            OrderStatus status = OrderStatus.New,
+            bool companyOrder = false,
+            string orderSource = "Test Source",
+            decimal shippingNetCost = 0,
+            decimal shippingGrossCost = 0,
+            decimal shippingNetClientPrice = 0,
+            decimal shippingGrossClientPrice = 0)
         {
             var order = new Order
             {
@@ -364,12 +370,49 @@ public static class BusinessTrackerDbContextExtensions
                 TrackingNumber = trackingNumber,
                 Carrier = carrier,
                 Status = status,
+                CompanyOrder = companyOrder,
+                OrderSource = orderSource,
+                ShippingNetCost = shippingNetCost,
+                ShippingGrossCost = shippingGrossCost,
+                ShippingNetClientPrice = shippingNetClientPrice,
+                ShippingGrossClientPrice = shippingGrossClientPrice,
                 OrderProducts = [],
                 OrderPackingMaterials = []
             };
 
             db.Orders.Add(order);
             return order;
+        }
+
+        public ClientDetails Arrange_ClientDetails(Order? order = null,
+            Guid? id = null,
+            string? clientName = "Test Client",
+            string? street = "Test Street 1",
+            string? postCode = "12-345",
+            string? city = "Test City",
+            string? email = "test@example.com",
+            string? phone = "123456789",
+            string? description = null)
+        {
+            order ??= db.Arrange_Order();
+
+            var details = new ClientDetails
+            {
+                Id = id ?? Guid.NewGuid(),
+                OrderId = order.Id,
+                Order = order,
+                ClientName = clientName,
+                Street = street,
+                PostCode = postCode,
+                City = city,
+                Email = email,
+                Phone = phone,
+                Description = description
+            };
+
+            order.ClientDetails = details;
+            db.ClientDetails.Add(details);
+            return details;
         }
 
         public OrderProduct Arrange_OrderProduct(Order? order = null,

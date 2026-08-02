@@ -41,7 +41,7 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var recipe = db.ProductRecipes.First(r => r.Id == recipeId);
             recipe.Name.Should().Be("New Name");
@@ -84,7 +84,7 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             db.ProductRecipes.Any(r => r.Id == recipeId).Should().BeFalse();
         });

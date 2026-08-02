@@ -12,4 +12,7 @@ public class OrderProduct
 
     public virtual Order Order { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;
+
+    public static double CalculateTotalSoldAdjustment(int oldAssignedAmount, int newAssignedAmount)
+        => newAssignedAmount - oldAssignedAmount;
 }

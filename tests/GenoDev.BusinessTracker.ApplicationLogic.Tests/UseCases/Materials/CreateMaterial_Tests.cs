@@ -26,7 +26,7 @@ public class CreateMaterial_Tests : BusinessTrackerUnitTestsBase<CreateMaterialC
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var material = db.Materials.FirstOrDefault(x => x.Id == resultId);
             material.Should().NotBeNull();

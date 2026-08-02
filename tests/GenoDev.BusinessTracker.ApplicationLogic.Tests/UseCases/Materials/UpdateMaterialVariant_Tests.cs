@@ -44,7 +44,7 @@ public class UpdateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<UpdateMa
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.FirstOrDefault(x => x.Id == _variantId);
             variant.Should().NotBeNull();

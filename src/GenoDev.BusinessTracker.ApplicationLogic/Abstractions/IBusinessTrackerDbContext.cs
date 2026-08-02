@@ -20,6 +20,7 @@ public interface IBusinessTrackerDbContext
     DbSet<ProductionMaterial> ProductionMaterials { get; }
     DbSet<Order> Orders { get; }
     DbSet<OrderProduct> OrderProducts { get; }
+    DbSet<ClientDetails> ClientDetails { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

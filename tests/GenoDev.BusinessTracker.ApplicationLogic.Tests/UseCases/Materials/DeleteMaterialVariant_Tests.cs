@@ -39,7 +39,7 @@ public class DeleteMaterialVariant_Tests : BusinessTrackerUnitTestsBase<DeleteMa
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.FirstOrDefault(x => x.Id == _variantId);
             variant.Should().BeNull();

@@ -43,7 +43,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
         await Sut.Handle(new DeleteProductionCommand(productionId), default);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var deletedProduction = db.Productions.FirstOrDefault(x => x.Id == productionId);
             deletedProduction.Should().BeNull();

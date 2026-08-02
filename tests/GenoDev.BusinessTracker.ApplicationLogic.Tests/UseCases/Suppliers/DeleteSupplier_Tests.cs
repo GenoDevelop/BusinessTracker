@@ -33,7 +33,7 @@ public class DeleteSupplier_Tests : BusinessTrackerUnitTestsBase<DeleteSupplierC
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Suppliers.FirstOrDefault(x => x.Id == supplierId);
             supplier.Should().BeNull();

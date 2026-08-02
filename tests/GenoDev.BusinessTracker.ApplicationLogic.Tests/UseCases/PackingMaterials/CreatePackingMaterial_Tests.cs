@@ -32,7 +32,7 @@ public sealed class CreatePackingMaterial_Tests : BusinessTrackerUnitTestsBase<C
         // Assert
         result.Should().NotBeEmpty();
         
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var created = db.PackingMaterials.FirstOrDefault(x => x.Id == result);
             created.Should().NotBeNull();
@@ -59,7 +59,7 @@ public sealed class CreatePackingMaterial_Tests : BusinessTrackerUnitTestsBase<C
         var result = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var created = db.PackingMaterials.FirstOrDefault(x => x.Id == result);
             created.Should().NotBeNull();

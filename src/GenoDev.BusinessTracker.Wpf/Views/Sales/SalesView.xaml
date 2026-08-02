@@ -10,7 +10,7 @@
              d:DataContext="{d:DesignInstance vm:SalesViewModel}">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type vm:OrdersViewModel}">
-            <local:OrdersView />
+            <local:OrdersListView />
         </DataTemplate>
     </UserControl.Resources>
     <Grid>

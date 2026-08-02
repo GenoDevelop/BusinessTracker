@@ -46,7 +46,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var item = db.SupplyItems.First(x => x.Id == itemId);
             item.SetsAmount.Should().Be(10);
@@ -91,7 +91,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialAmount + 30);
@@ -136,7 +136,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount - 50);
@@ -183,7 +183,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             var asset = db.FixedAssets.First(x => x.Id == assetId);
@@ -225,7 +225,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialAmount);
@@ -265,7 +265,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var packing = db.PackingMaterials.First(x => x.Id == packingId);
             packing.TotalCompanyAmount.Should().Be(initialAmount - 500);

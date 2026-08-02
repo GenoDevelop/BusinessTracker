@@ -21,6 +21,16 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.TrackingNumber).IsRequired(false);
         builder.Property(x => x.Carrier).IsRequired(false).HasConversion<string>();
         builder.Property(x => x.Status).HasConversion<string>();
+        builder.Property(x => x.CompanyOrder).IsRequired();
+        builder.Property(x => x.OrderSource).IsRequired();
+        builder.Property(x => x.ShippingNetCost).IsRequired().HasPrecision(18, 2);
+        builder.Property(x => x.ShippingGrossCost).IsRequired().HasPrecision(18, 2);
+        builder.Property(x => x.ShippingNetClientPrice).IsRequired().HasPrecision(18, 2);
+        builder.Property(x => x.ShippingGrossClientPrice).IsRequired().HasPrecision(18, 2);
+
+        builder.HasOne(x => x.ClientDetails)
+            .WithOne(x => x.Order)
+            .HasForeignKey<ClientDetails>(x => x.OrderId);
 
         builder.HasMany(x => x.OrderProducts)
             .WithOne(x => x.Order)

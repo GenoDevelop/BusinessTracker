@@ -35,7 +35,7 @@ public class CreateRecipe_Tests : BusinessTrackerUnitTestsBase<CreateRecipeComma
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var recipe = db.ProductRecipes.FirstOrDefault(x => x.Id == resultId);
             recipe.Should().NotBeNull();

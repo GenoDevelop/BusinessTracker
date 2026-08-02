@@ -30,7 +30,7 @@ public class CreateSupplier_Tests : BusinessTrackerUnitTestsBase<CreateSupplierC
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Suppliers.FirstOrDefault(x => x.Id == resultId);
             supplier.Should().NotBeNull();
@@ -56,7 +56,7 @@ public class CreateSupplier_Tests : BusinessTrackerUnitTestsBase<CreateSupplierC
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Suppliers.FirstOrDefault(x => x.Id == resultId);
             supplier.Should().NotBeNull();

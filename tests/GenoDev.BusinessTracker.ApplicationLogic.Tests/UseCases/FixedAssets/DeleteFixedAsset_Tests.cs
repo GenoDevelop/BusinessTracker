@@ -34,7 +34,7 @@ public sealed class DeleteFixedAsset_Tests : BusinessTrackerUnitTestsBase<Delete
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var deleted = db.FixedAssets.FirstOrDefault(x => x.Id == fixedAsset.Id);
             deleted.Should().BeNull();

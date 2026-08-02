@@ -9,4 +9,7 @@ public class OrderPackingMaterial
 
     public virtual Order Order { get; set; } = null!;
     public virtual PackingMaterial PackingMaterial { get; set; } = null!;
+
+    public static double CalculateTotalUsedAdjustment(double oldAmount, double newAmount)
+        => newAmount - oldAmount;
 }

@@ -57,7 +57,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
         await Sut.Handle(command, default);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var production = db.Productions.Include(p => p.ProductionMaterials).First(x => x.Id == productionId);
             production.Amount.Should().Be(15);
@@ -112,7 +112,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
         await Sut.Handle(command, default);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var production = db.Productions.Include(p => p.ProductionMaterials).First(x => x.Id == productionId);
             production.Amount.Should().Be(15);

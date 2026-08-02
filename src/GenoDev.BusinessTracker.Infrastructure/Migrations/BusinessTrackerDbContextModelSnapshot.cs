@@ -26,6 +26,55 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.ClientDetails", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("City")
+                        .HasColumnType("text")
+                        .HasColumnName("city");
+
+                    b.Property<string>("ClientName")
+                        .HasColumnType("text")
+                        .HasColumnName("client_name");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("text")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("PostCode")
+                        .HasColumnType("text")
+                        .HasColumnName("post_code");
+
+                    b.Property<string>("Street")
+                        .HasColumnType("text")
+                        .HasColumnName("street");
+
+                    b.HasKey("Id")
+                        .HasName("pk_client_details");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_client_details_order_id");
+
+                    b.ToTable("client_details", "business_tracker");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.FixedAsset", b =>
                 {
                     b.Property<Guid>("Id")
@@ -168,6 +217,10 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("carrier");
 
+                    b.Property<bool>("CompanyOrder")
+                        .HasColumnType("boolean")
+                        .HasColumnName("company_order");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -180,9 +233,34 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("order_identifier");
 
+                    b.Property<string>("OrderSource")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("order_source");
+
                     b.Property<string>("PaymentIdentifier")
                         .HasColumnType("text")
                         .HasColumnName("payment_identifier");
+
+                    b.Property<decimal>("ShippingGrossClientPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("shipping_gross_client_price");
+
+                    b.Property<decimal>("ShippingGrossCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("shipping_gross_cost");
+
+                    b.Property<decimal>("ShippingNetClientPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("shipping_net_client_price");
+
+                    b.Property<decimal>("ShippingNetCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("shipping_net_cost");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -254,11 +332,13 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasColumnName("product_id");
 
                     b.Property<decimal>("UnitGrossPrice")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
                         .HasColumnName("unit_gross_price");
 
                     b.Property<decimal>("UnitNetPrice")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
                         .HasColumnName("unit_net_price");
 
                     b.HasKey("Id")
@@ -636,6 +716,18 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.ClientDetails", b =>
+                {
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Order", "Order")
+                        .WithOne("ClientDetails")
+                        .HasForeignKey("GenoDev.BusinessTracker.Domain.Entities.ClientDetails", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_client_details_orders_order_id");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MaterialVariant", b =>
                 {
                     b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Material", "Material")
@@ -822,6 +914,8 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Order", b =>
                 {
+                    b.Navigation("ClientDetails");
+
                     b.Navigation("OrderPackingMaterials");
 
                     b.Navigation("OrderProducts");

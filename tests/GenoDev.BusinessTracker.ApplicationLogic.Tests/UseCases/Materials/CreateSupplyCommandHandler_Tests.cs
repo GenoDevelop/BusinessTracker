@@ -39,7 +39,7 @@ public class CreateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Cre
         // Assert
         resultId.Should().NotBeEmpty();
         
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var supply = db.Supplies.Include(x => x.Supplier).FirstOrDefault(x => x.Id == resultId);
             supply.Should().NotBeNull();

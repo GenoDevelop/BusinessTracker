@@ -44,7 +44,7 @@ public sealed class UpdateFixedAsset_Tests : BusinessTrackerUnitTestsBase<Update
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var updated = db.FixedAssets.FirstOrDefault(x => x.Id == fixedAsset.Id);
             updated.Should().NotBeNull();

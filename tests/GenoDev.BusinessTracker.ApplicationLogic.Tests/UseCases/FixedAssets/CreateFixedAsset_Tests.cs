@@ -32,7 +32,7 @@ public sealed class CreateFixedAsset_Tests : BusinessTrackerUnitTestsBase<Create
         // Assert
         result.Should().NotBeEmpty();
         
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var created = db.FixedAssets.FirstOrDefault(x => x.Id == result);
             created.Should().NotBeNull();

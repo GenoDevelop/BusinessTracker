@@ -37,7 +37,7 @@ public class UpdateMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateMaterialC
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var material = db.Materials.FirstOrDefault(x => x.Id == materialId);
             material.Should().NotBeNull();

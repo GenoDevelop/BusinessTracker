@@ -34,7 +34,7 @@ public sealed class DeletePackingMaterial_Tests : BusinessTrackerUnitTestsBase<D
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var deleted = db.PackingMaterials.FirstOrDefault(x => x.Id == packingMaterial.Id);
             deleted.Should().BeNull();

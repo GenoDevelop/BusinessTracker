@@ -56,7 +56,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var updatedSupply = db.Supplies.First(x => x.Id == supplyId);
             updatedSupply.SupplierId.Should().Be(newSupplierId);
@@ -128,7 +128,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
@@ -173,7 +173,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalPrivateAmount.Should().Be(initialPrivateAmount + (setsAmount * unitsInSet));
@@ -218,7 +218,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
@@ -263,7 +263,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.First(x => x.Id == variantId);
             variant.TotalCompanyAmount.Should().Be(initialCompanyAmount);
@@ -307,7 +307,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
             packing.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
@@ -351,7 +351,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var packing = db.PackingMaterials.First(x => x.Id == packingMaterialId);
             packing.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));
@@ -395,7 +395,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
             asset.TotalCompanyAmount.Should().Be(initialCompanyAmount + (setsAmount * unitsInSet));
@@ -439,7 +439,7 @@ public class UpdateSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<Upd
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var asset = db.FixedAssets.First(x => x.Id == fixedAssetId);
             asset.TotalCompanyAmount.Should().Be(initialCompanyAmount - (setsAmount * unitsInSet));

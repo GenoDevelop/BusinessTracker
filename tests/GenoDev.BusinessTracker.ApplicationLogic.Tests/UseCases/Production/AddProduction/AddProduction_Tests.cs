@@ -55,7 +55,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var production = db.Productions
                 .Include(p => p.ProductionMaterials)

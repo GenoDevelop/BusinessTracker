@@ -17,8 +17,8 @@ public class OrderProductConfiguration : IEntityTypeConfiguration<OrderProduct>
         builder.Property(x => x.ProductId).IsRequired();
         builder.Property(x => x.OrderedAmount).IsRequired();
         builder.Property(x => x.AssignedAmount).IsRequired();
-        builder.Property(x => x.UnitNetPrice).IsRequired();
-        builder.Property(x => x.UnitGrossPrice).IsRequired();
+        builder.Property(x => x.UnitNetPrice).IsRequired().HasPrecision(18, 2);
+        builder.Property(x => x.UnitGrossPrice).IsRequired().HasPrecision(18, 2);
 
         builder.HasOne(x => x.Order)
             .WithMany(x => x.OrderProducts)

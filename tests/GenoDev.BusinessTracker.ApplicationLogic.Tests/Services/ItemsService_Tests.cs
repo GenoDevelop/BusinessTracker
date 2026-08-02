@@ -32,7 +32,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.Find(materialVariantId);
             variant!.TotalPrivateAmount.Should().Be(initialAmount + adjustment);
@@ -55,7 +55,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.Find(materialVariantId);
             variant!.TotalCompanyAmount.Should().Be(initialAmount + adjustment);
@@ -78,7 +78,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalUsed);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.Find(materialVariantId);
             variant!.TotalUsedAmount.Should().Be(initialAmount + adjustment);
@@ -101,7 +101,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var pm = db.PackingMaterials.Find(packingMaterialId);
             pm!.TotalPrivateAmount.Should().Be(initialAmount + adjustment);
@@ -124,7 +124,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var pm = db.PackingMaterials.Find(packingMaterialId);
             pm!.TotalCompanyAmount.Should().Be(initialAmount + adjustment);
@@ -147,7 +147,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalUsed);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var pm = db.PackingMaterials.Find(packingMaterialId);
             pm!.TotalUsedAmount.Should().Be(initialAmount + adjustment);
@@ -170,7 +170,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalPrivate);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var fa = db.FixedAssets.Find(fixedAssetId);
             fa!.TotalPrivateAmount.Should().Be(initialAmount + adjustment);
@@ -193,7 +193,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalCompany);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var fa = db.FixedAssets.Find(fixedAssetId);
             fa!.TotalCompanyAmount.Should().Be(initialAmount + adjustment);
@@ -269,7 +269,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalAmount);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var product = db.Products.Find(productId);
             product!.TotalAmount.Should().Be(initialAmount + adjustment);
@@ -292,7 +292,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalSoldAmount);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var product = db.Products.Find(productId);
             product!.TotalSoldAmount.Should().Be(initialAmount + adjustment);

@@ -43,7 +43,7 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.FirstOrDefault(x => x.Id == resultId);
             variant.Should().NotBeNull();
@@ -105,7 +105,7 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
         var resultId = await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var variant = db.MaterialVariants.FirstOrDefault(x => x.Id == resultId);
             variant.Should().NotBeNull();

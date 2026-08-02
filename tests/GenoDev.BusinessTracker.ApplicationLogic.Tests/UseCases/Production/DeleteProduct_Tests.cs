@@ -32,7 +32,7 @@ public class DeleteProduct_Tests : BusinessTrackerUnitTestsBase<DeleteProductCom
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var product = db.Products.FirstOrDefault(x => x.Id == productId);
             product.Should().BeNull();

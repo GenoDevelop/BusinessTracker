@@ -37,7 +37,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var updated = db.ProductRecipeMaterials.Find(recipeMaterialId);
             updated.Should().NotBeNull();
@@ -108,7 +108,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var updated = db.ProductRecipeMaterials.Find(recipeMaterialId);
             updated.Should().NotBeNull();

@@ -5,6 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 public static class QueryableSearchExtensions
 {
+    public static IOrderedQueryable<T> OrderBy<T, TKey>(this IQueryable<T> query,
+        Expression<Func<T, TKey>> keySelector, bool isDescending)
+    {
+        return isDescending ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
+    }
+
     public static IQueryable<T> ApplyNumericFilter<T>(this IQueryable<T> query,
         Expression<Func<T, double>> selector, NumericOperator? op, decimal? value)
     {

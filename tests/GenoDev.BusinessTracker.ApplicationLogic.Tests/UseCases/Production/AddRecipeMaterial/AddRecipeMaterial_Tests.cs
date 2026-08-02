@@ -35,7 +35,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var recipeMaterial = db.ProductRecipeMaterials.FirstOrDefault(rm => rm.ProductRecipeId == recipeId && rm.MaterialId == materialId);
             recipeMaterial.Should().NotBeNull();

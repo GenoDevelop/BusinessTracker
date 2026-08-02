@@ -44,7 +44,7 @@ public sealed class UpdatePackingMaterial_Tests : BusinessTrackerUnitTestsBase<U
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var updated = db.PackingMaterials.FirstOrDefault(x => x.Id == packingMaterial.Id);
             updated.Should().NotBeNull();

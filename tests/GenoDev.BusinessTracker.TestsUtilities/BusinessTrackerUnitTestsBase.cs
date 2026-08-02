@@ -86,7 +86,7 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
         db.SaveChanges();
     }
 
-    protected void AssertBusinessTracker_Database(Action<BusinessTrackerDbContext> assert,
+    protected void Assert_BusinessTrackerDatabase(Action<BusinessTrackerDbContext> assert,
         Func<IServiceProvider, BusinessTrackerDbContext>? customContextInjection = null)
     {
         var scope = GetAssertScope();
@@ -97,7 +97,7 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
         assert.Invoke(db);
     }
 
-    protected T AssertBusinessTracker_Database<T>(Func<BusinessTrackerDbContext, T> assert,
+    protected T Assert_BusinessTrackerDatabase<T>(Func<BusinessTrackerDbContext, T> assert,
         Func<IServiceProvider, BusinessTrackerDbContext>? customContextInjection = null)
     {
         var scope = GetAssertScope();

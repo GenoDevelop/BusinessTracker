@@ -42,7 +42,7 @@ public class UpdateSupplier_Tests : BusinessTrackerUnitTestsBase<UpdateSupplierC
         await Sut.Handle(command, CancellationToken.None);
 
         // Assert
-        AssertBusinessTracker_Database(db =>
+        Assert_BusinessTrackerDatabase(db =>
         {
             var supplier = db.Suppliers.First(x => x.Id == supplierId);
             supplier.Name.Should().Be("New Name");
