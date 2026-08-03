@@ -71,4 +71,46 @@ public class UpdateOrderPackingMaterial_Tests : BusinessTrackerUnitTestsBase<Upd
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
+
+    [Fact]
+    public async Task Handle_ShouldUpdatePackingMaterialAndAdjustStock_WhenMaterialIsChanged()
+    {
+        // Arrange
+        var order = Arrange_BusinessTrackerDatabase(db => db.Arrange_Order());
+        var oldMaterial = Arrange_BusinessTrackerDatabase(db => db.Arrange_PackingMaterial());
+        var newMaterial = Arrange_BusinessTrackerDatabase(db => db.Arrange_PackingMaterial());
+        
+        var initialAmount = 5.0;
+        var orderPackingMaterial = Arrange_BusinessTrackerDatabase(db => db.Arrange_OrderPackingMaterial(order, oldMaterial, amount: initialAmount));
+        
+        var oldMaterialInitialUsed = oldMaterial.TotalUsedAmount;
+        var newMaterialInitialUsed = newMaterial.TotalUsedAmount;
+        var newAmount = 15.0;
+
+        var command = new UpdateOrderPackingMaterialCommand(
+            OrderPackingMaterialId: orderPackingMaterial.Id,
+            PackingMaterialId: newMaterial.Id,
+            Amount: newAmount
+        );
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert_BusinessTrackerDatabase(db =>
+        {
+            var opm = db.OrderPackingMaterials.AsNoTracking().FirstOrDefault(x => x.Id == orderPackingMaterial.Id);
+            opm.Should().NotBeNull();
+            opm!.PackingMaterialId.Should().Be(newMaterial.Id);
+            opm.Amount.Should().Be(newAmount);
+
+            var oldMaterialUpdated = db.PackingMaterials.AsNoTracking().FirstOrDefault(pm => pm.Id == oldMaterial.Id);
+            oldMaterialUpdated.Should().NotBeNull();
+            oldMaterialUpdated!.TotalUsedAmount.Should().Be(oldMaterialInitialUsed - initialAmount);
+
+            var newMaterialUpdated = db.PackingMaterials.AsNoTracking().FirstOrDefault(pm => pm.Id == newMaterial.Id);
+            newMaterialUpdated.Should().NotBeNull();
+            newMaterialUpdated!.TotalUsedAmount.Should().Be(newMaterialInitialUsed + newAmount);
+        });
+    }
 }

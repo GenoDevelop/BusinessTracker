@@ -36,6 +36,7 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
         
         var command = new UpdateOrderProductCommand(
             OrderProductId: orderProduct.Id,
+            ProductId: product.Id,
             OrderedAmount: 20,
             AssignedAmount: newAssignedAmount,
             UnitNetPrice: 200.00m,
@@ -71,6 +72,7 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
         // Arrange
         var command = new UpdateOrderProductCommand(
             OrderProductId: Guid.NewGuid(),
+            ProductId: Guid.NewGuid(),
             OrderedAmount: 1,
             AssignedAmount: 1,
             UnitNetPrice: 1,
@@ -82,5 +84,53 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUpdateProductAndAdjustStock_WhenProductIsChanged()
+    {
+        // Arrange
+        var order = Arrange_BusinessTrackerDatabase(db => db.Arrange_Order());
+        var oldProduct = Arrange_BusinessTrackerDatabase(db => db.Arrange_Product());
+        var newProduct = Arrange_BusinessTrackerDatabase(db => db.Arrange_Product());
+        
+        var initialAssignedAmount = 5;
+        var orderProduct = Arrange_BusinessTrackerDatabase(db => 
+            db.Arrange_OrderProduct(order, oldProduct, assignedAmount: initialAssignedAmount));
+        
+        var oldProductInitialSold = oldProduct.TotalSoldAmount;
+        var newProductInitialSold = newProduct.TotalSoldAmount;
+        var newAssignedAmount = 10;
+        
+        var command = new UpdateOrderProductCommand(
+            OrderProductId: orderProduct.Id,
+            ProductId: newProduct.Id,
+            OrderedAmount: 20,
+            AssignedAmount: newAssignedAmount,
+            UnitNetPrice: 200.00m,
+            UnitGrossPrice: 246.00m
+        );
+
+        // Act
+        await Sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert_BusinessTrackerDatabase(db =>
+        {
+            var updatedOrderProduct = db.OrderProducts.AsNoTracking().FirstOrDefault(x => x.Id == orderProduct.Id);
+            updatedOrderProduct.Should().NotBeNull();
+            updatedOrderProduct!.ProductId.Should().Be(newProduct.Id);
+            updatedOrderProduct.AssignedAmount.Should().Be(newAssignedAmount);
+
+            var oldProductUpdated = db.Products.AsNoTracking().FirstOrDefault(x => x.Id == oldProduct.Id);
+            oldProductUpdated.Should().NotBeNull();
+            // Reverted: oldSold - initialAssignedAmount
+            oldProductUpdated!.TotalSoldAmount.Should().Be(oldProductInitialSold - initialAssignedAmount);
+
+            var newProductUpdated = db.Products.AsNoTracking().FirstOrDefault(x => x.Id == newProduct.Id);
+            newProductUpdated.Should().NotBeNull();
+            // Applied: newSold + newAssignedAmount
+            newProductUpdated!.TotalSoldAmount.Should().Be(newProductInitialSold + newAssignedAmount);
+        });
     }
 }

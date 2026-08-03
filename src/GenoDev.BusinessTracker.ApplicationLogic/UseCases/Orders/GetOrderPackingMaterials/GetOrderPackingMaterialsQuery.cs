@@ -14,6 +14,7 @@ public enum OrderPackingMaterialSortBy
 
 public record OrderPackingMaterialListDto(
     Guid Id,
+    Guid PackingMaterialId,
     string Name,
     string? Ean,
     string? ManufacturerCode,

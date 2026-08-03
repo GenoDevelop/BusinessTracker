@@ -4,10 +4,887 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Sales"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+             xmlns:converters="clr-namespace:GenoDev.BusinessTracker.Wpf.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:OrdersViewModel}">
-    <Grid>
-        <TextBlock Text="Zamówienia" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+    <Grid x:Name="RootGrid" ClipToBounds="True">
+        <Grid x:Name="LayoutGrid" SizeChanged="LayoutGrid_SizeChanged">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="OrdersColumn" Width="200" MinWidth="0"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="*" MinWidth="0"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="5, 10, 0, 10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Toolbar -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="Zamówienia" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+
+                    <controls:CreateButton Command="{Binding CreateOrderCommand}" ToolTip="Dodaj zamówienie" Margin="0,0,5,0" />
+                    <controls:RefreshButton Click="OrdersRefreshButton_Click" Margin="0,0,5,0" />
+                    <controls:FilterToggleButton
+                        IsChecked="{Binding IsFilterVisible,
+                                            Mode=TwoWay,
+                                            UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <!-- Date Range Picker -->
+                <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <controls:DateRangePicker StartDate="{Binding StartDate}" EndDate="{Binding EndDate}" />
+                </Grid>
+
+                <!-- Orders List -->
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding Orders}"
+                         SelectedItem="{Binding SelectedOrder}"
+                         Margin="0,0,0,3"
+                         BorderThickness="0"
+                         Padding="0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#E0EEFF" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#F0F7FF" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name, StringFormat='dd.MM.yyyy'}" FontWeight="Bold" Margin="0,3,0,3" Foreground="SteelBlue" FontSize="13" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="GroupItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="GroupItem">
+                                                <StackPanel>
+                                                    <ContentPresenter />
+                                                    <ItemsPresenter />
+                                                </StackPanel>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5,5,5,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Ellipse Grid.Column="0" Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
+                                         Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
+                                
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding OrderIdentifier}" FontWeight="Bold" />
+                                    <TextBlock FontSize="11">
+                                        <Run Text="{Binding TotalNetPrice, StringFormat='{}{0:N2}zł'}" Foreground="Gray" />
+                                        <Run Text="/" Foreground="Gray" />
+                                        <Run Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2}zł'}" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding OrderSource}" FontSize="10" Foreground="DimGray" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Pagination -->
+                <controls:PaginationControl Grid.Row="3"
+                                            Layout="CompactTwoRows"
+                                           x:Name="OrdersPagination"
+                                           PageLoader="{Binding OrdersPageLoader}"
+                                           InitialPageSize="20" />
+            </Grid>
+
+            <GridSplitter Grid.Column="1"
+                          Width="4"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="Transparent" />
+
+            <!-- Details Panel -->
+            <Grid Grid.Column="2" Background="#F9F9F9">
+                <Grid Margin="5,0,0,3" Visibility="{Binding SelectedOrder, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Grid Grid.Row="0" Margin="5,5,5,10">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Bottom">
+                                <Run Text="{Binding SelectedOrder.OrderDate, StringFormat='dd.MM.yyyy'}" />
+                            </TextBlock>
+                            <TextBlock Text="{Binding SelectedOrder.OrderIdentifier}" FontWeight="Bold" FontSize="18" Margin="10,0,0,0" Foreground="Black" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                            <controls:EditButton Command="{Binding EditOrderCommand}" ToolTip="Edytuj zamówienie" Margin="0,0,5,0" />
+                            <controls:DeleteButton Command="{Binding DeleteOrderCommand}" ToolTip="Usuń zamówienie" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Top Tabs -->
+                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0,1,0,0" Margin="0,0,0,10">
+                        <TabControl.Resources>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Padding" Value="10,2" />
+                            </Style>
+                        </TabControl.Resources>
+                        <TabItem Header="Szczegóły">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <Grid Grid.Column="0" Margin="0,0,20,0" VerticalAlignment="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="OrderLabels" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Status: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,5,0"
+                                                 Fill="{Binding SelectedOrder.Status, Converter={StaticResource StatusToColorConverter}}" />
+                                        <TextBlock Text="{Binding SelectedOrder.Status, Converter={StaticResource OrderStatusToPolishConverter}}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Cena: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4">
+                                        <Run Text="{Binding SelectedOrder.TotalNetPrice, StringFormat='{}{0:N2} zł'}" />
+                                        <Run Text=" / " Foreground="Gray" />
+                                        <Run Text="{Binding SelectedOrder.TotalGrossPrice, StringFormat='{}{0:N2} zł'}" Foreground="SteelBlue"/>
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Źródło: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedOrder.OrderSource}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                </Grid>
+
+                                <Grid Grid.Column="1" Margin="10,0,20,0" VerticalAlignment="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="ShippingLabels" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Tracking: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding SelectedOrder.TrackingNumber}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedOrder.Carrier, StringFormat=' ({0})'}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                                   Visibility="{Binding SelectedOrder.Carrier, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Koszt wysyłki: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4">
+                                        <Run Text="{Binding SelectedOrder.ShippingNetCost, StringFormat='{}{0:N2} zł'}" />
+                                        <Run Text=" / " Foreground="Gray" />
+                                        <Run Text="{Binding SelectedOrder.ShippingGrossCost, StringFormat='{}{0:N2} zł'}" Foreground="SteelBlue"/>
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Wysyłka klient: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4">
+                                        <Run Text="{Binding SelectedOrder.ShippingNetClientPrice, StringFormat='{}{0:N2} zł'}" />
+                                        <Run Text=" / " Foreground="Gray" />
+                                        <Run Text="{Binding SelectedOrder.ShippingGrossClientPrice, StringFormat='{}{0:N2} zł'}" Foreground="SteelBlue"/>
+                                    </TextBlock>
+                                </Grid>
+
+                                <Grid Grid.Column="2" Margin="10,0,0,0">
+                                    <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <TextBlock Text="{Binding SelectedOrder.Description}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Klient">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <Grid Grid.Column="0" Margin="0,0,20,0" VerticalAlignment="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Klient: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.ClientName}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,0,4"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Adres: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4">
+                                        <Run Text="{Binding SelectedOrder.ClientDetails.Street}" />, 
+                                        <Run Text="{Binding SelectedOrder.ClientDetails.PostCode}" /> 
+                                        <Run Text="{Binding SelectedOrder.ClientDetails.City}" />
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="E-mail: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.Email}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Telefon: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.Phone}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Firma: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedOrder.CompanyOrder, Converter={StaticResource BooleanToTextConverter}, ConverterParameter='Tak;Nie'}" 
+                                               FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
+                                </Grid>
+
+                                <Grid Grid.Column="1" Margin="10,0,0,0">
+                                    <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <TextBlock Text="{Binding SelectedOrder.ClientDetails.Description}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <GridSplitter Grid.Row="1" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="Transparent">
+                        <GridSplitter.Template>
+                            <ControlTemplate TargetType="GridSplitter">
+                                <Grid Background="Transparent">
+                                    <Rectangle Height="1" Fill="#DDD" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </GridSplitter.Template>
+                    </GridSplitter>
+
+                    <!-- Bottom Tabs (Products/Materials) -->
+                    <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0,1,0,0" Margin="0,5,0,0">
+                        <TabControl.Resources>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Padding" Value="10,2" />
+                            </Style>
+                        </TabControl.Resources>
+                        
+                        <TabItem Header="Produkty">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Zamówione Produkty" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <controls:CreateButton Command="{Binding AddProductCommand}" ToolTip="Dodaj produkt do zamówienia" Margin="0,0,5,0" />
+                                    <controls:RefreshButton Click="ProductsRefreshButton_Click" Margin="0,0,5,0" />
+                                    <controls:FilterToggleButton
+                                        IsChecked="{Binding IsProductsFilterVisible,
+                                                            Mode=TwoWay,
+                                                            UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                                          Sorting="ProductsDataGrid_Sorting">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Width="2*" SortMemberPath="ProductName">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:TextFilterColumnHeader x:Name="ProductNameFilterColumn" Header="Produkt"
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="5,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="1*" SortMemberPath="Identifier">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:TextFilterColumnHeader x:Name="ProductIdentifierFilterColumn" Header="Identyfikator"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Identifier}" VerticalAlignment="Center" Margin="5,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="OrderedAmount">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="OrderedAmountFilterColumn" Header="Zamówiono"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding OrderedAmount}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.6*" SortMemberPath="AssignedAmount">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="AssignedAmountFilterColumn" Header="Przypisano"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding AssignedAmount}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.8*" SortMemberPath="UnitNetPrice">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="UnitNetPriceFilterColumn" Header="Cena Netto"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding UnitNetPrice, StringFormat='{}{0:N2} zł'}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.8*" SortMemberPath="UnitGrossPrice">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="UnitGrossPriceFilterColumn" Header="Cena Brutto"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding UnitGrossPrice, StringFormat='{}{0:N2} zł'}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" Foreground="SteelBlue"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.8*" SortMemberPath="TotalNetPrice">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="TotalNetPriceFilterColumn" Header="Suma Netto"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding TotalNetPrice, StringFormat='{}{0:N2} zł'}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.8*" SortMemberPath="TotalGrossPrice">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="TotalGrossPriceFilterColumn" Header="Suma Brutto"
+                                                   
+                                                    FilterChanged="ProductsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding TotalGrossPrice, StringFormat='{}{0:N2} zł'}" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" FontWeight="SemiBold" Foreground="SteelBlue"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="Auto">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <controls:EditButton Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                             CommandParameter="{Binding}"
+                                                                             Margin="2,0" Width="14" />
+                                                        <controls:DeleteButton Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                               CommandParameter="{Binding}"
+                                                                               Margin="2,0" Width="14" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <controls:PaginationControl Grid.Row="2" Margin="0,5,0,0" x:Name="ProductsPagination" Layout="SingleLine"
+                                    PageLoader="{Binding ProductsPageLoader}" InitialPageSize="50" HorizontalAlignment="Right" />
+                            </Grid>
+                        </TabItem>
+                        
+                        <TabItem Header="Materiały do pakowania">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Materiały do Pakowania" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <controls:CreateButton Command="{Binding AddPackingMaterialCommand}" ToolTip="Dodaj materiał opakowaniowy" Margin="0,0,5,0" />
+                                    <controls:RefreshButton Click="PackingMaterialsRefreshButton_Click" Margin="0,0,5,0" />
+                                    <controls:FilterToggleButton
+                                        IsChecked="{Binding IsPackingMaterialsFilterVisible,
+                                                            Mode=TwoWay,
+                                                            UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding PackingMaterials}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                                          Sorting="PackingMaterialsDataGrid_Sorting">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:TextFilterColumnHeader x:Name="PackingMaterialNameFilterColumn" Header="Nazwa"
+                                                   
+                                                    FilterChanged="PackingMaterialsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="1*" SortMemberPath="Ean">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:TextFilterColumnHeader x:Name="PackingMaterialEanFilterColumn" Header="EAN"
+                                                   
+                                                    FilterChanged="PackingMaterialsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="1*" SortMemberPath="ManufacturerCode">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:TextFilterColumnHeader x:Name="PackingMaterialManufacturerCodeFilterColumn" Header="Kod Producenta"
+                                                   
+                                                    FilterChanged="PackingMaterialsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding ManufacturerCode}" VerticalAlignment="Center" Margin="5,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="0.8*" SortMemberPath="Amount">
+                                            <DataGridTemplateColumn.Header>
+                                                <controls:NumericFilterColumnHeader x:Name="PackingMaterialAmountFilterColumn" Header="Ilość"
+                                                   
+                                                    FilterChanged="PackingMaterialsFilter_FilterChanged" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock VerticalAlignment="Center" Margin="5,0">
+                                                        <Run Text="{Binding Amount, Mode=OneWay}" />
+                                                        <Run Text="{Binding Unit, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="Auto">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <controls:EditButton Command="{Binding DataContext.EditPackingMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                             CommandParameter="{Binding}"
+                                                                             Margin="2,0" Width="14" />
+                                                        <controls:DeleteButton Command="{Binding DataContext.DeletePackingMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                               CommandParameter="{Binding}"
+                                                                               Margin="2,0" Width="14" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <controls:PaginationControl Grid.Row="2" Margin="0,5,0,0" x:Name="PackingMaterialsPagination" Layout="SingleLine"
+                                    PageLoader="{Binding PackingMaterialsPageLoader}" InitialPageSize="50" HorizontalAlignment="Right" />
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+
+                <TextBlock Text="Wybierz zamówienie z listy, aby zobaczyć szczegóły"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"
+                           Visibility="{Binding SelectedOrder, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+            </Grid>
+        </Grid>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderFormOpen}" Title="{Binding OrderFormViewModel.Title}" StaysOpen="True">
+            <Grid Width="600" DataContext="{Binding OrderFormViewModel}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TabControl Grid.Row="0" Background="Transparent" BorderThickness="0,1,0,0" Height="450">
+                        <TabControl.Resources>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Padding" Value="10,2" />
+                            </Style>
+                        </TabControl.Resources>
+                        
+                        <!-- Order Details Tab -->
+                        <TabItem Header="Szczegóły zamówienia">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Data zamówienia" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <DatePicker SelectedDate="{Binding OrderDate, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Status" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <ComboBox ItemsSource="{Binding OrderStatuses}" SelectedItem="{Binding Status}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,5,0"
+                                                                     Fill="{Binding Converter={StaticResource StatusToColorConverter}}" />
+                                                            <TextBlock Text="{Binding Converter={StaticResource OrderStatusToPolishConverter}}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Identyfikator zamówienia" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding OrderIdentifier, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Identyfikator płatności" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding PaymentIdentifier, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Źródło zamówienia" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding OrderSource, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5,0,0,10" VerticalAlignment="Center">
+                                        </StackPanel>
+
+                                        <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,5,0,10" />
+
+                                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Przewoźnik" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <ComboBox ItemsSource="{Binding Carriers}" SelectedItem="{Binding Carrier}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Numer śledzenia" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding TrackingNumber, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Koszt wysyłki (Netto)" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <controls:NumericTextBox Value="{Binding ShippingNetCost, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Koszt wysyłki (Brutto)" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <controls:NumericTextBox Value="{Binding ShippingGrossCost, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Cena wysyłki dla klienta (Netto)" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <controls:NumericTextBox Value="{Binding ShippingNetClientPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="6" Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Cena wysyłki dla klienta (Brutto)" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <controls:NumericTextBox Value="{Binding ShippingGrossClientPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                            <TextBlock Text="Opis" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        
+                        <!-- Client Data Tab -->
+                        <TabItem Header="Dane klienta">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Nazwa klienta" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                    <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,5,10">
+                                            <TextBlock Text="Ulica" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding Street, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="5,0,0,10">
+                                            <TextBlock Text="Kod pocztowy" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                            <TextBox Text="{Binding PostCode, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock Text="Miasto" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                    <TextBox Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                                    <CheckBox Content="Firma" IsChecked="{Binding CompanyOrder}" Margin="0,0,0,10" />
+
+                                    <TextBlock Text="E-mail" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                    <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                                    <TextBlock Text="Telefon" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                    <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+
+                                    <TextBlock Text="Opis klienta" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                    <TextBox Text="{Binding ClientDescription, UpdateSourceTrigger=PropertyChanged}" 
+                                             TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                    </TabControl>
+
+                    <!-- Form Actions -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    </StackPanel>
+                </Grid>
+            </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <StackPanel Width="300">
+                <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                    <Run Text="Czy na pewno chcesz usunąć zamówienie " />
+                    <Run Text="{Binding SelectedOrder.OrderIdentifier, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="?" />
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelDeleteOrderCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteOrderCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                </StackPanel>
+            </StackPanel>
+        </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderProductFormOpen}" Title="{Binding OrderProductFormViewModel.Title}" StaysOpen="True">
+            <Grid Width="450" DataContext="{Binding OrderProductFormViewModel}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                        <TextBlock Text="Produkt" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                        <controls:SearchableComboBox ItemsSource="{Binding Products}" 
+                                                   SelectedItem="{Binding SelectedProduct}"
+                                                   DisplayMemberPath="Name"
+                                                   Margin="0,0,0,10"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,5,10">
+                                <TextBlock Text="Ilość zamówiona" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                <controls:NumericTextBox Value="{Binding OrderedAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5,0,0,10">
+                                <TextBlock Text="Ilość przypisana" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                <controls:NumericTextBox Value="{Binding AssignedAmount, UpdateSourceTrigger=PropertyChanged}" Mode="Integer" />
+                                <TextBlock Text="{Binding StockInfo}" Margin="0,2,0,0" FontSize="10">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="Gray"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsStockExceeded}" Value="True">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,5,10">
+                                <TextBlock Text="Cena jednostkowa netto" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                <controls:NumericTextBox Value="{Binding UnitNetPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5,0,0,10">
+                                <TextBlock Text="Cena jednostkowa brutto" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                                <controls:NumericTextBox Value="{Binding UnitGrossPrice, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    </StackPanel>
+                </Grid>
+            </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderProductDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <StackPanel Width="300">
+                <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                    <Run Text="Czy na pewno chcesz usunąć produkt " />
+                    <Run Text="{Binding SelectedOrderProduct.ProductName, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text=" z tego zamówienia?" />
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelDeleteProductCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteProductCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                </StackPanel>
+            </StackPanel>
+        </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderPackingMaterialFormOpen}" Title="{Binding OrderPackingMaterialFormViewModel.Title}" StaysOpen="True">
+            <Grid Width="450" DataContext="{Binding OrderPackingMaterialFormViewModel}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="Materiał opakowaniowy" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                    <controls:SearchableComboBox ItemsSource="{Binding PackingMaterials}" 
+                                               SelectedItem="{Binding SelectedPackingMaterial}"
+                                               DisplayMemberPath="Name"
+                                               Margin="0,0,0,10" />
+
+                    <TextBlock Text="Ilość" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
+                    <controls:NumericTextBox Value="{Binding Amount, UpdateSourceTrigger=PropertyChanged}" Mode="Decimal" />
+                    <TextBlock Text="{Binding StockInfo}" Margin="0,2,0,10" FontSize="10">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Gray"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStockExceeded}" Value="True">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                </StackPanel>
+            </Grid>
+        </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsOrderPackingMaterialDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <StackPanel Width="300">
+                <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
+                    <Run Text="Czy na pewno chcesz usunąć materiał opakowaniowy " />
+                    <Run Text="{Binding SelectedOrderPackingMaterial.Name, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text=" z tego zamówienia?" />
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelDeletePackingMaterialCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeletePackingMaterialCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                </StackPanel>
+            </StackPanel>
+        </controls:DraggablePopup>
     </Grid>
 </UserControl>

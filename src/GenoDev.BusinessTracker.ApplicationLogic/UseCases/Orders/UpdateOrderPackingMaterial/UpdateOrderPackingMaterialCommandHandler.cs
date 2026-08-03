@@ -27,15 +27,43 @@ public class UpdateOrderPackingMaterialCommandHandler : IRequestHandler<UpdateOr
             throw new KeyNotFoundException($"Order packing material with ID {request.OrderPackingMaterialId} was not found.");
         }
 
-        var usedAdjustment = OrderPackingMaterial.CalculateTotalUsedAdjustment(orderPackingMaterial.Amount, request.Amount);
-
-        orderPackingMaterial.PackingMaterialId = request.PackingMaterialId;
-        orderPackingMaterial.Amount = request.Amount;
-
-        if (usedAdjustment != 0)
+        if (orderPackingMaterial.PackingMaterialId != request.PackingMaterialId)
         {
-            await _itemsService.AdjustStorageAmountAsync(orderPackingMaterial.PackingMaterialId, StorageItemType.Packing, usedAdjustment, StorageAmountType.TotalUsed, cancellationToken);
+            // Material changed:
+            // 1. Revert adjustment for the old material
+            await _itemsService.AdjustStorageAmountAsync(
+                orderPackingMaterial.PackingMaterialId,
+                StorageItemType.Packing,
+                -orderPackingMaterial.Amount,
+                StorageAmountType.TotalUsed,
+                cancellationToken);
+
+            // 2. Apply adjustment for the new material
+            await _itemsService.AdjustStorageAmountAsync(
+                request.PackingMaterialId,
+                StorageItemType.Packing,
+                request.Amount,
+                StorageAmountType.TotalUsed,
+                cancellationToken);
+            
+            orderPackingMaterial.PackingMaterialId = request.PackingMaterialId;
         }
+        else
+        {
+            // Material is the same, just adjust the amount
+            var usedAdjustment = OrderPackingMaterial.CalculateTotalUsedAdjustment(orderPackingMaterial.Amount, request.Amount);
+            if (usedAdjustment != 0)
+            {
+                await _itemsService.AdjustStorageAmountAsync(
+                    orderPackingMaterial.PackingMaterialId,
+                    StorageItemType.Packing,
+                    usedAdjustment,
+                    StorageAmountType.TotalUsed,
+                    cancellationToken);
+            }
+        }
+
+        orderPackingMaterial.Amount = request.Amount;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

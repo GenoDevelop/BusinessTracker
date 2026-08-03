@@ -41,6 +41,7 @@ public class GetOrderProductsQueryHandler(IBusinessTrackerDbContext dbContext)
             .Take(request.PageSize)
             .Select(x => new OrderProductListDto(
                 x.Id,
+                x.ProductId,
                 x.Product.Name,
                 x.Product.Identifier,
                 x.OrderedAmount,

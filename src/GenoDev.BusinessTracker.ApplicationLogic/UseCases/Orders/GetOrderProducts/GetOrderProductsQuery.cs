@@ -19,6 +19,7 @@ public enum OrderProductSortBy
 
 public record OrderProductListDto(
     Guid Id,
+    Guid ProductId,
     string ProductName,
     string Identifier,
     int OrderedAmount,

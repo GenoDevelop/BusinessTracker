@@ -10,12 +10,12 @@
              d:DataContext="{d:DesignInstance vm:SalesViewModel}">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type vm:OrdersViewModel}">
-            <local:OrdersListView />
+            <local:OrdersView />
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="Zamówienia">
+            <TabItem Header="Zamów.">
                 <ContentControl Content="{Binding OrdersViewModel}" />
             </TabItem>
         </TabControl>

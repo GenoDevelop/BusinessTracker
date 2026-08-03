@@ -4,6 +4,7 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.UpdateOrderPr
 
 public record UpdateOrderProductCommand(
     Guid OrderProductId,
+    Guid ProductId,
     int OrderedAmount,
     int AssignedAmount,
     decimal UnitNetPrice,

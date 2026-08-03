@@ -34,6 +34,7 @@ public class GetOrderPackingMaterialsQueryHandler(IBusinessTrackerDbContext dbCo
             .Select(x => new OrderPackingMaterialListDto
             (
                 x.Id,
+                x.PackingMaterialId,
                 x.PackingMaterial.Name,
                 x.PackingMaterial.Ean,
                 x.PackingMaterial.ManufacturerCode,
