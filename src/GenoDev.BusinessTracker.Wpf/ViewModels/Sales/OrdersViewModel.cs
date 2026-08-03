@@ -11,6 +11,8 @@ using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using MediatR;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -325,6 +327,30 @@ public partial class OrdersViewModel : ViewModelBase
     {
         IsOrderPackingMaterialDeleteConfirmationOpen = false;
         SelectedOrderPackingMaterial = null;
+    }
+
+    [RelayCommand]
+    private void OpenTrackingUrl(OrderListDto order)
+    {
+        if (string.IsNullOrWhiteSpace(order.TrackingNumber) || order.Carrier == null)
+            return;
+
+        string? url = order.Carrier.Value.GetTrackingUrl(order.TrackingNumber);
+
+        if (url == null) return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+            Trace.WriteLine($"Failed to open tracking URL: {ex.Message}");
+        }
     }
 
     partial void OnSelectedOrderChanged(OrderListDto? value)

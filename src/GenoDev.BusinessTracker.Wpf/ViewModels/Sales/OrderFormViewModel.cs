@@ -42,7 +42,7 @@ public partial class OrderFormViewModel : ViewModelBase
     [ObservableProperty] private string? _phone;
     [ObservableProperty] private string? _clientDescription;
 
-    public IEnumerable<Carrier> Carriers => Enum.GetValues<Carrier>();
+    public IEnumerable<Carrier?> Carriers => [null, .. Enum.GetValues<Carrier>().Cast<Carrier?>()];
     public IEnumerable<OrderStatus> OrderStatuses => Enum.GetValues<OrderStatus>();
 
     public event Func<Task>? RequestClose;

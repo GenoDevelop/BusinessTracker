@@ -220,7 +220,16 @@
 
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Tracking: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
                                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,4">
-                                        <TextBlock Text="{Binding SelectedOrder.TrackingNumber}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedOrder.TrackingNumber}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                                   Visibility="{Binding SelectedOrder.Carrier, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                        <TextBlock FontWeight="SemiBold" VerticalAlignment="Center"
+                                                   Visibility="{Binding SelectedOrder.Carrier, Converter={StaticResource NullToVisibilityConverter}}">
+                                            <Hyperlink Command="{Binding DataContext.OpenTrackingUrlCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                       CommandParameter="{Binding SelectedOrder}"
+                                                       TextDecorations="Underline" Foreground="SteelBlue">
+                                                <TextBlock Text="{Binding SelectedOrder.TrackingNumber}" />
+                                            </Hyperlink>
+                                        </TextBlock>
                                         <TextBlock Text="{Binding SelectedOrder.Carrier, StringFormat=' ({0})'}" FontWeight="SemiBold" VerticalAlignment="Center"
                                                    Visibility="{Binding SelectedOrder.Carrier, Converter={StaticResource NullToVisibilityConverter}}"/>
                                     </StackPanel>
@@ -243,7 +252,7 @@
                                 <Grid Grid.Column="2" Margin="10,0,0,0">
                                     <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                            <TextBlock Text="{Binding SelectedOrder.Description}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding SelectedOrder.Description}" TextWrapping="Wrap" />
                                         </ScrollViewer>
                                     </Border>
                                 </Grid>
@@ -269,23 +278,23 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Klient: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Klient: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4" />
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.ClientName}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,0,4"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Adres: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Adres: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4" />
                                     <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4">
                                         <Run Text="{Binding SelectedOrder.ClientDetails.Street}" />, 
                                         <Run Text="{Binding SelectedOrder.ClientDetails.PostCode}" /> 
                                         <Run Text="{Binding SelectedOrder.ClientDetails.City}" />
                                     </TextBlock>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="E-mail: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="E-mail: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4" />
                                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.Email}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
 
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Telefon: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4" />
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Telefon: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4" />
                                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedOrder.ClientDetails.Phone}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Firma: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,4"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Firma: " Foreground="Gray" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,4"/>
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedOrder.CompanyOrder, Converter={StaticResource BooleanToTextConverter}, ConverterParameter='Tak;Nie'}" 
                                                FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,0,4"/>
                                 </Grid>
@@ -293,7 +302,7 @@
                                 <Grid Grid.Column="1" Margin="10,0,0,0">
                                     <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                            <TextBlock Text="{Binding SelectedOrder.ClientDetails.Description}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding SelectedOrder.ClientDetails.Description}" TextWrapping="Wrap" />
                                         </ScrollViewer>
                                     </Border>
                                 </Grid>
@@ -655,7 +664,18 @@
 
                                         <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,5,10">
                                             <TextBlock Text="Przewoźnik" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
-                                            <ComboBox ItemsSource="{Binding Carriers}" SelectedItem="{Binding Carrier}" />
+                                            <ComboBox ItemsSource="{Binding Carriers}" SelectedItem="{Binding Carrier}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid>
+                                                            <TextBlock x:Name="NullText" Text="Brak" FontStyle="Italic" Foreground="Gray" 
+                                                                       Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                                            <TextBlock x:Name="ItemText" Text="{Binding}" 
+                                                                       Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
                                         </StackPanel>
 
                                         <StackPanel Grid.Row="4" Grid.Column="1" Margin="5,0,0,10">
