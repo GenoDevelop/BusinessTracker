@@ -326,16 +326,20 @@
 
                             <!-- Production History Content -->
                             <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,0,0">
-                                <DataGrid ItemsSource="{Binding ProductionHistory}"
+                                <controls:ConfigurableDataGrid x:Name="HistoryDataGrid"
+                                          LayoutKey="Production.HistoryGrid"
+                                          ItemsSource="{Binding ProductionHistory}"
                                           SelectedItem="{Binding SelectedProduction}"
                                           AutoGenerateColumns="False"
                                           IsReadOnly="True"
                                           Background="White"
                                           BorderThickness="1"
                                           BorderBrush="#DDD"
+                                          ColumnVisibilityChanged="HistoryDataGrid_ColumnVisibilityChanged"
                                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
                                     <DataGrid.Columns>
-                                        <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Date">
                                             <DataGridTemplateColumn.Header>
                                                 <controls:DateRangeFilterColumnHeader
                                                     x:Name="HistoryDateFilterColumn"
@@ -351,7 +355,8 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Amount">
                                             <DataGridTemplateColumn.Header>
                                                 <controls:NumericFilterColumnHeader
                                                     x:Name="HistoryAmountFilterColumn"
@@ -367,7 +372,8 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="*">
+                                        <DataGridTemplateColumn Width="*"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Description">
                                             <DataGridTemplateColumn.Header>
                                                 <controls:TextFilterColumnHeader
                                                     x:Name="HistoryDescriptionFilterColumn"
@@ -383,7 +389,8 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                          
-                                        <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje"
                                                            FontWeight="Bold"
@@ -404,7 +411,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
-                                </DataGrid>
+                                </controls:ConfigurableDataGrid>
                             </Grid>
                             <!-- Pagination for Production History -->
                             <controls:PaginationControl x:Name="HistoryPagination"

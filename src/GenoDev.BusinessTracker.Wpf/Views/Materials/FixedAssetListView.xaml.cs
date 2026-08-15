@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
@@ -75,20 +76,42 @@ public partial class FixedAssetListView : UserControl
 
     private async void Filter_FilterChanged(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not FixedAssetListViewModel viewModel)
+        if (!UpdateFilter())
         {
             return;
         }
 
-        viewModel.SetFilter(new FixedAssetFilterCriteria(
-            NameFilterColumn.FilterText,
-            EanFilterColumn.FilterText,
-            ManufacturerCodeFilterColumn.FilterText,
-            DescriptionFilterColumn.FilterText,
-            AmountFilterColumn.SelectedOperator,
-            AmountFilterColumn.FilterValue));
+        await Pagination.RefreshAsync();
+    }
+
+    private async void DataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateFilter() || !e.AffectsActiveFilter ||
+            DataContext is not FixedAssetListViewModel { IsFilterVisible: true })
+        {
+            return;
+        }
 
         await Pagination.RefreshAsync();
+    }
+
+    private bool UpdateFilter()
+    {
+        if (DataContext is not FixedAssetListViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetFilter(new FixedAssetFilterCriteria(
+            FixedAssetsDataGrid.IsColumnVisible("Name") ? NameFilterColumn.FilterText : null,
+            FixedAssetsDataGrid.IsColumnVisible("Ean") ? EanFilterColumn.FilterText : null,
+            FixedAssetsDataGrid.IsColumnVisible("ManufacturerCode") ? ManufacturerCodeFilterColumn.FilterText : null,
+            FixedAssetsDataGrid.IsColumnVisible("Description") ? DescriptionFilterColumn.FilterText : null,
+            FixedAssetsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.SelectedOperator : null,
+            FixedAssetsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.FilterValue : null));
+        return true;
     }
 
     private async void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)

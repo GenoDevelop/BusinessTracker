@@ -33,12 +33,15 @@
         </StackPanel>
         
         <!-- Suppliers -->
-        <DataGrid Grid.Row="1"
+        <controls:ConfigurableDataGrid x:Name="SuppliersDataGrid"
+                  Grid.Row="1"
+                  LayoutKey="Materials.SuppliersGrid"
                   ItemsSource="{Binding Suppliers}"
                   SelectedItem="{Binding SelectedSupplier}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                  ColumnVisibilityChanged="SuppliersDataGrid_ColumnVisibilityChanged"
                   Sorting="SuppliersDataGrid_Sorting">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="*" SortMemberPath="Name">
@@ -96,7 +99,8 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
         
-                <DataGridTemplateColumn Width="80" CanUserSort="False">
+                <DataGridTemplateColumn Width="80" CanUserSort="False"
+                                        controls:ConfigurableDataGrid.ColumnKey="Actions">
                     <DataGridTemplateColumn.Header>
                         <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" />
                     </DataGridTemplateColumn.Header>
@@ -121,7 +125,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </controls:ConfigurableDataGrid>
         
         <!-- Pagination -->
         <controls:PaginationControl x:Name="SuppliersPagination"

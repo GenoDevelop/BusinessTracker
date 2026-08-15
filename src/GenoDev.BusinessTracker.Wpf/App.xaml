@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:GenoDev.BusinessTracker.Wpf"
-             xmlns:converters="clr-namespace:GenoDev.BusinessTracker.Wpf.Converters">
+             xmlns:converters="clr-namespace:GenoDev.BusinessTracker.Wpf.Converters"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -137,6 +138,9 @@
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="#DDD" />
             </Style>
+
+            <Style TargetType="{x:Type controls:ConfigurableDataGrid}"
+                   BasedOn="{StaticResource {x:Type DataGrid}}" />
 
             <Style TargetType="DataGridRow">
                 <Setter Property="MinHeight" Value="32" />

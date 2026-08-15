@@ -1,4 +1,5 @@
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 using System.ComponentModel;
@@ -125,17 +126,39 @@ public partial class RecipesView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not RecipesViewModel viewModel)
+        if (!UpdateRecipeMaterialsFilter())
         {
             return;
         }
 
-        viewModel.SetRecipeMaterialsFilter(
-            new RecipeMaterialsFilterCriteria(
-                MaterialNameFilterColumn.FilterText,
-                DescriptionFilterColumn.FilterText));
+        await RecipeMaterialsPagination.RefreshAsync();
+    }
+
+    private async void RecipeMaterialsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateRecipeMaterialsFilter() || !e.AffectsActiveFilter ||
+            DataContext is not RecipesViewModel { IsItemsFilterVisible: true })
+        {
+            return;
+        }
 
         await RecipeMaterialsPagination.RefreshAsync();
+    }
+
+    private bool UpdateRecipeMaterialsFilter()
+    {
+        if (DataContext is not RecipesViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetRecipeMaterialsFilter(
+            new RecipeMaterialsFilterCriteria(
+                RecipeMaterialsDataGrid.IsColumnVisible("MaterialName") ? MaterialNameFilterColumn.FilterText : null,
+                RecipeMaterialsDataGrid.IsColumnVisible("Description") ? DescriptionFilterColumn.FilterText : null));
+        return true;
     }
 
     private async void MaterialsDataGrid_Sorting(

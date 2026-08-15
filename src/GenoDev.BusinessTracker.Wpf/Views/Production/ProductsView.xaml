@@ -22,10 +22,13 @@
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
+        <controls:ConfigurableDataGrid x:Name="ProductsDataGrid"
+                  Grid.Row="1" LayoutKey="Production.ProductsGrid"
+                  ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
                   AutoGenerateColumns="False" IsReadOnly="True"
                   Background="White"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                  ColumnVisibilityChanged="ProductsDataGrid_ColumnVisibilityChanged"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
@@ -109,7 +112,9 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
         
-                <DataGridTemplateColumn Width="80">
+                <DataGridTemplateColumn Width="80"
+                                        controls:ConfigurableDataGrid.ColumnKey="Actions"
+                                        controls:ConfigurableDataGrid.ColumnTitle="Akcje">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -125,7 +130,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </controls:ConfigurableDataGrid>
         
         <!-- Pagination -->
         <controls:PaginationControl x:Name="ProductsPagination"

@@ -8,7 +8,7 @@ using GenoDev.BusinessTracker.Domain.Enums;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class NumericFilterColumnHeader : UserControl
+public partial class NumericFilterColumnHeader : UserControl, IColumnFilterHeader
 {
     private readonly DispatcherTimer _debounceTimer;
 
@@ -97,6 +97,8 @@ public partial class NumericFilterColumnHeader : UserControl
         get => (decimal?)GetValue(FilterValueProperty);
         set => SetValue(FilterValueProperty, value);
     }
+
+    public bool HasActiveFilter => SelectedOperator.HasValue && FilterValue.HasValue;
 
     private static readonly DependencyPropertyKey IsValueValidPropertyKey = DependencyProperty.RegisterReadOnly(
         nameof(IsValueValid),

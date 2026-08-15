@@ -132,9 +132,15 @@ public partial class MaterialListViewModel : ViewModelBase
 
     public IRelayCommand<MaterialVariantDto> DeleteMaterialVariantCommand { get; }
 
-    public void SetFilter(MaterialFilterCriteria filter)
+    public bool SetFilter(MaterialFilterCriteria filter)
     {
+        if (_filter == filter)
+        {
+            return false;
+        }
+
         _filter = filter;
+        return true;
     }
 
     public void SetSorting(MaterialSortBy sortBy, bool isDescending)

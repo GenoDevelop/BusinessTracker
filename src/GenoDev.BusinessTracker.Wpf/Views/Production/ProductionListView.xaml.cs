@@ -1,4 +1,5 @@
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using System.Windows;
 using System.Windows.Controls;
@@ -117,19 +118,41 @@ public partial class ProductionListView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not ProductionListViewModel viewModel)
+        if (!UpdateHistoryFilter())
         {
             return;
         }
 
-        viewModel.SetHistoryFilter(
-            new ProductionHistoryFilterCriteria(
-                Description: HistoryDescriptionFilterColumn.FilterText,
-                Amount: (double?)HistoryAmountFilterColumn.FilterValue,
-                AmountOperator: HistoryAmountFilterColumn.SelectedOperator,
-                FromDate: HistoryDateFilterColumn.StartDate,
-                ToDate: HistoryDateFilterColumn.EndDate));
+        await HistoryPagination.RefreshAsync();
+    }
+
+    private async void HistoryDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateHistoryFilter() || !e.AffectsActiveFilter ||
+            DataContext is not ProductionListViewModel { IsHistoryFilterVisible: true })
+        {
+            return;
+        }
 
         await HistoryPagination.RefreshAsync();
+    }
+
+    private bool UpdateHistoryFilter()
+    {
+        if (DataContext is not ProductionListViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetHistoryFilter(
+            new ProductionHistoryFilterCriteria(
+                Description: HistoryDataGrid.IsColumnVisible("Description") ? HistoryDescriptionFilterColumn.FilterText : null,
+                Amount: HistoryDataGrid.IsColumnVisible("Amount") ? (double?)HistoryAmountFilterColumn.FilterValue : null,
+                AmountOperator: HistoryDataGrid.IsColumnVisible("Amount") ? HistoryAmountFilterColumn.SelectedOperator : null,
+                FromDate: HistoryDataGrid.IsColumnVisible("Date") ? HistoryDateFilterColumn.StartDate : null,
+                ToDate: HistoryDataGrid.IsColumnVisible("Date") ? HistoryDateFilterColumn.EndDate : null));
+        return true;
     }
 }

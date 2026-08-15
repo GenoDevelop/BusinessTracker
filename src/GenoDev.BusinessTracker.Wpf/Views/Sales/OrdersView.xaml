@@ -346,9 +346,12 @@
                                                             UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
 
-                                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedOrderProduct}"
+                                <controls:ConfigurableDataGrid x:Name="OrderProductsDataGrid"
+                                          Grid.Row="1" LayoutKey="Sales.OrderProductsGrid"
+                                          ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedOrderProduct}"
                                           AutoGenerateColumns="False" IsReadOnly="True"
                                           Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                                          ColumnVisibilityChanged="OrderProductsDataGrid_ColumnVisibilityChanged"
                                           Sorting="ProductsDataGrid_Sorting">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Width="2*" SortMemberPath="ProductName">
@@ -454,7 +457,8 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
                                             </DataGridTemplateColumn.Header>
@@ -472,7 +476,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
-                                </DataGrid>
+                                </controls:ConfigurableDataGrid>
 
                                 <controls:PaginationControl Grid.Row="2" Margin="0,5,0,0" x:Name="ProductsPagination" Layout="SingleLine"
                                     PageLoader="{Binding ProductsPageLoader}" InitialPageSize="50" HorizontalAlignment="Right" />
@@ -497,9 +501,12 @@
                                                             UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
 
-                                <DataGrid Grid.Row="1" ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedOrderPackingMaterial}"
+                                <controls:ConfigurableDataGrid x:Name="OrderPackingMaterialsDataGrid"
+                                          Grid.Row="1" LayoutKey="Sales.OrderPackingMaterialsGrid"
+                                          ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedOrderPackingMaterial}"
                                           AutoGenerateColumns="False" IsReadOnly="True"
                                           Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                                          ColumnVisibilityChanged="OrderPackingMaterialsDataGrid_ColumnVisibilityChanged"
                                           Sorting="PackingMaterialsDataGrid_Sorting">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
@@ -557,7 +564,8 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto"
+                                                                controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
                                             </DataGridTemplateColumn.Header>
@@ -575,7 +583,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
-                                </DataGrid>
+                                </controls:ConfigurableDataGrid>
 
                                 <controls:PaginationControl Grid.Row="2" Margin="0,5,0,0" x:Name="PackingMaterialsPagination" Layout="SingleLine"
                                     PageLoader="{Binding PackingMaterialsPageLoader}" InitialPageSize="50" HorizontalAlignment="Right" />

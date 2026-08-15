@@ -1,6 +1,7 @@
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
 using GenoDev.BusinessTracker.Wpf.Converters;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 using System.ComponentModel;
 using System.Windows;
@@ -164,34 +165,60 @@ public partial class SuppliesView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not SuppliesViewModel viewModel)
+        if (!UpdateSupplyItemsFilter())
         {
             return;
         }
 
-        viewModel.SetSupplyItemsFilter(
-            new SupplyItemsFilterCriteria(
-                ItemNameFilterColumn.FilterText,
-                EanFilterColumn.FilterText,
-                ManufacturerCodeFilterColumn.FilterText,
-                SetsAmountFilterColumn.FilterValue,
-                SetsAmountFilterColumn.SelectedOperator,
-                UnitsInSetFilterColumn.FilterValue,
-                UnitsInSetFilterColumn.SelectedOperator,
-                TotalAmountFilterColumn.FilterValue,
-                TotalAmountFilterColumn.SelectedOperator,
-                (decimal?)SetNetPriceFilterColumn.FilterValue,
-                SetNetPriceFilterColumn.SelectedOperator,
-                (decimal?)TotalNetPriceFilterColumn.FilterValue,
-                TotalNetPriceFilterColumn.SelectedOperator,
-                (decimal?)SetGrossPriceFilterColumn.FilterValue,
-                SetGrossPriceFilterColumn.SelectedOperator,
-                (decimal?)TotalGrossPriceFilterColumn.FilterValue,
-                TotalGrossPriceFilterColumn.SelectedOperator,
-                PrivateSupplyFilterColumn.IsFilterActive ? PrivateSupplyFilterColumn.FilterValue : null,
-                ItemTypeFilterColumn.GetSelectedValues<StorageItemType>()?.ToArray()));
+        await SupplyItemsPagination.RefreshAsync();
+    }
+
+    private async void SupplyItemsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateSupplyItemsFilter() || !e.AffectsActiveFilter ||
+            DataContext is not SuppliesViewModel { IsItemsFilterVisible: true })
+        {
+            return;
+        }
 
         await SupplyItemsPagination.RefreshAsync();
+    }
+
+    private bool UpdateSupplyItemsFilter()
+    {
+        if (DataContext is not SuppliesViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetSupplyItemsFilter(
+            new SupplyItemsFilterCriteria(
+                SupplyItemsDataGrid.IsColumnVisible("ItemName") ? ItemNameFilterColumn.FilterText : null,
+                SupplyItemsDataGrid.IsColumnVisible("Ean") ? EanFilterColumn.FilterText : null,
+                SupplyItemsDataGrid.IsColumnVisible("ManufacturerCode") ? ManufacturerCodeFilterColumn.FilterText : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetsAmount") ? SetsAmountFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetsAmount") ? SetsAmountFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("UnitsInSet") ? UnitsInSetFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("UnitsInSet") ? UnitsInSetFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalAmount") ? TotalAmountFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalAmount") ? TotalAmountFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetNetPrice") ? (decimal?)SetNetPriceFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetNetPrice") ? SetNetPriceFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalNetPrice") ? (decimal?)TotalNetPriceFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalNetPrice") ? TotalNetPriceFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetGrossPrice") ? (decimal?)SetGrossPriceFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("SetGrossPrice") ? SetGrossPriceFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalGrossPrice") ? (decimal?)TotalGrossPriceFilterColumn.FilterValue : null,
+                SupplyItemsDataGrid.IsColumnVisible("TotalGrossPrice") ? TotalGrossPriceFilterColumn.SelectedOperator : null,
+                SupplyItemsDataGrid.IsColumnVisible("PrivateSupply") && PrivateSupplyFilterColumn.IsFilterActive
+                    ? PrivateSupplyFilterColumn.FilterValue
+                    : null,
+                SupplyItemsDataGrid.IsColumnVisible("ItemType")
+                    ? ItemTypeFilterColumn.GetSelectedValues<StorageItemType>()?.ToArray()
+                    : null));
+        return true;
     }
 
     private async void SupplyItemsDataGrid_Sorting(

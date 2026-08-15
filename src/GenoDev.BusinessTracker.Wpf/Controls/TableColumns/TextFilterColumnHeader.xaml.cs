@@ -4,7 +4,7 @@ using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class TextFilterColumnHeader : UserControl
+public partial class TextFilterColumnHeader : UserControl, IColumnFilterHeader
 {
     private readonly DispatcherTimer _debounceTimer;
 
@@ -47,6 +47,8 @@ public partial class TextFilterColumnHeader : UserControl
         get => (string?)GetValue(FilterTextProperty);
         set => SetValue(FilterTextProperty, value);
     }
+
+    public bool HasActiveFilter => !string.IsNullOrWhiteSpace(FilterText);
 
     public static readonly DependencyProperty IsFilterVisibleProperty = DependencyProperty.Register(
         nameof(IsFilterVisible),

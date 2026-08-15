@@ -33,12 +33,15 @@
         </StackPanel>
 
         <!-- Fixed Assets Table -->
-        <DataGrid Grid.Row="1"
+        <controls:ConfigurableDataGrid x:Name="FixedAssetsDataGrid"
+                  Grid.Row="1"
+                  LayoutKey="Materials.FixedAssetsGrid"
                   ItemsSource="{Binding FixedAssets}"
                   SelectedItem="{Binding SelectedFixedAsset}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                  ColumnVisibilityChanged="DataGrid_ColumnVisibilityChanged"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="*" SortMemberPath="Name">
@@ -137,7 +140,8 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="Auto">
+                <DataGridTemplateColumn Width="Auto"
+                                        controls:ConfigurableDataGrid.ColumnKey="Actions">
                     <DataGridTemplateColumn.Header>
                         <TextBlock Text="Akcje"
                                    FontWeight="Bold"
@@ -160,7 +164,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </controls:ConfigurableDataGrid>
 
         <!-- Pagination -->
         <controls:PaginationControl x:Name="Pagination"

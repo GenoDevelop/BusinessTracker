@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
@@ -109,20 +110,60 @@ public partial class MaterialListView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not MaterialListViewModel viewModel)
+        if (!UpdateMaterialsFilter())
         {
             return;
         }
 
-        viewModel.SetFilter(
-            new MaterialFilterCriteria(
-                NameFilterColumn.FilterText,
-                DescriptionFilterColumn.FilterText,
-                VariantsCountFilterColumn.SelectedOperator,
-                VariantsCountFilterColumn.FilterValue));
+        await MaterialsPagination.RefreshAsync();
+    }
+
+    private async void MaterialsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateMaterialsFilter() || !e.AffectsActiveFilter ||
+            DataContext is not MaterialListViewModel { IsFilterVisible: true })
+        {
+            return;
+        }
 
         await MaterialsPagination.RefreshAsync();
     }
+
+    private bool UpdateMaterialsFilter()
+    {
+        if (DataContext is not MaterialListViewModel viewModel)
+        {
+            return false;
+        }
+
+        var isVariantsCountFilterActive =
+            IsMaterialsColumnVisible("VariantsCount") &&
+            VariantsCountFilterColumn.SelectedOperator.HasValue &&
+            VariantsCountFilterColumn.FilterValue.HasValue;
+
+        return viewModel.SetFilter(
+            new MaterialFilterCriteria(
+                IsMaterialsColumnVisible("Name")
+                    ? NullIfWhiteSpace(NameFilterColumn.FilterText)
+                    : null,
+                IsMaterialsColumnVisible("Description")
+                    ? NullIfWhiteSpace(DescriptionFilterColumn.FilterText)
+                    : null,
+                isVariantsCountFilterActive
+                    ? VariantsCountFilterColumn.SelectedOperator
+                    : null,
+                isVariantsCountFilterActive
+                    ? VariantsCountFilterColumn.FilterValue
+                    : null));
+    }
+
+    private static string? NullIfWhiteSpace(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value;
+
+    private bool IsMaterialsColumnVisible(string columnKey) =>
+        MaterialsDataGrid.IsColumnVisible(columnKey);
 
     private async void MaterialsDataGrid_Sorting(
         object sender,
@@ -167,23 +208,45 @@ public partial class MaterialListView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not MaterialListViewModel viewModel)
+        if (!UpdateVariantsFilter())
         {
             return;
         }
 
-        viewModel.SetVariantFilter(
-            new MaterialVariantFilterCriteria(
-                VariantNameFilterColumn.FilterText,
-                VariantEanFilterColumn.FilterText,
-                VariantManufacturerCodeFilterColumn.FilterText,
-                VariantDescriptionFilterColumn.FilterText,
-                VariantAmountFilterColumn.SelectedOperator,
-                VariantAmountFilterColumn.FilterValue,
-                VariantTotalUsedAmountFilterColumn.SelectedOperator,
-                VariantTotalUsedAmountFilterColumn.FilterValue));
+        await VariantsPagination.RefreshAsync();
+    }
+
+    private async void VariantsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateVariantsFilter() || !e.AffectsActiveFilter ||
+            DataContext is not MaterialListViewModel { IsVariantFilterVisible: true })
+        {
+            return;
+        }
 
         await VariantsPagination.RefreshAsync();
+    }
+
+    private bool UpdateVariantsFilter()
+    {
+        if (DataContext is not MaterialListViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetVariantFilter(
+            new MaterialVariantFilterCriteria(
+                VariantsDataGrid.IsColumnVisible("Name") ? VariantNameFilterColumn.FilterText : null,
+                VariantsDataGrid.IsColumnVisible("Ean") ? VariantEanFilterColumn.FilterText : null,
+                VariantsDataGrid.IsColumnVisible("ManufacturerCode") ? VariantManufacturerCodeFilterColumn.FilterText : null,
+                VariantsDataGrid.IsColumnVisible("Description") ? VariantDescriptionFilterColumn.FilterText : null,
+                VariantsDataGrid.IsColumnVisible("Amount") ? VariantAmountFilterColumn.SelectedOperator : null,
+                VariantsDataGrid.IsColumnVisible("Amount") ? VariantAmountFilterColumn.FilterValue : null,
+                VariantsDataGrid.IsColumnVisible("TotalUsedAmount") ? VariantTotalUsedAmountFilterColumn.SelectedOperator : null,
+                VariantsDataGrid.IsColumnVisible("TotalUsedAmount") ? VariantTotalUsedAmountFilterColumn.FilterValue : null));
+        return true;
     }
 
     private async void VariantsDataGrid_Sorting(

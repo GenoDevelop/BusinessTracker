@@ -1,4 +1,5 @@
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 using System;
@@ -88,22 +89,44 @@ public partial class ProductsView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not ProductsViewModel viewModel)
+        if (!UpdateProductsFilter())
         {
             return;
         }
     
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void ProductsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateProductsFilter() || !e.AffectsActiveFilter ||
+            DataContext is not ProductsViewModel { IsFilterVisible: true })
+        {
+            return;
+        }
+
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private bool UpdateProductsFilter()
+    {
+        if (DataContext is not ProductsViewModel viewModel)
+        {
+            return false;
+        }
+
         viewModel.SetProductsFilter(
             new ProductsFilterCriteria(
-                NameFilterColumn.FilterText,
-                IdentifierFilterColumn.FilterText,
-                AmountFilterColumn.FilterValue,
-                AmountFilterColumn.SelectedOperator,
-                TotalSoldAmountFilterColumn.FilterValue,
-                TotalSoldAmountFilterColumn.SelectedOperator,
-                DescriptionFilterColumn.FilterText));
-    
-        await ProductsPagination.RefreshAsync();
+                ProductsDataGrid.IsColumnVisible("Name") ? NameFilterColumn.FilterText : null,
+                ProductsDataGrid.IsColumnVisible("Identifier") ? IdentifierFilterColumn.FilterText : null,
+                ProductsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.FilterValue : null,
+                ProductsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.SelectedOperator : null,
+                ProductsDataGrid.IsColumnVisible("TotalSoldAmount") ? TotalSoldAmountFilterColumn.FilterValue : null,
+                ProductsDataGrid.IsColumnVisible("TotalSoldAmount") ? TotalSoldAmountFilterColumn.SelectedOperator : null,
+                ProductsDataGrid.IsColumnVisible("Description") ? DescriptionFilterColumn.FilterText : null));
+        return true;
     }
     
     private async void DataGrid_Sorting(

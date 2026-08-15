@@ -4,7 +4,7 @@ using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class DateRangeFilterColumnHeader : UserControl
+public partial class DateRangeFilterColumnHeader : UserControl, IColumnFilterHeader
 {
     private readonly DispatcherTimer _debounceTimer;
 
@@ -79,6 +79,8 @@ public partial class DateRangeFilterColumnHeader : UserControl
         get => (DateTime?)GetValue(EndDateProperty);
         set => SetValue(EndDateProperty, value);
     }
+
+    public bool HasActiveFilter => StartDate.HasValue || EndDate.HasValue;
 
     #endregion
 

@@ -6,7 +6,7 @@ using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class EnumFilterColumnHeader : UserControl
+public partial class EnumFilterColumnHeader : UserControl, IColumnFilterHeader
 {
     private readonly DispatcherTimer _debounceTimer;
 
@@ -172,6 +172,10 @@ public partial class EnumFilterColumnHeader : UserControl
     {
         return FilterComboBox.GetSelectedValues<TEnum>();
     }
+
+    public bool HasActiveFilter => SelectionMode == EnumFilterSelectionMode.Single
+        ? SelectedValue is not null
+        : SelectedValues is { Count: > 0 };
 
     #endregion
 

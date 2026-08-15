@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
@@ -32,19 +33,34 @@ public partial class StockAdjustmentsView : UserControl
 
     private async void Filter_FilterChanged(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not StockAdjustmentsViewModel viewModel) return;
-        viewModel.SetFilter(new StockAdjustmentFilterCriteria(
-            NameFilter.FilterText,
-            TypeFilter.GetSelectedValues<StockAdjustmentItemType>()?.ToArray(),
-            EanFilter.FilterText,
-            CodeFilter.FilterText,
-            AmountFilter.SelectedOperator,
-            AmountFilter.FilterValue,
-            null,
-            DateFilter.StartDate,
-            DateFilter.EndDate,
-            DescriptionFilter.FilterText));
+        if (!UpdateFilter()) return;
         await Pagination.RefreshAsync();
+    }
+
+    private async void AdjustmentsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateFilter() || !e.AffectsActiveFilter ||
+            DataContext is not StockAdjustmentsViewModel { IsFilterVisible: true }) return;
+        await Pagination.RefreshAsync();
+    }
+
+    private bool UpdateFilter()
+    {
+        if (DataContext is not StockAdjustmentsViewModel viewModel) return false;
+        viewModel.SetFilter(new StockAdjustmentFilterCriteria(
+            AdjustmentsDataGrid.IsColumnVisible("ItemName") ? NameFilter.FilterText : null,
+            AdjustmentsDataGrid.IsColumnVisible("ItemType") ? TypeFilter.GetSelectedValues<StockAdjustmentItemType>()?.ToArray() : null,
+            AdjustmentsDataGrid.IsColumnVisible("Ean") ? EanFilter.FilterText : null,
+            AdjustmentsDataGrid.IsColumnVisible("Code") ? CodeFilter.FilterText : null,
+            AdjustmentsDataGrid.IsColumnVisible("Amount") ? AmountFilter.SelectedOperator : null,
+            AdjustmentsDataGrid.IsColumnVisible("Amount") ? AmountFilter.FilterValue : null,
+            null,
+            AdjustmentsDataGrid.IsColumnVisible("Date") ? DateFilter.StartDate : null,
+            AdjustmentsDataGrid.IsColumnVisible("Date") ? DateFilter.EndDate : null,
+            AdjustmentsDataGrid.IsColumnVisible("Description") ? DescriptionFilter.FilterText : null));
+        return true;
     }
 
     private async void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)

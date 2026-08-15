@@ -1,5 +1,6 @@
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -85,18 +86,40 @@ public partial class SuppliersView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (DataContext is not SuppliersViewModel viewModel)
+        if (!UpdateSuppliersFilter())
         {
             return;
         }
     
+        await SuppliersPagination.RefreshAsync();
+    }
+
+    private async void SuppliersDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateSuppliersFilter() || !e.AffectsActiveFilter ||
+            DataContext is not SuppliersViewModel { IsFilterVisible: true })
+        {
+            return;
+        }
+
+        await SuppliersPagination.RefreshAsync();
+    }
+
+    private bool UpdateSuppliersFilter()
+    {
+        if (DataContext is not SuppliersViewModel viewModel)
+        {
+            return false;
+        }
+
         viewModel.SetSuppliersFilter(
             new SuppliersFilterCriteria(
-                NameFilterColumn.FilterText,
-                NipFilterColumn.FilterText,
-                DescriptionFilterColumn.FilterText));
-    
-        await SuppliersPagination.RefreshAsync();
+                SuppliersDataGrid.IsColumnVisible("Name") ? NameFilterColumn.FilterText : null,
+                SuppliersDataGrid.IsColumnVisible("Nip") ? NipFilterColumn.FilterText : null,
+                SuppliersDataGrid.IsColumnVisible("Description") ? DescriptionFilterColumn.FilterText : null));
+        return true;
     }
     
     private async void SuppliersDataGrid_Sorting(

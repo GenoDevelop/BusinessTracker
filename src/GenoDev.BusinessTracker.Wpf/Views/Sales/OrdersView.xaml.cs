@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.GetOrders;
 using GenoDev.BusinessTracker.Wpf.Converters;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -204,29 +205,51 @@ public partial class OrdersView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (_attachedViewModel == null)
+        if (!UpdateProductsFilter())
         {
             return;
         }
 
-        _attachedViewModel.SetOrderProductsFilter(
-            new OrderProductsFilterCriteria(
-                ProductNameFilterColumn.FilterText,
-                ProductIdentifierFilterColumn.FilterText,
-                OrderedAmountFilterColumn.FilterValue,
-                OrderedAmountFilterColumn.SelectedOperator,
-                AssignedAmountFilterColumn.FilterValue,
-                AssignedAmountFilterColumn.SelectedOperator,
-                UnitNetPriceFilterColumn.FilterValue,
-                UnitNetPriceFilterColumn.SelectedOperator,
-                UnitGrossPriceFilterColumn.FilterValue,
-                UnitGrossPriceFilterColumn.SelectedOperator,
-                TotalNetPriceFilterColumn.FilterValue,
-                TotalNetPriceFilterColumn.SelectedOperator,
-                TotalGrossPriceFilterColumn.FilterValue,
-                TotalGrossPriceFilterColumn.SelectedOperator));
+        await ProductsPagination.RefreshAsync();
+    }
+
+    private async void OrderProductsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateProductsFilter() || !e.AffectsActiveFilter ||
+            _attachedViewModel is not { IsProductsFilterVisible: true })
+        {
+            return;
+        }
 
         await ProductsPagination.RefreshAsync();
+    }
+
+    private bool UpdateProductsFilter()
+    {
+        if (_attachedViewModel == null)
+        {
+            return false;
+        }
+
+        _attachedViewModel.SetOrderProductsFilter(
+            new OrderProductsFilterCriteria(
+                OrderProductsDataGrid.IsColumnVisible("ProductName") ? ProductNameFilterColumn.FilterText : null,
+                OrderProductsDataGrid.IsColumnVisible("Identifier") ? ProductIdentifierFilterColumn.FilterText : null,
+                OrderProductsDataGrid.IsColumnVisible("OrderedAmount") ? OrderedAmountFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("OrderedAmount") ? OrderedAmountFilterColumn.SelectedOperator : null,
+                OrderProductsDataGrid.IsColumnVisible("AssignedAmount") ? AssignedAmountFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("AssignedAmount") ? AssignedAmountFilterColumn.SelectedOperator : null,
+                OrderProductsDataGrid.IsColumnVisible("UnitNetPrice") ? UnitNetPriceFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("UnitNetPrice") ? UnitNetPriceFilterColumn.SelectedOperator : null,
+                OrderProductsDataGrid.IsColumnVisible("UnitGrossPrice") ? UnitGrossPriceFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("UnitGrossPrice") ? UnitGrossPriceFilterColumn.SelectedOperator : null,
+                OrderProductsDataGrid.IsColumnVisible("TotalNetPrice") ? TotalNetPriceFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("TotalNetPrice") ? TotalNetPriceFilterColumn.SelectedOperator : null,
+                OrderProductsDataGrid.IsColumnVisible("TotalGrossPrice") ? TotalGrossPriceFilterColumn.FilterValue : null,
+                OrderProductsDataGrid.IsColumnVisible("TotalGrossPrice") ? TotalGrossPriceFilterColumn.SelectedOperator : null));
+        return true;
     }
 
     private async void ProductsDataGrid_Sorting(
@@ -274,20 +297,42 @@ public partial class OrdersView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        if (_attachedViewModel == null)
+        if (!UpdatePackingMaterialsFilter())
         {
             return;
         }
 
-        _attachedViewModel.SetOrderPackingMaterialsFilter(
-            new OrderPackingMaterialsFilterCriteria(
-                PackingMaterialNameFilterColumn.FilterText,
-                PackingMaterialEanFilterColumn.FilterText,
-                PackingMaterialManufacturerCodeFilterColumn.FilterText,
-                PackingMaterialAmountFilterColumn.FilterValue,
-                PackingMaterialAmountFilterColumn.SelectedOperator));
+        await PackingMaterialsPagination.RefreshAsync();
+    }
+
+    private async void OrderPackingMaterialsDataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdatePackingMaterialsFilter() || !e.AffectsActiveFilter ||
+            _attachedViewModel is not { IsPackingMaterialsFilterVisible: true })
+        {
+            return;
+        }
 
         await PackingMaterialsPagination.RefreshAsync();
+    }
+
+    private bool UpdatePackingMaterialsFilter()
+    {
+        if (_attachedViewModel == null)
+        {
+            return false;
+        }
+
+        _attachedViewModel.SetOrderPackingMaterialsFilter(
+            new OrderPackingMaterialsFilterCriteria(
+                OrderPackingMaterialsDataGrid.IsColumnVisible("Name") ? PackingMaterialNameFilterColumn.FilterText : null,
+                OrderPackingMaterialsDataGrid.IsColumnVisible("Ean") ? PackingMaterialEanFilterColumn.FilterText : null,
+                OrderPackingMaterialsDataGrid.IsColumnVisible("ManufacturerCode") ? PackingMaterialManufacturerCodeFilterColumn.FilterText : null,
+                OrderPackingMaterialsDataGrid.IsColumnVisible("Amount") ? PackingMaterialAmountFilterColumn.FilterValue : null,
+                OrderPackingMaterialsDataGrid.IsColumnVisible("Amount") ? PackingMaterialAmountFilterColumn.SelectedOperator : null));
+        return true;
     }
 
     private async void PackingMaterialsDataGrid_Sorting(

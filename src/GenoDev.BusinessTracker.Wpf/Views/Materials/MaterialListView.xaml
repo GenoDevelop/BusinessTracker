@@ -45,14 +45,19 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <DataGrid ItemsSource="{Binding Materials}"
+                <controls:ConfigurableDataGrid x:Name="MaterialsDataGrid"
+                          LayoutKey="Materials.MaterialsGrid"
+                          ItemsSource="{Binding Materials}"
                           SelectedItem="{Binding SelectedMaterial}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                          ColumnVisibilityChanged="MaterialsDataGrid_ColumnVisibilityChanged"
                           Sorting="MaterialsDataGrid_Sorting">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="*" SortMemberPath="Name">
+                        <DataGridTemplateColumn Width="*" SortMemberPath="Name"
+                                                controls:ConfigurableDataGrid.ColumnKey="Name"
+                                                controls:ConfigurableDataGrid.ColumnTitle="Nazwa">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader
                                     x:Name="NameFilterColumn"
@@ -70,7 +75,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <DataGridTemplateColumn Width="150" SortMemberPath="VariantsCount">
+                        <DataGridTemplateColumn Width="150" SortMemberPath="VariantsCount"
+                                                controls:ConfigurableDataGrid.ColumnKey="VariantsCount"
+                                                controls:ConfigurableDataGrid.ColumnTitle="Liczba wariantów">
                             <DataGridTemplateColumn.Header>
                                 <controls:NumericFilterColumnHeader
                                     x:Name="VariantsCountFilterColumn"
@@ -89,7 +96,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <DataGridTemplateColumn Width="2*" SortMemberPath="Description">
+                        <DataGridTemplateColumn Width="2*" SortMemberPath="Description"
+                                                controls:ConfigurableDataGrid.ColumnKey="Description"
+                                                controls:ConfigurableDataGrid.ColumnTitle="Opis">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader
                                     x:Name="DescriptionFilterColumn"
@@ -108,7 +117,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto">
+                        <DataGridTemplateColumn Width="Auto"
+                                                controls:ConfigurableDataGrid.ColumnKey="Actions"
+                                                controls:ConfigurableDataGrid.ColumnTitle="Akcje">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="Akcje"
                                            FontWeight="Bold"
@@ -133,7 +144,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </DataGrid>
+                </controls:ConfigurableDataGrid>
 
                 <!-- Pagination for Materials -->
                 <controls:PaginationControl x:Name="MaterialsPagination"
@@ -183,12 +194,15 @@
                                                  Click="VariantFilterToggleButton_Click" />
                 </StackPanel>
 
-                <DataGrid Grid.Row="1"
+                <controls:ConfigurableDataGrid x:Name="VariantsDataGrid"
+                          Grid.Row="1"
+                          LayoutKey="Materials.MaterialVariantsGrid"
                           ItemsSource="{Binding MaterialVariants}"
                           SelectedItem="{Binding SelectedMaterialVariant}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                          ColumnVisibilityChanged="VariantsDataGrid_ColumnVisibilityChanged"
                           Sorting="VariantsDataGrid_Sorting">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="*" SortMemberPath="Name">
@@ -308,7 +322,8 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto">
+                        <DataGridTemplateColumn Width="Auto"
+                                                controls:ConfigurableDataGrid.ColumnKey="Actions">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="Akcje"
                                            FontWeight="Bold"
@@ -331,7 +346,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </DataGrid>
+                </controls:ConfigurableDataGrid>
 
                 <!-- Pagination for Variants -->
                 <controls:PaginationControl x:Name="VariantsPagination"

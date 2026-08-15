@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using GenoDev.BusinessTracker.Domain.Enums;
+using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
@@ -75,22 +76,44 @@ public partial class PackingMaterialListView : UserControl
 
     private async void Filter_FilterChanged(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not PackingMaterialListViewModel viewModel)
+        if (!UpdateFilter())
         {
             return;
         }
 
-        viewModel.SetFilter(new PackingMaterialFilterCriteria(
-            NameFilterColumn.FilterText,
-            EanFilterColumn.FilterText,
-            ManufacturerCodeFilterColumn.FilterText,
-            DescriptionFilterColumn.FilterText,
-            AmountFilterColumn.SelectedOperator,
-            AmountFilterColumn.FilterValue,
-            TotalUsedAmountFilterColumn.SelectedOperator,
-            TotalUsedAmountFilterColumn.FilterValue));
+        await Pagination.RefreshAsync();
+    }
+
+    private async void DataGrid_ColumnVisibilityChanged(
+        object? sender,
+        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
+    {
+        if (!UpdateFilter() || !e.AffectsActiveFilter ||
+            DataContext is not PackingMaterialListViewModel { IsFilterVisible: true })
+        {
+            return;
+        }
 
         await Pagination.RefreshAsync();
+    }
+
+    private bool UpdateFilter()
+    {
+        if (DataContext is not PackingMaterialListViewModel viewModel)
+        {
+            return false;
+        }
+
+        viewModel.SetFilter(new PackingMaterialFilterCriteria(
+            PackingMaterialsDataGrid.IsColumnVisible("Name") ? NameFilterColumn.FilterText : null,
+            PackingMaterialsDataGrid.IsColumnVisible("Ean") ? EanFilterColumn.FilterText : null,
+            PackingMaterialsDataGrid.IsColumnVisible("ManufacturerCode") ? ManufacturerCodeFilterColumn.FilterText : null,
+            PackingMaterialsDataGrid.IsColumnVisible("Description") ? DescriptionFilterColumn.FilterText : null,
+            PackingMaterialsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.SelectedOperator : null,
+            PackingMaterialsDataGrid.IsColumnVisible("Amount") ? AmountFilterColumn.FilterValue : null,
+            PackingMaterialsDataGrid.IsColumnVisible("TotalUsedAmount") ? TotalUsedAmountFilterColumn.SelectedOperator : null,
+            PackingMaterialsDataGrid.IsColumnVisible("TotalUsedAmount") ? TotalUsedAmountFilterColumn.FilterValue : null));
+        return true;
     }
 
     private async void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)

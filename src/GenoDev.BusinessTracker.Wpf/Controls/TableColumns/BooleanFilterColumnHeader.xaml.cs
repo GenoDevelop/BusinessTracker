@@ -7,7 +7,7 @@ using GenoDev.BusinessTracker.Wpf.Converters;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class BooleanFilterColumnHeader : UserControl
+public partial class BooleanFilterColumnHeader : UserControl, IColumnFilterHeader
 {
     private readonly DispatcherTimer _debounceTimer;
 
@@ -109,6 +109,8 @@ public partial class BooleanFilterColumnHeader : UserControl
         get => (bool)GetValue(IsFilterActiveProperty);
         set => SetValue(IsFilterActiveProperty, value);
     }
+
+    public bool HasActiveFilter => IsFilterActive;
 
     private static void OnIsFilterActiveChanged(
         DependencyObject d,

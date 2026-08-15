@@ -224,10 +224,13 @@
                     </StackPanel>
 
                     <!-- Materials DataGrid -->
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding RecipeMaterials}" SelectedItem="{Binding SelectedRecipeMaterial}"
+                    <controls:ConfigurableDataGrid x:Name="RecipeMaterialsDataGrid"
+                              Grid.Row="1" LayoutKey="Production.RecipeMaterialsGrid"
+                              ItemsSource="{Binding RecipeMaterials}" SelectedItem="{Binding SelectedRecipeMaterial}"
                               AutoGenerateColumns="False" IsReadOnly="True"
                               Background="White"
                               ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                              ColumnVisibilityChanged="RecipeMaterialsDataGrid_ColumnVisibilityChanged"
                               Sorting="MaterialsDataGrid_Sorting">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
@@ -262,7 +265,8 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn Width="Auto"
+                                                    controls:ConfigurableDataGrid.ColumnKey="Actions">
                                 <DataGridTemplateColumn.Header>
                                     <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
                                 </DataGridTemplateColumn.Header>
@@ -284,7 +288,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </DataGrid>
+                    </controls:ConfigurableDataGrid>
 
                     <!-- Pagination for Materials -->
                     <controls:PaginationControl x:Name="RecipeMaterialsPagination"
