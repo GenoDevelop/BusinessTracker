@@ -227,7 +227,7 @@
                          Margin="0,0,0,10" />
 
                 <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True"
                          MinHeight="80"
                          TextWrapping="Wrap"

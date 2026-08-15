@@ -32,6 +32,60 @@
                 <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
             </Style>
 
+            <Style TargetType="{x:Type controls:ResizableTextBox}">
+                <Setter Property="Background" Value="White" />
+                <Setter Property="BorderBrush" Value="#ABADB3" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Foreground" Value="#202020" />
+                <Setter Property="MinWidth" Value="120" />
+                <Setter Property="MinHeight" Value="50" />
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:ResizableTextBox}">
+                            <Grid>
+                                <TextBox Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="{TemplateBinding AcceptsReturn}"
+                                         TextWrapping="{TemplateBinding TextWrapping}"
+                                         VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
+                                         HorizontalScrollBarVisibility="Disabled"
+                                         Background="{TemplateBinding Background}"
+                                         BorderBrush="{TemplateBinding BorderBrush}"
+                                         BorderThickness="{TemplateBinding BorderThickness}"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         FontFamily="{TemplateBinding FontFamily}"
+                                         FontSize="{TemplateBinding FontSize}"
+                                         FontStyle="{TemplateBinding FontStyle}"
+                                         FontWeight="{TemplateBinding FontWeight}"
+                                         Padding="3,3,15,15" />
+
+                                <Thumb x:Name="PART_ResizeThumb"
+                                       Width="16"
+                                       Height="16"
+                                       Margin="0,0,2,2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Bottom"
+                                       Cursor="SizeNWSE"
+                                       Focusable="False"
+                                       ToolTip="Zmień rozmiar pola">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Grid Background="Transparent">
+                                                <Path Data="M 3,13 L 13,3 M 8,13 L 13,8 M 12,13 L 13,12"
+                                                      Stroke="#777"
+                                                      StrokeThickness="1.2"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style TargetType="ComboBox">
                 <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
             </Style>

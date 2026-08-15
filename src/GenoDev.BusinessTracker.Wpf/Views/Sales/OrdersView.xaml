@@ -715,7 +715,7 @@
 
                                         <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="0,0,0,10">
                                             <TextBlock Text="Opis" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                                            <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                                      TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
                                         </StackPanel>
                                     </Grid>
@@ -757,7 +757,7 @@
                                     <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
                                     <TextBlock Text="Opis klienta" Margin="0,0,0,2" Foreground="Gray" FontSize="11" />
-                                    <TextBox Text="{Binding ClientDescription, UpdateSourceTrigger=PropertyChanged}" 
+                                    <controls:ResizableTextBox Text="{Binding ClientDescription, UpdateSourceTrigger=PropertyChanged}"
                                              TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
                                 </StackPanel>
                             </ScrollViewer>

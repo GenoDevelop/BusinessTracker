@@ -316,7 +316,7 @@
                               Margin="0,0,0,10" Height="25"/>
 
                     <TextBlock Text="Opis:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                    <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -340,7 +340,7 @@
                               Margin="0,0,0,10" Height="25"/>
 
                     <TextBlock Text="Opis:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                    <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
