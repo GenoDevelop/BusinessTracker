@@ -97,6 +97,11 @@ public partial class ProductionListView : UserControl
         object sender,
         SelectionChangedEventArgs e)
     {
+        if (DataContext is ProductionListViewModel { IsRestoringProductsSelection: true })
+        {
+            return;
+        }
+
         // History belongs to a different product context, so the previous page is invalid.
         await HistoryPagination.ResetAndRefreshAsync();
     }

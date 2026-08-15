@@ -35,6 +35,7 @@
         <!-- Suppliers -->
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding Suppliers}"
+                  SelectedItem="{Binding SelectedSupplier}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"

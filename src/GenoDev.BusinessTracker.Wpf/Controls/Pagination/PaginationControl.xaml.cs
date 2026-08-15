@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
@@ -219,6 +220,7 @@ public partial class PaginationControl : UserControl
             new PropertyMetadata("Następna"));
 
     private CancellationTokenSource? _activeLoadCancellation;
+    private long _scheduledRefreshVersion;
     private long _loadRequestVersion;
     private bool _autoLoadExecuted;
 
@@ -357,6 +359,21 @@ public partial class PaginationControl : UserControl
     /// </summary>
     public async Task<bool> RefreshAsync()
     {
+        var scheduledRefreshVersion = ++_scheduledRefreshVersion;
+
+        // Let the current input/binding operation finish first so selection changes,
+        // popup closing, and other visual state can be rendered before query work starts.
+        await Dispatcher.InvokeAsync(
+            static () => { },
+            DispatcherPriority.Background);
+
+        // Several bindings/events can request the same refresh in one dispatcher turn.
+        // Only the newest request should reach the database.
+        if (scheduledRefreshVersion != _scheduledRefreshVersion)
+        {
+            return false;
+        }
+
         var outcome = await LoadCurrentPageAsync(allowPageCorrection: true);
         return outcome == LoadOutcome.Success;
     }
@@ -609,6 +626,9 @@ public partial class PaginationControl : UserControl
 
     private void CancelActiveLoad()
     {
+        // Invalidate a refresh that has been queued but has not started yet.
+        ++_scheduledRefreshVersion;
+
         // Invalidate the request even if its loader ignores cancellation.
         ++_loadRequestVersion;
 

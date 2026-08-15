@@ -31,6 +31,11 @@ public partial class ProductionListViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private Guid? _editingProductionId;
+    private CancellationTokenSource? _productRecipesLoadCancellation;
+    private CancellationTokenSource? _materialsLoadCancellation;
+    private bool _isRestoringProductsSelection;
+    private bool _isRestoringHistorySelection;
+    private bool _isRestoringProductRecipesSelection;
 
     private ProductionHistoryFilterCriteria _historyFilter =
         ProductionHistoryFilterCriteria.Empty;
@@ -84,6 +89,8 @@ public partial class ProductionListViewModel : ViewModelBase
     /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
     /// </summary>
     public event Action<ProductionPaginationTarget>? PaginationRefreshRequested;
+
+    public bool IsRestoringProductsSelection => _isRestoringProductsSelection;
 
     [ObservableProperty]
     private bool _isFilterVisible;
@@ -243,17 +250,30 @@ public partial class ProductionListViewModel : ViewModelBase
         PaginationState state,
         CancellationToken cancellationToken)
     {
-        var selectedId = SelectedProduct?.Id;
+        var selectedProduct = SelectedProduct;
         var result = await _mediator.Send(
             new GetProductionSummaryQuery(state.PageIndex, state.PageSize, SearchTerm),
             cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
-        ReplaceItems(Products, result.Items);
+        _isRestoringProductsSelection = true;
+        try
+        {
+            SelectedProduct = ReplaceItemsPreservingSelection(
+                Products,
+                result.Items,
+                selectedProduct,
+                product => product.Id);
+        }
+        finally
+        {
+            _isRestoringProductsSelection = false;
+        }
 
-        SelectedProduct = selectedId.HasValue
-            ? Products.FirstOrDefault(product => product.Id == selectedId.Value)
-            : null;
+        if (selectedProduct is not null && SelectedProduct is null)
+        {
+            HandleSelectedProductChanged(null);
+        }
 
         return result.TotalCount;
     }
@@ -269,7 +289,7 @@ public partial class ProductionListViewModel : ViewModelBase
             return 0;
         }
 
-        var selectedId = SelectedProduction?.Id;
+        var selectedProduction = SelectedProduction;
         var filter = _historyFilter;
 
         var result = await _mediator.Send(
@@ -285,16 +305,39 @@ public partial class ProductionListViewModel : ViewModelBase
             cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
-        ReplaceItems(ProductionHistory, result.Items);
+        _isRestoringHistorySelection = true;
+        try
+        {
+            SelectedProduction = ReplaceItemsPreservingSelection(
+                ProductionHistory,
+                result.Items,
+                selectedProduction,
+                production => production.Id);
+        }
+        finally
+        {
+            _isRestoringHistorySelection = false;
+        }
 
-        SelectedProduction = selectedId.HasValue
-            ? ProductionHistory.FirstOrDefault(item => item.Id == selectedId.Value)
-            : null;
+        if (selectedProduction is not null && SelectedProduction is null)
+        {
+            _ = LoadMaterialsAsync();
+        }
 
         return result.TotalCount;
     }
 
     partial void OnSelectedProductChanged(ProductionSummaryDto? value)
+    {
+        if (_isRestoringProductsSelection)
+        {
+            return;
+        }
+
+        HandleSelectedProductChanged(value);
+    }
+
+    private void HandleSelectedProductChanged(ProductionSummaryDto? value)
     {
         CancelAddProduction();
         ProductionHistory.Clear();
@@ -304,6 +347,16 @@ public partial class ProductionListViewModel : ViewModelBase
     }
 
     partial void OnSelectedRecipeChanged(RecipeDto? value)
+    {
+        if (_isRestoringProductRecipesSelection)
+        {
+            return;
+        }
+
+        HandleSelectedRecipeChanged(value);
+    }
+
+    private void HandleSelectedRecipeChanged(RecipeDto? value)
     {
         NotifyCommandStatesChanged();
 
@@ -320,6 +373,11 @@ public partial class ProductionListViewModel : ViewModelBase
 
     partial void OnSelectedProductionChanged(ProductionHistoryDto? value)
     {
+        if (_isRestoringHistorySelection)
+        {
+            return;
+        }
+
         if (!ShowRecipeDetails)
         {
             _ = LoadMaterialsAsync();
@@ -353,57 +411,125 @@ public partial class ProductionListViewModel : ViewModelBase
 
     private async Task LoadProductRecipesAsync(ProductionSummaryDto? product)
     {
-        var selectedId = SelectedRecipe?.Id;
-        ProductRecipes.Clear();
-        SelectedRecipe = null;
+        _productRecipesLoadCancellation?.Cancel();
+
+        var selectedRecipe = SelectedRecipe;
 
         if (product is null)
         {
+            ProductRecipes.Clear();
+            SelectedRecipe = null;
             return;
         }
 
-        var result = await _mediator.Send(
-            new GetRecipesQuery(0, 1000, null, product.Id));
+        var cancellation = new CancellationTokenSource();
+        _productRecipesLoadCancellation = cancellation;
 
-        if (SelectedProduct?.Id != product.Id)
+        try
         {
-            return;
+            await YieldToUiAsync();
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            if (SelectedProduct?.Id != product.Id)
+            {
+                return;
+            }
+
+            var result = await _mediator.Send(
+                new GetRecipesQuery(0, 1000, null, product.Id),
+                cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            if (SelectedProduct?.Id != product.Id)
+            {
+                return;
+            }
+
+            _isRestoringProductRecipesSelection = true;
+            try
+            {
+                SelectedRecipe = ReplaceItemsPreservingSelection(
+                    ProductRecipes,
+                    result.Items,
+                    selectedRecipe,
+                    recipe => recipe.Id);
+
+                SelectedRecipe ??= ProductRecipes.FirstOrDefault();
+            }
+            finally
+            {
+                _isRestoringProductRecipesSelection = false;
+            }
+
+            HandleSelectedRecipeChanged(SelectedRecipe);
         }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // A newer product selection superseded this request.
+        }
+        finally
+        {
+            if (ReferenceEquals(_productRecipesLoadCancellation, cancellation))
+            {
+                _productRecipesLoadCancellation = null;
+            }
 
-        ReplaceItems(ProductRecipes, result.Items);
-
-        SelectedRecipe = selectedId.HasValue
-            ? ProductRecipes.FirstOrDefault(recipe => recipe.Id == selectedId.Value)
-            : null;
-
-        SelectedRecipe ??= ProductRecipes.FirstOrDefault();
+            cancellation.Dispose();
+        }
     }
 
     private async Task LoadMaterialsAsync()
     {
-        if (ShowRecipeDetails)
+        _materialsLoadCancellation?.Cancel();
+        var cancellation = new CancellationTokenSource();
+        _materialsLoadCancellation = cancellation;
+
+        try
         {
-            if (SelectedRecipe is null)
+            await YieldToUiAsync();
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            if (ShowRecipeDetails)
+            {
+                if (SelectedRecipe is null)
+                {
+                    SelectedMaterials.Clear();
+                    return;
+                }
+
+                var result = await _mediator.Send(
+                    new GetRecipeMaterialsQuery(SelectedRecipe.Id),
+                    cancellation.Token);
+                cancellation.Token.ThrowIfCancellationRequested();
+                ReplaceItems(SelectedMaterials, result.Items.Cast<object>());
+                return;
+            }
+
+            if (SelectedProduction is null)
             {
                 SelectedMaterials.Clear();
                 return;
             }
 
-            var result = await _mediator.Send(
-                new GetRecipeMaterialsQuery(SelectedRecipe.Id));
-            ReplaceItems(SelectedMaterials, result.Items.Cast<object>());
-            return;
+            var productionMaterials = await _mediator.Send(
+                new GetProductionMaterialsQuery(SelectedProduction.Id),
+                cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
+            ReplaceItems(SelectedMaterials, productionMaterials.Cast<object>());
         }
-
-        if (SelectedProduction is null)
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
-            SelectedMaterials.Clear();
-            return;
+            // A newer selection or display mode superseded this request.
         }
+        finally
+        {
+            if (ReferenceEquals(_materialsLoadCancellation, cancellation))
+            {
+                _materialsLoadCancellation = null;
+            }
 
-        var productionMaterials = await _mediator.Send(
-            new GetProductionMaterialsQuery(SelectedProduction.Id));
-        ReplaceItems(SelectedMaterials, productionMaterials.Cast<object>());
+            cancellation.Dispose();
+        }
     }
 
     private bool CanAddProduction()
@@ -535,10 +661,15 @@ public partial class ProductionListViewModel : ViewModelBase
         NotifyCommandStatesChanged();
         try
         {
-            await _mediator.Send(new DeleteProductionCommand(ProductionToDelete.Id));
+            var deletedProductionId = ProductionToDelete.Id;
+            await _mediator.Send(new DeleteProductionCommand(deletedProductionId));
 
             IsDeletePopupOpen = false;
             ProductionToDelete = null;
+            if (SelectedProduction?.Id == deletedProductionId)
+            {
+                SelectedProduction = null;
+            }
 
             await LoadProductRecipesAsync(SelectedProduct);
             RequestPaginationRefresh(ProductionPaginationTarget.History);

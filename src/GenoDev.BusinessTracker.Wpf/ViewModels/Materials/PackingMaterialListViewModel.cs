@@ -43,6 +43,9 @@ public partial class PackingMaterialListViewModel : ViewModelBase
     private bool _isFilterVisible;
 
     [ObservableProperty]
+    private PackingMaterialDto? _selectedPackingMaterial;
+
+    [ObservableProperty]
     private PackingMaterialSortBy _sortBy = PackingMaterialSortBy.Name;
 
     [ObservableProperty]
@@ -79,6 +82,7 @@ public partial class PackingMaterialListViewModel : ViewModelBase
 
     private async Task<int> LoadPackingMaterialsPageAsync(PaginationState state, CancellationToken cancellationToken)
     {
+        var selectedPackingMaterial = SelectedPackingMaterial;
         var query = new GetPackingMaterialsQuery(
             state.PageIndex,
             state.PageSize,
@@ -95,7 +99,13 @@ public partial class PackingMaterialListViewModel : ViewModelBase
 
         var result = await _mediator.Send(query, cancellationToken);
 
-        ReplaceItems(PackingMaterials, result.Items);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        SelectedPackingMaterial = ReplaceItemsPreservingSelection(
+            PackingMaterials,
+            result.Items,
+            selectedPackingMaterial,
+            material => material.Id);
 
         return result.TotalCount;
     }
@@ -145,9 +155,14 @@ public partial class PackingMaterialListViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _mediator.Send(new DeletePackingMaterialCommand(MaterialToDelete.Id));
+            var deletedMaterialId = MaterialToDelete.Id;
+            await _mediator.Send(new DeletePackingMaterialCommand(deletedMaterialId));
             IsDeletePopupOpen = false;
             MaterialToDelete = null;
+            if (SelectedPackingMaterial?.Id == deletedMaterialId)
+            {
+                SelectedPackingMaterial = null;
+            }
             RequestPaginationRefresh();
         }
         finally
@@ -162,12 +177,4 @@ public partial class PackingMaterialListViewModel : ViewModelBase
         MaterialToDelete = null;
     }
 
-    private static void ReplaceItems<T>(ObservableCollection<T> target, IEnumerable<T> source)
-    {
-        target.Clear();
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

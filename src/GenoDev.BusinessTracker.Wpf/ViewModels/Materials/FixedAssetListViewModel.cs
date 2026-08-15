@@ -43,6 +43,9 @@ public partial class FixedAssetListViewModel : ViewModelBase
     private bool _isFilterVisible;
 
     [ObservableProperty]
+    private FixedAssetDto? _selectedFixedAsset;
+
+    [ObservableProperty]
     private FixedAssetSortBy _sortBy = FixedAssetSortBy.Name;
 
     [ObservableProperty]
@@ -79,6 +82,7 @@ public partial class FixedAssetListViewModel : ViewModelBase
 
     private async Task<int> LoadFixedAssetsPageAsync(PaginationState state, CancellationToken cancellationToken)
     {
+        var selectedFixedAsset = SelectedFixedAsset;
         var query = new GetFixedAssetsQuery(
             state.PageIndex,
             state.PageSize,
@@ -93,7 +97,13 @@ public partial class FixedAssetListViewModel : ViewModelBase
 
         var result = await _mediator.Send(query, cancellationToken);
 
-        ReplaceItems(FixedAssets, result.Items);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        SelectedFixedAsset = ReplaceItemsPreservingSelection(
+            FixedAssets,
+            result.Items,
+            selectedFixedAsset,
+            asset => asset.Id);
 
         return result.TotalCount;
     }
@@ -143,9 +153,14 @@ public partial class FixedAssetListViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _mediator.Send(new DeleteFixedAssetCommand(AssetToDelete.Id));
+            var deletedAssetId = AssetToDelete.Id;
+            await _mediator.Send(new DeleteFixedAssetCommand(deletedAssetId));
             IsDeletePopupOpen = false;
             AssetToDelete = null;
+            if (SelectedFixedAsset?.Id == deletedAssetId)
+            {
+                SelectedFixedAsset = null;
+            }
             RequestPaginationRefresh();
         }
         finally
@@ -160,12 +175,4 @@ public partial class FixedAssetListViewModel : ViewModelBase
         AssetToDelete = null;
     }
 
-    private static void ReplaceItems<T>(ObservableCollection<T> target, IEnumerable<T> source)
-    {
-        target.Clear();
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

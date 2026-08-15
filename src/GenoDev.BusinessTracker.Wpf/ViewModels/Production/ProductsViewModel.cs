@@ -75,9 +75,14 @@ public partial class ProductsViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _mediator.Send(new DeleteProductCommand(ProductToDelete.Id));
+            var deletedProductId = ProductToDelete.Id;
+            await _mediator.Send(new DeleteProductCommand(deletedProductId));
             IsDeletePopupOpen = false;
             ProductToDelete = null;
+            if (SelectedProduct?.Id == deletedProductId)
+            {
+                SelectedProduct = null;
+            }
             RequestPaginationRefresh(ProductsPaginationTarget.Products);
         }
         finally
@@ -103,6 +108,9 @@ public partial class ProductsViewModel : ViewModelBase
     
     [ObservableProperty]
     private bool _isFilterVisible;
+
+    [ObservableProperty]
+    private ProductDto? _selectedProduct;
     
     public ObservableCollection<ProductDto> Products { get; } = new();
     
@@ -148,6 +156,7 @@ public partial class ProductsViewModel : ViewModelBase
         PaginationState state,
         CancellationToken cancellationToken)
     {
+        var selectedProduct = SelectedProduct;
         var filter = _productsFilter;
         var result = await _mediator.Send(
             new GetProductsQuery(
@@ -166,7 +175,11 @@ public partial class ProductsViewModel : ViewModelBase
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(Products, result.Items);
+        SelectedProduct = ReplaceItemsPreservingSelection(
+            Products,
+            result.Items,
+            selectedProduct,
+            product => product.Id);
         return result.TotalCount;
     }
     
@@ -175,15 +188,4 @@ public partial class ProductsViewModel : ViewModelBase
         PaginationRefreshRequested?.Invoke(target);
     }
     
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-    
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

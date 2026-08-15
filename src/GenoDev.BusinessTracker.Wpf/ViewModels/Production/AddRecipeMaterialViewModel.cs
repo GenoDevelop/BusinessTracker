@@ -15,6 +15,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     private Guid? _recipeId;
     private Guid? _recipeMaterialId;
     private Guid? _initialMaterialId;
+    private CancellationTokenSource? _materialsLoadCancellation;
 
     [ObservableProperty]
     private string _title = "Dodaj materiał do przepisu";
@@ -42,25 +43,44 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     {
         if (!_recipeId.HasValue) return;
 
-        IsBusy = true;
+        _materialsLoadCancellation?.Cancel();
+        var cancellation = new CancellationTokenSource();
+        _materialsLoadCancellation = cancellation;
+
         try
         {
+            await YieldToUiAsync();
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            IsBusy = true;
+
             var query = new GetMaterialsForRecipeQuery(
                 _recipeId.Value,
                 ExcludedMaterialId: _initialMaterialId,
                 SearchTerm: MaterialSearchTerm);
 
-            var result = await mediator.Send(query);
-            
+            var result = await mediator.Send(query, cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
+
             Materials.Clear();
             foreach (var material in result)
             {
                 Materials.Add(material);
             }
         }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // A newer search or initialization superseded this request.
+        }
         finally
         {
-            IsBusy = false;
+            if (ReferenceEquals(_materialsLoadCancellation, cancellation))
+            {
+                _materialsLoadCancellation = null;
+                IsBusy = false;
+            }
+
+            cancellation.Dispose();
         }
     }
 

@@ -25,6 +25,7 @@ public partial class SuppliesViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private CancellationTokenSource? _supplyDetailsCancellation;
+    private bool _isRestoringSuppliesSelection;
     private SupplyItemsFilterCriteria _supplyItemsFilter =
         SupplyItemsFilterCriteria.Empty;
     
@@ -70,9 +71,15 @@ public partial class SuppliesViewModel : ViewModelBase
     
     [ObservableProperty]
     private SupplyDetailsDto? _selectedSupplyDetails;
+
+    [ObservableProperty]
+    private bool _isSupplyDetailsLoading;
     
     [ObservableProperty]
     private bool _isItemsFilterVisible;
+
+    [ObservableProperty]
+    private SupplyItemDto? _selectedSupplyItem;
     
     public SupplyItemSortColumn? SupplyItemsSortColumn { get; private set; }
     
@@ -109,7 +116,7 @@ public partial class SuppliesViewModel : ViewModelBase
     private bool _isDeleteItemPopupOpen;
     
     [ObservableProperty]
-    private SupplyItemDto? _selectedItemToRemove;
+    private SupplyItemDto? _supplyItemToRemove;
     
     public void SetSupplyItemsFilter(SupplyItemsFilterCriteria filter)
     {
@@ -151,14 +158,22 @@ public partial class SuppliesViewModel : ViewModelBase
     
     partial void OnSelectedSupplyChanged(SupplyDto? value)
     {
+        if (_isRestoringSuppliesSelection)
+        {
+            return;
+        }
+
+        SelectedSupplyItem = null;
         _ = LoadSupplyDetailsAsync(value);
     }
+
+    public bool IsRestoringSuppliesSelection => _isRestoringSuppliesSelection;
     
     private async Task<int> LoadSuppliesPageAsync(
         PaginationState state,
         CancellationToken cancellationToken)
     {
-        var selectedId = SelectedSupply?.Id;
+        var selectedSupply = SelectedSupply;
         var result = await _mediator.Send(
             new GetSuppliesQuery(
                 state.PageIndex,
@@ -169,11 +184,24 @@ public partial class SuppliesViewModel : ViewModelBase
     
         cancellationToken.ThrowIfCancellationRequested();
     
-        ReplaceItems(Supplies, result.Items);
-    
-        SelectedSupply = selectedId.HasValue
-            ? Supplies.FirstOrDefault(supply => supply.Id == selectedId.Value)
-            : null;
+        _isRestoringSuppliesSelection = true;
+        try
+        {
+            SelectedSupply = ReplaceItemsPreservingSelection(
+                Supplies,
+                result.Items,
+                selectedSupply,
+                supply => supply.Id);
+        }
+        finally
+        {
+            _isRestoringSuppliesSelection = false;
+        }
+
+        if (selectedSupply is not null && SelectedSupply is null)
+        {
+            _ = LoadSupplyDetailsAsync(null);
+        }
     
         return result.TotalCount;
     }
@@ -186,8 +214,11 @@ public partial class SuppliesViewModel : ViewModelBase
         if (selectedSupply is null)
         {
             SupplyItems.Clear();
+            SelectedSupplyItem = null;
             return 0;
         }
+
+        var selectedSupplyItem = SelectedSupplyItem;
     
         var filter = IsItemsFilterVisible
             ? _supplyItemsFilter
@@ -225,7 +256,11 @@ public partial class SuppliesViewModel : ViewModelBase
     
         cancellationToken.ThrowIfCancellationRequested();
     
-        ReplaceItems(SupplyItems, result.Items);
+        SelectedSupplyItem = ReplaceItemsPreservingSelection(
+            SupplyItems,
+            result.Items,
+            selectedSupplyItem,
+            item => item.Id);
         return result.TotalCount;
     }
     
@@ -233,21 +268,30 @@ public partial class SuppliesViewModel : ViewModelBase
     {
         _supplyDetailsCancellation?.Cancel();
         _supplyDetailsCancellation = null;
-    
-        SelectedSupplyDetails = null;
-    
+
         if (supply is null)
         {
+            SelectedSupplyDetails = null;
+            IsSupplyDetailsLoading = false;
             IsBusy = false;
             return;
         }
-    
+
         var cancellation = new CancellationTokenSource();
         _supplyDetailsCancellation = cancellation;
-    
+
+        IsSupplyDetailsLoading = true;
         IsBusy = true;
         try
         {
+            await YieldToUiAsync();
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            if (SelectedSupply?.Id != supply.Id)
+            {
+                return;
+            }
+
             var result = await _mediator.Send(
                 new GetSupplyDetailsQuery(supply.Id),
                 cancellation.Token);
@@ -268,6 +312,7 @@ public partial class SuppliesViewModel : ViewModelBase
             if (ReferenceEquals(_supplyDetailsCancellation, cancellation))
             {
                 _supplyDetailsCancellation = null;
+                IsSupplyDetailsLoading = false;
                 IsBusy = false;
             }
     
@@ -408,14 +453,14 @@ public partial class SuppliesViewModel : ViewModelBase
             return;
         }
     
-        SelectedItemToRemove = item;
+        SupplyItemToRemove = item;
         IsDeleteItemPopupOpen = true;
     }
     
     [RelayCommand]
     private async Task ConfirmDeleteItem()
     {
-        if (SelectedItemToRemove is null)
+        if (SupplyItemToRemove is null)
         {
             return;
         }
@@ -423,11 +468,16 @@ public partial class SuppliesViewModel : ViewModelBase
         IsBusy = true;
         try
         {
+            var removedItemId = SupplyItemToRemove.Id;
             await _mediator.Send(
-                new RemoveItemFromSupplyCommand(SelectedItemToRemove.Id));
+                new RemoveItemFromSupplyCommand(removedItemId));
     
             IsDeleteItemPopupOpen = false;
-            SelectedItemToRemove = null;
+            SupplyItemToRemove = null;
+            if (SelectedSupplyItem?.Id == removedItemId)
+            {
+                SelectedSupplyItem = null;
+            }
     
             RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
             RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
@@ -443,7 +493,7 @@ public partial class SuppliesViewModel : ViewModelBase
     private void CancelDeleteItem()
     {
         IsDeleteItemPopupOpen = false;
-        SelectedItemToRemove = null;
+        SupplyItemToRemove = null;
     }
     
     private void RequestPaginationRefresh(
@@ -460,15 +510,4 @@ public partial class SuppliesViewModel : ViewModelBase
             : null;
     }
     
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-    
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

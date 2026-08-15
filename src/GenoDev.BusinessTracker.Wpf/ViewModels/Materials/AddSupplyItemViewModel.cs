@@ -16,6 +16,8 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
 public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSupplyId) : ViewModelBase
 {
+    private CancellationTokenSource? _variantsLoadCancellation;
+
     [ObservableProperty]
     private StorageItemType _selectedType = StorageItemType.MaterialVariant;
 
@@ -88,23 +90,50 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
 
     private async Task LoadVariantsAsync(MaterialDto? material)
     {
+        _variantsLoadCancellation?.Cancel();
+
         MaterialVariants.Clear();
         SelectedMaterialVariant = null;
 
         if (material == null) return;
 
-        IsBusy = true;
+        var cancellation = new CancellationTokenSource();
+        _variantsLoadCancellation = cancellation;
+
         try
         {
-            var result = await mediator.Send(new GetMaterialVariantsQuery(material.Id, 0, 1000));
+            await YieldToUiAsync();
+            cancellation.Token.ThrowIfCancellationRequested();
+
+            if (SelectedMaterial?.Id != material.Id)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            var result = await mediator.Send(
+                new GetMaterialVariantsQuery(material.Id, 0, 1000),
+                cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
+
             foreach (var variant in result.Items)
             {
                 MaterialVariants.Add(variant);
             }
         }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // A newer material selection superseded this request.
+        }
         finally
         {
-            IsBusy = false;
+            if (ReferenceEquals(_variantsLoadCancellation, cancellation))
+            {
+                _variantsLoadCancellation = null;
+                IsBusy = false;
+            }
+
+            cancellation.Dispose();
         }
     }
 

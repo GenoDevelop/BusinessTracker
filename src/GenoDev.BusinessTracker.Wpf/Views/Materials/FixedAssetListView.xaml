@@ -35,6 +35,7 @@
         <!-- Fixed Assets Table -->
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding FixedAssets}"
+                  SelectedItem="{Binding SelectedFixedAsset}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"

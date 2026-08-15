@@ -35,6 +35,7 @@
         <!-- Packing Materials Table -->
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding PackingMaterials}"
+                  SelectedItem="{Binding SelectedPackingMaterial}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"

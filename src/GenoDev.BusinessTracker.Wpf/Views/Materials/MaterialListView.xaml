@@ -185,6 +185,7 @@
 
                 <DataGrid Grid.Row="1"
                           ItemsSource="{Binding MaterialVariants}"
+                          SelectedItem="{Binding SelectedMaterialVariant}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"

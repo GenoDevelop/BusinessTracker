@@ -67,6 +67,8 @@ public partial class OrderProductFormViewModel : ViewModelBase
 
     private async Task LoadProducts()
     {
+        await YieldToUiAsync();
+
         var result = await _mediator.Send(new GetProductsQuery(0, 1000));
         Products = new ObservableCollection<ProductDto>(result.Items);
     }

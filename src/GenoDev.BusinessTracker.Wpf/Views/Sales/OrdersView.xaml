@@ -346,7 +346,8 @@
                                                             UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
 
-                                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedOrderProduct}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
                                           Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                                           Sorting="ProductsDataGrid_Sorting">
                                     <DataGrid.Columns>
@@ -496,7 +497,8 @@
                                                             UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
 
-                                <DataGrid Grid.Row="1" ItemsSource="{Binding PackingMaterials}" AutoGenerateColumns="False" IsReadOnly="True"
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding PackingMaterials}" SelectedItem="{Binding SelectedOrderPackingMaterial}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
                                           Background="White" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                                           Sorting="PackingMaterialsDataGrid_Sorting">
                                     <DataGrid.Columns>
@@ -845,7 +847,7 @@
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć produkt " />
-                    <Run Text="{Binding SelectedOrderProduct.ProductName, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="{Binding OrderProductToDelete.ProductName, Mode=OneWay}" FontWeight="Bold" />
                     <Run Text=" z tego zamówienia?" />
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -897,7 +899,7 @@
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć materiał opakowaniowy " />
-                    <Run Text="{Binding SelectedOrderPackingMaterial.Name, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="{Binding OrderPackingMaterialToDelete.Name, Mode=OneWay}" FontWeight="Bold" />
                     <Run Text=" z tego zamówienia?" />
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

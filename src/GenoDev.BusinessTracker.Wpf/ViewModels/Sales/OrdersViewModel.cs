@@ -28,6 +28,7 @@ public partial class OrdersViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
+    private bool _isRestoringOrdersSelection;
 
     public OrdersViewModel(
         IMediator mediator,
@@ -78,6 +79,12 @@ public partial class OrdersViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isOrderPackingMaterialFormOpen;
+
+    [ObservableProperty]
+    private OrderProductListDto? _orderProductToDelete;
+
+    [ObservableProperty]
+    private OrderPackingMaterialListDto? _orderPackingMaterialToDelete;
 
     [ObservableProperty]
     private OrderProductListDto? _selectedOrderProduct;
@@ -245,21 +252,26 @@ public partial class OrdersViewModel : ViewModelBase
     [RelayCommand]
     private void DeleteProduct(OrderProductListDto product)
     {
-        SelectedOrderProduct = product;
+        OrderProductToDelete = product;
         IsOrderProductDeleteConfirmationOpen = true;
     }
 
     [RelayCommand]
     private async Task ConfirmDeleteProduct()
     {
-        if (SelectedOrderProduct == null) return;
+        if (OrderProductToDelete == null) return;
 
         IsBusy = true;
         try
         {
-            await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeleteProductFromOrder.DeleteProductFromOrderCommand(SelectedOrderProduct.Id));
+            var deletedProductId = OrderProductToDelete.Id;
+            await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeleteProductFromOrder.DeleteProductFromOrderCommand(deletedProductId));
             IsOrderProductDeleteConfirmationOpen = false;
-            SelectedOrderProduct = null;
+            OrderProductToDelete = null;
+            if (SelectedOrderProduct?.Id == deletedProductId)
+            {
+                SelectedOrderProduct = null;
+            }
             RequestPaginationRefresh(OrdersPaginationTarget.Products);
         }
         finally
@@ -272,7 +284,7 @@ public partial class OrdersViewModel : ViewModelBase
     private void CancelDeleteProduct()
     {
         IsOrderProductDeleteConfirmationOpen = false;
-        SelectedOrderProduct = null;
+        OrderProductToDelete = null;
     }
 
     [RelayCommand]
@@ -315,21 +327,26 @@ public partial class OrdersViewModel : ViewModelBase
     [RelayCommand]
     private void DeletePackingMaterial(OrderPackingMaterialListDto packingMaterial)
     {
-        SelectedOrderPackingMaterial = packingMaterial;
+        OrderPackingMaterialToDelete = packingMaterial;
         IsOrderPackingMaterialDeleteConfirmationOpen = true;
     }
 
     [RelayCommand]
     private async Task ConfirmDeletePackingMaterial()
     {
-        if (SelectedOrderPackingMaterial == null) return;
+        if (OrderPackingMaterialToDelete == null) return;
 
         IsBusy = true;
         try
         {
-            await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeletePackingMaterialFromOrder.DeletePackingMaterialFromOrderCommand(SelectedOrderPackingMaterial.Id));
+            var deletedPackingMaterialId = OrderPackingMaterialToDelete.Id;
+            await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeletePackingMaterialFromOrder.DeletePackingMaterialFromOrderCommand(deletedPackingMaterialId));
             IsOrderPackingMaterialDeleteConfirmationOpen = false;
-            SelectedOrderPackingMaterial = null;
+            OrderPackingMaterialToDelete = null;
+            if (SelectedOrderPackingMaterial?.Id == deletedPackingMaterialId)
+            {
+                SelectedOrderPackingMaterial = null;
+            }
             RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
         }
         finally
@@ -342,7 +359,7 @@ public partial class OrdersViewModel : ViewModelBase
     private void CancelDeletePackingMaterial()
     {
         IsOrderPackingMaterialDeleteConfirmationOpen = false;
-        SelectedOrderPackingMaterial = null;
+        OrderPackingMaterialToDelete = null;
     }
 
     [RelayCommand]
@@ -371,6 +388,14 @@ public partial class OrdersViewModel : ViewModelBase
 
     partial void OnSelectedOrderChanged(OrderListDto? value)
     {
+        if (_isRestoringOrdersSelection)
+        {
+            return;
+        }
+
+        SelectedOrderProduct = null;
+        SelectedOrderPackingMaterial = null;
+
         // Both dependent tables now represent a different order, so their old pages are invalid.
         RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
         RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
@@ -381,8 +406,11 @@ public partial class OrdersViewModel : ViewModelBase
         if (SelectedOrder == null)
         {
             Products.Clear();
+            SelectedOrderProduct = null;
             return 0;
         }
+
+        var selectedOrderProduct = SelectedOrderProduct;
 
         var filter = IsProductsFilterVisible ? _orderProductsFilter : OrderProductsFilterCriteria.Empty;
 
@@ -408,7 +436,11 @@ public partial class OrdersViewModel : ViewModelBase
             filter.TotalGrossPrice
         ), cancellationToken);
 
-        ReplaceItems(Products, result.Items);
+        SelectedOrderProduct = ReplaceItemsPreservingSelection(
+            Products,
+            result.Items,
+            selectedOrderProduct,
+            product => product.Id);
         return result.TotalCount;
     }
 
@@ -417,8 +449,11 @@ public partial class OrdersViewModel : ViewModelBase
         if (SelectedOrder == null)
         {
             PackingMaterials.Clear();
+            SelectedOrderPackingMaterial = null;
             return 0;
         }
+
+        var selectedOrderPackingMaterial = SelectedOrderPackingMaterial;
 
         var filter = IsPackingMaterialsFilterVisible ? _orderPackingMaterialsFilter : OrderPackingMaterialsFilterCriteria.Empty;
 
@@ -435,13 +470,17 @@ public partial class OrdersViewModel : ViewModelBase
             IsPackingMaterialsDescending
         ), cancellationToken);
 
-        ReplaceItems(PackingMaterials, result.Items);
+        SelectedOrderPackingMaterial = ReplaceItemsPreservingSelection(
+            PackingMaterials,
+            result.Items,
+            selectedOrderPackingMaterial,
+            material => material.Id);
         return result.TotalCount;
     }
 
     private async Task<int> LoadOrdersPageAsync(PaginationState state, CancellationToken cancellationToken)
     {
-        var selectedId = SelectedOrder?.Id;
+        var selectedOrder = SelectedOrder;
         var result = await _mediator.Send(
             new GetOrdersQuery(
                 state.PageIndex,
@@ -452,11 +491,25 @@ public partial class OrdersViewModel : ViewModelBase
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(Orders, result.Items);
+        _isRestoringOrdersSelection = true;
+        try
+        {
+            SelectedOrder = ReplaceItemsPreservingSelection(
+                Orders,
+                result.Items,
+                selectedOrder,
+                order => order.Id);
+        }
+        finally
+        {
+            _isRestoringOrdersSelection = false;
+        }
 
-        SelectedOrder = selectedId.HasValue
-            ? Orders.FirstOrDefault(o => o.Id == selectedId.Value)
-            : null;
+        if (selectedOrder is not null && SelectedOrder is null)
+        {
+            RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
+            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
+        }
 
         return result.TotalCount;
     }
@@ -466,12 +519,4 @@ public partial class OrdersViewModel : ViewModelBase
         PaginationRefreshRequested?.Invoke(target, resetPageIndex);
     }
 
-    private void ReplaceItems<T>(ObservableCollection<T> target, IEnumerable<T> source)
-    {
-        target.Clear();
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

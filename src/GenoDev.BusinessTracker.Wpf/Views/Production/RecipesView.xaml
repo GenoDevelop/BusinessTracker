@@ -224,7 +224,8 @@
                     </StackPanel>
 
                     <!-- Materials DataGrid -->
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding RecipeMaterials}" AutoGenerateColumns="False" IsReadOnly="True"
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding RecipeMaterials}" SelectedItem="{Binding SelectedRecipeMaterial}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
                               Background="White"
                               ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                               Sorting="MaterialsDataGrid_Sorting">

@@ -23,6 +23,7 @@ public partial class MaterialListViewModel : ViewModelBase
     private readonly IServiceProvider _serviceProvider;
     private MaterialFilterCriteria _filter = MaterialFilterCriteria.Empty;
     private MaterialVariantFilterCriteria _variantFilter = MaterialVariantFilterCriteria.Empty;
+    private bool _isRestoringMaterialsSelection;
 
     public MaterialListViewModel(
         IMediator mediator,
@@ -62,8 +63,17 @@ public partial class MaterialListViewModel : ViewModelBase
     [ObservableProperty]
     private MaterialDto? _selectedMaterial;
 
+    [ObservableProperty]
+    private MaterialVariantDto? _selectedMaterialVariant;
+
     partial void OnSelectedMaterialChanged(MaterialDto? value)
     {
+        if (_isRestoringMaterialsSelection)
+        {
+            return;
+        }
+
+        SelectedMaterialVariant = null;
         CreateMaterialVariantCommand.NotifyCanExecuteChanged();
         RequestVariantsPaginationRefresh();
     }
@@ -146,6 +156,7 @@ public partial class MaterialListViewModel : ViewModelBase
         PaginationState state,
         CancellationToken cancellationToken)
     {
+        var selectedMaterial = SelectedMaterial;
         var result = await _mediator.Send(
             new GetMaterialsQuery(
                 state.PageIndex,
@@ -160,7 +171,26 @@ public partial class MaterialListViewModel : ViewModelBase
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(Materials, result.Items);
+        _isRestoringMaterialsSelection = true;
+        try
+        {
+            SelectedMaterial = ReplaceItemsPreservingSelection(
+                Materials,
+                result.Items,
+                selectedMaterial,
+                material => material.Id);
+        }
+        finally
+        {
+            _isRestoringMaterialsSelection = false;
+        }
+
+        if (selectedMaterial is not null && SelectedMaterial is null)
+        {
+            CreateMaterialVariantCommand.NotifyCanExecuteChanged();
+            RequestVariantsPaginationRefresh();
+        }
+
         return result.TotalCount;
     }
 
@@ -171,8 +201,11 @@ public partial class MaterialListViewModel : ViewModelBase
         if (SelectedMaterial is null)
         {
             MaterialVariants.Clear();
+            SelectedMaterialVariant = null;
             return 0;
         }
+
+        var selectedMaterialVariant = SelectedMaterialVariant;
 
         var result = await _mediator.Send(
             new GetMaterialVariantsQuery(
@@ -193,7 +226,11 @@ public partial class MaterialListViewModel : ViewModelBase
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(MaterialVariants, result.Items);
+        SelectedMaterialVariant = ReplaceItemsPreservingSelection(
+            MaterialVariants,
+            result.Items,
+            selectedMaterialVariant,
+            variant => variant.Id);
         return result.TotalCount;
     }
 
@@ -302,10 +339,15 @@ public partial class MaterialListViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _mediator.Send(new DeleteMaterialCommand(MaterialToDelete.Id));
+            var deletedMaterialId = MaterialToDelete.Id;
+            await _mediator.Send(new DeleteMaterialCommand(deletedMaterialId));
 
             IsDeletePopupOpen = false;
             MaterialToDelete = null;
+            if (SelectedMaterial?.Id == deletedMaterialId)
+            {
+                SelectedMaterial = null;
+            }
             RequestPaginationRefresh();
         }
         finally
@@ -324,10 +366,15 @@ public partial class MaterialListViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _mediator.Send(new DeleteMaterialVariantCommand(VariantToDelete.Id));
+            var deletedVariantId = VariantToDelete.Id;
+            await _mediator.Send(new DeleteMaterialVariantCommand(deletedVariantId));
 
             IsDeleteVariantPopupOpen = false;
             VariantToDelete = null;
+            if (SelectedMaterialVariant?.Id == deletedVariantId)
+            {
+                SelectedMaterialVariant = null;
+            }
             RequestVariantsPaginationRefresh();
         }
         finally
@@ -365,15 +412,4 @@ public partial class MaterialListViewModel : ViewModelBase
         VariantsPaginationRefreshRequested?.Invoke();
     }
 
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

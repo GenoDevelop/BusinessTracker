@@ -22,7 +22,8 @@
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
                   Background="White"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   Sorting="DataGrid_Sorting">

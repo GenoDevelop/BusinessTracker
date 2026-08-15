@@ -60,6 +60,9 @@ public partial class SuppliersViewModel : ViewModelBase
     
     [ObservableProperty]
     private bool _isFilterVisible;
+
+    [ObservableProperty]
+    private SupplierDto? _selectedSupplier;
     
     [ObservableProperty]
     private SupplierSortBy _sortBy = SupplierSortBy.Name;
@@ -94,6 +97,7 @@ public partial class SuppliersViewModel : ViewModelBase
         PaginationState state,
         CancellationToken cancellationToken)
     {
+        var selectedSupplier = SelectedSupplier;
         var filter = _suppliersFilter;
     
         var result = await _mediator.Send(
@@ -109,7 +113,11 @@ public partial class SuppliersViewModel : ViewModelBase
     
         cancellationToken.ThrowIfCancellationRequested();
     
-        ReplaceItems(Suppliers, result.Items);
+        SelectedSupplier = ReplaceItemsPreservingSelection(
+            Suppliers,
+            result.Items,
+            selectedSupplier,
+            supplier => supplier.Id);
         return result.TotalCount;
     }
     
@@ -168,11 +176,16 @@ public partial class SuppliersViewModel : ViewModelBase
         IsBusy = true;
         try
         {
+            var deletedSupplierId = SupplierToDelete.Id;
             await _mediator.Send(
-                new DeleteSupplierCommand(SupplierToDelete.Id));
+                new DeleteSupplierCommand(deletedSupplierId));
     
             IsDeletePopupOpen = false;
             SupplierToDelete = null;
+            if (SelectedSupplier?.Id == deletedSupplierId)
+            {
+                SelectedSupplier = null;
+            }
             RequestPaginationRefresh();
         }
         finally
@@ -192,15 +205,4 @@ public partial class SuppliersViewModel : ViewModelBase
         PaginationRefreshRequested?.Invoke();
     }
     
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-    
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

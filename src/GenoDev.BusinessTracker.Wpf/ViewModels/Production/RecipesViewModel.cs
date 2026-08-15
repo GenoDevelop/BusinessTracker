@@ -26,6 +26,7 @@ public partial class RecipesViewModel : ViewModelBase
     private RecipeMaterialsFilterCriteria _recipeMaterialsFilter =
         RecipeMaterialsFilterCriteria.Empty;
     private RecipeMaterialDto? _materialToDelete;
+    private bool _isRestoringRecipesSelection;
 
     public RecipesViewModel(
         IMediator mediator,
@@ -66,6 +67,8 @@ public partial class RecipesViewModel : ViewModelBase
     /// </summary>
     public event Action<RecipesPaginationTarget>? PaginationRefreshRequested;
 
+    public bool IsRestoringRecipesSelection => _isRestoringRecipesSelection;
+
     [ObservableProperty]
     private bool _isDeleteConfirmationOpen;
 
@@ -86,6 +89,19 @@ public partial class RecipesViewModel : ViewModelBase
 
     [ObservableProperty]
     private RecipeDto? _selectedRecipe;
+
+    [ObservableProperty]
+    private RecipeMaterialDto? _selectedRecipeMaterial;
+
+    partial void OnSelectedRecipeChanged(RecipeDto? value)
+    {
+        if (_isRestoringRecipesSelection)
+        {
+            return;
+        }
+
+        SelectedRecipeMaterial = null;
+    }
 
     [ObservableProperty]
     private AddRecipeMaterialViewModel? _addRecipeMaterialViewModel;
@@ -139,7 +155,7 @@ public partial class RecipesViewModel : ViewModelBase
         PaginationState state,
         CancellationToken cancellationToken)
     {
-        var selectedId = SelectedRecipe?.Id;
+        var selectedRecipe = SelectedRecipe;
         var result = await _mediator.Send(
             new GetRecipesQuery(
                 state.PageIndex,
@@ -151,11 +167,24 @@ public partial class RecipesViewModel : ViewModelBase
         // natychmiast po anulowaniu poprzedniego żądania.
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(Recipes, result.Items);
+        _isRestoringRecipesSelection = true;
+        try
+        {
+            SelectedRecipe = ReplaceItemsPreservingSelection(
+                Recipes,
+                result.Items,
+                selectedRecipe,
+                recipe => recipe.Id);
+        }
+        finally
+        {
+            _isRestoringRecipesSelection = false;
+        }
 
-        SelectedRecipe = selectedId.HasValue
-            ? Recipes.FirstOrDefault(recipe => recipe.Id == selectedId.Value)
-            : null;
+        if (selectedRecipe is not null && SelectedRecipe is null)
+        {
+            RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
+        }
 
         return result.TotalCount;
     }
@@ -168,8 +197,11 @@ public partial class RecipesViewModel : ViewModelBase
         if (selectedRecipe is null)
         {
             RecipeMaterials.Clear();
+            SelectedRecipeMaterial = null;
             return 0;
         }
+
+        var selectedRecipeMaterial = SelectedRecipeMaterial;
 
         var filter = _recipeMaterialsFilter;
         var result = await _mediator.Send(
@@ -185,7 +217,11 @@ public partial class RecipesViewModel : ViewModelBase
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ReplaceItems(RecipeMaterials, result.Items);
+        SelectedRecipeMaterial = ReplaceItemsPreservingSelection(
+            RecipeMaterials,
+            result.Items,
+            selectedRecipeMaterial,
+            material => material.Id);
         return result.TotalCount;
     }
 
@@ -287,12 +323,17 @@ public partial class RecipesViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            var command = new RemoveRecipeMaterialCommand(_materialToDelete.Id);
+            var deletedMaterialId = _materialToDelete.Id;
+            var command = new RemoveRecipeMaterialCommand(deletedMaterialId);
 
             await _mediator.Send(command);
 
             IsDeleteMaterialConfirmationOpen = false;
             _materialToDelete = null;
+            if (SelectedRecipeMaterial?.Id == deletedMaterialId)
+            {
+                SelectedRecipeMaterial = null;
+            }
             RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
         }
         finally
@@ -349,15 +390,4 @@ public partial class RecipesViewModel : ViewModelBase
         PaginationRefreshRequested?.Invoke(target);
     }
 
-    private static void ReplaceItems<T>(
-        ObservableCollection<T> target,
-        IEnumerable<T> source)
-    {
-        target.Clear();
-
-        foreach (var item in source)
-        {
-            target.Add(item);
-        }
-    }
 }

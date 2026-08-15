@@ -61,6 +61,8 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
 
     private async Task LoadPackingMaterials()
     {
+        await YieldToUiAsync();
+
         var result = await _mediator.Send(new GetPackingMaterialsQuery(0, 1000));
         PackingMaterials = new ObservableCollection<PackingMaterialDto>(result.Items);
     }

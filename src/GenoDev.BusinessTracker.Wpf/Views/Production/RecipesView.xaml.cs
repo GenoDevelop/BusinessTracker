@@ -98,6 +98,11 @@ public partial class RecipesView : UserControl
         object sender,
         SelectionChangedEventArgs e)
     {
+        if (DataContext is RecipesViewModel { IsRestoringRecipesSelection: true })
+        {
+            return;
+        }
+
         // Materials belong to a different recipe context, so the previous page is invalid.
         await RecipeMaterialsPagination.ResetAndRefreshAsync();
     }

@@ -137,6 +137,11 @@ public partial class SuppliesView : UserControl
         object sender,
         SelectionChangedEventArgs e)
     {
+        if (DataContext is SuppliesViewModel { IsRestoringSuppliesSelection: true })
+        {
+            return;
+        }
+
         // Items belong to a different supply context, so the previous page is invalid.
         await SupplyItemsPagination.ResetAndRefreshAsync();
     }
