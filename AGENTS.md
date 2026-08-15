@@ -144,6 +144,14 @@ Use the existing end-to-end list pattern rather than inventing per-view alternat
 - Match established layout, resources, colors, spacing, popup patterns, and action placement by inspecting the closest existing screen before designing a new one.
 - Avoid introducing a new UI framework, navigation pattern, generic repository, event bus, or parallel design system without explicit approval.
 
+### Notes and rich text
+
+- Note content is persisted as an RTF string in `Note.ContentRtf`. Treat it as opaque outside WPF; conversion between `RichTextBox`/`FlowDocument` and RTF belongs to the view layer.
+- Keep the paged note list lightweight by projecting only note identity and name. Load the selected note's rich content through a separate details query with latest-request-wins cancellation.
+- Creating a note sets only its name and empty content. Editing the rich content is a separate explicit-save operation; formatting changes must never be persisted merely because selection or focus changed.
+- Rich-text formatting controls must preserve the editor's focus/selection and reflect the format at the current caret or selection (including active toggles, font size, and text color), so toolbar interaction never obscures what will be changed.
+- Changing the active note while its editor is dirty requires a save/discard/cancel decision. Apply this guard to direct row selection and indirect selection changes such as paging, filtering, sorting, or selecting a newly created note; cancel must keep the current editor content and logical selection intact.
+
 ## Testing requirements
 
 Every handler change must be covered by unit/use-case tests. This includes new handlers, changed branches, validation/invariant changes, query projections, filters, sort options, pagination behavior, and side effects. A handler change is incomplete until its tests are added or updated and pass.

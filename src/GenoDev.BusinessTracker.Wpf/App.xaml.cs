@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 using GenoDev.BusinessTracker.Wpf.ViewModels;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Notes;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -67,6 +68,8 @@ public partial class App : Application
         services.AddTransient<CreateMaterialVariantViewModel>();
         services.AddTransient<CreatePackingMaterialViewModel>();
         services.AddTransient<CreateFixedAssetViewModel>();
+        services.AddTransient<NotesViewModel>();
+        services.AddTransient<CreateNoteViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>(s => new MainWindow

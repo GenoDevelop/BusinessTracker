@@ -11,6 +11,8 @@
         xmlns:salesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Sales"
         xmlns:materialsViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Materials"
         xmlns:productionViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Production"
+        xmlns:notes="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Notes"
+        xmlns:notesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Notes"
         mc:Ignorable="d"
         Title="Business Tracker" Height="768" Width="1024"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
@@ -24,6 +26,9 @@
         <DataTemplate DataType="{x:Type sales:SalesViewModel}">
             <salesViews:SalesView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type notes:NotesViewModel}">
+            <notesViews:NotesView />
+        </DataTemplate>
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <TabControl SelectedIndex="{Binding SelectedMainTabIndex}">
@@ -35,6 +40,9 @@
             </TabItem>
             <TabItem Header="Sprzedaż">
                 <ContentControl Content="{Binding SalesViewModel}" />
+            </TabItem>
+            <TabItem Header="Notatki">
+                <ContentControl Content="{Binding NotesViewModel}" />
             </TabItem>
         </TabControl>
 

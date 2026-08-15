@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Notes;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -11,11 +12,13 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel(
         MaterialsViewModel materialsViewModel,
         ProductionViewModel productionViewModel,
-        SalesViewModel salesViewModel)
+        SalesViewModel salesViewModel,
+        NotesViewModel notesViewModel)
     {
         MaterialsViewModel = materialsViewModel;
         ProductionViewModel = productionViewModel;
         SalesViewModel = salesViewModel;
+        NotesViewModel = notesViewModel;
 
         InitializeAsync();
     }
@@ -41,4 +44,5 @@ public partial class MainViewModel : ViewModelBase
     public MaterialsViewModel MaterialsViewModel { get; }
     public ProductionViewModel ProductionViewModel { get; }
     public SalesViewModel SalesViewModel { get; }
+    public NotesViewModel NotesViewModel { get; }
 }

@@ -8,6 +8,22 @@ public static class BusinessTrackerDbContextExtensions
 {
     extension(BusinessTrackerDbContext db)
     {
+        public Note Arrange_Note(
+            Guid? id = null,
+            string name = "Test Note",
+            string contentRtf = "")
+        {
+            var note = new Note
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = name,
+                ContentRtf = contentRtf
+            };
+
+            db.Notes.Add(note);
+            return note;
+        }
+
         public Supplier Arrange_Supplier(Guid? id = null,
             string name = "Test Supplier",
             string? nip = null,
