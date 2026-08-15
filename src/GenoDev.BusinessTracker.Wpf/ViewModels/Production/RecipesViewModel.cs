@@ -9,6 +9,7 @@ using GenoDev.BusinessTracker.Wpf.Filtering;
 using MediatR;
 using System.Collections.ObjectModel;
 using GenoDev.BusinessTracker.Wpf.Controls;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
@@ -21,13 +22,17 @@ public enum RecipesPaginationTarget
 public partial class RecipesViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
+    private readonly IServiceProvider _serviceProvider;
     private RecipeMaterialsFilterCriteria _recipeMaterialsFilter =
         RecipeMaterialsFilterCriteria.Empty;
     private RecipeMaterialDto? _materialToDelete;
 
-    public RecipesViewModel(IMediator mediator)
+    public RecipesViewModel(
+        IMediator mediator,
+        IServiceProvider serviceProvider)
     {
         _mediator = mediator;
+        _serviceProvider = serviceProvider;
 
         CreateRecipeCommand = new AsyncRelayCommand(CreateRecipeAsync);
         EditRecipeCommand = new AsyncRelayCommand(EditRecipeAsync);
@@ -214,7 +219,7 @@ public partial class RecipesViewModel : ViewModelBase
             return;
         }
 
-        CreateRecipeViewModel = new CreateRecipeViewModel(_mediator);
+        CreateRecipeViewModel = _serviceProvider.GetRequiredService<CreateRecipeViewModel>();
         CreateRecipeViewModel.RequestClose += () =>
         {
             IsCreatePopupOpen = false;
@@ -253,7 +258,7 @@ public partial class RecipesViewModel : ViewModelBase
             return;
         }
 
-        AddRecipeMaterialViewModel = new AddRecipeMaterialViewModel(_mediator);
+        AddRecipeMaterialViewModel = _serviceProvider.GetRequiredService<AddRecipeMaterialViewModel>();
         AddRecipeMaterialViewModel.RequestClose += () =>
         {
             IsAddMaterialPopupOpen = false;

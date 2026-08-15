@@ -29,7 +29,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalPrivate);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment,
+            StorageAmountType.TotalPrivate, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -52,7 +53,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalCompany);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment,
+            StorageAmountType.TotalCompany, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -75,7 +77,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment, StorageAmountType.TotalUsed);
+        await Sut.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, adjustment,
+            StorageAmountType.TotalUsed, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -98,7 +101,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalPrivate);
+        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment,
+            StorageAmountType.TotalPrivate, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -121,7 +125,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalCompany);
+        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment,
+            StorageAmountType.TotalCompany, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -144,7 +149,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment, StorageAmountType.TotalUsed);
+        await Sut.AdjustStorageAmountAsync(packingMaterialId, StorageItemType.Packing, adjustment,
+            StorageAmountType.TotalUsed, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -167,7 +173,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalPrivate);
+        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment,
+            StorageAmountType.TotalPrivate, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -190,7 +197,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment, StorageAmountType.TotalCompany);
+        await Sut.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, adjustment,
+            StorageAmountType.TotalCompany, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -266,7 +274,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalAmount);
+        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalAmount,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -289,7 +298,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act
-        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalSoldAmount);
+        await Sut.AdjustProductAmountAsync(productId, adjustment, ProductAmountType.TotalSoldAmount,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

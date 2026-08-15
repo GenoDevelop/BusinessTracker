@@ -33,7 +33,7 @@ public class GetProductionHistoryTests : BusinessTrackerUnitTestsBase<GetProduct
         var query = new GetProductionHistoryQuery(productId);
 
         // Act
-        var result = await Sut.Handle(query, default);
+        var result = await Sut.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Items.Should().HaveCount(2);
@@ -59,7 +59,7 @@ public class GetProductionHistoryTests : BusinessTrackerUnitTestsBase<GetProduct
         var query = new GetProductionHistoryQuery(productId, PageIndex: 1, PageSize: 10);
 
         // Act
-        var result = await Sut.Handle(query, default);
+        var result = await Sut.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Items.Should().HaveCount(5);
@@ -91,17 +91,23 @@ public class GetProductionHistoryTests : BusinessTrackerUnitTestsBase<GetProduct
         });
 
         // Act & Assert 1: Description
-        var resultDesc = await Sut.Handle(new GetProductionHistoryQuery(productId, Description: "test"), default);
+        var resultDesc = await Sut.Handle(new GetProductionHistoryQuery(productId, Description: "test"),
+            TestContext.Current.CancellationToken);
         resultDesc.Items.Should().HaveCount(2); // "Test A", "Test C"
 
         // Act & Assert 2: Amount Range
-        var resultAmount = await Sut.Handle(new GetProductionHistoryQuery(productId, AmountOperator: NumericOperator.GreaterThan, Amount: 15), default);
+        var resultAmount = await Sut.Handle(
+            new GetProductionHistoryQuery(productId, AmountOperator: NumericOperator.GreaterThan, Amount: 15),
+            TestContext.Current.CancellationToken);
         resultAmount.Items.Should().HaveCount(2);
         resultAmount.Items.Should().Contain(x => x.ProductionAmount == 20);
         resultAmount.Items.Should().Contain(x => x.ProductionAmount == 30);
 
         // Act & Assert 3: Date Range
-        var resultDate = await Sut.Handle(new GetProductionHistoryQuery(productId, FromDate: baseDate.AddDays(1), ToDate: baseDate.AddDays(1).AddHours(2)), default);
+        var resultDate = await Sut.Handle(
+            new GetProductionHistoryQuery(productId, FromDate: baseDate.AddDays(1),
+                ToDate: baseDate.AddDays(1).AddHours(2)),
+            TestContext.Current.CancellationToken);
         resultDate.Items.Should().HaveCount(1);
         resultDate.Items.Single().Description.Should().Be("Sample B");
     }

@@ -14,6 +14,10 @@ This file is the authoritative, repository-wide guide for AI-assisted work. Read
 
 The application is a .NET 10 Windows desktop application using WPF, CommunityToolkit.Mvvm, MediatR, Entity Framework Core 10, and PostgreSQL.
 
+All .NET work runs directly on the host machine with the locally installed .NET 10 SDK. Use local `dotnet` for restore, build, test, run, and EF CLI commands. Docker is used only to host PostgreSQL (the development database and disposable Testcontainers databases). Never build, test, run, or execute EF tooling inside a Docker SDK container, and never pull a .NET SDK image as a fallback for a missing local SDK. If the required local SDK is unavailable, report the prerequisite instead of changing the target framework or moving the toolchain into Docker.
+
+The repository's `global.json` opts `dotnet test` into the .NET 10 Microsoft.Testing.Platform (MTP) runner. Keep this setting: the test executable uses xUnit v3's MTP integration and cannot run through the legacy VSTest mode on .NET 10. With MTP, identify inputs explicitly with `--project` or `--solution`.
+
 - `src/GenoDev.BusinessTracker.Domain`: entities and domain enums. It must not depend on UI, persistence, or application use cases.
 - `src/GenoDev.BusinessTracker.ApplicationLogic`: CQRS requests, handlers, DTOs, application abstractions, query helpers, and application services. It depends on Domain, not Infrastructure or WPF.
 - `src/GenoDev.BusinessTracker.Infrastructure`: EF Core `BusinessTrackerDbContext`, entity configurations, PostgreSQL setup, design-time context factory, and migrations. It implements application abstractions.
@@ -23,6 +27,14 @@ The application is a .NET 10 Windows desktop application using WPF, CommunityToo
 - `utilities/GenoDev.Utilities.Core`: small reusable, business-independent utilities.
 
 Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Infrastructure -> ApplicationLogic + Domain`, and `ApplicationLogic -> Domain`. Do not reference WPF or Infrastructure from Domain/ApplicationLogic merely for convenience.
+
+## NuGet dependencies and licensing
+
+- Reuse the framework, existing packages, and repository code before proposing another dependency. Add a new NuGet package only when it has a concrete, justified benefit and the same result cannot reasonably be achieved with what the project already uses.
+- **Never add a new direct NuGet dependency without the user's explicit approval.** Before editing a project file or running a restore that introduces it, tell the user the exact package and proposed version, why it is needed, and ask for permission.
+- Before requesting approval, verify the package using its official NuGet metadata and, when needed, its official repository. Report the exact license identifier/name and state plainly whether the package is free to use for this project, including commercial use when that can be established. Mention material obligations or restrictions such as attribution, notice preservation, source disclosure, copyleft, paid/commercial terms, or dual licensing.
+- Do not infer that a package is free merely because it can be downloaded from NuGet. If the license, ownership, applicable version, or commercial-use terms are missing or ambiguous, say so and do not add the package until the user makes an informed decision.
+- If an update to an existing dependency changes its license or introduces materially different terms, treat it like a new dependency and obtain approval first.
 
 ## CQRS and application use cases
 
@@ -37,6 +49,7 @@ Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Inf
 - Preserve business invariants and update every related aggregate/counter consistently. Study adjacent handlers before implementing inventory, production, supply, recipe, or order mutations; these flows affect related totals.
 - Pass cancellation tokens through MediatR, EF async operations, pagination loaders, and services.
 - Register application services in `ApplicationLogic/Extensions/DependencyInjectionExtensions.cs`; MediatR discovers handlers from the ApplicationLogic assembly.
+- The WPF application does not create a DI scope per MediatR request. Services that hold or depend on the transient `IBusinessTrackerDbContext` (including `IItemsService`) must therefore be transient, not scoped or singleton.
 
 ## Database and Entity Framework Core
 
@@ -60,7 +73,7 @@ Then inspect the generated migration and model snapshot to ensure they contain o
 
 **Never apply migrations to the user's local database.** Do not run `dotnet ef database update`, `Database.Migrate`, `EnsureCreated`, SQL scripts, or any other command against the configured local/development database. The user's workflow is to review and apply migrations personally when appropriate. AI work stops after generating and reviewing the migration. Automatic migration of the isolated, disposable PostgreSQL Testcontainer by the existing test infrastructure is allowed and must remain intact.
 
-The local development PostgreSQL service is defined in `docker-compose.yml` and listens on port 5434.
+The local development PostgreSQL service is defined in `docker-compose.yml` and listens on port 5434. This database service is Docker's only runtime role in normal project development; the WPF application and all .NET commands remain local.
 
 ## Lists, server-side pagination, filtering, and sorting
 
@@ -71,7 +84,7 @@ Use the existing end-to-end list pattern rather than inventing per-view alternat
 - List queries use zero-based `PageIndex` and a positive `PageSize` and return `PagedList<T>`.
 - Apply all filters and ordering before `CountAsync`, `Skip`, and `Take`.
 - `TotalCount` is the count after filtering and before paging. `HasNextPage` is derived by `PagedList<T>`.
-- Apply deterministic server-side ordering before paging. Add a stable tie-breaker when the primary column is not unique and page stability matters.
+- Apply deterministic server-side ordering before paging. Store the result of the primary `OrderBy` as an `IOrderedQueryable`, then finish it with an ascending unique-ID tie-breaker using `ThenByStable(x => x.Id)` (or an explicit `ThenBy(x => x.Id)`). This prevents records with equal primary sort values from moving between pages and makes it impossible to call the shared helper before primary ordering.
 - Sorting is represented by a feature-specific `*SortBy` enum plus `IsDescending`. Keep enum names aligned with DataGrid `SortMemberPath` values so views can parse them directly.
 - Text filters should use `QueryableSearchExtensions.WhereContainsAll` or `WhereContainsAllInAny`. They use PostgreSQL `ILIKE`, escape `%`, `_`, and `\`, split unquoted input into terms combined with AND, and treat quoted input as one phrase. Do not replace them with case-sensitive `Contains` or client-side filtering.
 - Numeric filters use `NumericOperator` and `ApplyNumericFilter`; date ranges, enum selections, and booleans should remain nullable/optional so an unset filter does not constrain the query.
@@ -105,6 +118,7 @@ Use the existing end-to-end list pattern rather than inventing per-view alternat
 - Follow MVVM with CommunityToolkit.Mvvm: ViewModels inherit `ViewModelBase`, use `[ObservableProperty]`, `RelayCommand`/`AsyncRelayCommand`, and MediatR. Keep business and persistence logic out of XAML code-behind.
 - Code-behind is acceptable for view concerns that WPF does not express cleanly: control events, DataGrid sort glyphs, collecting column-header filter state, pagination refresh wiring, and popup/window behavior.
 - Resolve ViewModels through DI. Register new ViewModels in `App.xaml.cs` with a lifetime consistent with neighboring screens. The main shell is singleton; feature/form ViewModels are generally transient.
+- Parent ViewModels must not construct form/child ViewModels with `new`. Resolve dependency-only children from `IServiceProvider`; use `ActivatorUtilities.CreateInstance` when the child also requires runtime values such as the selected DTO or parent ID. Lightweight row/input helper ViewModels that only wrap their parent and have no service dependencies are exempt.
 - Reuse existing controls and styles before adding new ones. Search `Wpf/Controls`, `App.xaml`, and nearby views first.
 - Whenever new UI behavior can or should be reused, implement it as a reusable component beside the existing controls in the appropriate `Wpf/Controls` subdirectory. Use that component in every applicable current location instead of leaving one-off copies in views. Reuse it for future occurrences so behavior, styling, accessibility, and fixes remain consistent. Add a view-specific implementation only when the behavior is genuinely unique; if duplication emerges, extract it immediately.
 - Use the existing button controls (`CreateButton`, `EditButton`, `DeleteButton`, `RefreshButton`, `FilterToggleButton`, arrow/website buttons) and `DraggablePopup` rather than reproducing their visuals or behavior.
@@ -122,6 +136,7 @@ Every handler change must be covered by unit/use-case tests. This includes new h
 
 - Use xUnit v3 and FluentAssertions, following the existing `*_Tests` naming and nearby feature folder structure.
 - Derive handler test classes from `BusinessTrackerUnitTestsBase<TSut>`.
+- In test code, pass `TestContext.Current.CancellationToken` to every asynchronous handler, service, EF, arrange, or other API that accepts a cancellation token. Do not use `default`, `CancellationToken.None`, or omit an optional token in ordinary tests. A dedicated `CancellationTokenSource` is appropriate only when cancellation behavior itself is under test; dispose it correctly.
 - For EF behavior, register the real PostgreSQL test database with `RegisterBusinessTrackingPostgresDatabase(services)`. Tests use Testcontainers and Respawn; Docker must be available.
 - Arrange domain data through `Arrange_BusinessTrackerDatabase` and the existing `BusinessTrackerDbContextExtensions.Arrange_*` helpers. Do not manually build large graphs in each test.
 - When adding an entity or a commonly needed setup shape, extend the shared `Arrange_*` extensions and maintain both navigation sides consistently.
@@ -130,12 +145,14 @@ Every handler change must be covered by unit/use-case tests. This includes new h
 - Command handler tests should verify the returned value, persisted database state, related entity/counter changes, and expected behavior when records or stock are missing/insufficient.
 - Do not weaken assertions, skip tests, or alter production behavior merely to make a test pass.
 
-After the mandatory migration step for schema changes, run only the tests relevant to the changed behavior and any additional tests for areas that could reasonably have been affected. Select the appropriate test project, feature, class, or filter based on the impact analysis. Run that selected set in one `dotnet test` invocation and one terminal session. Do not fan tests out into multiple independent or parallel invocations: container startup is expensive and separate sessions hide earlier results from the user.
+After the mandatory migration step for schema changes, run only the tests relevant to the changed behavior and any additional tests for areas that could reasonably have been affected. Select the appropriate test project, feature, class, or filter based on the impact analysis. Run that selected set in one `dotnet test` invocation and one terminal session, for example `dotnet test --project tests/GenoDev.BusinessTracker.ApplicationLogic.Tests/GenoDev.BusinessTracker.ApplicationLogic.Tests.csproj`. Do not fan tests out into multiple independent or parallel invocations: container startup is expensive and separate sessions hide earlier results from the user.
+
+Do not run unrelated tests merely because some code changed. In particular, changes confined to WPF/MVVM code—views, XAML, code-behind, ViewModels, converters, controls, styles, bindings, or UI-only DI registrations—cannot change handler behavior and therefore do not justify running ApplicationLogic handler tests. Verify such changes with a solution/WPF build and the most appropriate UI-focused inspection or manual check available. Run handler tests only when handlers, application services, application contracts/query semantics, shared handler dependencies, persistence behavior, or test infrastructure that can affect those tests changed. If a change spans both UI and ApplicationLogic, test only the affected ApplicationLogic behavior and build the WPF project/solution.
 
 Do not run the entire solution by default. Use the solution-level command only when justified by broad cross-cutting changes, shared infrastructure changes, project/DI changes with wide impact, or genuine uncertainty about the affected scope:
 
 ```powershell
-dotnet test GenoDev.BusinessTracker.sln
+dotnet test --solution GenoDev.BusinessTracker.sln
 ```
 
 Keep any necessary reruns after a fix in that same terminal session. Do not start a second test session while the first is running. In the final report, state which test scope was selected and why; if the full solution was run, state the justification.
@@ -159,5 +176,7 @@ Before completing a change, verify all applicable items:
 5. Database-backed filtering, sorting, counting, and pagination remain server-side and cancellation-aware.
 6. Every changed handler has corresponding focused tests using the shared test fixture and `Arrange_*` extensions.
 7. Every schema change has a generated and reviewed migration created before tests were run, and no migration was applied to the user's local database.
-8. Impact-based relevant tests pass in one test session; a full-solution test run was used only when justified, and the solution builds when UI/contracts/DI changed.
-9. This `AGENTS.md` was updated if the work introduced a durable architectural decision or convention.
+8. Impact-based relevant tests pass in one test session; unrelated handler tests were not run for WPF/MVVM-only changes, a full-solution test run was used only when justified, and the solution builds when UI/contracts/DI changed.
+9. Tests pass `TestContext.Current.CancellationToken` through cancellation-aware APIs unless cancellation behavior is explicitly under test.
+10. Every newly proposed NuGet dependency was approved by the user after its purpose, exact version, license, and usage terms were disclosed.
+11. This `AGENTS.md` was updated if the work introduced a durable architectural decision or convention.

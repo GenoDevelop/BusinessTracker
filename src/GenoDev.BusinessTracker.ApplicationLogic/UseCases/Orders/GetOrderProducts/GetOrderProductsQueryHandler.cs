@@ -21,7 +21,7 @@ public class GetOrderProductsQueryHandler(IBusinessTrackerDbContext dbContext)
             .ApplyNumericFilter(x => x.OrderedAmount * x.UnitNetPrice, request.TotalNetPriceOperator, request.TotalNetPriceValue)
             .ApplyNumericFilter(x => x.OrderedAmount * x.UnitGrossPrice, request.TotalGrossPriceOperator, request.TotalGrossPriceValue);
 
-        baseQuery = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             OrderProductSortBy.ProductName => baseQuery.OrderBy(x => x.Product.Name, request.IsDescending),
             OrderProductSortBy.Identifier => baseQuery.OrderBy(x => x.Product.Identifier, request.IsDescending),
@@ -34,9 +34,11 @@ public class GetOrderProductsQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => baseQuery.OrderBy(x => x.Product.Name, request.IsDescending)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await baseQuery.CountAsync(cancellationToken);
 
-        var items = await baseQuery
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new OrderProductListDto(

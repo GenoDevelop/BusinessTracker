@@ -54,7 +54,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             });
 
         // Act
-        await Sut.Handle(command, default);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -109,7 +109,7 @@ public class UpdateProductionTests : BusinessTrackerUnitTestsBase<UpdateProducti
             });
 
         // Act
-        await Sut.Handle(command, default);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

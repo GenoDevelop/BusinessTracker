@@ -20,8 +20,8 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
     private IServiceScope GetAssertScope() => _assertScope ??= _sp.CreateScope();
     
     protected readonly IFixture DataGenerator = new Fixture();
-    protected TSubjectOfUnitTest Sut;
-    protected IServiceProvider _sp;
+    protected TSubjectOfUnitTest Sut = null!;
+    protected IServiceProvider _sp = null!;
 
     protected readonly ServiceCollection _services;
     
@@ -136,6 +136,17 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
 
         _assertScope?.Dispose();
         _assertScope = null;
+
+        if (_sp is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync();
+        }
+        else if (_sp is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        TestContext.Output = null;
     }
 }
 
@@ -143,7 +154,7 @@ public abstract class BusinessTrackerUnitTestsBase<TSubjectOfUnitTest> : IAsyncL
 public abstract class UnitTestsBase : IAsyncLifetime
 {
     protected readonly IFixture DataGenerator = new Fixture();
-    protected IServiceProvider _sp;
+    protected IServiceProvider _sp = null!;
 
     protected readonly ServiceCollection _services;
 

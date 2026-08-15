@@ -28,7 +28,7 @@ public class GetMaterialVariantsQueryHandler(IBusinessTrackerDbContext dbContext
             .ApplyNumericFilter(MaterialVariant.RemainingTotalCompanyAmountExpression, request.AmountOperator, request.AmountValue)
             .ApplyNumericFilter(x => x.TotalUsedAmount, request.TotalUsedAmountOperator, request.TotalUsedAmountValue);
         
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             MaterialVariantSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             MaterialVariantSortBy.Ean => request.IsDescending ? query.OrderByDescending(x => x.Ean) : query.OrderBy(x => x.Ean),
@@ -41,9 +41,11 @@ public class GetMaterialVariantsQueryHandler(IBusinessTrackerDbContext dbContext
             _ => query.OrderBy(x => x.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new MaterialVariantDto(

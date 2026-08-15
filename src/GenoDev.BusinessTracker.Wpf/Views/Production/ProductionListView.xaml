@@ -33,7 +33,7 @@
                            Margin="0,0,10,0" />
                 <controls:RefreshButton Click="ProductionsRefreshButton_Click"
                                         Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
             <!-- Search Header -->
@@ -281,7 +281,7 @@
                             <controls:RefreshButton Click="HistoryRefreshButton_Click"
                                                     Margin="0,0,5,0"
                                                     Width="16" />
-                            <controls:FilterToggleButton IsChecked="{Binding IsHistoryFilterVisible}"
+                            <controls:FilterToggleButton IsChecked="{Binding IsHistoryFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                          Click="HistoryFilterToggleButton_Click"
                                                          Width="16" />
                         </StackPanel>

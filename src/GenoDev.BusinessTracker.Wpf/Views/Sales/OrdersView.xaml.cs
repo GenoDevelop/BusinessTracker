@@ -1,9 +1,9 @@
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.GetOrders;
+using GenoDev.BusinessTracker.Wpf.Converters;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -16,14 +16,40 @@ public partial class OrdersView : UserControl
     public OrdersView()
     {
         InitializeComponent();
+
+        Loaded += OrdersView_Loaded;
+        Unloaded += OrdersView_Unloaded;
         DataContextChanged += OrdersView_DataContextChanged;
+    }
+
+    private void OrdersView_Loaded(object sender, RoutedEventArgs e)
+    {
+        AttachViewModel(DataContext as OrdersViewModel);
+    }
+
+    private void OrdersView_Unloaded(object sender, RoutedEventArgs e)
+    {
+        AttachViewModel(null);
     }
 
     private void OrdersView_DataContextChanged(
         object sender,
         DependencyPropertyChangedEventArgs e)
     {
-        if (_attachedViewModel != null)
+        if (IsLoaded)
+        {
+            AttachViewModel(e.NewValue as OrdersViewModel);
+        }
+    }
+
+    private void AttachViewModel(OrdersViewModel? viewModel)
+    {
+        if (ReferenceEquals(_attachedViewModel, viewModel))
+        {
+            return;
+        }
+
+        if (_attachedViewModel is not null)
         {
             _attachedViewModel.PaginationRefreshRequested -=
                 ViewModel_PaginationRefreshRequested;
@@ -31,18 +57,20 @@ public partial class OrdersView : UserControl
                 ViewModel_PropertyChanged;
         }
 
-        _attachedViewModel = e.NewValue as OrdersViewModel;
+        _attachedViewModel = viewModel;
 
-        if (_attachedViewModel != null)
+        if (_attachedViewModel is null)
         {
-            _attachedViewModel.PaginationRefreshRequested +=
-                ViewModel_PaginationRefreshRequested;
-            _attachedViewModel.PropertyChanged +=
-                ViewModel_PropertyChanged;
-
-            ConfigureOrdersView(_attachedViewModel);
-            UpdateFilterHeadersVisibility(_attachedViewModel);
+            return;
         }
+
+        _attachedViewModel.PaginationRefreshRequested +=
+            ViewModel_PaginationRefreshRequested;
+        _attachedViewModel.PropertyChanged +=
+            ViewModel_PropertyChanged;
+
+        ConfigureOrdersView(_attachedViewModel);
+        UpdateFilterHeadersVisibility(_attachedViewModel);
     }
 
     private void LayoutGrid_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -198,7 +226,7 @@ public partial class OrdersView : UserControl
                 TotalGrossPriceFilterColumn.FilterValue,
                 TotalGrossPriceFilterColumn.SelectedOperator));
 
-        await ProductsPagination.ResetAndRefreshAsync();
+        await ProductsPagination.RefreshAsync();
     }
 
     private async void ProductsDataGrid_Sorting(
@@ -232,7 +260,7 @@ public partial class OrdersView : UserControl
             sortColumn,
             isDescending);
 
-        await ProductsPagination.ResetAndRefreshAsync();
+        await ProductsPagination.RefreshAsync();
     }
 
     private async void PackingMaterialsRefreshButton_Click(
@@ -259,7 +287,7 @@ public partial class OrdersView : UserControl
                 PackingMaterialAmountFilterColumn.FilterValue,
                 PackingMaterialAmountFilterColumn.SelectedOperator));
 
-        await PackingMaterialsPagination.ResetAndRefreshAsync();
+        await PackingMaterialsPagination.RefreshAsync();
     }
 
     private async void PackingMaterialsDataGrid_Sorting(
@@ -293,29 +321,6 @@ public partial class OrdersView : UserControl
             sortColumn,
             isDescending);
 
-        await PackingMaterialsPagination.ResetAndRefreshAsync();
-    }
-}
-
-internal sealed class DateToDateOnlyConverter : IValueConverter
-{
-    public object Convert(
-        object value,
-        Type targetType,
-        object parameter,
-        CultureInfo culture)
-    {
-        return value is DateTime dateTime
-            ? dateTime.Date
-            : value;
-    }
-
-    public object ConvertBack(
-        object value,
-        Type targetType,
-        object parameter,
-        CultureInfo culture)
-    {
-        return Binding.DoNothing;
+        await PackingMaterialsPagination.RefreshAsync();
     }
 }

@@ -28,7 +28,7 @@
                                    Margin="0,0,5,0" />
             <controls:RefreshButton Click="RefreshButton_Click"
                                     Margin="0,0,5,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"
+            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Click="FilterToggleButton_Click" />
         </StackPanel>
 
@@ -179,7 +179,7 @@
                                            Margin="0,0,5,0" />
                     <controls:RefreshButton Click="VariantsRefreshButton_Click"
                                             Margin="0,0,5,0" />
-                    <controls:FilterToggleButton IsChecked="{Binding IsVariantFilterVisible}"
+                    <controls:FilterToggleButton IsChecked="{Binding IsVariantFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  Click="VariantFilterToggleButton_Click" />
                 </StackPanel>
 

@@ -40,7 +40,7 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
         });
 
         // Act
-        await Sut.Handle(new DeleteProductionCommand(productionId), default);
+        await Sut.Handle(new DeleteProductionCommand(productionId), TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

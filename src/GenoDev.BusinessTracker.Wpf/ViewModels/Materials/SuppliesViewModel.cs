@@ -10,6 +10,7 @@ using MediatR;
 using System.Collections.ObjectModel;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 
@@ -22,13 +23,17 @@ public enum SuppliesPaginationTarget
 public partial class SuppliesViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
+    private readonly IServiceProvider _serviceProvider;
     private CancellationTokenSource? _supplyDetailsCancellation;
     private SupplyItemsFilterCriteria _supplyItemsFilter =
         SupplyItemsFilterCriteria.Empty;
     
-    public SuppliesViewModel(IMediator mediator)
+    public SuppliesViewModel(
+        IMediator mediator,
+        IServiceProvider serviceProvider)
     {
         _mediator = mediator;
+        _serviceProvider = serviceProvider;
     }
     
     public ObservableCollection<SupplyDto> Supplies { get; } = new();
@@ -129,22 +134,19 @@ public partial class SuppliesViewModel : ViewModelBase
     partial void OnStartDateChanged(DateTime? value)
     {
         RequestPaginationRefresh(
-            SuppliesPaginationTarget.Supplies,
-            resetPageIndex: true);
+            SuppliesPaginationTarget.Supplies);
     }
     
     partial void OnEndDateChanged(DateTime? value)
     {
         RequestPaginationRefresh(
-            SuppliesPaginationTarget.Supplies,
-            resetPageIndex: true);
+            SuppliesPaginationTarget.Supplies);
     }
     
     partial void OnIsFilterVisibleChanged(bool value)
     {
         RequestPaginationRefresh(
-            SuppliesPaginationTarget.Supplies,
-            resetPageIndex: true);
+            SuppliesPaginationTarget.Supplies);
     }
     
     partial void OnSelectedSupplyChanged(SupplyDto? value)
@@ -276,7 +278,7 @@ public partial class SuppliesViewModel : ViewModelBase
     [RelayCommand]
     private async Task CreateSupply()
     {
-        CreateSupplyViewModel = new CreateSupplyViewModel(_mediator);
+        CreateSupplyViewModel = _serviceProvider.GetRequiredService<CreateSupplyViewModel>();
         CreateSupplyViewModel.RequestClose += async () =>
         {
             IsCreatePopupOpen = false;
@@ -296,8 +298,8 @@ public partial class SuppliesViewModel : ViewModelBase
             return;
         }
     
-        EditSupplyViewModel = new EditSupplyViewModel(
-            _mediator,
+        EditSupplyViewModel = ActivatorUtilities.CreateInstance<EditSupplyViewModel>(
+            _serviceProvider,
             SelectedSupplyDetails);
     
         EditSupplyViewModel.RequestClose += async () =>
@@ -319,8 +321,8 @@ public partial class SuppliesViewModel : ViewModelBase
             return;
         }
     
-        AddSupplyItemViewModel = new AddSupplyItemViewModel(
-            _mediator,
+        AddSupplyItemViewModel = ActivatorUtilities.CreateInstance<AddSupplyItemViewModel>(
+            _serviceProvider,
             SelectedSupply.Id);
     
         AddSupplyItemViewModel.RequestClose += async () =>
@@ -343,8 +345,8 @@ public partial class SuppliesViewModel : ViewModelBase
             return;
         }
     
-        EditSupplyItemViewModel = new EditSupplyItemViewModel(
-            _mediator,
+        EditSupplyItemViewModel = ActivatorUtilities.CreateInstance<EditSupplyItemViewModel>(
+            _serviceProvider,
             item);
     
         EditSupplyItemViewModel.RequestClose += async () =>

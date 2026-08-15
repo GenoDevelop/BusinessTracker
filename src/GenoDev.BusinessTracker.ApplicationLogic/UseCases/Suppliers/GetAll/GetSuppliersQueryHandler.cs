@@ -21,7 +21,7 @@ public class GetSuppliersQueryHandler(IBusinessTrackerDbContext dbContext)
         if (!string.IsNullOrWhiteSpace(request.DescriptionFilter))
             query = query.WhereContainsAll(x => x.Description, request.DescriptionFilter);
 
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             SupplierSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             SupplierSortBy.Nip => request.IsDescending ? query.OrderByDescending(x => x.Nip) : query.OrderBy(x => x.Nip),
@@ -29,9 +29,11 @@ public class GetSuppliersQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => query.OrderBy(x => x.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new SupplierDto(

@@ -31,7 +31,7 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
                 request.VariantsCountFilter.Value);
         }
 
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             MaterialSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             MaterialSortBy.Description => request.IsDescending ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description),
@@ -41,9 +41,11 @@ public class GetMaterialsQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => query.OrderBy(x => x.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new MaterialDto(

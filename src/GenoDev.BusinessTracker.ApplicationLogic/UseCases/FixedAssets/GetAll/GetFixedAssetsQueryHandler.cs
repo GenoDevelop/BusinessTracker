@@ -38,7 +38,7 @@ public class GetFixedAssetsQueryHandler(IBusinessTrackerDbContext dbContext)
             query = query.ApplyNumericFilter(x => x.TotalCompanyAmount, request.AmountOperator.Value, request.AmountValue.Value);
         }
 
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             FixedAssetSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             FixedAssetSortBy.Ean => request.IsDescending ? query.OrderByDescending(x => x.Ean) : query.OrderBy(x => x.Ean),
@@ -48,9 +48,11 @@ public class GetFixedAssetsQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => query.OrderBy(x => x.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new FixedAssetDto(

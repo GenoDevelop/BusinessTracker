@@ -157,18 +157,8 @@ public class BusinessTrackerTestPostgresDatabaseFactory : BusinessTrackerTestDat
         await ReseedDatabaseAsync(sp);
     }
     
-    private async Task ReseedDatabaseAsync(IServiceProvider sp)
-    {
-        // Use when needed, for now just return
-        return;
-        
-        var database = sp.GetRequiredService<BusinessTrackerDbContext>();
-        
-        database.ChangeTracker.Clear();
-        
-        await database.SaveChangesAsync();
-        database.ChangeTracker.Clear();
-    }
+    private static Task ReseedDatabaseAsync(IServiceProvider _)
+        => Task.CompletedTask;
 
     public override ValueTask DisposeAsync()
     {

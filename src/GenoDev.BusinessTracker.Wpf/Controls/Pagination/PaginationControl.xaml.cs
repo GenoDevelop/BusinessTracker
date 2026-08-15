@@ -368,7 +368,8 @@ public partial class PaginationControl : UserControl
 
     /// <summary>
     /// Resets the page to zero and reloads data.
-    /// Useful after changing filters or sorting.
+    /// Reserved for transitions where retaining the current page is deliberately invalid.
+    /// Ordinary refresh, filtering, and sorting should use <see cref="RefreshAsync"/>.
     /// </summary>
     public async Task<bool> ResetAndRefreshAsync()
     {

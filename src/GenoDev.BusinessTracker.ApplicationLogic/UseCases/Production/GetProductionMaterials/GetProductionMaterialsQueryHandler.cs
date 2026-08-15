@@ -16,6 +16,7 @@ public class GetProductionMaterialsQueryHandler : IRequestHandler<GetProductionM
     public async Task<IEnumerable<ProductionMaterialDto>> Handle(GetProductionMaterialsQuery request, CancellationToken cancellationToken)
     {
         return await _context.ProductionMaterials
+            .AsNoTracking()
             .Where(x => x.ProductionId == request.ProductionId)
             .Select(x => new ProductionMaterialDto(
                 x.Id,

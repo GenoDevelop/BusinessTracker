@@ -14,7 +14,9 @@ public static class DependencyInjectionExtensions
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
         });
 
-        services.AddScoped<IItemsService, ItemsService>();
+        // WPF resolves MediatR requests from the host provider without per-request scopes.
+        // Keep this service aligned with its transient DbContext dependency.
+        services.AddTransient<IItemsService, ItemsService>();
 
         return services;
     }

@@ -78,7 +78,7 @@ public partial class SuppliersView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        await SuppliersPagination.ResetAndRefreshAsync();
+        await SuppliersPagination.RefreshAsync();
     }
     
     private async void SupplierFilter_FilterChanged(
@@ -96,7 +96,7 @@ public partial class SuppliersView : UserControl
                 NipFilterColumn.FilterText,
                 DescriptionFilterColumn.FilterText));
     
-        await SuppliersPagination.ResetAndRefreshAsync();
+        await SuppliersPagination.RefreshAsync();
     }
     
     private async void SuppliersDataGrid_Sorting(

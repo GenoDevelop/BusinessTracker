@@ -19,7 +19,7 @@
             <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
             <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,5,0"/>
             <controls:RefreshButton Click="ProductsRefreshButton_Click" Margin="0,0,5,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}"/>
+            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" AutoGenerateColumns="False" IsReadOnly="True"

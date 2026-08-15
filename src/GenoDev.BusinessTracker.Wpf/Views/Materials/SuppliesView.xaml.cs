@@ -1,8 +1,8 @@
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.GetSupplies;
+using GenoDev.BusinessTracker.Wpf.Converters;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -137,6 +137,7 @@ public partial class SuppliesView : UserControl
         object sender,
         SelectionChangedEventArgs e)
     {
+        // Items belong to a different supply context, so the previous page is invalid.
         await SupplyItemsPagination.ResetAndRefreshAsync();
     }
 
@@ -151,7 +152,7 @@ public partial class SuppliesView : UserControl
         object sender,
         RoutedEventArgs e)
     {
-        await SupplyItemsPagination.ResetAndRefreshAsync();
+        await SupplyItemsPagination.RefreshAsync();
     }
 
     private async void SupplyItemsFilter_FilterChanged(
@@ -185,7 +186,7 @@ public partial class SuppliesView : UserControl
                 PrivateSupplyFilterColumn.IsFilterActive ? PrivateSupplyFilterColumn.FilterValue : null,
                 ItemTypeFilterColumn.GetSelectedValues<StorageItemType>()?.ToArray()));
 
-        await SupplyItemsPagination.ResetAndRefreshAsync();
+        await SupplyItemsPagination.RefreshAsync();
     }
 
     private async void SupplyItemsDataGrid_Sorting(
@@ -215,29 +216,6 @@ public partial class SuppliesView : UserControl
             : ListSortDirection.Ascending;
 
         viewModel.SetSupplyItemsSorting(sortColumn, isDescending);
-        await SupplyItemsPagination.ResetAndRefreshAsync();
-    }
-}
-
-internal sealed class DateToDateOnlyConverter : IValueConverter
-{
-    public object Convert(
-        object value,
-        Type targetType,
-        object parameter,
-        CultureInfo culture)
-    {
-        return value is DateTime dateTime
-            ? dateTime.Date
-            : value;
-    }
-
-    public object ConvertBack(
-        object value,
-        Type targetType,
-        object parameter,
-        CultureInfo culture)
-    {
-        return Binding.DoNothing;
+        await SupplyItemsPagination.RefreshAsync();
     }
 }

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
@@ -26,10 +27,12 @@ public partial class ProductsViewModel : ViewModelBase
     
     public CreateProductViewModel CreateProductViewModel { get; }
     
-    public ProductsViewModel(IMediator mediator)
+    public ProductsViewModel(
+        IMediator mediator,
+        IServiceProvider serviceProvider)
     {
         _mediator = mediator;
-        CreateProductViewModel = new CreateProductViewModel(mediator);
+        CreateProductViewModel = serviceProvider.GetRequiredService<CreateProductViewModel>();
         CreateProductViewModel.RequestClose += async () =>
         {
             IsCreatePopupOpen = false;

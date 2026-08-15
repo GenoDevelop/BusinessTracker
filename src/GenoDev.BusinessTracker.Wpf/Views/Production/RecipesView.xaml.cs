@@ -98,6 +98,7 @@ public partial class RecipesView : UserControl
         object sender,
         SelectionChangedEventArgs e)
     {
+        // Materials belong to a different recipe context, so the previous page is invalid.
         await RecipeMaterialsPagination.ResetAndRefreshAsync();
     }
 

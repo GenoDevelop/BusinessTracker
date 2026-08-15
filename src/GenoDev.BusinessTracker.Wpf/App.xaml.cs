@@ -46,11 +46,15 @@ public partial class App : Application
         services.AddTransient<FixedAssetListViewModel>();
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<SuppliesViewModel>();
+        services.AddTransient<CreateSupplyViewModel>();
         services.AddTransient<CreateSupplierViewModel>();
         services.AddTransient<CreateMaterialViewModel>();
         services.AddTransient<ProductionViewModel>();
         services.AddTransient<ProductsViewModel>();
+        services.AddTransient<CreateProductViewModel>();
         services.AddTransient<RecipesViewModel>();
+        services.AddTransient<CreateRecipeViewModel>();
+        services.AddTransient<AddRecipeMaterialViewModel>();
         services.AddTransient<ProductionListViewModel>();
         services.AddTransient<SalesViewModel>();
         services.AddTransient<OrdersViewModel>();

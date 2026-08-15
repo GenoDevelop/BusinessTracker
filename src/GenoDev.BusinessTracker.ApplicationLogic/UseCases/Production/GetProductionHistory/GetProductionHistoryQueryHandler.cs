@@ -1,5 +1,4 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
-using GenoDev.BusinessTracker.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,24 +16,16 @@ public class GetProductionHistoryQueryHandler : IRequestHandler<GetProductionHis
     public async Task<PagedList<ProductionHistoryDto>> Handle(GetProductionHistoryQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Productions
+            .AsNoTracking()
             .Where(x => x.ProductId == request.ProductId);
 
         if (!string.IsNullOrWhiteSpace(request.Description))
             query = query.WhereContainsAll(x => x.Description, request.Description);
 
-        if (request.Amount.HasValue && request.AmountOperator.HasValue)
-        {
-            query = request.AmountOperator.Value switch
-            {
-                NumericOperator.Equal => query.Where(x => x.Amount == request.Amount.Value),
-                NumericOperator.NotEqual => query.Where(x => x.Amount != request.Amount.Value),
-                NumericOperator.LessThan => query.Where(x => x.Amount < request.Amount.Value),
-                NumericOperator.LessThanOrEqual => query.Where(x => x.Amount <= request.Amount.Value),
-                NumericOperator.GreaterThan => query.Where(x => x.Amount > request.Amount.Value),
-                NumericOperator.GreaterThanOrEqual => query.Where(x => x.Amount >= request.Amount.Value),
-                _ => query
-            };
-        }
+        query = query.ApplyNumericFilter(
+            x => x.Amount,
+            request.AmountOperator,
+            request.Amount);
 
         if (request.FromDate.HasValue)
         {
@@ -48,7 +39,9 @@ public class GetProductionHistoryQueryHandler : IRequestHandler<GetProductionHis
             query = query.Where(x => x.ProductionDate < to);
         }
 
-        query = query.OrderByDescending(x => x.ProductionDate);
+        query = query
+            .OrderByDescending(x => x.ProductionDate)
+            .ThenBy(x => x.Id);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

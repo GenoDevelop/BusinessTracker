@@ -24,7 +24,9 @@ public class GetRecipesQueryHandler(IBusinessTrackerDbContext dbContext)
                 x => x.Product.Identifier);
         }
 
-        query = query.OrderBy(x => x.Name);
+        query = query
+            .OrderBy(x => x.Name)
+            .ThenBy(x => x.Id);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

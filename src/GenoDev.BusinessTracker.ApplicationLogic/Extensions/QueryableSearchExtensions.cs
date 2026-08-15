@@ -11,6 +11,13 @@ public static class QueryableSearchExtensions
         return isDescending ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
     }
 
+    public static IOrderedQueryable<T> ThenByStable<T, TKey>(
+        this IOrderedQueryable<T> query,
+        Expression<Func<T, TKey>> keySelector)
+    {
+        return query.ThenBy(keySelector);
+    }
+
     public static IQueryable<T> ApplyNumericFilter<T>(this IQueryable<T> query,
         Expression<Func<T, double>> selector, NumericOperator? op, decimal? value)
     {

@@ -17,7 +17,7 @@ public class GetOrderPackingMaterialsQueryHandler(IBusinessTrackerDbContext dbCo
             .WhereContainsAll(x => x.PackingMaterial.ManufacturerCode, request.ManufacturerCodeFilter)
             .ApplyNumericFilter(x => x.Amount, request.AmountOperator, request.AmountValue);
 
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             OrderPackingMaterialSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.PackingMaterial.Name) : query.OrderBy(x => x.PackingMaterial.Name),
             OrderPackingMaterialSortBy.Ean => request.IsDescending ? query.OrderByDescending(x => x.PackingMaterial.Ean) : query.OrderBy(x => x.PackingMaterial.Ean),
@@ -26,9 +26,11 @@ public class GetOrderPackingMaterialsQueryHandler(IBusinessTrackerDbContext dbCo
             _ => query.OrderBy(x => x.PackingMaterial.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new OrderPackingMaterialListDto

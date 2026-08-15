@@ -16,7 +16,9 @@ public class GetProductionSummaryQueryHandler(IBusinessTrackerDbContext dbContex
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             query = query.WhereContainsAllInAny(request.SearchTerm, x => x.Name, x => x.Identifier);
 
-        query = query.OrderBy(x => x.Name);
+        query = query
+            .OrderBy(x => x.Name)
+            .ThenBy(x => x.Id);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

@@ -57,7 +57,7 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
         if (request.PrivateSupplyFilter.HasValue)
             query = query.Where(x => x.PrivateSupply == request.PrivateSupplyFilter.Value);
 
-        query = (request.SortColumn, request.SortDescending) switch
+        var orderedQuery = (request.SortColumn, request.SortDescending) switch
         {
             (SupplyItemSortColumn.ItemName, true) => query.OrderByDescending(x => x.ItemName),
             (SupplyItemSortColumn.ItemName, false) => query.OrderBy(x => x.ItemName),
@@ -86,9 +86,11 @@ public class GetSupplyItemsQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => query.OrderBy(x => x.ItemName)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new SupplyItemDto(

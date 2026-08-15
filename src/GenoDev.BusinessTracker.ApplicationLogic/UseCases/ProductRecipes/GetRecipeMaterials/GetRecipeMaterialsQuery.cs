@@ -17,4 +17,4 @@ public record RecipeMaterialDto(
     Guid Id,
     Guid MaterialId,
     string MaterialName,
-    string Description);
+    string? Description);

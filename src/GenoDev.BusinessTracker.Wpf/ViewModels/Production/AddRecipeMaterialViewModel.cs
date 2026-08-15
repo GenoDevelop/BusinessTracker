@@ -86,7 +86,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
         _recipeMaterialId = material.Id;
         _initialMaterialId = material.MaterialId;
         Title = "Edytuj materiał w przepisie";
-        Description = material.Description;
+        Description = material.Description ?? string.Empty;
         
         // We need to find the material in the list or load it
         _ = LoadMaterialsAndSelectAsync(material.MaterialId);

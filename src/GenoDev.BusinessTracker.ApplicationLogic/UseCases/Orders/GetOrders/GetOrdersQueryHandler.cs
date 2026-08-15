@@ -23,7 +23,9 @@ public class GetOrdersQueryHandler(IBusinessTrackerDbContext dbContext)
             query = query.Where(x => x.OrderDate < end);
         }
 
-        query = query.OrderByDescending(x => x.OrderDate);
+        query = query
+            .OrderByDescending(x => x.OrderDate)
+            .ThenBy(x => x.Id);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

@@ -28,7 +28,7 @@
                 <TextBlock Text="Przepisy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" />
                 <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible}" />
+                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
             <!-- Search Header -->
@@ -219,7 +219,7 @@
 
                         <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
                         <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" />
-                        <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible}"
+                        <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      Click="RecipeMaterialsFilterToggleButton_Click" />
                     </StackPanel>
 

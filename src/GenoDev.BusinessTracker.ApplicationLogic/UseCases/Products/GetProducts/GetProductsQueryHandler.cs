@@ -1,6 +1,5 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
 using GenoDev.BusinessTracker.Domain.Enums;
-using GenoDev.BusinessTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +17,7 @@ public class GetProductsQueryHandler(IBusinessTrackerDbContext dbContext)
             .ApplyNumericFilter(x => x.TotalAmount - x.TotalSoldAmount, request.AmountOperator, request.AmountFilter)
             .ApplyNumericFilter(x => x.TotalSoldAmount, request.TotalSoldAmountOperator, request.TotalSoldAmountFilter);
 
-        query = request.SortBy switch
+        var orderedQuery = request.SortBy switch
         {
             ProductSortBy.Name => request.IsDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             ProductSortBy.Identifier => request.IsDescending ? query.OrderByDescending(x => x.Identifier) : query.OrderBy(x => x.Identifier),
@@ -29,12 +28,13 @@ public class GetProductsQueryHandler(IBusinessTrackerDbContext dbContext)
             _ => query.OrderBy(x => x.Name)
         };
 
+        orderedQuery = orderedQuery.ThenByStable(x => x.Id);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = (await query
+        var items = await orderedQuery
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .ToListAsync(cancellationToken))
             .Select(x => new ProductDto(
                 x.Id,
                 x.Name,
@@ -42,7 +42,7 @@ public class GetProductsQueryHandler(IBusinessTrackerDbContext dbContext)
                 x.TotalAmount - x.TotalSoldAmount,
                 x.TotalSoldAmount,
                 x.Description))
-            .ToList();
+            .ToListAsync(cancellationToken);
 
         return new PagedList<ProductDto>(items, totalCount, request.PageIndex, request.PageSize);
     }

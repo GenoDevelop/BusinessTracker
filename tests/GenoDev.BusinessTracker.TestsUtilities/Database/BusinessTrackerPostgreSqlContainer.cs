@@ -22,8 +22,7 @@ public class BusinessTrackerPostgreSqlContainer
 
     private static PostgreSqlContainer BuildContainer()
     {
-        return new PostgreSqlBuilder()
-            .WithImage("postgres:17-alpine")
+        return new PostgreSqlBuilder("postgres:17-alpine")
             .WithName(ContainerName)
             .WithUsername("genodev")
             .WithPassword("totally_strong_password")

@@ -11,6 +11,7 @@ using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.Filtering;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.ComponentModel;
 
@@ -26,10 +27,14 @@ public enum OrdersPaginationTarget
 public partial class OrdersViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
+    private readonly IServiceProvider _serviceProvider;
 
-    public OrdersViewModel(IMediator mediator)
+    public OrdersViewModel(
+        IMediator mediator,
+        IServiceProvider serviceProvider)
     {
         _mediator = mediator;
+        _serviceProvider = serviceProvider;
     }
 
     public ObservableCollection<OrderListDto> Orders { get; } = new();
@@ -108,33 +113,34 @@ public partial class OrdersViewModel : ViewModelBase
 
     partial void OnStartDateChanged(DateTime? value)
     {
-        RequestPaginationRefresh(OrdersPaginationTarget.Orders, true);
+        RequestPaginationRefresh(OrdersPaginationTarget.Orders);
     }
 
     partial void OnEndDateChanged(DateTime? value)
     {
-        RequestPaginationRefresh(OrdersPaginationTarget.Orders, true);
+        RequestPaginationRefresh(OrdersPaginationTarget.Orders);
     }
 
     partial void OnIsFilterVisibleChanged(bool value)
     {
-        RequestPaginationRefresh(OrdersPaginationTarget.Orders, true);
+        RequestPaginationRefresh(OrdersPaginationTarget.Orders);
     }
 
     partial void OnIsProductsFilterVisibleChanged(bool value)
     {
-        RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
+        RequestPaginationRefresh(OrdersPaginationTarget.Products);
     }
 
     partial void OnIsPackingMaterialsFilterVisibleChanged(bool value)
     {
-        RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
+        RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
     }
 
     [RelayCommand]
     private async Task CreateOrder()
     {
-        OrderFormViewModel = new OrderFormViewModel(_mediator);
+        OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
+            _serviceProvider);
         OrderFormViewModel.RequestClose += async () =>
         {
             IsOrderFormOpen = false;
@@ -150,7 +156,9 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderFormViewModel = new OrderFormViewModel(_mediator, SelectedOrder);
+        OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
+            _serviceProvider,
+            SelectedOrder);
         OrderFormViewModel.RequestClose += async () =>
         {
             IsOrderFormOpen = false;
@@ -164,8 +172,6 @@ public partial class OrdersViewModel : ViewModelBase
     [ObservableProperty] private bool _isOrderDeleteConfirmationOpen;
     [ObservableProperty] private bool _isOrderProductDeleteConfirmationOpen;
     [ObservableProperty] private bool _isOrderPackingMaterialDeleteConfirmationOpen;
-    private OrderProductListDto? _productToDelete;
-    private OrderPackingMaterialListDto? _packingMaterialToDelete;
 
     [RelayCommand]
     private void DeleteOrder()
@@ -204,11 +210,13 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderProductFormViewModel = new OrderProductFormViewModel(_mediator, SelectedOrder.Id);
+        OrderProductFormViewModel = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
+            _serviceProvider,
+            SelectedOrder.Id);
         OrderProductFormViewModel.RequestClose += async () =>
         {
             IsOrderProductFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
+            RequestPaginationRefresh(OrdersPaginationTarget.Products);
             await Task.CompletedTask;
         };
         IsOrderProductFormOpen = true;
@@ -220,7 +228,10 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderProductFormViewModel = new OrderProductFormViewModel(_mediator, SelectedOrder.Id, product);
+        OrderProductFormViewModel = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
+            _serviceProvider,
+            SelectedOrder.Id,
+            product);
         OrderProductFormViewModel.RequestClose += async () =>
         {
             IsOrderProductFormOpen = false;
@@ -249,7 +260,7 @@ public partial class OrdersViewModel : ViewModelBase
             await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeleteProductFromOrder.DeleteProductFromOrderCommand(SelectedOrderProduct.Id));
             IsOrderProductDeleteConfirmationOpen = false;
             SelectedOrderProduct = null;
-            RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
+            RequestPaginationRefresh(OrdersPaginationTarget.Products);
         }
         finally
         {
@@ -269,11 +280,13 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderPackingMaterialFormViewModel = new OrderPackingMaterialFormViewModel(_mediator, SelectedOrder.Id);
+        OrderPackingMaterialFormViewModel = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
+            _serviceProvider,
+            SelectedOrder.Id);
         OrderPackingMaterialFormViewModel.RequestClose += async () =>
         {
             IsOrderPackingMaterialFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
+            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
             await Task.CompletedTask;
         };
         IsOrderPackingMaterialFormOpen = true;
@@ -285,7 +298,10 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderPackingMaterialFormViewModel = new OrderPackingMaterialFormViewModel(_mediator, SelectedOrder.Id, packingMaterial);
+        OrderPackingMaterialFormViewModel = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
+            _serviceProvider,
+            SelectedOrder.Id,
+            packingMaterial);
         OrderPackingMaterialFormViewModel.RequestClose += async () =>
         {
             IsOrderPackingMaterialFormOpen = false;
@@ -314,7 +330,7 @@ public partial class OrdersViewModel : ViewModelBase
             await _mediator.Send(new GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.DeletePackingMaterialFromOrder.DeletePackingMaterialFromOrderCommand(SelectedOrderPackingMaterial.Id));
             IsOrderPackingMaterialDeleteConfirmationOpen = false;
             SelectedOrderPackingMaterial = null;
-            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
+            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
         }
         finally
         {
@@ -355,6 +371,7 @@ public partial class OrdersViewModel : ViewModelBase
 
     partial void OnSelectedOrderChanged(OrderListDto? value)
     {
+        // Both dependent tables now represent a different order, so their old pages are invalid.
         RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
         RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
     }
