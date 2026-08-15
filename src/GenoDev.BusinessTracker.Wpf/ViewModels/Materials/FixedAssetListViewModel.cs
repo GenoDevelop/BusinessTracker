@@ -20,6 +20,7 @@ public partial class FixedAssetListViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private FixedAssetFilterCriteria _filter = FixedAssetFilterCriteria.Empty;
+    private Guid? _pendingCreatedFixedAssetId;
 
     public FixedAssetListViewModel(IMediator mediator, IServiceProvider serviceProvider)
     {
@@ -103,7 +104,9 @@ public partial class FixedAssetListViewModel : ViewModelBase
             FixedAssets,
             result.Items,
             selectedFixedAsset,
-            asset => asset.Id);
+            asset => asset.Id,
+            _pendingCreatedFixedAssetId);
+        _pendingCreatedFixedAssetId = null;
 
         return result.TotalCount;
     }
@@ -129,10 +132,14 @@ public partial class FixedAssetListViewModel : ViewModelBase
         var editor = _serviceProvider.GetRequiredService<CreateFixedAssetViewModel>();
         initialize?.Invoke(editor);
 
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedFixedAssetId = result.CreatedEntityId;
+                RequestPaginationRefresh();
+            }
         };
 
         CreateFixedAssetViewModel = editor;

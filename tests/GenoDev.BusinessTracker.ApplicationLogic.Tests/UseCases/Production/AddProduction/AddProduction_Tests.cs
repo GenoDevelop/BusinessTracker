@@ -52,17 +52,21 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        var createdProductionId = await Sut.Handle(
+            command,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
         {
             var production = db.Productions
                 .Include(p => p.ProductionMaterials)
-                .FirstOrDefault(p => p.ProductId == productId && p.Amount == 5);
+                .FirstOrDefault(p => p.Id == createdProductionId);
 
             production.Should().NotBeNull();
-            production!.Description.Should().Be("Test Production");
+            production!.ProductId.Should().Be(productId);
+            production.Amount.Should().Be(5);
+            production.Description.Should().Be("Test Production");
             production.ProductionMaterials.Should().HaveCount(2);
 
             var product = db.Products.Find(productId);
@@ -108,7 +112,7 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()

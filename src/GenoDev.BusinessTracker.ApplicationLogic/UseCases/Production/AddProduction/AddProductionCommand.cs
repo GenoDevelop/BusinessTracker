@@ -12,4 +12,4 @@ public record AddProductionCommand(
     int Amount,
     string? Description,
     DateTime ProductionDate,
-    IEnumerable<MaterialVariantUsageDto> UsedMaterials) : IRequest<Unit>;
+    IEnumerable<MaterialVariantUsageDto> UsedMaterials) : IRequest<Guid>;

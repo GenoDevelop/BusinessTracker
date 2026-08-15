@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.AddProductToOrder;
 
-public class AddProductToOrderCommandHandler : IRequestHandler<AddProductToOrderCommand>
+public class AddProductToOrderCommandHandler : IRequestHandler<AddProductToOrderCommand, Guid>
 {
     private readonly IBusinessTrackerDbContext _context;
     private readonly IItemsService _itemsService;
@@ -17,7 +17,7 @@ public class AddProductToOrderCommandHandler : IRequestHandler<AddProductToOrder
         _itemsService = itemsService;
     }
 
-    public async Task Handle(AddProductToOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddProductToOrderCommand request, CancellationToken cancellationToken)
     {
         var orderExists = await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken);
         if (!orderExists)
@@ -41,5 +41,6 @@ public class AddProductToOrderCommandHandler : IRequestHandler<AddProductToOrder
 
         _context.OrderProducts.Add(orderProduct);
         await _context.SaveChangesAsync(cancellationToken);
+        return orderProduct.Id;
     }
 }

@@ -6,6 +6,21 @@ using System.Threading.Tasks;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels;
 
+public readonly record struct EditorCloseResult(
+    bool WasSaved,
+    bool WasDeleted,
+    Guid? CreatedEntityId)
+{
+    public static EditorCloseResult Cancelled => default;
+
+    public static EditorCloseResult Saved(Guid? createdEntityId = null) =>
+        new(true, false, createdEntityId);
+
+    public static EditorCloseResult Deleted => new(false, true, null);
+
+    public bool RequiresRefresh => WasSaved || WasDeleted;
+}
+
 public partial class ViewModelBase : ObservableObject
 {
     [ObservableProperty]
@@ -30,15 +45,17 @@ public partial class ViewModelBase : ObservableObject
     }
 
     /// <summary>
-    /// Replaces a data-bound collection and returns the refreshed instance of the
-    /// previously selected item. Callers can suppress selection-change side effects
-    /// while this synchronous replacement is in progress.
+    /// Replaces a data-bound collection and returns the preferred item when present,
+    /// otherwise the refreshed instance of the previous selection. Callers can
+    /// suppress selection-change side effects while this synchronous replacement
+    /// is in progress.
     /// </summary>
-    protected static T? ReplaceItemsPreservingSelection<T, TKey>(
+    protected static T? ReplaceItemsPreservingSelection<T>(
         ObservableCollection<T> target,
         IEnumerable<T> source,
         T? selectedItem,
-        Func<T, TKey> keySelector)
+        Func<T, Guid> keySelector,
+        Guid? preferredItemKey = null)
         where T : class
     {
         var hasSelection = selectedItem is not null;
@@ -52,14 +69,23 @@ public partial class ViewModelBase : ObservableObject
             target.Add(item);
         }
 
+        if (preferredItemKey is not null)
+        {
+            var preferredItem = target.FirstOrDefault(item =>
+                keySelector(item) == preferredItemKey.Value);
+
+            if (preferredItem is not null)
+            {
+                return preferredItem;
+            }
+        }
+
         if (!hasSelection)
         {
             return null;
         }
 
         return target.FirstOrDefault(item =>
-            EqualityComparer<TKey>.Default.Equals(
-                keySelector(item),
-                selectedKey!));
+            keySelector(item) == selectedKey);
     }
 }

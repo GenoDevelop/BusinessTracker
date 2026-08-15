@@ -45,7 +45,7 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
     [ObservableProperty]
     private string? _description;
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
@@ -53,6 +53,7 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
         IsBusy = true;
         try
         {
+            Guid? createdProductId = null;
             if (_editingProductId.HasValue)
             {
                 var command = new UpdateProductCommand(_editingProductId.Value, Name, Identifier, Description);
@@ -61,12 +62,12 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
             else
             {
                 var command = new CreateProductCommand(Name, Identifier, Description);
-                await mediator.Send(command);
+                createdProductId = await mediator.Send(command);
             }
             
             Clear();
             
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdProductId));
         }
         finally
         {
@@ -79,6 +80,6 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

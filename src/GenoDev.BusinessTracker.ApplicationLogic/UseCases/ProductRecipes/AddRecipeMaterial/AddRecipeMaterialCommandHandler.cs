@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddRecipeMaterial;
 
 public class AddRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbContext)
-    : IRequestHandler<AddRecipeMaterialCommand>
+    : IRequestHandler<AddRecipeMaterialCommand, Guid>
 {
-    public async Task Handle(AddRecipeMaterialCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddRecipeMaterialCommand request, CancellationToken cancellationToken)
     {
         var recipe = await dbContext.ProductRecipes
             .FirstOrDefaultAsync(r => r.Id == request.RecipeId, cancellationToken);
@@ -40,5 +40,6 @@ public class AddRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbContext
 
         dbContext.ProductRecipeMaterials.Add(recipeMaterial);
         await dbContext.SaveChangesAsync(cancellationToken);
+        return recipeMaterial.Id;
     }
 }

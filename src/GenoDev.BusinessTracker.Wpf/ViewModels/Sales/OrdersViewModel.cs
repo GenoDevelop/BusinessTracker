@@ -29,6 +29,9 @@ public partial class OrdersViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private bool _isRestoringOrdersSelection;
+    private Guid? _pendingCreatedOrderId;
+    private Guid? _pendingCreatedOrderProductId;
+    private Guid? _pendingCreatedOrderPackingMaterialId;
 
     public OrdersViewModel(
         IMediator mediator,
@@ -148,10 +151,14 @@ public partial class OrdersViewModel : ViewModelBase
     {
         OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
             _serviceProvider);
-        OrderFormViewModel.RequestClose += async () =>
+        OrderFormViewModel.RequestClose += async result =>
         {
             IsOrderFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.Orders);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedOrderId = result.CreatedEntityId;
+                RequestPaginationRefresh(OrdersPaginationTarget.Orders);
+            }
             await Task.CompletedTask;
         };
         IsOrderFormOpen = true;
@@ -166,10 +173,13 @@ public partial class OrdersViewModel : ViewModelBase
         OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
             _serviceProvider,
             SelectedOrder);
-        OrderFormViewModel.RequestClose += async () =>
+        OrderFormViewModel.RequestClose += async result =>
         {
             IsOrderFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.Orders);
+            if (result.RequiresRefresh)
+            {
+                RequestPaginationRefresh(OrdersPaginationTarget.Orders);
+            }
             await Task.CompletedTask;
         };
         IsOrderFormOpen = true;
@@ -220,10 +230,14 @@ public partial class OrdersViewModel : ViewModelBase
         OrderProductFormViewModel = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id);
-        OrderProductFormViewModel.RequestClose += async () =>
+        OrderProductFormViewModel.RequestClose += async result =>
         {
             IsOrderProductFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.Products);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedOrderProductId = result.CreatedEntityId;
+                RequestPaginationRefresh(OrdersPaginationTarget.Products);
+            }
             await Task.CompletedTask;
         };
         IsOrderProductFormOpen = true;
@@ -239,10 +253,13 @@ public partial class OrdersViewModel : ViewModelBase
             _serviceProvider,
             SelectedOrder.Id,
             product);
-        OrderProductFormViewModel.RequestClose += async () =>
+        OrderProductFormViewModel.RequestClose += async result =>
         {
             IsOrderProductFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.Products);
+            if (result.RequiresRefresh)
+            {
+                RequestPaginationRefresh(OrdersPaginationTarget.Products);
+            }
             await Task.CompletedTask;
         };
         IsOrderProductFormOpen = true;
@@ -295,10 +312,14 @@ public partial class OrdersViewModel : ViewModelBase
         OrderPackingMaterialFormViewModel = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id);
-        OrderPackingMaterialFormViewModel.RequestClose += async () =>
+        OrderPackingMaterialFormViewModel.RequestClose += async result =>
         {
             IsOrderPackingMaterialFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedOrderPackingMaterialId = result.CreatedEntityId;
+                RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
+            }
             await Task.CompletedTask;
         };
         IsOrderPackingMaterialFormOpen = true;
@@ -314,10 +335,13 @@ public partial class OrdersViewModel : ViewModelBase
             _serviceProvider,
             SelectedOrder.Id,
             packingMaterial);
-        OrderPackingMaterialFormViewModel.RequestClose += async () =>
+        OrderPackingMaterialFormViewModel.RequestClose += async result =>
         {
             IsOrderPackingMaterialFormOpen = false;
-            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
+            if (result.RequiresRefresh)
+            {
+                RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
+            }
             await Task.CompletedTask;
         };
         IsOrderPackingMaterialFormOpen = true;
@@ -393,6 +417,11 @@ public partial class OrdersViewModel : ViewModelBase
             return;
         }
 
+        HandleSelectedOrderChanged();
+    }
+
+    private void HandleSelectedOrderChanged()
+    {
         SelectedOrderProduct = null;
         SelectedOrderPackingMaterial = null;
 
@@ -440,7 +469,9 @@ public partial class OrdersViewModel : ViewModelBase
             Products,
             result.Items,
             selectedOrderProduct,
-            product => product.Id);
+            product => product.Id,
+            _pendingCreatedOrderProductId);
+        _pendingCreatedOrderProductId = null;
         return result.TotalCount;
     }
 
@@ -474,13 +505,16 @@ public partial class OrdersViewModel : ViewModelBase
             PackingMaterials,
             result.Items,
             selectedOrderPackingMaterial,
-            material => material.Id);
+            material => material.Id,
+            _pendingCreatedOrderPackingMaterialId);
+        _pendingCreatedOrderPackingMaterialId = null;
         return result.TotalCount;
     }
 
     private async Task<int> LoadOrdersPageAsync(PaginationState state, CancellationToken cancellationToken)
     {
         var selectedOrder = SelectedOrder;
+        var previousSelectedOrderId = selectedOrder?.Id;
         var result = await _mediator.Send(
             new GetOrdersQuery(
                 state.PageIndex,
@@ -498,17 +532,18 @@ public partial class OrdersViewModel : ViewModelBase
                 Orders,
                 result.Items,
                 selectedOrder,
-                order => order.Id);
+                order => order.Id,
+                _pendingCreatedOrderId);
+            _pendingCreatedOrderId = null;
         }
         finally
         {
             _isRestoringOrdersSelection = false;
         }
 
-        if (selectedOrder is not null && SelectedOrder is null)
+        if (previousSelectedOrderId != SelectedOrder?.Id)
         {
-            RequestPaginationRefresh(OrdersPaginationTarget.Products, true);
-            RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials, true);
+            HandleSelectedOrderChanged();
         }
 
         return result.TotalCount;

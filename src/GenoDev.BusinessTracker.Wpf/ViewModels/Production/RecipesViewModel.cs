@@ -27,6 +27,8 @@ public partial class RecipesViewModel : ViewModelBase
         RecipeMaterialsFilterCriteria.Empty;
     private RecipeMaterialDto? _materialToDelete;
     private bool _isRestoringRecipesSelection;
+    private Guid? _pendingCreatedRecipeId;
+    private Guid? _pendingCreatedRecipeMaterialId;
 
     public RecipesViewModel(
         IMediator mediator,
@@ -65,7 +67,7 @@ public partial class RecipesViewModel : ViewModelBase
     /// Lekki, niezależny od WPF sygnał używany wyłącznie po operacjach CRUD,
     /// kiedy kontrolka paginacji powinna ponownie pobrać aktualną stronę.
     /// </summary>
-    public event Action<RecipesPaginationTarget>? PaginationRefreshRequested;
+    public event Action<RecipesPaginationTarget, bool>? PaginationRefreshRequested;
 
     public bool IsRestoringRecipesSelection => _isRestoringRecipesSelection;
 
@@ -156,6 +158,7 @@ public partial class RecipesViewModel : ViewModelBase
         CancellationToken cancellationToken)
     {
         var selectedRecipe = SelectedRecipe;
+        var previousSelectedRecipeId = selectedRecipe?.Id;
         var result = await _mediator.Send(
             new GetRecipesQuery(
                 state.PageIndex,
@@ -174,16 +177,21 @@ public partial class RecipesViewModel : ViewModelBase
                 Recipes,
                 result.Items,
                 selectedRecipe,
-                recipe => recipe.Id);
+                recipe => recipe.Id,
+                _pendingCreatedRecipeId);
+            _pendingCreatedRecipeId = null;
         }
         finally
         {
             _isRestoringRecipesSelection = false;
         }
 
-        if (selectedRecipe is not null && SelectedRecipe is null)
+        if (previousSelectedRecipeId != SelectedRecipe?.Id)
         {
-            RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
+            SelectedRecipeMaterial = null;
+            RequestPaginationRefresh(
+                RecipesPaginationTarget.RecipeMaterials,
+                true);
         }
 
         return result.TotalCount;
@@ -221,7 +229,9 @@ public partial class RecipesViewModel : ViewModelBase
             RecipeMaterials,
             result.Items,
             selectedRecipeMaterial,
-            material => material.Id);
+            material => material.Id,
+            _pendingCreatedRecipeMaterialId);
+        _pendingCreatedRecipeMaterialId = null;
         return result.TotalCount;
     }
 
@@ -256,10 +266,14 @@ public partial class RecipesViewModel : ViewModelBase
         }
 
         CreateRecipeViewModel = _serviceProvider.GetRequiredService<CreateRecipeViewModel>();
-        CreateRecipeViewModel.RequestClose += () =>
+        CreateRecipeViewModel.RequestClose += result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh(RecipesPaginationTarget.Recipes);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedRecipeId = result.CreatedEntityId;
+                RequestPaginationRefresh(RecipesPaginationTarget.Recipes);
+            }
         };
     }
 
@@ -295,10 +309,14 @@ public partial class RecipesViewModel : ViewModelBase
         }
 
         AddRecipeMaterialViewModel = _serviceProvider.GetRequiredService<AddRecipeMaterialViewModel>();
-        AddRecipeMaterialViewModel.RequestClose += () =>
+        AddRecipeMaterialViewModel.RequestClose += result =>
         {
             IsAddMaterialPopupOpen = false;
-            RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedRecipeMaterialId = result.CreatedEntityId;
+                RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
+            }
         };
     }
 
@@ -385,9 +403,11 @@ public partial class RecipesViewModel : ViewModelBase
         IsDeleteConfirmationOpen = false;
     }
 
-    private void RequestPaginationRefresh(RecipesPaginationTarget target)
+    private void RequestPaginationRefresh(
+        RecipesPaginationTarget target,
+        bool resetPageIndex = false)
     {
-        PaginationRefreshRequested?.Invoke(target);
+        PaginationRefreshRequested?.Invoke(target, resetPageIndex);
     }
 
 }

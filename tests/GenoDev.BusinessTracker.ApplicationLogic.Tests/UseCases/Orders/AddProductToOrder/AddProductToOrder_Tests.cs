@@ -40,14 +40,18 @@ public class AddProductToOrder_Tests : BusinessTrackerUnitTestsBase<AddProductTo
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        var createdOrderProductId = await Sut.Handle(
+            command,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
         {
-            var op = db.OrderProducts.FirstOrDefault(x => x.OrderId == order.Id && x.ProductId == product.Id);
+            var op = db.OrderProducts.FirstOrDefault(x => x.Id == createdOrderProductId);
             op.Should().NotBeNull();
-            op!.OrderedAmount.Should().Be(command.OrderedAmount);
+            op!.OrderId.Should().Be(order.Id);
+            op.ProductId.Should().Be(product.Id);
+            op.OrderedAmount.Should().Be(command.OrderedAmount);
             op.AssignedAmount.Should().Be(command.AssignedAmount);
             op.UnitNetPrice.Should().Be(command.UnitNetPrice);
             op.UnitGrossPrice.Should().Be(command.UnitGrossPrice);
@@ -72,7 +76,7 @@ public class AddProductToOrder_Tests : BusinessTrackerUnitTestsBase<AddProductTo
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();

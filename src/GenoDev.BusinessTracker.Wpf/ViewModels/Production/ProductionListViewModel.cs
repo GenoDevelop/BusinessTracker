@@ -36,6 +36,7 @@ public partial class ProductionListViewModel : ViewModelBase
     private bool _isRestoringProductsSelection;
     private bool _isRestoringHistorySelection;
     private bool _isRestoringProductRecipesSelection;
+    private Guid? _pendingCreatedProductionId;
 
     private ProductionHistoryFilterCriteria _historyFilter =
         ProductionHistoryFilterCriteria.Empty;
@@ -312,7 +313,9 @@ public partial class ProductionListViewModel : ViewModelBase
                 ProductionHistory,
                 result.Items,
                 selectedProduction,
-                production => production.Id);
+                production => production.Id,
+                _pendingCreatedProductionId);
+            _pendingCreatedProductionId = null;
         }
         finally
         {
@@ -718,6 +721,7 @@ public partial class ProductionListViewModel : ViewModelBase
         NotifyCommandStatesChanged();
         try
         {
+            Guid? createdProductionId = null;
             if (IsEditingProduction)
             {
                 if (!_editingProductionId.HasValue)
@@ -739,7 +743,7 @@ public partial class ProductionListViewModel : ViewModelBase
             }
             else
             {
-                await _mediator.Send(new AddProductionCommand(
+                createdProductionId = await _mediator.Send(new AddProductionCommand(
                     SelectedProduct.Id,
                     ProductionAmount,
                     ProductionDescription,
@@ -752,6 +756,7 @@ public partial class ProductionListViewModel : ViewModelBase
                             input.UsedAmount))));
             }
 
+            _pendingCreatedProductionId = createdProductionId;
             CancelAddProduction();
             await LoadProductRecipesAsync(SelectedProduct);
             RequestPaginationRefresh(ProductionPaginationTarget.History);

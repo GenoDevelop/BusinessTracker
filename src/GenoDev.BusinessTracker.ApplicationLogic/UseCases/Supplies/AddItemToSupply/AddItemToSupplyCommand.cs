@@ -11,4 +11,4 @@ public record AddItemToSupplyCommand(
     double UnitsInSet,
     decimal SetNetPrice,
     decimal SetGrossPrice,
-    bool PrivateSupply) : IRequest<Unit>;
+    bool PrivateSupply) : IRequest<Guid>;

@@ -27,7 +27,7 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
     [ObservableProperty]
     private string? _description;
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
@@ -35,6 +35,7 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
         IsBusy = true;
         try
         {
+            Guid? createdMaterialId = null;
             if (_editingMaterialId.HasValue)
             {
                 var command = new UpdateMaterialCommand(_editingMaterialId.Value, Name, Description);
@@ -43,9 +44,9 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
             else
             {
                 var command = new CreateMaterialCommand(Name, Description);
-                await mediator.Send(command);
+                createdMaterialId = await mediator.Send(command);
             }
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdMaterialId));
         }
         finally
         {
@@ -58,6 +59,6 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

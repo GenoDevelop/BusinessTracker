@@ -32,14 +32,18 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         var command = new AddRecipeMaterialCommand(recipeId, materialId, description);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        var createdRecipeMaterialId = await Sut.Handle(
+            command,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
         {
-            var recipeMaterial = db.ProductRecipeMaterials.FirstOrDefault(rm => rm.ProductRecipeId == recipeId && rm.MaterialId == materialId);
+            var recipeMaterial = db.ProductRecipeMaterials.FirstOrDefault(rm => rm.Id == createdRecipeMaterialId);
             recipeMaterial.Should().NotBeNull();
-            recipeMaterial!.Description.Should().Be(description);
+            recipeMaterial!.ProductRecipeId.Should().Be(recipeId);
+            recipeMaterial.MaterialId.Should().Be(materialId);
+            recipeMaterial.Description.Should().Be(description);
         });
     }
 
@@ -50,7 +54,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         var command = new AddRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid(), "desc");
 
         // Act
-        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*Recipe with ID*");
@@ -68,7 +72,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         var command = new AddRecipeMaterialCommand(recipeId, Guid.NewGuid(), "desc");
 
         // Act
-        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*Material with ID*");
@@ -91,7 +95,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         var command = new AddRecipeMaterialCommand(recipeId, materialId, "Duplicate");
 
         // Act
-        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already added to this recipe*");

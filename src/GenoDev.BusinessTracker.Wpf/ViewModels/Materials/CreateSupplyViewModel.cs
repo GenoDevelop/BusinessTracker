@@ -33,7 +33,7 @@ public partial class CreateSupplyViewModel(IMediator mediator) : ViewModelBase
 
     public ObservableCollection<SupplierDto> Suppliers { get; } = new();
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public async Task InitializeAsync()
     {
@@ -61,14 +61,14 @@ public partial class CreateSupplyViewModel(IMediator mediator) : ViewModelBase
         IsBusy = true;
         try
         {
-            await mediator.Send(new CreateSupplyCommand(
+            var createdSupplyId = await mediator.Send(new CreateSupplyCommand(
                 SelectedSupplier.Id,
                 OrderDate,
                 Description,
                 InvoiceNo,
                 ShippingNetPrice ?? 0,
                 ShippingGrossPrice ?? 0));
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplyId));
         }
         finally
         {
@@ -81,6 +81,6 @@ public partial class CreateSupplyViewModel(IMediator mediator) : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

@@ -36,14 +36,18 @@ public class AddPackingMaterialToOrder_Tests : BusinessTrackerUnitTestsBase<AddP
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        var createdOrderPackingMaterialId = await Sut.Handle(
+            command,
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
         {
-            var opm = db.OrderPackingMaterials.FirstOrDefault(x => x.OrderId == order.Id && x.PackingMaterialId == packingMaterial.Id);
+            var opm = db.OrderPackingMaterials.FirstOrDefault(x => x.Id == createdOrderPackingMaterialId);
             opm.Should().NotBeNull();
-            opm!.Amount.Should().Be(command.Amount);
+            opm!.OrderId.Should().Be(order.Id);
+            opm.PackingMaterialId.Should().Be(packingMaterial.Id);
+            opm.Amount.Should().Be(command.Amount);
 
             var updatedPackingMaterial = db.PackingMaterials.AsNoTracking().FirstOrDefault(pm => pm.Id == packingMaterial.Id);
             updatedPackingMaterial.Should().NotBeNull();
@@ -63,7 +67,7 @@ public class AddPackingMaterialToOrder_Tests : BusinessTrackerUnitTestsBase<AddP
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();

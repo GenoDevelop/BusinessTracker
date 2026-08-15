@@ -58,7 +58,7 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     public ObservableCollection<PackingMaterialDto> PackingMaterials { get; } = new();
     public ObservableCollection<FixedAssetDto> FixedAssets { get; } = new();
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public async Task InitializeAsync()
     {
@@ -163,8 +163,8 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
                 SetGrossPrice ?? 0,
                 PrivateSupply);
 
-            await mediator.Send(command);
-            RequestClose?.Invoke();
+            var createdSupplyItemId = await mediator.Send(command);
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplyItemId));
         }
         finally
         {
@@ -186,6 +186,6 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

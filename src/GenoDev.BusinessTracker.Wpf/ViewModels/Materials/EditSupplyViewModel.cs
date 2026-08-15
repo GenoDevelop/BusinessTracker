@@ -39,7 +39,7 @@ public partial class EditSupplyViewModel(IMediator mediator, SupplyDetailsDto de
     public ObservableCollection<SupplierDto> Suppliers { get; } = new();
     public ObservableCollection<MaterialSupplyStatus> AvailableStatuses { get; } = new(Enum.GetValues<MaterialSupplyStatus>());
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public async Task InitializeAsync()
     {
@@ -77,7 +77,7 @@ public partial class EditSupplyViewModel(IMediator mediator, SupplyDetailsDto de
                 InvoiceNo,
                 ShippingNetPrice ?? 0,
                 ShippingGrossPrice ?? 0));
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved());
         }
         finally
         {
@@ -90,6 +90,6 @@ public partial class EditSupplyViewModel(IMediator mediator, SupplyDetailsDto de
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

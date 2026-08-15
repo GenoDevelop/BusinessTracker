@@ -47,7 +47,7 @@ public partial class CreateMaterialVariantViewModel(IMediator mediator) : ViewMo
     [ObservableProperty]
     private string? _description;
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
@@ -55,6 +55,7 @@ public partial class CreateMaterialVariantViewModel(IMediator mediator) : ViewMo
         IsBusy = true;
         try
         {
+            Guid? createdVariantId = null;
             if (_variantId.HasValue)
             {
                 var command = new UpdateMaterialVariantCommand(
@@ -77,9 +78,9 @@ public partial class CreateMaterialVariantViewModel(IMediator mediator) : ViewMo
                     Unit,
                     Description);
 
-                await mediator.Send(command);
+                createdVariantId = await mediator.Send(command);
             }
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdVariantId));
         }
         finally
         {
@@ -92,6 +93,6 @@ public partial class CreateMaterialVariantViewModel(IMediator mediator) : ViewMo
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

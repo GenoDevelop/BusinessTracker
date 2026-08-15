@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Materials.AddItemToSupply;
 
-public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService) : IRequestHandler<AddItemToSupplyCommand, Unit>
+public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, IItemsService itemsService) : IRequestHandler<AddItemToSupplyCommand, Guid>
 {
-    public async Task<Unit> Handle(AddItemToSupplyCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddItemToSupplyCommand request, CancellationToken cancellationToken)
     {
         var supply = await context.Supplies
             .FirstOrDefaultAsync(s => s.Id == request.SupplyId, cancellationToken);
@@ -59,6 +59,6 @@ public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, II
         context.SupplyItems.Add(item);
         await context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return item.Id;
     }
 }

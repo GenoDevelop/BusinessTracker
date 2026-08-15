@@ -8,4 +8,4 @@ public record AddProductToOrderCommand(
     int OrderedAmount,
     int AssignedAmount,
     decimal UnitNetPrice,
-    decimal UnitGrossPrice) : IRequest;
+    decimal UnitGrossPrice) : IRequest<Guid>;

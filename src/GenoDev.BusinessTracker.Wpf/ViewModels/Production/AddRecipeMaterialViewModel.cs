@@ -37,7 +37,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
 
     public ObservableCollection<MaterialDto> Materials { get; } = new();
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public async Task LoadMaterialsAsync()
     {
@@ -129,6 +129,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
         IsBusy = true;
         try
         {
+            Guid? createdRecipeMaterialId = null;
             if (_recipeMaterialId.HasValue)
             {
                 var command = new UpdateRecipeMaterialCommand(_recipeMaterialId.Value, SelectedMaterial.Id, Description);
@@ -137,10 +138,10 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
             else
             {
                 var command = new AddRecipeMaterialCommand(_recipeId.Value, SelectedMaterial.Id, Description);
-                await mediator.Send(command);
+                createdRecipeMaterialId = await mediator.Send(command);
             }
             
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdRecipeMaterialId));
         }
         finally
         {
@@ -153,6 +154,6 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

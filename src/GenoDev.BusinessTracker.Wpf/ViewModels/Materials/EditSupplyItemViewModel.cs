@@ -59,7 +59,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     public ObservableCollection<PackingMaterialDto> PackingMaterials { get; } = new();
     public ObservableCollection<FixedAssetDto> FixedAssets { get; } = new();
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public async Task InitializeAsync()
     {
@@ -200,7 +200,7 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
                 PrivateSupply);
 
             await mediator.Send(command);
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved());
         }
         finally
         {
@@ -222,6 +222,6 @@ public partial class EditSupplyItemViewModel(IMediator mediator, SupplyItemDto i
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

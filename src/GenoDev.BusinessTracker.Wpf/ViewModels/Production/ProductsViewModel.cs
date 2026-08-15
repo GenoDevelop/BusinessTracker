@@ -24,6 +24,7 @@ public partial class ProductsViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private ProductsFilterCriteria _productsFilter = ProductsFilterCriteria.Empty;
+    private Guid? _pendingCreatedProductId;
     
     public CreateProductViewModel CreateProductViewModel { get; }
     
@@ -33,10 +34,14 @@ public partial class ProductsViewModel : ViewModelBase
     {
         _mediator = mediator;
         CreateProductViewModel = serviceProvider.GetRequiredService<CreateProductViewModel>();
-        CreateProductViewModel.RequestClose += async () =>
+        CreateProductViewModel.RequestClose += async result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh(ProductsPaginationTarget.Products);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedProductId = result.CreatedEntityId;
+                RequestPaginationRefresh(ProductsPaginationTarget.Products);
+            }
             await Task.CompletedTask;
         };
     
@@ -179,7 +184,9 @@ public partial class ProductsViewModel : ViewModelBase
             Products,
             result.Items,
             selectedProduct,
-            product => product.Id);
+            product => product.Id,
+            _pendingCreatedProductId);
+        _pendingCreatedProductId = null;
         return result.TotalCount;
     }
     

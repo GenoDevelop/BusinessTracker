@@ -72,8 +72,15 @@ public partial class MaterialListView : UserControl
         await MaterialsPagination.RefreshAsync();
     }
 
-    private async void ViewModel_VariantsPaginationRefreshRequested()
+    private async void ViewModel_VariantsPaginationRefreshRequested(
+        bool resetPageIndex)
     {
+        if (resetPageIndex)
+        {
+            await VariantsPagination.ResetAndRefreshAsync();
+            return;
+        }
+
         await VariantsPagination.RefreshAsync();
     }
 

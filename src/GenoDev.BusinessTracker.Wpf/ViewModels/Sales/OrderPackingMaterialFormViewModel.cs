@@ -33,7 +33,7 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
 
     public bool IsStockExceeded => SelectedPackingMaterial != null && Amount > EffectiveAvailableStock;
 
-    public event Func<Task>? RequestClose;
+    public event Func<EditorCloseResult, Task>? RequestClose;
 
     public OrderPackingMaterialFormViewModel(IMediator mediator, Guid orderId)
     {
@@ -90,6 +90,7 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
     {
         if (SelectedPackingMaterial == null) return;
 
+        Guid? createdOrderPackingMaterialId = null;
         if (IsEditing && _orderPackingMaterialId.HasValue)
         {
             await _mediator.Send(new UpdateOrderPackingMaterialCommand(
@@ -99,7 +100,7 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
         }
         else
         {
-            await _mediator.Send(new AddPackingMaterialToOrderCommand(
+            createdOrderPackingMaterialId = await _mediator.Send(new AddPackingMaterialToOrderCommand(
                 _orderId,
                 SelectedPackingMaterial.Id,
                 Amount));
@@ -107,7 +108,7 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
 
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderPackingMaterialId));
         }
     }
 
@@ -116,7 +117,7 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
     {
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Cancelled);
         }
     }
 }

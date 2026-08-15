@@ -20,6 +20,7 @@ public partial class PackingMaterialListViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private PackingMaterialFilterCriteria _filter = PackingMaterialFilterCriteria.Empty;
+    private Guid? _pendingCreatedPackingMaterialId;
 
     public PackingMaterialListViewModel(IMediator mediator, IServiceProvider serviceProvider)
     {
@@ -105,7 +106,9 @@ public partial class PackingMaterialListViewModel : ViewModelBase
             PackingMaterials,
             result.Items,
             selectedPackingMaterial,
-            material => material.Id);
+            material => material.Id,
+            _pendingCreatedPackingMaterialId);
+        _pendingCreatedPackingMaterialId = null;
 
         return result.TotalCount;
     }
@@ -131,10 +134,14 @@ public partial class PackingMaterialListViewModel : ViewModelBase
         var editor = _serviceProvider.GetRequiredService<CreatePackingMaterialViewModel>();
         initialize?.Invoke(editor);
 
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedPackingMaterialId = result.CreatedEntityId;
+                RequestPaginationRefresh();
+            }
         };
 
         CreatePackingMaterialViewModel = editor;

@@ -26,6 +26,8 @@ public partial class SuppliesViewModel : ViewModelBase
     private readonly IServiceProvider _serviceProvider;
     private CancellationTokenSource? _supplyDetailsCancellation;
     private bool _isRestoringSuppliesSelection;
+    private Guid? _pendingCreatedSupplyId;
+    private Guid? _pendingCreatedSupplyItemId;
     private SupplyItemsFilterCriteria _supplyItemsFilter =
         SupplyItemsFilterCriteria.Empty;
     
@@ -174,6 +176,7 @@ public partial class SuppliesViewModel : ViewModelBase
         CancellationToken cancellationToken)
     {
         var selectedSupply = SelectedSupply;
+        var previousSelectedSupplyId = selectedSupply?.Id;
         var result = await _mediator.Send(
             new GetSuppliesQuery(
                 state.PageIndex,
@@ -191,16 +194,22 @@ public partial class SuppliesViewModel : ViewModelBase
                 Supplies,
                 result.Items,
                 selectedSupply,
-                supply => supply.Id);
+                supply => supply.Id,
+                _pendingCreatedSupplyId);
+            _pendingCreatedSupplyId = null;
         }
         finally
         {
             _isRestoringSuppliesSelection = false;
         }
 
-        if (selectedSupply is not null && SelectedSupply is null)
+        if (previousSelectedSupplyId != SelectedSupply?.Id)
         {
-            _ = LoadSupplyDetailsAsync(null);
+            SelectedSupplyItem = null;
+            _ = LoadSupplyDetailsAsync(SelectedSupply);
+            RequestPaginationRefresh(
+                SuppliesPaginationTarget.SupplyItems,
+                true);
         }
     
         return result.TotalCount;
@@ -260,7 +269,9 @@ public partial class SuppliesViewModel : ViewModelBase
             SupplyItems,
             result.Items,
             selectedSupplyItem,
-            item => item.Id);
+            item => item.Id,
+            _pendingCreatedSupplyItemId);
+        _pendingCreatedSupplyItemId = null;
         return result.TotalCount;
     }
     
@@ -324,10 +335,14 @@ public partial class SuppliesViewModel : ViewModelBase
     private async Task CreateSupply()
     {
         CreateSupplyViewModel = _serviceProvider.GetRequiredService<CreateSupplyViewModel>();
-        CreateSupplyViewModel.RequestClose += async () =>
+        CreateSupplyViewModel.RequestClose += async result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedSupplyId = result.CreatedEntityId;
+                RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            }
             await Task.CompletedTask;
         };
     
@@ -347,11 +362,14 @@ public partial class SuppliesViewModel : ViewModelBase
             _serviceProvider,
             SelectedSupplyDetails);
     
-        EditSupplyViewModel.RequestClose += async () =>
+        EditSupplyViewModel.RequestClose += async result =>
         {
             IsEditPopupOpen = false;
-            await LoadSupplyDetailsAsync(SelectedSupply);
-            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            if (result.RequiresRefresh)
+            {
+                await LoadSupplyDetailsAsync(SelectedSupply);
+                RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+            }
         };
     
         await EditSupplyViewModel.InitializeAsync();
@@ -370,12 +388,16 @@ public partial class SuppliesViewModel : ViewModelBase
             _serviceProvider,
             SelectedSupply.Id);
     
-        AddSupplyItemViewModel.RequestClose += async () =>
+        AddSupplyItemViewModel.RequestClose += async result =>
         {
             IsAddMaterialPopupOpen = false;
-            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
-            RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
-            await LoadSupplyDetailsAsync(SelectedSupply);
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedSupplyItemId = result.CreatedEntityId;
+                RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+                RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
+                await LoadSupplyDetailsAsync(SelectedSupply);
+            }
         };
     
         await AddSupplyItemViewModel.InitializeAsync();
@@ -394,12 +416,15 @@ public partial class SuppliesViewModel : ViewModelBase
             _serviceProvider,
             item);
     
-        EditSupplyItemViewModel.RequestClose += async () =>
+        EditSupplyItemViewModel.RequestClose += async result =>
         {
             IsEditItemPopupOpen = false;
-            RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
-            RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
-            await LoadSupplyDetailsAsync(SelectedSupply);
+            if (result.RequiresRefresh)
+            {
+                RequestPaginationRefresh(SuppliesPaginationTarget.Supplies);
+                RequestPaginationRefresh(SuppliesPaginationTarget.SupplyItems);
+                await LoadSupplyDetailsAsync(SelectedSupply);
+            }
         };
     
         await EditSupplyItemViewModel.InitializeAsync();

@@ -17,6 +17,7 @@ public partial class SuppliersViewModel : ViewModelBase
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private SuppliersFilterCriteria _suppliersFilter = SuppliersFilterCriteria.Empty;
+    private Guid? _pendingCreatedSupplierId;
     
     public SuppliersViewModel(
         IMediator mediator,
@@ -117,7 +118,9 @@ public partial class SuppliersViewModel : ViewModelBase
             Suppliers,
             result.Items,
             selectedSupplier,
-            supplier => supplier.Id);
+            supplier => supplier.Id,
+            _pendingCreatedSupplierId);
+        _pendingCreatedSupplierId = null;
         return result.TotalCount;
     }
     
@@ -145,10 +148,14 @@ public partial class SuppliersViewModel : ViewModelBase
             editor.InitializeForEdit(supplier);
         }
     
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedSupplierId = result.CreatedEntityId;
+                RequestPaginationRefresh();
+            }
         };
     
         CreateSupplierViewModel = editor;

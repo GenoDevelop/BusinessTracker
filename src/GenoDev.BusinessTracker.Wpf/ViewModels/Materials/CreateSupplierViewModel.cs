@@ -43,7 +43,7 @@ public partial class CreateSupplierViewModel : ViewModelBase
         _mediator = mediator;
     }
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
     
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
@@ -51,6 +51,7 @@ public partial class CreateSupplierViewModel : ViewModelBase
         IsBusy = true;
         try
         {
+            Guid? createdSupplierId = null;
             if (_editingSupplierId.HasValue)
             {
                 var command = new UpdateSupplierCommand(_editingSupplierId.Value, Name, Nip, Description, WebsiteUrl);
@@ -59,9 +60,9 @@ public partial class CreateSupplierViewModel : ViewModelBase
             else
             {
                 var command = new CreateSupplierCommand(Name, Nip, Description, WebsiteUrl);
-                await _mediator.Send(command);
+                createdSupplierId = await _mediator.Send(command);
             }
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplierId));
         }
         finally
         {
@@ -74,6 +75,6 @@ public partial class CreateSupplierViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

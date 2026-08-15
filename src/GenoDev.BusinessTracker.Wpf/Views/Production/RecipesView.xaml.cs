@@ -64,11 +64,18 @@ public partial class RecipesView : UserControl
     }
 
     private async void ViewModel_PaginationRefreshRequested(
-        RecipesPaginationTarget target)
+        RecipesPaginationTarget target,
+        bool resetPageIndex)
     {
         var pagination = target == RecipesPaginationTarget.Recipes
             ? RecipesPagination
             : RecipeMaterialsPagination;
+
+        if (resetPageIndex)
+        {
+            await pagination.ResetAndRefreshAsync();
+            return;
+        }
 
         await pagination.RefreshAsync();
     }

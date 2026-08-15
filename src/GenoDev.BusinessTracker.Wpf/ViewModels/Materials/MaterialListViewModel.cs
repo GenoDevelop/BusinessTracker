@@ -24,6 +24,8 @@ public partial class MaterialListViewModel : ViewModelBase
     private MaterialFilterCriteria _filter = MaterialFilterCriteria.Empty;
     private MaterialVariantFilterCriteria _variantFilter = MaterialVariantFilterCriteria.Empty;
     private bool _isRestoringMaterialsSelection;
+    private Guid? _pendingCreatedMaterialId;
+    private Guid? _pendingCreatedVariantId;
 
     public MaterialListViewModel(
         IMediator mediator,
@@ -52,7 +54,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
     public event Action? PaginationRefreshRequested;
 
-    public event Action? VariantsPaginationRefreshRequested;
+    public event Action<bool>? VariantsPaginationRefreshRequested;
 
     [ObservableProperty]
     private bool _isFilterVisible;
@@ -75,7 +77,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         SelectedMaterialVariant = null;
         CreateMaterialVariantCommand.NotifyCanExecuteChanged();
-        RequestVariantsPaginationRefresh();
+        RequestVariantsPaginationRefresh(true);
     }
 
     [ObservableProperty]
@@ -157,6 +159,7 @@ public partial class MaterialListViewModel : ViewModelBase
         CancellationToken cancellationToken)
     {
         var selectedMaterial = SelectedMaterial;
+        var previousSelectedMaterialId = selectedMaterial?.Id;
         var result = await _mediator.Send(
             new GetMaterialsQuery(
                 state.PageIndex,
@@ -178,17 +181,20 @@ public partial class MaterialListViewModel : ViewModelBase
                 Materials,
                 result.Items,
                 selectedMaterial,
-                material => material.Id);
+                material => material.Id,
+                _pendingCreatedMaterialId);
+            _pendingCreatedMaterialId = null;
         }
         finally
         {
             _isRestoringMaterialsSelection = false;
         }
 
-        if (selectedMaterial is not null && SelectedMaterial is null)
+        if (previousSelectedMaterialId != SelectedMaterial?.Id)
         {
+            SelectedMaterialVariant = null;
             CreateMaterialVariantCommand.NotifyCanExecuteChanged();
-            RequestVariantsPaginationRefresh();
+            RequestVariantsPaginationRefresh(true);
         }
 
         return result.TotalCount;
@@ -230,7 +236,9 @@ public partial class MaterialListViewModel : ViewModelBase
             MaterialVariants,
             result.Items,
             selectedMaterialVariant,
-            variant => variant.Id);
+            variant => variant.Id,
+            _pendingCreatedVariantId);
+        _pendingCreatedVariantId = null;
         return result.TotalCount;
     }
 
@@ -254,10 +262,14 @@ public partial class MaterialListViewModel : ViewModelBase
         var editor = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
         initialize?.Invoke(editor);
 
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreatePopupOpen = false;
-            RequestPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedMaterialId = result.CreatedEntityId;
+                RequestPaginationRefresh();
+            }
         };
 
         CreateMaterialViewModel = editor;
@@ -274,10 +286,14 @@ public partial class MaterialListViewModel : ViewModelBase
         var editor = _serviceProvider.GetRequiredService<CreateMaterialVariantViewModel>();
         editor.Initialize(SelectedMaterial.Id);
 
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreateVariantPopupOpen = false;
-            RequestVariantsPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedVariantId = result.CreatedEntityId;
+                RequestVariantsPaginationRefresh();
+            }
         };
 
         CreateMaterialVariantViewModel = editor;
@@ -294,10 +310,14 @@ public partial class MaterialListViewModel : ViewModelBase
         var editor = _serviceProvider.GetRequiredService<CreateMaterialVariantViewModel>();
         editor.InitializeForEdit(variant);
 
-        editor.RequestClose += () =>
+        editor.RequestClose += result =>
         {
             IsCreateVariantPopupOpen = false;
-            RequestVariantsPaginationRefresh();
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedVariantId = result.CreatedEntityId;
+                RequestVariantsPaginationRefresh();
+            }
         };
 
         CreateMaterialVariantViewModel = editor;
@@ -407,9 +427,9 @@ public partial class MaterialListViewModel : ViewModelBase
         PaginationRefreshRequested?.Invoke();
     }
 
-    public void RequestVariantsPaginationRefresh()
+    public void RequestVariantsPaginationRefresh(bool resetPageIndex = false)
     {
-        VariantsPaginationRefreshRequested?.Invoke();
+        VariantsPaginationRefreshRequested?.Invoke(resetPageIndex);
     }
 
 }

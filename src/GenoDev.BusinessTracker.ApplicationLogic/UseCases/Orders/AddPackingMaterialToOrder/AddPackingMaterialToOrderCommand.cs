@@ -5,4 +5,4 @@ namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Orders.AddPackingMat
 public record AddPackingMaterialToOrderCommand(
     Guid OrderId,
     Guid PackingMaterialId,
-    double Amount) : IRequest;
+    double Amount) : IRequest<Guid>;

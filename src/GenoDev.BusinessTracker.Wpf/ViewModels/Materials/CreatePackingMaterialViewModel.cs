@@ -32,7 +32,7 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
     [ObservableProperty]
     private string? _description;
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public void InitializeForEdit(PackingMaterialDto dto)
     {
@@ -51,6 +51,7 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
         IsBusy = true;
         try
         {
+            Guid? createdMaterialId = null;
             if (_id.HasValue)
             {
                 var command = new UpdatePackingMaterialCommand(
@@ -72,9 +73,9 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
                     Unit,
                     Description);
 
-                await mediator.Send(command);
+                createdMaterialId = await mediator.Send(command);
             }
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdMaterialId));
         }
         finally
         {
@@ -87,6 +88,6 @@ public partial class CreatePackingMaterialViewModel(IMediator mediator) : ViewMo
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }

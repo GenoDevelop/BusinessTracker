@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Production.AddProduction;
 
-public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand, Unit>
+public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand, Guid>
 {
     private readonly IBusinessTrackerDbContext _context;
     private readonly IItemsService _itemsService;
@@ -17,7 +17,7 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
         _itemsService = itemsService;
     }
 
-    public async Task<Unit> Handle(AddProductionCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddProductionCommand request, CancellationToken cancellationToken)
     {
         var product = await _context.Products
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
@@ -62,6 +62,6 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
-        return Unit.Value;
+        return production.Id;
     }
 }

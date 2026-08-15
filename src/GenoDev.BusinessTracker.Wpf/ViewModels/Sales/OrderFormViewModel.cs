@@ -45,7 +45,7 @@ public partial class OrderFormViewModel : ViewModelBase
     public IEnumerable<Carrier?> Carriers => [null, .. Enum.GetValues<Carrier>().Cast<Carrier?>()];
     public IEnumerable<OrderStatus> OrderStatuses => Enum.GetValues<OrderStatus>();
 
-    public event Func<Task>? RequestClose;
+    public event Func<EditorCloseResult, Task>? RequestClose;
 
     public OrderFormViewModel(IMediator mediator)
     {
@@ -90,6 +90,7 @@ public partial class OrderFormViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveAsync()
     {
+        Guid? createdOrderId = null;
         if (IsEditing && _orderId.HasValue)
         {
             await _mediator.Send(new UpdateOrderCommand(
@@ -119,7 +120,7 @@ public partial class OrderFormViewModel : ViewModelBase
         }
         else
         {
-            await _mediator.Send(new CreateOrderCommand(
+            createdOrderId = await _mediator.Send(new CreateOrderCommand(
                 new OrderData(
                     Description,
                     OrderDate,
@@ -145,7 +146,7 @@ public partial class OrderFormViewModel : ViewModelBase
 
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderId));
         }
     }
 
@@ -164,7 +165,7 @@ public partial class OrderFormViewModel : ViewModelBase
             IsDeleteConfirmationOpen = false;
             if (RequestClose != null)
             {
-                await RequestClose.Invoke();
+                await RequestClose.Invoke(EditorCloseResult.Deleted);
             }
         }
     }
@@ -180,7 +181,7 @@ public partial class OrderFormViewModel : ViewModelBase
     {
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Cancelled);
         }
     }
 }

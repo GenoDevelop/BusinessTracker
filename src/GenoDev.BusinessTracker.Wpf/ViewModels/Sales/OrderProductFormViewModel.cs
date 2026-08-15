@@ -36,7 +36,7 @@ public partial class OrderProductFormViewModel : ViewModelBase
 
     public bool IsStockExceeded => SelectedProduct != null && AssignedAmount > EffectiveAvailableStock;
 
-    public event Func<Task>? RequestClose;
+    public event Func<EditorCloseResult, Task>? RequestClose;
 
     public OrderProductFormViewModel(IMediator mediator, Guid orderId)
     {
@@ -96,6 +96,7 @@ public partial class OrderProductFormViewModel : ViewModelBase
     {
         if (SelectedProduct == null) return;
 
+        Guid? createdOrderProductId = null;
         if (IsEditing && _orderProductId.HasValue)
         {
             await _mediator.Send(new UpdateOrderProductCommand(
@@ -108,7 +109,7 @@ public partial class OrderProductFormViewModel : ViewModelBase
         }
         else
         {
-            await _mediator.Send(new AddProductToOrderCommand(
+            createdOrderProductId = await _mediator.Send(new AddProductToOrderCommand(
                 _orderId,
                 SelectedProduct.Id,
                 OrderedAmount,
@@ -119,7 +120,7 @@ public partial class OrderProductFormViewModel : ViewModelBase
 
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderProductId));
         }
     }
 
@@ -128,7 +129,7 @@ public partial class OrderProductFormViewModel : ViewModelBase
     {
         if (RequestClose != null)
         {
-            await RequestClose.Invoke();
+            await RequestClose.Invoke(EditorCloseResult.Cancelled);
         }
     }
 }

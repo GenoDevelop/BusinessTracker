@@ -32,7 +32,7 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
     [ObservableProperty]
     private string? _description;
 
-    public event Action? RequestClose;
+    public event Action<EditorCloseResult>? RequestClose;
 
     public void InitializeForEdit(FixedAssetDto dto)
     {
@@ -51,6 +51,7 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
         IsBusy = true;
         try
         {
+            Guid? createdAssetId = null;
             if (_id.HasValue)
             {
                 var command = new UpdateFixedAssetCommand(
@@ -72,9 +73,9 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
                     Unit,
                     Description);
 
-                await mediator.Send(command);
+                createdAssetId = await mediator.Send(command);
             }
-            RequestClose?.Invoke();
+            RequestClose?.Invoke(EditorCloseResult.Saved(createdAssetId));
         }
         finally
         {
@@ -87,6 +88,6 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
     [RelayCommand]
     private void Cancel()
     {
-        RequestClose?.Invoke();
+        RequestClose?.Invoke(EditorCloseResult.Cancelled);
     }
 }
