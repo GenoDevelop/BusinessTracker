@@ -39,6 +39,7 @@ Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Inf
 ## CQRS and application use cases
 
 - All business operations invoked by the UI go through MediatR.
+- Every MediatR request handler runs through `TransactionBehavior`, which wraps the complete handler invocation with `TransactionHelper`. Keep the behavior registered as an open pipeline behavior so commands and queries share the same ambient transaction and nested requests reuse it.
 - Model reads as `IRequest<T>` queries and writes as commands. Put each request and its handler in the appropriate feature/use-case folder under `ApplicationLogic/UseCases`.
 - Keep request contracts and result DTOs independent of WPF. Do not expose EF entities to the UI when a purpose-built DTO is appropriate.
 - Handlers depend on `IBusinessTrackerDbContext` and other application abstractions, not the concrete context.

@@ -1,4 +1,5 @@
 using GenoDev.BusinessTracker.ApplicationLogic.Abstractions;
+using GenoDev.BusinessTracker.ApplicationLogic.Behaviors;
 using GenoDev.BusinessTracker.ApplicationLogic.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ public static class DependencyInjectionExtensions
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
+            cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 
         // WPF resolves MediatR requests from the host provider without per-request scopes.
