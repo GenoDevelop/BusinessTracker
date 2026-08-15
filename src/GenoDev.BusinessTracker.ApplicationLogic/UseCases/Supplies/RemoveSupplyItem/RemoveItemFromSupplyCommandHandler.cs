@@ -14,7 +14,7 @@ public class RemoveItemFromSupplyCommandHandler(IBusinessTrackerDbContext dbCont
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (item == null)
-            throw new KeyNotFoundException($"SupplyItem with ID {request.Id} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono pozycji dostawy.", nameof(request.Id));
 
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {

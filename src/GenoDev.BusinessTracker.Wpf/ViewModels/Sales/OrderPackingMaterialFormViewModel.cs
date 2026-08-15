@@ -90,25 +90,29 @@ public partial class OrderPackingMaterialFormViewModel : ViewModelBase
     {
         if (SelectedPackingMaterial == null) return;
 
-        Guid? createdOrderPackingMaterialId = null;
-        if (IsEditing && _orderPackingMaterialId.HasValue)
+        ClearValidationErrors();
+        try
         {
-            await _mediator.Send(new UpdateOrderPackingMaterialCommand(
-                _orderPackingMaterialId.Value,
-                SelectedPackingMaterial.Id,
-                Amount));
-        }
-        else
-        {
-            createdOrderPackingMaterialId = await _mediator.Send(new AddPackingMaterialToOrderCommand(
-                _orderId,
-                SelectedPackingMaterial.Id,
-                Amount));
-        }
+            Guid? createdOrderPackingMaterialId = null;
+            if (IsEditing && _orderPackingMaterialId.HasValue)
+            {
+                await _mediator.Send(new UpdateOrderPackingMaterialCommand(
+                    _orderPackingMaterialId.Value, SelectedPackingMaterial.Id, Amount));
+            }
+            else
+            {
+                createdOrderPackingMaterialId = await _mediator.Send(new AddPackingMaterialToOrderCommand(
+                    _orderId, SelectedPackingMaterial.Id, Amount));
+            }
 
-        if (RequestClose != null)
+            if (RequestClose != null)
+            {
+                await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderPackingMaterialId));
+            }
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
         {
-            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderPackingMaterialId));
+            ApplyValidationErrors(exception);
         }
     }
 

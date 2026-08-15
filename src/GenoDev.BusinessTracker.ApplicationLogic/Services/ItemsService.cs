@@ -13,7 +13,7 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
             case StorageItemType.MaterialVariant:
                 var materialVariant = await context.MaterialVariants.FindAsync([itemId], cancellationToken);
                 if (materialVariant == null)
-                    throw new KeyNotFoundException($"Material variant with ID {itemId} not found.");
+                    throw Exceptions.RequestValidationException.For("Nie znaleziono wariantu materiału.");
 
                 switch (amountType)
                 {
@@ -27,14 +27,14 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
                         materialVariant.TotalUsedAmount += amountDifference;
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(amountType), amountType, null);
+                        throw Exceptions.RequestValidationException.For("Typ zmienianej wartości magazynowej jest nieprawidłowy.");
                 }
                 break;
 
             case StorageItemType.Packing:
                 var packingMaterial = await context.PackingMaterials .FindAsync([itemId], cancellationToken);
                 if (packingMaterial == null)
-                    throw new KeyNotFoundException($"Packing material with ID {itemId} not found.");
+                    throw Exceptions.RequestValidationException.For("Nie znaleziono materiału pakowego.");
 
                 switch (amountType)
                 {
@@ -48,17 +48,17 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
                         packingMaterial.TotalUsedAmount += amountDifference;
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(amountType), amountType, null);
+                        throw Exceptions.RequestValidationException.For("Typ zmienianej wartości magazynowej jest nieprawidłowy.");
                 }
                 break;
 
             case StorageItemType.FixedAsset:
                 if (amountType == StorageAmountType.TotalUsed)
-                    throw new InvalidOperationException("Fixed assets do not have a total used property.");
+                    throw Exceptions.RequestValidationException.For("Środki trwałe nie obsługują ewidencji zużytej ilości.");
 
                 var fixedAsset = await context.FixedAssets .FindAsync([itemId], cancellationToken);
                 if (fixedAsset == null)
-                    throw new KeyNotFoundException($"Fixed asset with ID {itemId} not found.");
+                    throw Exceptions.RequestValidationException.For("Nie znaleziono środka trwałego.");
 
                 switch (amountType)
                 {
@@ -69,12 +69,12 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
                         fixedAsset.TotalCompanyAmount += amountDifference;
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(amountType), amountType, null);
+                        throw Exceptions.RequestValidationException.For("Typ zmienianej wartości magazynowej jest nieprawidłowy.");
                 }
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
+                throw Exceptions.RequestValidationException.For("Typ pozycji magazynowej jest nieprawidłowy.");
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -85,7 +85,7 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
     {
         var product = await context.Products.FindAsync([productId], cancellationToken);
         if (product == null)
-            throw new KeyNotFoundException($"Product with ID {productId} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produktu.");
 
         switch (amountType)
         {
@@ -96,7 +96,7 @@ public class ItemsService(IBusinessTrackerDbContext context) : IItemsService
                 product.TotalSoldAmount += (int)amountDifference;
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(amountType), amountType, null);
+                throw Exceptions.RequestValidationException.For("Typ zmienianej wartości produktu jest nieprawidłowy.");
         }
 
         await context.SaveChangesAsync(cancellationToken);

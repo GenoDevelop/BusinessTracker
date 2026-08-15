@@ -32,6 +32,7 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
     {
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -47,6 +48,10 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
                 createdMaterialId = await mediator.Send(command);
             }
             RequestClose?.Invoke(EditorCloseResult.Saved(createdMaterialId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

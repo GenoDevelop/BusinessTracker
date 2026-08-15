@@ -39,7 +39,7 @@ public class UpdateOrderPackingMaterial_Tests : BusinessTrackerUnitTestsBase<Upd
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -66,10 +66,10 @@ public class UpdateOrderPackingMaterial_Tests : BusinessTrackerUnitTestsBase<Upd
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class UpdateOrderPackingMaterial_Tests : BusinessTrackerUnitTestsBase<Upd
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

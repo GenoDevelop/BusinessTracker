@@ -1,5 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using GenoDev.BusinessTracker.ApplicationLogic.Exceptions;
+using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 using System.Threading.Tasks;
@@ -21,10 +24,79 @@ public readonly record struct EditorCloseResult(
     public bool RequiresRefresh => WasSaved || WasDeleted;
 }
 
-public partial class ViewModelBase : ObservableObject
+public partial class ViewModelBase : ObservableObject, INotifyDataErrorInfo
 {
+    private readonly Dictionary<string, List<string>> _validationErrors = new(StringComparer.Ordinal);
+
     [ObservableProperty]
     private bool _isBusy;
+
+    public bool HasErrors => _validationErrors.Count > 0;
+
+    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+    public IEnumerable GetErrors(string? propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(propertyName))
+        {
+            return _validationErrors.Values.SelectMany(messages => messages).ToArray();
+        }
+
+        return _validationErrors.TryGetValue(propertyName, out var errors)
+            ? errors
+            : Array.Empty<string>();
+    }
+
+    protected void ClearValidationErrors()
+    {
+        var affectedProperties = _validationErrors.Keys.ToArray();
+        _validationErrors.Clear();
+        OnPropertyChanged(nameof(HasErrors));
+
+        foreach (var propertyName in affectedProperties)
+        {
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        }
+    }
+
+    protected void ApplyValidationErrors(RequestValidationException exception)
+    {
+        ClearValidationErrors();
+        var unassignedMessages = new List<string>();
+
+        foreach (var error in exception.Errors)
+        {
+            var propertyName = error.Source?.Split('.').LastOrDefault();
+            if (string.IsNullOrWhiteSpace(propertyName) || GetType().GetProperty(propertyName) is null)
+            {
+                unassignedMessages.Add(error.Message);
+                continue;
+            }
+
+            if (!_validationErrors.TryGetValue(propertyName, out var propertyErrors))
+            {
+                propertyErrors = [];
+                _validationErrors[propertyName] = propertyErrors;
+            }
+
+            propertyErrors.Add(error.Message);
+        }
+
+        OnPropertyChanged(nameof(HasErrors));
+        foreach (var propertyName in _validationErrors.Keys)
+        {
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        }
+
+        if (unassignedMessages.Count > 0)
+        {
+            MessageBox.Show(
+                string.Join(Environment.NewLine, unassignedMessages.Distinct()),
+                "Nie można wykonać operacji",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+    }
 
     /// <summary>
     /// Gives WPF a chance to process input, bindings, and rendering before starting

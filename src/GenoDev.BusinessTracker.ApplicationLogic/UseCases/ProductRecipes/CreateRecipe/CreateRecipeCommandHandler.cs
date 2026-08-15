@@ -13,7 +13,7 @@ public class CreateRecipeCommandHandler(IBusinessTrackerDbContext dbContext)
         var productExists = await dbContext.Products.AnyAsync(p => p.Id == request.ProductId, cancellationToken);
         if (!productExists)
         {
-            throw new KeyNotFoundException($"Product with ID {request.ProductId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produktu.", nameof(request.ProductId));
         }
 
         var recipe = new ProductRecipe

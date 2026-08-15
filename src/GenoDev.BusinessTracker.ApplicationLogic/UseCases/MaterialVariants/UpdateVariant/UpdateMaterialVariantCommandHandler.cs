@@ -14,7 +14,7 @@ public class UpdateMaterialVariantCommandHandler(IBusinessTrackerDbContext dbCon
 
         if (variant == null)
         {
-            throw new InvalidOperationException($"Material variant with ID {request.Id} does not exist.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono wariantu materiału.", nameof(request.Id));
         }
 
         variant.Name = request.Name;

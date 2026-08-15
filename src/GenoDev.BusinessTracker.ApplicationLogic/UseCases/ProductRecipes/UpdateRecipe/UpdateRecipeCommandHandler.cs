@@ -14,13 +14,13 @@ public class UpdateRecipeCommandHandler(IBusinessTrackerDbContext dbContext)
 
         if (recipe == null)
         {
-            throw new KeyNotFoundException($"Recipe with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono receptury.", nameof(request.Id));
         }
 
         var productExists = await dbContext.Products.AnyAsync(p => p.Id == request.ProductId, cancellationToken);
         if (!productExists)
         {
-            throw new KeyNotFoundException($"Product with ID {request.ProductId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produktu.", nameof(request.ProductId));
         }
 
         recipe.ProductId = request.ProductId;

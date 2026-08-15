@@ -48,6 +48,7 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
     {
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -76,6 +77,10 @@ public partial class CreateFixedAssetViewModel(IMediator mediator) : ViewModelBa
                 createdAssetId = await mediator.Send(command);
             }
             RequestClose?.Invoke(EditorCloseResult.Saved(createdAssetId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

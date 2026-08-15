@@ -22,7 +22,7 @@ public class AddPackingMaterialToOrderCommandHandler : IRequestHandler<AddPackin
         var orderExists = await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken);
         if (!orderExists)
         {
-            throw new KeyNotFoundException($"Order with ID {request.OrderId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono zamówienia.", nameof(request.OrderId));
         }
 
         var orderPackingMaterial = new OrderPackingMaterial

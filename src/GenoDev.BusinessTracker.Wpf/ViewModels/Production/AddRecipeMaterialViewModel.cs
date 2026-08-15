@@ -126,6 +126,7 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
     {
         if (SelectedMaterial == null || !_recipeId.HasValue) return;
 
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -142,6 +143,10 @@ public partial class AddRecipeMaterialViewModel(IMediator mediator) : ViewModelB
             }
             
             RequestClose?.Invoke(EditorCloseResult.Saved(createdRecipeMaterialId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

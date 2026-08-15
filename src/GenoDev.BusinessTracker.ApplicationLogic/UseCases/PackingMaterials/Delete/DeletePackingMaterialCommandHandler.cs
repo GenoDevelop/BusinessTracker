@@ -20,7 +20,7 @@ public sealed class DeletePackingMaterialCommandHandler : IRequestHandler<Delete
 
         if (packingMaterial == null)
         {
-            throw new KeyNotFoundException($"Packing material with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono materiału pakowego.", nameof(request.Id));
         }
 
         _context.PackingMaterials.Remove(packingMaterial);

@@ -140,6 +140,7 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
     {
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -165,6 +166,10 @@ public partial class AddSupplyItemViewModel(IMediator mediator, Guid materialSup
 
             var createdSupplyItemId = await mediator.Send(command);
             RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplyItemId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

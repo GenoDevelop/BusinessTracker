@@ -60,7 +60,7 @@ public class UpdateOrder_Tests : BusinessTrackerUnitTestsBase<UpdateOrderCommand
         var command = new UpdateOrderCommand(initialOrder.Id, updateOrderData, updateClientData);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -107,9 +107,9 @@ public class UpdateOrder_Tests : BusinessTrackerUnitTestsBase<UpdateOrderCommand
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

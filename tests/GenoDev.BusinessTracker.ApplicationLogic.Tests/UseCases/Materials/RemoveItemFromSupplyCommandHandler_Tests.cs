@@ -35,7 +35,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -67,7 +67,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -101,7 +101,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -135,7 +135,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -168,7 +168,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -201,7 +201,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(itemId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -219,7 +219,7 @@ public class RemoveItemFromSupplyCommandHandler_Tests : BusinessTrackerUnitTests
         var command = new RemoveItemFromSupplyCommand(Guid.NewGuid());
 
         // Act & Assert
-        await Sut.Invoking(x => x.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.Handle(command, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

@@ -34,7 +34,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         var command = new UpdateRecipeMaterialCommand(recipeMaterialId, newMaterialId, newDescription);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -53,10 +53,10 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         var command = new UpdateRecipeMaterialCommand(Guid.NewGuid(), Guid.NewGuid(), "desc");
 
         // Act
-        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -82,10 +82,11 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         var command = new UpdateRecipeMaterialCommand(recipeMaterial1Id, material2Id, "Duplicate Update");
 
         // Act
-        Func<Task> act = async () => await Sut.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already added to this recipe*");
+        var exception = await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Ten materiał jest już dodany do receptury.");
     }
 
     [Fact]
@@ -105,7 +106,7 @@ public class UpdateRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<UpdateRec
         var command = new UpdateRecipeMaterialCommand(recipeMaterialId, materialId, newDescription);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

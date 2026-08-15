@@ -90,63 +90,38 @@ public partial class OrderFormViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveAsync()
     {
-        Guid? createdOrderId = null;
-        if (IsEditing && _orderId.HasValue)
+        ClearValidationErrors();
+        try
         {
-            await _mediator.Send(new UpdateOrderCommand(
-                _orderId.Value,
-                new UpdateOrderData(
-                    Description,
-                    OrderDate,
-                    OrderIdentifier,
-                    PaymentIdentifier,
-                    TrackingNumber,
-                    Carrier,
-                    Status,
-                    CompanyOrder,
-                    OrderSource,
-                    ShippingNetCost,
-                    ShippingGrossCost,
-                    ShippingNetClientPrice,
-                    ShippingGrossClientPrice),
-                new UpdateClientData(
-                    ClientName,
-                    Street,
-                    PostCode,
-                    City,
-                    Email,
-                    Phone,
-                    ClientDescription)));
-        }
-        else
-        {
-            createdOrderId = await _mediator.Send(new CreateOrderCommand(
-                new OrderData(
-                    Description,
-                    OrderDate,
-                    OrderIdentifier,
-                    PaymentIdentifier,
-                    TrackingNumber,
-                    Carrier,
-                    CompanyOrder,
-                    OrderSource,
-                    ShippingNetCost,
-                    ShippingGrossCost,
-                    ShippingNetClientPrice,
-                    ShippingGrossClientPrice),
-                new ClientData(
-                    ClientName,
-                    Street,
-                    PostCode,
-                    City,
-                    Email,
-                    Phone,
-                    ClientDescription)));
-        }
+            Guid? createdOrderId = null;
+            if (IsEditing && _orderId.HasValue)
+            {
+                await _mediator.Send(new UpdateOrderCommand(
+                    _orderId.Value,
+                    new UpdateOrderData(
+                        Description, OrderDate, OrderIdentifier, PaymentIdentifier, TrackingNumber, Carrier, Status,
+                        CompanyOrder, OrderSource, ShippingNetCost, ShippingGrossCost, ShippingNetClientPrice,
+                        ShippingGrossClientPrice),
+                    new UpdateClientData(ClientName, Street, PostCode, City, Email, Phone, ClientDescription)));
+            }
+            else
+            {
+                createdOrderId = await _mediator.Send(new CreateOrderCommand(
+                    new OrderData(
+                        Description, OrderDate, OrderIdentifier, PaymentIdentifier, TrackingNumber, Carrier,
+                        CompanyOrder, OrderSource, ShippingNetCost, ShippingGrossCost, ShippingNetClientPrice,
+                        ShippingGrossClientPrice),
+                    new ClientData(ClientName, Street, PostCode, City, Email, Phone, ClientDescription)));
+            }
 
-        if (RequestClose != null)
+            if (RequestClose != null)
+            {
+                await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderId));
+            }
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
         {
-            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderId));
+            ApplyValidationErrors(exception);
         }
     }
 

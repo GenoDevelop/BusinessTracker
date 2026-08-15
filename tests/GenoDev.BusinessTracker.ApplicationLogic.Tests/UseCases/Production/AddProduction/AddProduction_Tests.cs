@@ -115,7 +115,8 @@ public class AddProduction_Tests : BusinessTrackerUnitTestsBase<AddProductionCom
         var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Duplicate material variants are not allowed in a single production.");
+        var exception = await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error =>
+            error.Message == "Ten sam wariant materiału nie może wystąpić w produkcji więcej niż raz.");
     }
 }

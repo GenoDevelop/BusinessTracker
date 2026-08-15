@@ -50,6 +50,7 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
     {
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -68,6 +69,10 @@ public partial class CreateProductViewModel(IMediator mediator) : ViewModelBase
             Clear();
             
             RequestClose?.Invoke(EditorCloseResult.Saved(createdProductId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

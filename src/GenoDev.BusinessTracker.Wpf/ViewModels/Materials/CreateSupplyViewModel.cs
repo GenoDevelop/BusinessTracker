@@ -58,6 +58,7 @@ public partial class CreateSupplyViewModel(IMediator mediator) : ViewModelBase
     {
         if (SelectedSupplier == null) return;
 
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -69,6 +70,10 @@ public partial class CreateSupplyViewModel(IMediator mediator) : ViewModelBase
                 ShippingNetPrice ?? 0,
                 ShippingGrossPrice ?? 0));
             RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplyId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

@@ -31,7 +31,7 @@ public sealed class DeletePackingMaterial_Tests : BusinessTrackerUnitTestsBase<D
         var command = new DeletePackingMaterialCommand(packingMaterial.Id);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -48,9 +48,9 @@ public sealed class DeletePackingMaterial_Tests : BusinessTrackerUnitTestsBase<D
         var command = new DeletePackingMaterialCommand(Guid.NewGuid());
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

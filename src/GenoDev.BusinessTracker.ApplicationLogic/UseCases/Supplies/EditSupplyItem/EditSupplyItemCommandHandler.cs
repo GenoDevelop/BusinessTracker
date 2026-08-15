@@ -15,7 +15,7 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (item == null)
-            throw new KeyNotFoundException($"SupplyItem with ID {request.Id} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono pozycji dostawy.", nameof(request.Id));
 
         if (item.Supply.Status == MaterialSupplyStatus.Received)
         {
@@ -51,7 +51,7 @@ public class EditSupplyItemCommandHandler(IBusinessTrackerDbContext dbContext, I
                 item.FixedAssetId = request.ItemId;
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(request.ItemType), request.ItemType, null);
+                throw Exceptions.RequestValidationException.For("Typ pozycji dostawy jest nieprawidłowy.", nameof(request.ItemType));
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

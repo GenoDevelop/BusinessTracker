@@ -18,9 +18,13 @@ namespace GenoDev.BusinessTracker.Wpf;
 public partial class App : Application
 {
     private readonly IHost _host;
+    private readonly GlobalExceptionHandler _globalExceptionHandler = new();
 
     public App()
     {
+        DispatcherUnhandledException += _globalExceptionHandler.HandleDispatcherException;
+        TaskScheduler.UnobservedTaskException += _globalExceptionHandler.HandleUnobservedTaskException;
+
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration((context, builder) =>
             {
@@ -81,6 +85,9 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        DispatcherUnhandledException -= _globalExceptionHandler.HandleDispatcherException;
+        TaskScheduler.UnobservedTaskException -= _globalExceptionHandler.HandleUnobservedTaskException;
+
         using (_host)
         {
             await _host.StopAsync(TimeSpan.FromSeconds(5));

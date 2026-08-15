@@ -40,7 +40,7 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
             Description: "Line 1\nLine 2");
 
         // Act
-        var resultId = await Sut.Handle(command, CancellationToken.None);
+        var resultId = await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -72,9 +72,9 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
             Description: null);
 
         // Act & Assert
-        await FluentActions.Awaiting(() => Sut.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage($"Material with ID {command.MaterialId} does not exist.");
+        var exception = await FluentActions.Awaiting(() => Sut.Handle(command, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Nie znaleziono materiału.");
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class CreateMaterialVariant_Tests : BusinessTrackerUnitTestsBase<CreateMa
             Description: "New variant description");
 
         // Act
-        var resultId = await Sut.Handle(command, CancellationToken.None);
+        var resultId = await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

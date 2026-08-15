@@ -14,7 +14,7 @@ public class RemoveRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
 
         if (recipeMaterial == null)
         {
-            throw new KeyNotFoundException($"Recipe material with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono składnika receptury.", nameof(request.Id));
         }
 
         dbContext.ProductRecipeMaterials.Remove(recipeMaterial);

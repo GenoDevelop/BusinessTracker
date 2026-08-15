@@ -24,7 +24,7 @@ public class UpdateOrderProductCommandHandler : IRequestHandler<UpdateOrderProdu
 
         if (orderProduct == null)
         {
-            throw new KeyNotFoundException($"Order product with ID {request.OrderProductId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono pozycji zamówienia.", nameof(request.OrderProductId));
         }
 
         if (orderProduct.ProductId != request.ProductId)

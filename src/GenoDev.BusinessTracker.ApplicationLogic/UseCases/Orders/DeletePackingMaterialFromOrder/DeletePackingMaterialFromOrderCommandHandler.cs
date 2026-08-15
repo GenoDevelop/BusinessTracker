@@ -24,7 +24,7 @@ public class DeletePackingMaterialFromOrderCommandHandler : IRequestHandler<Dele
 
         if (orderPackingMaterial == null)
         {
-            throw new KeyNotFoundException($"Order packing material with ID {request.OrderPackingMaterialId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono pozycji materiału pakowego.", nameof(request.OrderPackingMaterialId));
         }
 
         var usedAdjustment = OrderPackingMaterial.CalculateTotalUsedAdjustment(orderPackingMaterial.Amount, 0);

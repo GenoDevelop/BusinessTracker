@@ -14,7 +14,7 @@ public class DeleteRecipeCommandHandler(IBusinessTrackerDbContext dbContext)
 
         if (recipe == null)
         {
-            throw new KeyNotFoundException($"Recipe with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono receptury.", nameof(request.Id));
         }
 
         dbContext.ProductRecipes.Remove(recipe);

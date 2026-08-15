@@ -46,7 +46,7 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
         // Act
         // We need to use the same scope for SUT and database operations to see the changes if they are in the same transaction,
         // but here they should be persisted by SaveChangesAsync in the handler.
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -80,10 +80,10 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
         );
 
         // Act
-        var act = () => Sut.Handle(command, CancellationToken.None);
+        var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class UpdateOrderProduct_Tests : BusinessTrackerUnitTestsBase<UpdateOrder
         );
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>

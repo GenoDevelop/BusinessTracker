@@ -30,7 +30,7 @@ public class RemoveRecipeMaterial_Tests
         var command = new RemoveRecipeMaterialCommand(recipeMaterialId);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -50,11 +50,11 @@ public class RemoveRecipeMaterial_Tests
         var command = new RemoveRecipeMaterialCommand(recipeMaterialId);
 
         // Act
-        var action = () => Sut.Handle(command, CancellationToken.None);
+        var action = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await action.Should()
-            .ThrowAsync<KeyNotFoundException>()
-            .WithMessage($"*{recipeMaterialId}*");
+        var exception = await action.Should()
+            .ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Nie znaleziono składnika receptury.");
     }
 }

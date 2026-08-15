@@ -219,31 +219,37 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(fixedAssetId, StorageItemType.FixedAsset, 10.0, StorageAmountType.TotalUsed))
-            .Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Fixed assets do not have a total used property.");
+        var exception = await Sut.Invoking(x => x.AdjustStorageAmountAsync(
+                fixedAssetId,
+                StorageItemType.FixedAsset,
+                10.0,
+                StorageAmountType.TotalUsed,
+                TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error =>
+            error.Message == "Środki trwałe nie obsługują ewidencji zużytej ilości.");
     }
 
     [Fact]
     public async Task AdjustStorageAmountAsync_MissingItem_ShouldThrowKeyNotFoundException()
     {
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.MaterialVariant, 10.0, StorageAmountType.TotalCompany))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.MaterialVariant, 10.0, StorageAmountType.TotalCompany, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
         
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.Packing, 10.0, StorageAmountType.TotalCompany))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.Packing, 10.0, StorageAmountType.TotalCompany, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
 
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.FixedAsset, 10.0, StorageAmountType.TotalCompany))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), StorageItemType.FixedAsset, 10.0, StorageAmountType.TotalCompany, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
     public async Task AdjustStorageAmountAsync_InvalidItemType_ShouldThrowArgumentOutOfRangeException()
     {
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), (StorageItemType)999, 10.0, StorageAmountType.TotalCompany))
-            .Should().ThrowAsync<ArgumentOutOfRangeException>();
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(Guid.NewGuid(), (StorageItemType)999, 10.0, StorageAmountType.TotalCompany, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -257,8 +263,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, 10.0, (StorageAmountType)999))
-            .Should().ThrowAsync<ArgumentOutOfRangeException>();
+        await Sut.Invoking(x => x.AdjustStorageAmountAsync(materialVariantId, StorageItemType.MaterialVariant, 10.0, (StorageAmountType)999, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -313,8 +319,8 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
     public async Task AdjustProductAmountAsync_MissingProduct_ShouldThrowKeyNotFoundException()
     {
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustProductAmountAsync(Guid.NewGuid(), 10.0, ProductAmountType.TotalAmount))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.AdjustProductAmountAsync(Guid.NewGuid(), 10.0, ProductAmountType.TotalAmount, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -328,7 +334,7 @@ public class ItemsService_Tests : BusinessTrackerUnitTestsBase<ItemsService>
         });
 
         // Act & Assert
-        await Sut.Invoking(x => x.AdjustProductAmountAsync(productId, 10.0, (ProductAmountType)999))
-            .Should().ThrowAsync<ArgumentOutOfRangeException>();
+        await Sut.Invoking(x => x.AdjustProductAmountAsync(productId, 10.0, (ProductAmountType)999, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

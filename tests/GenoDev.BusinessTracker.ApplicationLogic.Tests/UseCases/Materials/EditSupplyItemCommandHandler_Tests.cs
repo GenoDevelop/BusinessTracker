@@ -43,7 +43,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: false);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -88,7 +88,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: false);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -133,7 +133,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: true);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -180,7 +180,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: false);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -222,7 +222,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: false);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -262,7 +262,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             PrivateSupply: false);
 
         // Act
-        await Sut.Handle(command, CancellationToken.None);
+        await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -283,7 +283,7 @@ public class EditSupplyItemCommandHandler_Tests : BusinessTrackerUnitTestsBase<E
             1, 1, 1, 1, false);
 
         // Act & Assert
-        await Sut.Invoking(x => x.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        await Sut.Invoking(x => x.Handle(command, TestContext.Current.CancellationToken))
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

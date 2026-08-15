@@ -26,7 +26,7 @@ public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 
         if (order == null)
         {
-            throw new KeyNotFoundException($"Order with ID {request.OrderId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono zamówienia.", nameof(request.OrderId));
         }
 
         foreach (var op in order.OrderProducts)

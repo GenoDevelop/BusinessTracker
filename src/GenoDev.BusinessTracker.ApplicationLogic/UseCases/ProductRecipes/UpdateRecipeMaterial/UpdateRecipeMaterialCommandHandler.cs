@@ -14,7 +14,7 @@ public class UpdateRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
 
         if (recipeMaterial == null)
         {
-            throw new KeyNotFoundException($"Recipe material with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono składnika receptury.", nameof(request.Id));
         }
 
         var alreadyExists = await dbContext.ProductRecipeMaterials
@@ -22,7 +22,7 @@ public class UpdateRecipeMaterialCommandHandler(IBusinessTrackerDbContext dbCont
 
         if (alreadyExists)
         {
-            throw new InvalidOperationException($"Material with ID {request.MaterialId} is already added to this recipe.");
+            throw Exceptions.RequestValidationException.For("Ten materiał jest już dodany do receptury.", nameof(request.MaterialId));
         }
 
         recipeMaterial.MaterialId = request.MaterialId;

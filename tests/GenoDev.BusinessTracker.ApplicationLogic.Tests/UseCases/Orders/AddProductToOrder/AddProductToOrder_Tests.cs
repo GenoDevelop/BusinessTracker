@@ -79,6 +79,6 @@ public class AddProductToOrder_Tests : BusinessTrackerUnitTestsBase<AddProductTo
         var act = () => Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

@@ -48,6 +48,7 @@ public partial class CreateSupplierViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task Save()
     {
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -63,6 +64,10 @@ public partial class CreateSupplierViewModel : ViewModelBase
                 createdSupplierId = await _mediator.Send(command);
             }
             RequestClose?.Invoke(EditorCloseResult.Saved(createdSupplierId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

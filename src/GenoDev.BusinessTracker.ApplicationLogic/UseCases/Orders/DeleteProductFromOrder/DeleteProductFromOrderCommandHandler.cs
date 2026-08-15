@@ -23,7 +23,7 @@ public class DeleteProductFromOrderCommandHandler : IRequestHandler<DeleteProduc
 
         if (orderProduct == null)
         {
-            throw new KeyNotFoundException($"Order product with ID {request.OrderProductId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono pozycji zamówienia.", nameof(request.OrderProductId));
         }
 
         var soldAdjustment = OrderProduct.CalculateTotalSoldAdjustment(orderProduct.AssignedAmount, 0);

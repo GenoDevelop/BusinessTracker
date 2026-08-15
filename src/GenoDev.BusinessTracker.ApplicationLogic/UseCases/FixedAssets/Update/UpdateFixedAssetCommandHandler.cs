@@ -20,7 +20,7 @@ public sealed class UpdateFixedAssetCommandHandler : IRequestHandler<UpdateFixed
 
         if (fixedAsset == null)
         {
-            throw new KeyNotFoundException($"Fixed asset with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono środka trwałego.", nameof(request.Id));
         }
 
         fixedAsset.Name = request.Name;

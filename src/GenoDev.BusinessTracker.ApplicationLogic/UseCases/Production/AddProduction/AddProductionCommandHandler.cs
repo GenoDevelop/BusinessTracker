@@ -23,11 +23,13 @@ public class AddProductionCommandHandler : IRequestHandler<AddProductionCommand,
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
 
         if (product == null)
-            throw new KeyNotFoundException($"Product with ID {request.ProductId} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produktu.", nameof(request.ProductId));
 
         if (request.UsedMaterials.Select(x => x.MaterialVariantId).Distinct().Count() != request.UsedMaterials.Count())
         {
-            throw new InvalidOperationException("Duplicate material variants are not allowed in a single production.");
+            throw Exceptions.RequestValidationException.For(
+                "Ten sam wariant materiału nie może wystąpić w produkcji więcej niż raz.",
+                nameof(request.UsedMaterials));
         }
 
         var production = new Domain.Entities.Production

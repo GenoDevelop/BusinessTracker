@@ -65,6 +65,7 @@ public partial class EditSupplyViewModel(IMediator mediator, SupplyDetailsDto de
     {
         if (SelectedSupplier == null) return;
 
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -78,6 +79,10 @@ public partial class EditSupplyViewModel(IMediator mediator, SupplyDetailsDto de
                 ShippingNetPrice ?? 0,
                 ShippingGrossPrice ?? 0));
             RequestClose?.Invoke(EditorCloseResult.Saved());
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

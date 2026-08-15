@@ -13,7 +13,7 @@ public class CreateMaterialVariantCommandHandler(IBusinessTrackerDbContext dbCon
         var materialExists = await dbContext.Materials.AnyAsync(x => x.Id == request.MaterialId, cancellationToken);
         if (!materialExists)
         {
-            throw new InvalidOperationException($"Material with ID {request.MaterialId} does not exist.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono materiału.", nameof(request.MaterialId));
         }
 
         var variant = new MaterialVariant

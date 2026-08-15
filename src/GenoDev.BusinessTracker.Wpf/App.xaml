@@ -8,6 +8,36 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Controls/Windows/Themes/DraggablePopup.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <ControlTemplate x:Key="RequestValidationErrorTemplate">
+                <StackPanel>
+                    <Border BorderBrush="#D32F2F" BorderThickness="1">
+                        <AdornedElementPlaceholder x:Name="adorner" />
+                    </Border>
+                    <ItemsControl ItemsSource="{Binding ElementName=adorner, Path=AdornedElement.(Validation.Errors)}"
+                                  Foreground="#D32F2F"
+                                  FontSize="11"
+                                  Margin="2,2,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ErrorContent}" TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ControlTemplate>
+
+            <Style TargetType="TextBox">
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
+            </Style>
+
+            <Style TargetType="ComboBox">
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
+            </Style>
+
+            <Style TargetType="DatePicker">
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
+            </Style>
             
             <Style x:Key="IconButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>

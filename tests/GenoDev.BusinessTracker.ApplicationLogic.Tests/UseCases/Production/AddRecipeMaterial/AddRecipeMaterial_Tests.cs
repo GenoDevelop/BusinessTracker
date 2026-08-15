@@ -57,7 +57,8 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*Recipe with ID*");
+        var exception = await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Nie znaleziono receptury.");
     }
 
     [Fact]
@@ -75,7 +76,8 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*Material with ID*");
+        var exception = await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Nie znaleziono materiału.");
     }
 
     [Fact]
@@ -98,6 +100,7 @@ public class AddRecipeMaterial_Tests : BusinessTrackerUnitTestsBase<AddRecipeMat
         Func<Task> act = async () => await Sut.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already added to this recipe*");
+        var exception = await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
+        exception.Which.Errors.Should().ContainSingle(error => error.Message == "Ten materiał jest już dodany do receptury.");
     }
 }

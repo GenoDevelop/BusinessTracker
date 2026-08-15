@@ -717,6 +717,7 @@ public partial class ProductionListViewModel : ViewModelBase
             return;
         }
 
+        ClearValidationErrors();
         IsBusy = true;
         NotifyCommandStatesChanged();
         try
@@ -761,6 +762,10 @@ public partial class ProductionListViewModel : ViewModelBase
             await LoadProductRecipesAsync(SelectedProduct);
             RequestPaginationRefresh(ProductionPaginationTarget.History);
             RequestPaginationRefresh(ProductionPaginationTarget.Productions);
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

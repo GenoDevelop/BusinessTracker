@@ -14,7 +14,7 @@ public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, II
             .FirstOrDefaultAsync(s => s.Id == request.SupplyId, cancellationToken);
 
         if (supply == null)
-            throw new KeyNotFoundException($"Supply with ID {request.SupplyId} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono dostawy.", nameof(request.SupplyId));
 
         var item = new SupplyItem
         {
@@ -43,7 +43,7 @@ public class AddItemToSupplyCommandHandler(IBusinessTrackerDbContext context, II
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(request.ItemType), request.ItemType, null);
+                throw Exceptions.RequestValidationException.For("Typ pozycji dostawy jest nieprawidłowy.", nameof(request.ItemType));
         }
 
         if (supply.Status == MaterialSupplyStatus.Received)

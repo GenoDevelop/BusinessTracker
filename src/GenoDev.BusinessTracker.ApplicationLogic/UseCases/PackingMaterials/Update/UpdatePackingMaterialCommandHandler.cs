@@ -20,7 +20,7 @@ public sealed class UpdatePackingMaterialCommandHandler : IRequestHandler<Update
 
         if (packingMaterial == null)
         {
-            throw new KeyNotFoundException($"Packing material with ID {request.Id} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono materiału pakowego.", nameof(request.Id));
         }
 
         packingMaterial.Name = request.Name;

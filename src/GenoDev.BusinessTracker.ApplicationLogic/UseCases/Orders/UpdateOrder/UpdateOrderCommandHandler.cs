@@ -21,7 +21,7 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order == null)
-            throw new KeyNotFoundException($"Order with ID {request.OrderId} was not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono zamówienia.", nameof(request.OrderId));
 
         order.Description = request.Order.Description;
         order.OrderDate = request.Order.OrderDate;

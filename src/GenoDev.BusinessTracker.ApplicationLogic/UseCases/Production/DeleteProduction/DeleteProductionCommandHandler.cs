@@ -24,7 +24,7 @@ public class DeleteProductionCommandHandler : IRequestHandler<DeleteProductionCo
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (production == null)
-            throw new KeyNotFoundException($"Production with ID {request.Id} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produkcji.", nameof(request.Id));
 
         foreach (var materialUsage in production.ProductionMaterials)
         {

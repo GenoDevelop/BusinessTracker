@@ -24,16 +24,18 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (production == null)
-            throw new KeyNotFoundException($"Production with ID {request.Id} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produkcji.", nameof(request.Id));
 
         if (request.UsedMaterials.Select(x => x.MaterialVariantId).Distinct().Count() != request.UsedMaterials.Count())
         {
-            throw new InvalidOperationException("Duplicate material variants are not allowed in a single production.");
+            throw Exceptions.RequestValidationException.For(
+                "Ten sam wariant materiału nie może wystąpić w produkcji więcej niż raz.",
+                nameof(request.UsedMaterials));
         }
 
         var product = await _context.Products.FindAsync([production.ProductId], cancellationToken);
         if (product == null)
-            throw new KeyNotFoundException($"Product with ID {production.ProductId} not found.");
+            throw Exceptions.RequestValidationException.For("Nie znaleziono produktu powiązanego z produkcją.");
 
         // Materials processing
         var requestMaterialsWithId = request.UsedMaterials.Where(um => um.Id.HasValue).ToList();
@@ -67,7 +69,7 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
 
                 var materialVariant = await _context.MaterialVariants.FindAsync([pm.MaterialVariantId], cancellationToken);
                 if (materialVariant == null)
-                    throw new KeyNotFoundException($"MaterialVariant with ID {pm.MaterialVariantId} not found.");
+                    throw Exceptions.RequestValidationException.For("Nie znaleziono wariantu materiału powiązanego z produkcją.", nameof(request.UsedMaterials));
 
                 // Adjust material stock: Add back old used amount, subtract new amount (TotalUsedAmount tracks how much was USED)
                 var adjustment = ProductionMaterial.CalculateTotalUsedAmountDifference(pm.UsedAmount, production.Amount, usage.Amount, request.Amount);
@@ -81,7 +83,7 @@ public class UpdateProductionCommandHandler : IRequestHandler<UpdateProductionCo
                 // Add new material
                 var materialVariant = await _context.MaterialVariants.FindAsync([usage.MaterialVariantId], cancellationToken);
                 if (materialVariant == null)
-                    throw new KeyNotFoundException($"MaterialVariant with ID {usage.MaterialVariantId} not found.");
+                    throw Exceptions.RequestValidationException.For("Nie znaleziono wariantu materiału.", nameof(request.UsedMaterials));
 
                 var totalAmount = ProductionMaterial.CalculateTotalUsedAmount(usage.Amount, request.Amount);
                 await _itemsService.AdjustStorageAmountAsync(materialVariant.Id, StorageItemType.MaterialVariant, totalAmount,

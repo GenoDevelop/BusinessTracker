@@ -5,10 +5,15 @@ public sealed record RequestValidationError(string? Source, string Message);
 public sealed class RequestValidationException : Exception
 {
     public RequestValidationException(IEnumerable<RequestValidationError> errors)
-        : base("Request validation failed.")
+        : base("Walidacja żądania nie powiodła się.")
     {
         Errors = errors.ToArray();
     }
 
     public IReadOnlyList<RequestValidationError> Errors { get; }
+
+    public static RequestValidationException For(string message, string? source = null)
+    {
+        return new RequestValidationException([new RequestValidationError(source, message)]);
+    }
 }

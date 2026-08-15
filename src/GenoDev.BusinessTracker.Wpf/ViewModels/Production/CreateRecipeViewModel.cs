@@ -73,6 +73,7 @@ public partial class CreateRecipeViewModel(IMediator mediator) : ViewModelBase
     {
         if (SelectedProduct == null) return;
 
+        ClearValidationErrors();
         IsBusy = true;
         try
         {
@@ -90,6 +91,10 @@ public partial class CreateRecipeViewModel(IMediator mediator) : ViewModelBase
             
             Clear();
             RequestClose?.Invoke(EditorCloseResult.Saved(createdRecipeId));
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
+        {
+            ApplyValidationErrors(exception);
         }
         finally
         {

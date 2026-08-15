@@ -38,7 +38,7 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         var command = new UpdateRecipeCommand(recipeId, newProductId, "New Name", "New Description");
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -58,10 +58,10 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         var command = new UpdateRecipeCommand(Guid.NewGuid(), Guid.NewGuid(), "Name", "Desc");
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await handler.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         var command = new DeleteRecipeCommand(recipeId);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert_BusinessTrackerDatabase(db =>
@@ -98,9 +98,9 @@ public class RecipeHandlers_Tests : BusinessTrackerUnitTestsBase<UpdateRecipeCom
         var command = new DeleteRecipeCommand(Guid.NewGuid());
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await handler.Handle(command, TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

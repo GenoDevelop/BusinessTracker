@@ -61,9 +61,9 @@ public class DeleteProductionTests : BusinessTrackerUnitTestsBase<DeleteProducti
     public async Task Handle_ShouldThrowExceptionIfProductionNotFound()
     {
         // Act
-        Func<Task> act = async () => await Sut.Handle(new DeleteProductionCommand(Guid.NewGuid()), default);
+        Func<Task> act = async () => await Sut.Handle(new DeleteProductionCommand(Guid.NewGuid()), TestContext.Current.CancellationToken);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 }

@@ -82,7 +82,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         // Act & Assert
         await Sut.Invoking(x => x.Handle(command, TestContext.Current.CancellationToken))
-            .Should().ThrowAsync<KeyNotFoundException>();
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class AddItemToSupplyCommandHandler_Tests : BusinessTrackerUnitTestsBase<
 
         // Act & Assert
         await Sut.Invoking(x => x.Handle(command, TestContext.Current.CancellationToken))
-            .Should().ThrowAsync<KeyNotFoundException>();
+            .Should().ThrowAsync<GenoDev.BusinessTracker.ApplicationLogic.Exceptions.RequestValidationException>();
     }
 
     [Fact]

@@ -96,31 +96,29 @@ public partial class OrderProductFormViewModel : ViewModelBase
     {
         if (SelectedProduct == null) return;
 
-        Guid? createdOrderProductId = null;
-        if (IsEditing && _orderProductId.HasValue)
+        ClearValidationErrors();
+        try
         {
-            await _mediator.Send(new UpdateOrderProductCommand(
-                _orderProductId.Value,
-                SelectedProduct.Id,
-                OrderedAmount,
-                AssignedAmount,
-                UnitNetPrice,
-                UnitGrossPrice));
-        }
-        else
-        {
-            createdOrderProductId = await _mediator.Send(new AddProductToOrderCommand(
-                _orderId,
-                SelectedProduct.Id,
-                OrderedAmount,
-                AssignedAmount,
-                UnitNetPrice,
-                UnitGrossPrice));
-        }
+            Guid? createdOrderProductId = null;
+            if (IsEditing && _orderProductId.HasValue)
+            {
+                await _mediator.Send(new UpdateOrderProductCommand(
+                    _orderProductId.Value, SelectedProduct.Id, OrderedAmount, AssignedAmount, UnitNetPrice, UnitGrossPrice));
+            }
+            else
+            {
+                createdOrderProductId = await _mediator.Send(new AddProductToOrderCommand(
+                    _orderId, SelectedProduct.Id, OrderedAmount, AssignedAmount, UnitNetPrice, UnitGrossPrice));
+            }
 
-        if (RequestClose != null)
+            if (RequestClose != null)
+            {
+                await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderProductId));
+            }
+        }
+        catch (ApplicationLogic.Exceptions.RequestValidationException exception)
         {
-            await RequestClose.Invoke(EditorCloseResult.Saved(createdOrderProductId));
+            ApplyValidationErrors(exception);
         }
     }
 
