@@ -26,7 +26,7 @@ public class CreateOrder_Tests : BusinessTrackerUnitTestsBase<CreateOrderCommand
             OrderIdentifier: "ORD-123",
             PaymentIdentifier: "PAY-456",
             TrackingNumber: "TRACK-789",
-            Carrier: Carrier.Dhl,
+            Carrier: Carrier.InPost,
             CompanyOrder: true,
             OrderSource: "Online Store",
             ShippingNetCost: 10.00m,

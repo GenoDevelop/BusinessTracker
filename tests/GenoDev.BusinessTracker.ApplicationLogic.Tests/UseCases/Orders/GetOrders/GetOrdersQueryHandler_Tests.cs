@@ -30,7 +30,7 @@ public class GetOrdersQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetOrder
                 orderIdentifier: "ORD-123",
                 paymentIdentifier: "PAY-123",
                 trackingNumber: "TRK-123",
-                carrier: Carrier.Dhl,
+                carrier: Carrier.InPost,
                 status: OrderStatus.New,
                 companyOrder: true,
                 orderSource: "Shopify",
@@ -61,7 +61,7 @@ public class GetOrdersQueryHandler_Tests : BusinessTrackerUnitTestsBase<GetOrder
         item.OrderIdentifier.Should().Be("ORD-123");
         item.PaymentIdentifier.Should().Be("PAY-123");
         item.TrackingNumber.Should().Be("TRK-123");
-        item.Carrier.Should().Be(Carrier.Dhl);
+        item.Carrier.Should().Be(Carrier.InPost);
         item.Status.Should().Be(OrderStatus.New);
         item.CompanyOrder.Should().BeTrue();
         item.OrderSource.Should().Be("Shopify");

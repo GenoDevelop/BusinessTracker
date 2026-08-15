@@ -37,7 +37,7 @@ public class UpdateOrder_Tests : BusinessTrackerUnitTestsBase<UpdateOrderCommand
             OrderIdentifier: "UPD-123",
             PaymentIdentifier: "UPAY-456",
             TrackingNumber: "UTRACK-789",
-            Carrier: Carrier.FedEx,
+            Carrier: Carrier.InPost,
             Status: OrderStatus.Shipped,
             CompanyOrder: true,
             OrderSource: "Updated Source",
