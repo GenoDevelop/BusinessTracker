@@ -40,6 +40,7 @@ Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Inf
 
 - All business operations invoked by the UI go through MediatR.
 - Every MediatR request handler runs through `TransactionBehavior`, which wraps the complete handler invocation with `TransactionHelper`. Keep the behavior registered as an open pipeline behavior so commands and queries share the same ambient transaction and nested requests reuse it.
+- `ValidationBehavior` runs immediately inside `TransactionBehavior`. It resolves an optional FluentValidation `IValidator<TRequest>`, skips validation when none is registered, and throws `RequestValidationException` with structured source/message errors before invoking an invalid request's handler. Register ApplicationLogic validators by assembly scanning as transient `IValidator<T>` services.
 - Model reads as `IRequest<T>` queries and writes as commands. Put each request and its handler in the appropriate feature/use-case folder under `ApplicationLogic/UseCases`.
 - Keep request contracts and result DTOs independent of WPF. Do not expose EF entities to the UI when a purpose-built DTO is appropriate.
 - Handlers depend on `IBusinessTrackerDbContext` and other application abstractions, not the concrete context.
