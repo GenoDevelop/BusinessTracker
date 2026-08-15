@@ -24,6 +24,9 @@
         <DataTemplate DataType="{x:Type vm:SuppliesViewModel}">
             <local:SuppliesView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StockAdjustmentsViewModel}">
+            <local:StockAdjustmentsView />
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
@@ -41,6 +44,12 @@
             </TabItem>
             <TabItem Header="Dostawy">
                 <ContentControl Content="{Binding SuppliesViewModel}" />
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="Korekty&#x0a;stanu" TextAlignment="Center" />
+                </TabItem.Header>
+                <ContentControl Content="{Binding StockAdjustmentsViewModel}" />
             </TabItem>
         </TabControl>
     </Grid>

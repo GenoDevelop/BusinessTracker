@@ -28,6 +28,7 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderProduct> OrderProducts { get; set; }
     public DbSet<ClientDetails> ClientDetails { get; set; }
+    public DbSet<StockAdjustment> StockAdjustments { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {

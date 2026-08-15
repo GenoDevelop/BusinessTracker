@@ -50,6 +50,7 @@ Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Inf
 - Project to DTOs in SQL with `Select`; avoid loading full graphs and mapping them in memory.
 - Commands perform the complete business mutation, call `SaveChangesAsync(cancellationToken)`, and return only the result their caller needs (commonly an ID or no value).
 - Preserve business invariants and update every related aggregate/counter consistently. Study adjacent handlers before implementing inventory, production, supply, recipe, or order mutations; these flows affect related totals.
+- Stock adjustments are persisted as signed, dated audit entries. Creating an entry applies its signed amount, updating one first reverses its old effect and then applies the replacement, and deleting one reverses its effect. A single create request may contain several categories and must remain atomic. Products use only company stock and whole-number amounts; material variants, packing materials, and fixed assets can target company or private stock.
 - Pass cancellation tokens through MediatR, EF async operations, pagination loaders, and services.
 - Register application services in `ApplicationLogic/Extensions/DependencyInjectionExtensions.cs`; MediatR discovers handlers from the ApplicationLogic assembly.
 - The WPF application does not create a DI scope per MediatR request. Services that hold or depend on the transient `IBusinessTrackerDbContext` (including `IItemsService`) must therefore be transient, not scoped or singleton.

@@ -1,0 +1,194 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.Materials.StockAdjustmentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+             xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Materials"
+             xmlns:enums="clr-namespace:GenoDev.BusinessTracker.Domain.Enums;assembly=GenoDev.BusinessTracker.Domain"
+             mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1000"
+             d:DataContext="{d:DesignInstance vm:StockAdjustmentsViewModel}">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Korekty stanu" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <controls:CreateButton Command="{Binding CreateCommand}" ToolTip="Dodaj korekty stanu" Margin="0,0,5,0" />
+            <controls:RefreshButton Click="RefreshButton_Click" Margin="0,0,5,0" />
+            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+
+        <DataGrid x:Name="AdjustmentsDataGrid" Grid.Row="1" ItemsSource="{Binding Adjustments}"
+                  SelectedItem="{Binding SelectedAdjustment}" AutoGenerateColumns="False" IsReadOnly="True"
+                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" Sorting="DataGrid_Sorting">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*" SortMemberPath="ItemName">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader x:Name="NameFilter" Header="Nazwa" DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemName}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="140" SortMemberPath="ItemType">
+                    <DataGridTemplateColumn.Header>
+                        <controls:EnumFilterColumnHeader x:Name="TypeFilter" Header="Typ" EnumType="{x:Type enums:StockAdjustmentItemType}"
+                            SelectionMode="Multiple" DisplayNameConverter="{StaticResource StockAdjustmentItemTypeToTextConverter}"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemType, Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="120" SortMemberPath="Ean">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader x:Name="EanFilter" Header="EAN" DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Ean}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="140" SortMemberPath="Code">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader x:Name="CodeFilter" Header="Kod" ToolTip="Kod producenta; dla produktu identyfikator" DebounceMilliseconds="500"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Code}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
+                    <DataGridTemplateColumn.Header>
+                        <controls:NumericFilterColumnHeader x:Name="AmountFilter" Header="Ilość"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <Run Text="{Binding Amount, StringFormat={}{0:+0.##;-0.##;0}, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Unit, Mode=OneWay}"/>
+                                </TextBlock>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <Run Text="0"/><Run Text=" "/><Run Text="{Binding Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="Gray" Text="{Binding AmountSign, Mode=OneWay}"/><Run Foreground="Gray" Text=" "/><Run Foreground="Gray" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="120" SortMemberPath="Date" SortDirection="Descending">
+                    <DataGridTemplateColumn.Header>
+                        <controls:DateRangeFilterColumnHeader x:Name="DateFilter" Header="Data"
+                            IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Date, StringFormat=dd.MM.yyyy}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="*" SortMemberPath="Description">
+                    <DataGridTemplateColumn.Header>
+                        <controls:TextFilterColumnHeader x:Name="DescriptionFilter" Header="Opis"
+                                                         DebounceMilliseconds="500"
+                                                         IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                         FilterChanged="Filter_FilterChanged" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}" TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding Description}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header><TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" /></DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate><StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <controls:EditButton Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Edytuj korektę" Margin="2,0" />
+                            <controls:DeleteButton Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń korektę" Margin="2,0" />
+                        </StackPanel></DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <controls:PaginationControl x:Name="Pagination" Grid.Row="2" Layout="SingleLine" PageLoader="{Binding PageLoader}"
+                                    InitialPageSize="50" HorizontalAlignment="Right" PaginationHorizontalAlignment="Right" Margin="0,5,0,0" />
+
+        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj korekty stanu" StaysOpen="True">
+            <Grid Width="620" DataContext="{Binding CreateViewModel}">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="200"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Data:" Margin="0,0,0,5"/><DatePicker SelectedDate="{Binding Date}" Margin="0,0,0,10"/>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="Typ:" Margin="0,0,0,5"/><ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Pozycja:" Margin="0,0,0,5"/><controls:SearchableComboBox ItemsSource="{Binding AvailableOptions}" SelectedItem="{Binding SelectedOption}" DisplayMemberPath="DisplayName" SearchPropertyPaths="Ean,Code" Margin="0,0,0,10"/></StackPanel>
+                    </Grid>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="Ilość:" Margin="0,0,0,5"/><controls:NumericTextBox Value="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Mode="{Binding QuantityInputMode}"/></StackPanel>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom"><TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="Gray" Margin="0,0,0,7"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}"/></StackPanel>
+                    </Grid>
+                    <TextBlock Text="Opis:" Margin="0,10,0,5"/>
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="60"/>
+                </StackPanel>
+                <Button Grid.Row="1" Content="Dodaj pozycję" Command="{Binding AddItemCommand}" HorizontalAlignment="Right" Padding="15,5" Margin="0,12,0,8"/>
+                <TextBlock Grid.Row="2" Text="Pozycje tej korekty:" FontWeight="Bold" Margin="0,0,0,5"/>
+                <DataGrid Grid.Row="3" ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Option.Name}" Width="*"/>
+                        <DataGridTemplateColumn Header="Typ" Width="130"><DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Option.ItemType, Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Ilość" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock>
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            <Run Text="{Binding Amount, StringFormat={}{0:+0.##;-0.##;0}, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Option.Unit, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            <Run Text="0"/><Run Text=" "/><Run Text="{Binding Option.Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="Gray" Text="{Binding Sign, Mode=OneWay}"/><Run Foreground="Gray" Text=" "/><Run Foreground="Gray" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="" Width="36"><DataGridTemplateColumn.CellTemplate><DataTemplate><controls:DeleteButton Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń z listy" Width="16" HorizontalAlignment="Center"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0"><Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Zapisz wszystkie" Command="{Binding SaveCommand}" Padding="15,5" IsDefault="True"/></StackPanel>
+            </Grid>
+        </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj korektę stanu" StaysOpen="True">
+            <StackPanel Width="500" DataContext="{Binding EditViewModel}">
+                <TextBlock Text="Data:" Margin="0,0,0,5"/><DatePicker SelectedDate="{Binding Date}" Margin="0,0,0,10"/>
+                <TextBlock Text="Typ:" Margin="0,0,0,5"/><ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox>
+                <TextBlock Text="Pozycja:" Margin="0,0,0,5"/><controls:SearchableComboBox ItemsSource="{Binding AvailableOptions}" SelectedItem="{Binding SelectedOption}" DisplayMemberPath="DisplayName" SearchPropertyPaths="Ean,Code" Margin="0,0,0,10"/>
+                <TextBlock Text="Ilość:" Margin="0,0,0,5"/><controls:NumericTextBox Value="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Mode="{Binding QuantityInputMode}" Margin="0,0,0,10"/>
+                <TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="Gray" Margin="0,0,0,8"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}" Margin="0,0,0,20"/>
+                <TextBlock Text="Opis:" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                         TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="70" Margin="0,0,0,20"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" IsDefault="True"/></StackPanel>
+            </StackPanel>
+        </controls:DraggablePopup>
+
+        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/></StackPanel></StackPanel>
+        </controls:DraggablePopup>
+    </Grid>
+</UserControl>

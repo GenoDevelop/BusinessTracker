@@ -124,6 +124,7 @@
             <converters:MaterialSupplyStatusToTextConverter x:Key="MaterialSupplyStatusToTextConverter" />
             <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibilityConverter" />
             <converters:SupplyItemTypeToTextConverter x:Key="SupplyItemTypeToTextConverter" />
+            <converters:StockAdjustmentItemTypeToTextConverter x:Key="StockAdjustmentItemTypeToTextConverter" />
             <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
             <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
             <converters:PolishBooleanDisplayConverter x:Key="PolishBooleanDisplayConverter" />

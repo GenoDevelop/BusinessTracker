@@ -247,6 +247,49 @@ public static class BusinessTrackerDbContextExtensions
             return product;
         }
 
+        public StockAdjustment Arrange_StockAdjustment(
+            MaterialVariant? materialVariant = null,
+            PackingMaterial? packingMaterial = null,
+            FixedAsset? fixedAsset = null,
+            Product? product = null,
+            Guid? id = null,
+            double amount = 1,
+            bool isPrivate = false,
+            DateOnly? date = null,
+            string? description = null)
+        {
+            StockAdjustmentItemType itemType;
+            if (materialVariant is not null) itemType = StockAdjustmentItemType.MaterialVariant;
+            else if (packingMaterial is not null) itemType = StockAdjustmentItemType.PackingMaterial;
+            else if (fixedAsset is not null) itemType = StockAdjustmentItemType.FixedAsset;
+            else
+            {
+                product ??= db.Arrange_Product();
+                itemType = StockAdjustmentItemType.Product;
+                isPrivate = false;
+            }
+
+            var adjustment = new StockAdjustment
+            {
+                Id = id ?? Guid.NewGuid(),
+                ItemType = itemType,
+                MaterialVariantId = materialVariant?.Id,
+                MaterialVariant = materialVariant,
+                PackingMaterialId = packingMaterial?.Id,
+                PackingMaterial = packingMaterial,
+                FixedAssetId = fixedAsset?.Id,
+                FixedAsset = fixedAsset,
+                ProductId = product?.Id,
+                Product = product,
+                Amount = amount,
+                IsPrivate = isPrivate,
+                Date = date ?? DateOnly.FromDateTime(DateTime.Today),
+                Description = description
+            };
+            db.StockAdjustments.Add(adjustment);
+            return adjustment;
+        }
+
         public ProductRecipe Arrange_ProductRecipe(Product? product = null,
             Guid? id = null,
             string name = "Test Recipe",

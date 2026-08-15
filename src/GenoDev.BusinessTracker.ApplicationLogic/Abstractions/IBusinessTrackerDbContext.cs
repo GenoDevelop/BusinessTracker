@@ -21,6 +21,7 @@ public interface IBusinessTrackerDbContext
     DbSet<Order> Orders { get; }
     DbSet<OrderProduct> OrderProducts { get; }
     DbSet<ClientDetails> ClientDetails { get; }
+    DbSet<StockAdjustment> StockAdjustments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
