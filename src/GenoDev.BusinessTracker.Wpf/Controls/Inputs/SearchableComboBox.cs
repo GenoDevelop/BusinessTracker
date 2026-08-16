@@ -383,7 +383,6 @@ public class SearchableComboBox : ComboBox
             Height = SearchTextBoxHeight,
             MinHeight = 0,
             Margin = new Thickness(0),
-            Padding = new Thickness(6, 1, 6, 1),
             VerticalContentAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Style = SearchTextBoxStyle

@@ -30,7 +30,7 @@
                            Style="{StaticResource SectionTitleTextStyle}"
                            Margin="0,0,10,0" />
                 <controls:RefreshButton Click="ProductionsRefreshButton_Click"
-                                        Margin="0,0,5,0" />
+                                        Margin="0,0,2,0" />
                 <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
@@ -242,11 +242,9 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <TextBlock Text="Historia Produkcji" FontSize="16" FontWeight="Bold" Margin="0,0,10,0" />
                             <controls:RefreshButton Click="HistoryRefreshButton_Click"
-                                                    Margin="0,0,5,0"
-                                                    Width="16" />
+                                                    Margin="0,0,2,0" />
                             <controls:FilterToggleButton IsChecked="{Binding IsHistoryFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                         Click="HistoryFilterToggleButton_Click"
-                                                         Width="16" />
+                                                         Click="HistoryFilterToggleButton_Click" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <controls:SearchableComboBox ItemsSource="{Binding ProductRecipes}" 
@@ -254,9 +252,7 @@
                                                         DisplayMemberPath="Name"
                                                         Width="200" Margin="0,0,5,0" 
                                                         VerticalAlignment="Center" />
-                            <controls:CreateButton Command="{Binding AddProductionCommand}" ToolTip="Dodaj produkcję"
-                                                   Width="18"
-                                                   Height="18"/>
+                            <controls:CreateButton Command="{Binding AddProductionCommand}" ToolTip="Dodaj produkcję" />
                         </StackPanel>
                     </Grid>
 
@@ -365,7 +361,7 @@
                                                         <controls:EditButton
                                                             Command="{Binding DataContext.EditProductionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}" 
-                                                            Margin="0,0,5,0"/>
+                                                            Margin="0,0,2,0"/>
                                                         <controls:DeleteButton
                                                             Command="{Binding DataContext.DeleteProductionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}" />

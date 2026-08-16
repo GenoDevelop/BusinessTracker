@@ -26,8 +26,8 @@
             <!-- Toolbar -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <TextBlock Text="Przepisy" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,10,0" />
-                <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" />
-                <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" />
+                <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,2,0" />
+                <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,2,0" />
                 <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
@@ -140,8 +140,8 @@
                         <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Bottom" />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,5,0" Width="18" Height="18"/>
-                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" Width="18" Height="18"/>
+                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,2,0" />
+                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" />
                         </StackPanel>
                     </Grid>
 
@@ -199,8 +199,8 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Potrzebne Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
 
-                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
-                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" />
+                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,2,0" ToolTip="Dodaj materiał" />
+                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,2,0" />
                         <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      Click="RecipeMaterialsFilterToggleButton_Click" />
                     </StackPanel>
@@ -259,12 +259,12 @@
                                                 Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Edytuj pozycję"
-                                                Margin="2,0" />
+                                                Margin="1,0" />
                                             <controls:DeleteButton
                                                 Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Usuń pozycję"
-                                                Margin="2,0" />
+                                                Margin="1,0" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

@@ -18,8 +18,8 @@
         <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Korekty stanu" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateCommand}" ToolTip="Dodaj korekty stanu" Margin="0,0,5,0" />
-            <controls:RefreshButton Click="RefreshButton_Click" Margin="0,0,5,0" />
+            <controls:CreateButton Command="{Binding CreateCommand}" ToolTip="Dodaj korekty stanu" Margin="0,0,2,0" />
+            <controls:RefreshButton Click="RefreshButton_Click" Margin="0,0,2,0" />
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
         </Border>
@@ -122,8 +122,8 @@
                     <DataGridTemplateColumn.Header><TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" /></DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate><StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <controls:EditButton Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Edytuj korektę" Margin="2,0" />
-                            <controls:DeleteButton Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń korektę" Margin="2,0" />
+                            <controls:EditButton Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Edytuj korektę" Margin="1,0" />
+                            <controls:DeleteButton Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń korektę" Margin="1,0" />
                         </StackPanel></DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -179,7 +179,7 @@
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="" Width="36"
                                                 controls:ConfigurableDataGrid.ColumnKey="Actions"
-                                                controls:ConfigurableDataGrid.ColumnTitle="Akcje"><DataGridTemplateColumn.CellTemplate><DataTemplate><controls:DeleteButton Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń z listy" Width="16" HorizontalAlignment="Center"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                                                controls:ConfigurableDataGrid.ColumnTitle="Akcje"><DataGridTemplateColumn.CellTemplate><DataTemplate><controls:DeleteButton Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń z listy" HorizontalAlignment="Center"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </controls:ConfigurableDataGrid>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0"><Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Zapisz wszystkie" Command="{Binding SaveCommand}" Padding="15,5" IsDefault="True"/></StackPanel>

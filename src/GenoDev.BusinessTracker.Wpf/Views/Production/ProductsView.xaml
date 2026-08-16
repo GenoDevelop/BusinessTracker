@@ -18,8 +18,8 @@
         <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Produkty" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,5,0"/>
-            <controls:RefreshButton Click="ProductsRefreshButton_Click" Margin="0,0,5,0" />
+            <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,2,0"/>
+            <controls:RefreshButton Click="ProductsRefreshButton_Click" Margin="0,0,2,0" />
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         </Border>
@@ -123,7 +123,7 @@
                                 <controls:EditButton
                                     Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     CommandParameter="{Binding}"
-                                    Margin="0,0,5,0" />
+                                    Margin="0,0,2,0" />
                                 <controls:DeleteButton
                                     Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     CommandParameter="{Binding}"/>

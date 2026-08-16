@@ -24,9 +24,9 @@
                        Margin="0,0,20,0" />
             <controls:CreateButton Command="{Binding CreateMaterialCommand}"
                                    ToolTip="Dodaj materiał"
-                                   Margin="0,0,5,0" />
+                                   Margin="0,0,2,0" />
             <controls:RefreshButton Click="RefreshButton_Click"
-                                    Margin="0,0,5,0" />
+                                    Margin="0,0,2,0" />
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Click="FilterToggleButton_Click" />
         </StackPanel>
@@ -133,12 +133,12 @@
                                             Command="{Binding DataContext.EditMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                             CommandParameter="{Binding}"
                                             ToolTip="Edytuj materiał"
-                                            Margin="2,0" />
+                                            Margin="1,0" />
                                         <controls:DeleteButton
                                             Command="{Binding DataContext.DeleteMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                             CommandParameter="{Binding}"
                                             ToolTip="Usuń materiał"
-                                            Margin="2,0" />
+                                            Margin="1,0" />
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -186,9 +186,9 @@
                                Margin="0,0,20,0" />
                     <controls:CreateButton Command="{Binding CreateMaterialVariantCommand}"
                                            ToolTip="Dodaj wariant"
-                                           Margin="0,0,5,0" />
+                                           Margin="0,0,2,0" />
                     <controls:RefreshButton Click="VariantsRefreshButton_Click"
-                                            Margin="0,0,5,0" />
+                                            Margin="0,0,2,0" />
                     <controls:FilterToggleButton IsChecked="{Binding IsVariantFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  Click="VariantFilterToggleButton_Click" />
                 </StackPanel>
@@ -336,11 +336,11 @@
                                         <controls:EditButton Command="{Binding DataContext.EditMaterialVariantCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                              CommandParameter="{Binding}"
                                                              ToolTip="Edytuj wariant"
-                                                             Margin="2,0" />
+                                                             Margin="1,0" />
                                         <controls:DeleteButton Command="{Binding DataContext.DeleteMaterialVariantCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                CommandParameter="{Binding}"
                                                                ToolTip="Usuń wariant"
-                                                               Margin="2,0" />
+                                                               Margin="1,0" />
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
