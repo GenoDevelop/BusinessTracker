@@ -117,7 +117,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto"
+                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                                 controls:ConfigurableDataGrid.ColumnKey="Actions"
                                                 controls:ConfigurableDataGrid.ColumnTitle="Akcje">
                             <DataGridTemplateColumn.Header>
@@ -322,7 +322,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto"
+                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                                 controls:ConfigurableDataGrid.ColumnKey="Actions">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="Akcje"

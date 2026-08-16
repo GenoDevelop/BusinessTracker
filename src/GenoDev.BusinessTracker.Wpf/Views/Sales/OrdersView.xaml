@@ -436,7 +436,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto"
+                                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                                                 controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
@@ -543,7 +543,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto"
+                                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                                                 controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
@@ -584,7 +584,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TabControl Grid.Row="0" Background="Transparent" BorderThickness="0,1,0,0" Height="450">
+                <TabControl Grid.Row="0" Background="Transparent" BorderThickness="0,1,0,0" MinHeight="470">
                         <TabControl.Resources>
                             <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
                                 <Setter Property="Padding" Value="10,2" />
@@ -593,9 +593,7 @@
                         
                         <!-- Order Details Tab -->
                         <TabItem Header="Szczegóły zamówienia">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
-                                <StackPanel>
-                                    <Grid>
+                            <Grid Margin="0,10,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="*" />
@@ -697,15 +695,12 @@
                                             <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                                      TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
                                         </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </ScrollViewer>
+                            </Grid>
                         </TabItem>
                         
                         <!-- Client Data Tab -->
                         <TabItem Header="Dane klienta">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
-                                <StackPanel>
+                            <StackPanel Margin="0,10,0,0">
                                     <TextBlock Text="Nazwa klienta" Margin="0,0,0,2" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
                                     <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
@@ -738,8 +733,7 @@
                                     <TextBlock Text="Opis klienta" Margin="0,0,0,2" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
                                     <controls:ResizableTextBox Text="{Binding ClientDescription, UpdateSourceTrigger=PropertyChanged}"
                                              TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" />
-                                </StackPanel>
-                            </ScrollViewer>
+                            </StackPanel>
                         </TabItem>
                     </TabControl>
 

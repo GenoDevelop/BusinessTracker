@@ -117,7 +117,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="Auto"
+                <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                         controls:ConfigurableDataGrid.ColumnKey="Actions">
                     <DataGridTemplateColumn.Header><TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0" /></DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
@@ -177,7 +177,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="" Width="36"
+                        <DataGridTemplateColumn Header="" Width="44"
                                                 controls:ConfigurableDataGrid.ColumnKey="Actions"
                                                 controls:ConfigurableDataGrid.ColumnTitle="Akcje"><DataGridTemplateColumn.CellTemplate><DataTemplate><controls:DeleteButton Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" ToolTip="Usuń z listy" HorizontalAlignment="Center"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     </DataGrid.Columns>
