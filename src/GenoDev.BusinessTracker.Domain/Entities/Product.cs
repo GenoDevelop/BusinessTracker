@@ -12,4 +12,5 @@ public class Product
     public virtual ICollection<ProductRecipe> ProductRecipes { get; set; } = new HashSet<ProductRecipe>();
     public virtual ICollection<Production> Productions { get; set; } = new HashSet<Production>();
     public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new HashSet<OrderProduct>();
+    public virtual ICollection<ProductImage> Images { get; set; } = new HashSet<ProductImage>();
 }

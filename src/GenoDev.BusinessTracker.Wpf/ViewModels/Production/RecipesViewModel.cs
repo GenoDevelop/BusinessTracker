@@ -10,6 +10,7 @@ using MediatR;
 using System.Collections.ObjectModel;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
@@ -32,10 +33,12 @@ public partial class RecipesViewModel : ViewModelBase
 
     public RecipesViewModel(
         IMediator mediator,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ProductImagesViewModel productImagesViewModel)
     {
         _mediator = mediator;
         _serviceProvider = serviceProvider;
+        ProductImages = productImagesViewModel;
 
         CreateRecipeCommand = new AsyncRelayCommand(CreateRecipeAsync);
         EditRecipeCommand = new AsyncRelayCommand(EditRecipeAsync);
@@ -49,6 +52,8 @@ public partial class RecipesViewModel : ViewModelBase
         ConfirmDeleteMaterialCommand = new AsyncRelayCommand(ConfirmDeleteMaterialAsync);
         CancelDeleteMaterialCommand = new RelayCommand(CancelDeleteMaterial);
     }
+
+    public ProductImagesViewModel ProductImages { get; }
 
     public ObservableCollection<RecipeDto> Recipes { get; } = new();
 
@@ -103,6 +108,7 @@ public partial class RecipesViewModel : ViewModelBase
         }
 
         SelectedRecipeMaterial = null;
+        _ = ProductImages.SetProductAsync(value?.ProductId);
     }
 
     [ObservableProperty]
@@ -185,6 +191,8 @@ public partial class RecipesViewModel : ViewModelBase
         {
             _isRestoringRecipesSelection = false;
         }
+
+        _ = ProductImages.SetProductAsync(SelectedRecipe?.ProductId);
 
         if (previousSelectedRecipeId != SelectedRecipe?.Id)
         {

@@ -12,6 +12,7 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.StockAdjustments.Create;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.StockAdjustments.Delete;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.StockAdjustments.GetStockAdjustments;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.StockAdjustments.Update;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Products.Images;
 using GenoDev.BusinessTracker.ApplicationLogic.Validation;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.TestsUtilities;
@@ -76,6 +77,7 @@ public abstract class ValidatorContractTests<TValidator> where TValidator : clas
 public sealed class AddItemToSupplyCommandValidator_Tests : ValidatorContractTests<AddItemToSupplyCommandValidator>;
 public sealed class AddPackingMaterialToOrderCommandValidator_Tests : ValidatorContractTests<AddPackingMaterialToOrderCommandValidator>;
 public sealed class AddProductionCommandValidator_Tests : ValidatorContractTests<AddProductionCommandValidator>;
+public sealed class AddProductImagesCommandValidator_Tests : ValidatorContractTests<AddProductImagesCommandValidator>;
 public sealed class AddProductToOrderCommandValidator_Tests : ValidatorContractTests<AddProductToOrderCommandValidator>;
 public sealed class AddRecipeMaterialCommandValidator_Tests : ValidatorContractTests<AddRecipeMaterialCommandValidator>;
 public sealed class ClientDataValidator_Tests : ValidatorContractTests<ClientDataValidator>;
@@ -96,6 +98,7 @@ public sealed class DeleteOrderCommandValidator_Tests : ValidatorContractTests<D
 public sealed class DeletePackingMaterialCommandValidator_Tests : ValidatorContractTests<DeletePackingMaterialCommandValidator>;
 public sealed class DeletePackingMaterialFromOrderCommandValidator_Tests : ValidatorContractTests<DeletePackingMaterialFromOrderCommandValidator>;
 public sealed class DeleteProductCommandValidator_Tests : ValidatorContractTests<DeleteProductCommandValidator>;
+public sealed class DeleteProductImageCommandValidator_Tests : ValidatorContractTests<DeleteProductImageCommandValidator>;
 public sealed class DeleteProductFromOrderCommandValidator_Tests : ValidatorContractTests<DeleteProductFromOrderCommandValidator>;
 public sealed class DeleteProductionCommandValidator_Tests : ValidatorContractTests<DeleteProductionCommandValidator>;
 public sealed class DeleteRecipeCommandValidator_Tests : ValidatorContractTests<DeleteRecipeCommandValidator>;
@@ -117,6 +120,8 @@ public sealed class GetProductionHistoryQueryValidator_Tests : ValidatorContract
 public sealed class GetProductionMaterialsQueryValidator_Tests : ValidatorContractTests<GetProductionMaterialsQueryValidator>;
 public sealed class GetProductionSummaryQueryValidator_Tests : ValidatorContractTests<GetProductionSummaryQueryValidator>;
 public sealed class GetProductsQueryValidator_Tests : ValidatorContractTests<GetProductsQueryValidator>;
+public sealed class GetProductImagesQueryValidator_Tests : ValidatorContractTests<GetProductImagesQueryValidator>;
+public sealed class GetProductImageContentQueryValidator_Tests : ValidatorContractTests<GetProductImageContentQueryValidator>;
 public sealed class GetRecipeMaterialsQueryValidator_Tests : ValidatorContractTests<GetRecipeMaterialsQueryValidator>;
 public sealed class GetRecipesQueryValidator_Tests : ValidatorContractTests<GetRecipesQueryValidator>;
 public sealed class GetSuppliersQueryValidator_Tests : ValidatorContractTests<GetSuppliersQueryValidator>;
@@ -126,6 +131,7 @@ public sealed class GetSupplyItemsQueryValidator_Tests : ValidatorContractTests<
 public sealed class GetStockAdjustmentsQueryValidator_Tests : ValidatorContractTests<GetStockAdjustmentsQueryValidator>;
 public sealed class MaterialVariantUsageDtoValidator_Tests : ValidatorContractTests<AddProductionCommandValidator.MaterialVariantUsageDtoValidator>;
 public sealed class OrderDataValidator_Tests : ValidatorContractTests<OrderDataValidator>;
+public sealed class ProductImageUploadValidator_Tests : ValidatorContractTests<ProductImageUploadValidator>;
 public sealed class RemoveItemFromSupplyCommandValidator_Tests : ValidatorContractTests<RemoveItemFromSupplyCommandValidator>;
 public sealed class RemoveRecipeMaterialCommandValidator_Tests : ValidatorContractTests<RemoveRecipeMaterialCommandValidator>;
 public sealed class UpdateClientDataValidator_Tests : ValidatorContractTests<UpdateClientDataValidator>;

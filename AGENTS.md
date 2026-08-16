@@ -60,6 +60,7 @@ Dependency direction is `Wpf -> ApplicationLogic`, `Wpf -> Infrastructure`, `Inf
 - PostgreSQL is the only supported relational behavior. Do not replace database-dependent tests with EF's in-memory provider.
 - `BusinessTrackerDbContext` uses lazy-loading proxies, snake_case naming, assembly-scanned `IEntityTypeConfiguration<T>` mappings, and multiple PostgreSQL schemas. Put mapping rules in `Infrastructure/Configurations`, not in WPF or handlers.
 - New entities require the appropriate `DbSet`, entity configuration, application abstraction exposure when needed, relationships/navigation initialization consistent with neighboring entities, and test arrange support.
+- Product images are stored as original binary content in PostgreSQL through `ProductImage`. Keep list queries lightweight by projecting only image metadata and load the selected image content with a separate query. Uploads accept JPEG, PNG, GIF, BMP, and TIFF, with limits of 10 MB per image, 20 images and 50 MB per request. Reuse the shared `ProductImagesPanel`: management is available only from the Products view, while Production and Recipes expose the same gallery read-only.
 - `SaveChanges` normalizes whitespace-only nullable strings to `null`; do not duplicate that normalization across handlers.
 - Runtime configuration comes from `Infrastructure/infrastructure_settings.json`. Do not commit new credentials or expose connection strings in output.
 

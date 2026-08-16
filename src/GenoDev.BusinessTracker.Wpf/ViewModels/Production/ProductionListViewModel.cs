@@ -18,6 +18,7 @@ using MediatR;
 using System.Collections.ObjectModel;
 using GenoDev.BusinessTracker.Domain.Entities;
 using GenoDev.BusinessTracker.Wpf.Controls;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 
@@ -41,9 +42,12 @@ public partial class ProductionListViewModel : ViewModelBase
     private ProductionHistoryFilterCriteria _historyFilter =
         ProductionHistoryFilterCriteria.Empty;
 
-    public ProductionListViewModel(IMediator mediator)
+    public ProductionListViewModel(
+        IMediator mediator,
+        ProductImagesViewModel productImagesViewModel)
     {
         _mediator = mediator;
+        ProductImages = productImagesViewModel;
 
         AddProductionCommand = new AsyncRelayCommand(AddProductionAsync, CanAddProduction);
         EditProductionCommand = new AsyncRelayCommand<ProductionHistoryDto>(
@@ -340,12 +344,15 @@ public partial class ProductionListViewModel : ViewModelBase
         HandleSelectedProductChanged(value);
     }
 
+    public ProductImagesViewModel ProductImages { get; }
+
     private void HandleSelectedProductChanged(ProductionSummaryDto? value)
     {
         CancelAddProduction();
         ProductionHistory.Clear();
         SelectedProduction = null;
         SelectedMaterials.Clear();
+        _ = ProductImages.SetProductAsync(value?.Id);
         _ = LoadProductRecipesAsync(value);
     }
 

@@ -9,6 +9,7 @@ using GenoDev.BusinessTracker.Wpf.ViewModels;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Notes;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
 namespace GenoDev.BusinessTracker.Wpf;
@@ -58,6 +59,7 @@ public partial class App : Application
         services.AddTransient<CreateMaterialViewModel>();
         services.AddTransient<ProductionViewModel>();
         services.AddTransient<ProductsViewModel>();
+        services.AddTransient<ProductImagesViewModel>();
         services.AddTransient<CreateProductViewModel>();
         services.AddTransient<RecipesViewModel>();
         services.AddTransient<CreateRecipeViewModel>();

@@ -1,0 +1,71 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Controls.ProductImagesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+             MinWidth="180" MinHeight="130">
+    <Border Background="{DynamicResource SurfaceBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Margin="0,0,0,6">
+                <TextBlock Text="Zdjęcia produktu"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Visibility="{Binding CanManage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <controls:CreateButton Click="UploadButton_Click"
+                                           ToolTip="Dodaj zdjęcia"
+                                           Margin="0,0,2,0" />
+                    <controls:DeleteButton Command="{Binding OpenDeleteConfirmationCommand}"
+                                           ToolTip="Usuń wybrane zdjęcie"
+                                           />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1" ClipToBounds="True">
+                <Image Source="{Binding ImageSource}"
+                       Stretch="Uniform"
+                       SnapsToDevicePixels="True" />
+                <TextBlock Text="Brak zdjęć"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Visibility="{Binding HasImages, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+            </Grid>
+
+            <Grid Grid.Row="2" Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <controls:ArrowLeftButton Command="{Binding PreviousImageCommand}"
+                                          ToolTip="Poprzednie zdjęcie" />
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding SelectedImage.FileName}"
+                               TextTrimming="CharacterEllipsis"
+                               TextAlignment="Center"
+                               MaxWidth="240"
+                               FontSize="11" />
+                    <TextBlock Text="{Binding ImagePositionText}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               FontSize="10" />
+                </StackPanel>
+                <controls:ArrowRightButton Grid.Column="2"
+                                           Command="{Binding NextImageCommand}"
+                                           ToolTip="Następne zdjęcie" />
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

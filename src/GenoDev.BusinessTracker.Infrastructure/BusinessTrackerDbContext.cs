@@ -21,6 +21,7 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public DbSet<MaterialVariant> MaterialVariants { get; set; }
     public DbSet<FixedAsset> FixedAssets { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<ProductRecipe> ProductRecipes { get; set; }
     public DbSet<ProductRecipeMaterial> ProductRecipeMaterials { get; set; }
     public DbSet<Production> Productions { get; set; }

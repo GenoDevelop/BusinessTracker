@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GenoDev.BusinessTracker.Wpf.Controls;
 using GenoDev.BusinessTracker.Wpf.ViewModels;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Production;
@@ -30,9 +31,12 @@ public partial class ProductsViewModel : ViewModelBase
     
     public ProductsViewModel(
         IMediator mediator,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ProductImagesViewModel productImagesViewModel)
     {
         _mediator = mediator;
+        ProductImages = productImagesViewModel;
+        ProductImages.CanManage = true;
         CreateProductViewModel = serviceProvider.GetRequiredService<CreateProductViewModel>();
         CreateProductViewModel.RequestClose += async result =>
         {
@@ -48,10 +52,14 @@ public partial class ProductsViewModel : ViewModelBase
         CreateProductCommand = new RelayCommand(OpenCreatePopup);
         EditProductCommand = new RelayCommand<ProductDto>(OpenEditPopup);
         DeleteProductCommand = new RelayCommand<ProductDto>(OpenDeletePopup);
+        OpenImagesCommand = new AsyncRelayCommand<ProductDto>(OpenImagesAsync);
+        CloseImagesCommand = new RelayCommand(CloseImages);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
         LoadProductsCommand = new RelayCommand(() => RequestPaginationRefresh(ProductsPaginationTarget.Products));
     }
+
+    public ProductImagesViewModel ProductImages { get; }
     
     private void OpenCreatePopup()
     {
@@ -72,6 +80,24 @@ public partial class ProductsViewModel : ViewModelBase
         ProductToDelete = product;
         IsDeletePopupOpen = true;
     }
+
+    private async Task OpenImagesAsync(ProductDto? product)
+    {
+        if (product is null)
+        {
+            return;
+        }
+
+        SelectedProduct = product;
+        IsImagesPopupOpen = true;
+        await ProductImages.SetProductAsync(product.Id);
+    }
+
+    private void CloseImages()
+    {
+        ProductImages.CancelDeleteCommand.Execute(null);
+        IsImagesPopupOpen = false;
+    }
     
     private async Task ConfirmDeleteAsync()
     {
@@ -87,6 +113,8 @@ public partial class ProductsViewModel : ViewModelBase
             if (SelectedProduct?.Id == deletedProductId)
             {
                 SelectedProduct = null;
+                IsImagesPopupOpen = false;
+                await ProductImages.SetProductAsync(null);
             }
             RequestPaginationRefresh(ProductsPaginationTarget.Products);
         }
@@ -107,6 +135,9 @@ public partial class ProductsViewModel : ViewModelBase
     
     [ObservableProperty]
     private bool _isDeletePopupOpen;
+
+    [ObservableProperty]
+    private bool _isImagesPopupOpen;
     
     [ObservableProperty]
     private ProductDto? _productToDelete;
@@ -140,6 +171,8 @@ public partial class ProductsViewModel : ViewModelBase
     public IRelayCommand CreateProductCommand { get; }
     public IRelayCommand<ProductDto> EditProductCommand { get; }
     public IRelayCommand<ProductDto> DeleteProductCommand { get; }
+    public IAsyncRelayCommand<ProductDto> OpenImagesCommand { get; }
+    public IRelayCommand CloseImagesCommand { get; }
     public IRelayCommand LoadProductsCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }

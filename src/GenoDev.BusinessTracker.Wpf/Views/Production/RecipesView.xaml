@@ -138,6 +138,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="250" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Product Details -->
@@ -163,6 +164,11 @@
                                 </ScrollViewer>
                             </Border>
                         </Grid>
+
+                        <controls:ProductImagesPanel Grid.Column="2"
+                                                     DataContext="{Binding ProductImages}"
+                                                     Height="170"
+                                                     Margin="10,0,0,0" />
                     </Grid>
                 </Grid>
 

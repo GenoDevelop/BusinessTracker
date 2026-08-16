@@ -256,11 +256,37 @@ public static class BusinessTrackerDbContextExtensions
                 TotalSoldAmount = soldAmount,
                 ProductRecipes = [],
                 Productions = [],
-                OrderProducts = []
+                OrderProducts = [],
+                Images = []
             };
         
             db.Products.Add(product);
             return product;
+        }
+
+        public ProductImage Arrange_ProductImage(
+            Product? product = null,
+            Guid? id = null,
+            string fileName = "product.png",
+            string contentType = "image/png",
+            byte[]? content = null,
+            DateTime? createdAtUtc = null)
+        {
+            product ??= db.Arrange_Product();
+            var image = new ProductImage
+            {
+                Id = id ?? Guid.NewGuid(),
+                ProductId = product.Id,
+                Product = product,
+                FileName = fileName,
+                ContentType = contentType,
+                Content = content ?? [1, 2, 3],
+                CreatedAtUtc = createdAtUtc ?? DateTime.UtcNow
+            };
+
+            product.Images.Add(image);
+            db.ProductImages.Add(image);
+            return image;
         }
 
         public StockAdjustment Arrange_StockAdjustment(
