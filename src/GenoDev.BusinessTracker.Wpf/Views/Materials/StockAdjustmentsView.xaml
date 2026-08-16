@@ -8,19 +8,21 @@
              xmlns:enums="clr-namespace:GenoDev.BusinessTracker.Domain.Enums;assembly=GenoDev.BusinessTracker.Domain"
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance vm:StockAdjustmentsViewModel}">
-    <Grid Margin="10">
+    <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Korekty stanu" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+        <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Korekty stanu" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,20,0" />
             <controls:CreateButton Command="{Binding CreateCommand}" ToolTip="Dodaj korekty stanu" Margin="0,0,5,0" />
             <controls:RefreshButton Click="RefreshButton_Click" Margin="0,0,5,0" />
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
+        </Border>
 
         <controls:ConfigurableDataGrid x:Name="AdjustmentsDataGrid"
                   Grid.Row="1" LayoutKey="Materials.StockAdjustmentsGrid" ItemsSource="{Binding Adjustments}"
@@ -87,7 +89,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
-                                    <Run Text="0"/><Run Text=" "/><Run Text="{Binding Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="Gray" Text="{Binding AmountSign, Mode=OneWay}"/><Run Foreground="Gray" Text=" "/><Run Foreground="Gray" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
+                                    <Run Text="0"/><Run Text=" "/><Run Text="{Binding Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding AmountSign, Mode=OneWay}"/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text=" "/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
                                 </TextBlock>
                             </Grid>
                         </DataTemplate>
@@ -142,7 +144,7 @@
                     </Grid>
                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <StackPanel><TextBlock Text="Ilość:" Margin="0,0,0,5"/><controls:NumericTextBox Value="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Mode="{Binding QuantityInputMode}"/></StackPanel>
-                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom"><TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="Gray" Margin="0,0,0,7"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}"/></StackPanel>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom"><TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,7"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}"/></StackPanel>
                     </Grid>
                     <TextBlock Text="Opis:" Margin="0,10,0,5"/>
                     <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
@@ -169,7 +171,7 @@
                                         </TextBlock>
                                         <TextBlock>
                                             <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsPrivate}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                            <Run Text="0"/><Run Text=" "/><Run Text="{Binding Option.Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="Gray" Text="{Binding Sign, Mode=OneWay}"/><Run Foreground="Gray" Text=" "/><Run Foreground="Gray" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
+                                            <Run Text="0"/><Run Text=" "/><Run Text="{Binding Option.Unit, Mode=OneWay}"/><Run Text=" "/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Sign, Mode=OneWay}"/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text=" "/><Run Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding AbsoluteAmount, StringFormat={}{0:0.##}, Mode=OneWay}"/>
                                         </TextBlock>
                                     </Grid>
                                 </DataTemplate>
@@ -190,7 +192,7 @@
                 <TextBlock Text="Typ:" Margin="0,0,0,5"/><ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox>
                 <TextBlock Text="Pozycja:" Margin="0,0,0,5"/><controls:SearchableComboBox ItemsSource="{Binding AvailableOptions}" SelectedItem="{Binding SelectedOption}" DisplayMemberPath="DisplayName" SearchPropertyPaths="Ean,Code" Margin="0,0,0,10"/>
                 <TextBlock Text="Ilość:" Margin="0,0,0,5"/><controls:NumericTextBox Value="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Mode="{Binding QuantityInputMode}" Margin="0,0,0,10"/>
-                <TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="Gray" Margin="0,0,0,8"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}" Margin="0,0,0,20"/>
+                <TextBlock Text="Wpisz wartość ujemną, aby zmniejszyć stan." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"/><CheckBox Content="Stan prywatny" IsChecked="{Binding IsPrivate}" IsEnabled="{Binding IsPrivateAvailable}" Margin="0,0,0,20"/>
                 <TextBlock Text="Opis:" Margin="0,0,0,5"/>
                 <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
                          TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="70" Margin="0,0,0,20"/>
@@ -199,7 +201,7 @@
         </controls:DraggablePopup>
 
         <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
-            <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="IndianRed" Foreground="White"/></StackPanel></StackPanel>
+            <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel></StackPanel>
         </controls:DraggablePopup>
     </Grid>
 </UserControl>

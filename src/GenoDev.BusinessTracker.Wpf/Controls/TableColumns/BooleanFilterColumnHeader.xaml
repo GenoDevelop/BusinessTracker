@@ -46,15 +46,19 @@
                        MinWidth="35" />
 
             <Button Grid.Column="2"
-                    Content="×"
                     ToolTip="Wyczyść filtr"
-                    Padding="4,0"
+                    Width="28"
+                    Height="28"
+                    Padding="7"
                     Margin="4,0,0,0"
                     VerticalAlignment="Center"
                     Visibility="{Binding IsFilterActive,
                                          ElementName=Root,
                                          Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Click="ClearFilter_Click" />
+                    Click="ClearFilter_Click">
+                <Path Data="{StaticResource CloseIconGeometry}"
+                      Style="{StaticResource ToolbarIconStyle}" />
+            </Button>
         </Grid>
     </StackPanel>
 </UserControl>

@@ -40,14 +40,15 @@
                       SelectionChanged="PageSizeComboBox_SelectionChanged"
                       IsEnabled="{Binding CanChangePageSize, ElementName=Root}"
                       VerticalAlignment="Center"
-                      Width="60" />
+                      Width="64" />
 
             <controls:ArrowLeftButton Click="PreviousButton_Click"
                                       IsEnabled="{Binding CanGoPrevious, ElementName=Root}"
                                       Margin="5,0"
                                       ToolTip="{Binding PreviousToolTip, ElementName=Root}"
                                       AutomationProperties.Name="{Binding PreviousToolTip, ElementName=Root}"
-                                      Width="20"/>
+                                      Width="30"
+                                      Height="30"/>
 
             <TextBlock VerticalAlignment="Center" Margin="10,0">
                 <Run Text="{Binding PageLabel, ElementName=Root}" />
@@ -64,7 +65,8 @@
                                        Margin="5,0"
                                        ToolTip="{Binding NextToolTip, ElementName=Root}"
                                        AutomationProperties.Name="{Binding NextToolTip, ElementName=Root}"
-                                       Width="20" />
+                                       Width="30"
+                                       Height="30" />
         </StackPanel>
 
         <Grid HorizontalAlignment="Stretch">
@@ -97,7 +99,8 @@
                 IsEnabled="{Binding CanGoPrevious, ElementName=Root}"
                 ToolTip="{Binding PreviousToolTip, ElementName=Root}"
                 AutomationProperties.Name="{Binding PreviousToolTip, ElementName=Root}"
-                Width="18"/>
+                Width="28"
+                Height="28"/>
 
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
@@ -115,7 +118,8 @@
                 IsEnabled="{Binding CanGoNext, ElementName=Root}"
                 ToolTip="{Binding NextToolTip, ElementName=Root}"
                 AutomationProperties.Name="{Binding NextToolTip, ElementName=Root}"
-                Width="18"/>
+                Width="28"
+                Height="28"/>
 
             <StackPanel Grid.Row="1"
                         Grid.ColumnSpan="3"
@@ -131,8 +135,8 @@
                           SelectionChanged="PageSizeComboBox_SelectionChanged"
                           IsEnabled="{Binding CanChangePageSize, ElementName=Root}"
                           VerticalAlignment="Center"
-                          Width="45"
-                          Height="22" />
+                          Width="60"
+                          Height="30" />
 
                 <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
                     <Run Text="{Binding CompactItemsRangeLabel, ElementName=Root}" />

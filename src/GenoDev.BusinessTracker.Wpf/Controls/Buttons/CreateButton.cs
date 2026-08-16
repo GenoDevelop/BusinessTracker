@@ -1,19 +1,16 @@
-using System.Windows.Media;
-
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public sealed class CreateButton : IconButton
 {
     private const string IconData =
-        "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z";
+        "M12,4 L12,20 M4,12 L20,12";
 
     public CreateButton()
     {
         ToolTip = "Utwórz nowy";
         Content = IconFactory.Create(
             IconData,
-            Brushes.Green,
-            20,
-            20);
+            18,
+            18);
     }
 }

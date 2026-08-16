@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using GenoDev.BusinessTracker.Domain.Enums;
@@ -13,9 +14,9 @@ public class StatusToColorConverter : IValueConverter
         {
             return supplyStatus switch
             {
-                MaterialSupplyStatus.New => Brushes.Gray,
-                MaterialSupplyStatus.Ordered => Brushes.DodgerBlue,
-                MaterialSupplyStatus.Received => Brushes.LimeGreen,
+                MaterialSupplyStatus.New => GetThemeBrush("TextSecondaryBrush", Brushes.Gray),
+                MaterialSupplyStatus.Ordered => GetThemeBrush("AccentBrush", Brushes.RoyalBlue),
+                MaterialSupplyStatus.Received => GetThemeBrush("SuccessBrush", Brushes.SeaGreen),
                 _ => Brushes.Transparent
             };
         }
@@ -24,15 +25,20 @@ public class StatusToColorConverter : IValueConverter
         {
             return orderStatus switch
             {
-                OrderStatus.New => Brushes.Gray,
-                OrderStatus.Processing => Brushes.DodgerBlue,
-                OrderStatus.Shipped => Brushes.Magenta,
-                OrderStatus.Delivered => Brushes.LimeGreen,
+                OrderStatus.New => GetThemeBrush("TextSecondaryBrush", Brushes.Gray),
+                OrderStatus.Processing => GetThemeBrush("AccentBrush", Brushes.RoyalBlue),
+                OrderStatus.Shipped => GetThemeBrush("WarningBrush", Brushes.DarkOrange),
+                OrderStatus.Delivered => GetThemeBrush("SuccessBrush", Brushes.SeaGreen),
                 _ => Brushes.Transparent
             };
         }
 
         return Brushes.Transparent;
+    }
+
+    private static Brush GetThemeBrush(string resourceKey, Brush fallback)
+    {
+        return Application.Current?.TryFindResource(resourceKey) as Brush ?? fallback;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

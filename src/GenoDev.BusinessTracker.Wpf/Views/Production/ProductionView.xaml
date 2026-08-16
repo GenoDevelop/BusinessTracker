@@ -20,14 +20,40 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="Produkty">
+        <TabControl TabStripPlacement="Left"
+                    SelectedIndex="{Binding SelectedTabIndex}"
+                    Style="{StaticResource SideNavigationTabControlStyle}">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource ProductsNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Produkty" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding ProductsViewModel}" />
             </TabItem>
-            <TabItem Header="Przepisy">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource RecipesNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Przepisy" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding RecipesViewModel}" />
             </TabItem>
-            <TabItem Header="Produkcja">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource ProductionNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Produkcja" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding ProductionListViewModel}" />
             </TabItem>
         </TabControl>

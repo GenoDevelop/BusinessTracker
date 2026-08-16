@@ -14,7 +14,8 @@
                  Margin="0"
                  FontWeight="Normal">
             <TextBox.Style>
-                <Style TargetType="TextBox">
+                <Style TargetType="TextBox"
+                       BasedOn="{StaticResource {x:Type TextBox}}">
                     <Setter Property="Visibility" Value="Collapsed" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsFilterVisible, ElementName=Root}"

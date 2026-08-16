@@ -9,7 +9,7 @@
              d:DesignHeight="450"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:FixedAssetListViewModel}">
-    <Grid Margin="10">
+    <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -17,11 +17,10 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+        <StackPanel Orientation="Horizontal">
             <TextBlock Text="Środki trwałe"
-                       FontSize="24"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"
+                       Style="{StaticResource PageTitleTextStyle}"
                        Margin="0,0,20,0" />
             <controls:CreateButton Command="{Binding CreateCommand}"
                                    ToolTip="Dodaj środek trwały"
@@ -31,6 +30,7 @@
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Click="FilterToggleButton_Click" />
         </StackPanel>
+        </Border>
 
         <!-- Fixed Assets Table -->
         <controls:ConfigurableDataGrid x:Name="FixedAssetsDataGrid"
@@ -111,7 +111,7 @@
                             <TextBlock VerticalAlignment="Center" Margin="5,0">
                                 <Run Text="{Binding TotalCompanyAmount, Mode=OneWay}" /><TextBlock Visibility="{Binding Unit, Converter={StaticResource NullToVisibilityConverter}}">
                                     <Run Text=" " /><Run Text="{Binding Unit, Mode=OneWay}" />
-                                </TextBlock><TextBlock Visibility="{Binding TotalPrivateAmount, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}" Foreground="Gray" FontSize="12" VerticalAlignment="Center">
+                                </TextBlock><TextBlock Visibility="{Binding TotalPrivateAmount, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center">
                                     <Run Text=" " /><Run Text="+" />
                                     <Run Text="{Binding TotalPrivateAmount, Mode=OneWay}" />
                                 </TextBlock>
@@ -224,8 +224,8 @@
                     <Button Content="Zapisz"
                             Command="{Binding SaveCommand}"
                             Padding="15,5"
-                            Background="DodgerBlue"
-                            Foreground="White"
+                            Background="{DynamicResource AccentBrush}"
+                            Foreground="{DynamicResource OnAccentBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
@@ -250,7 +250,7 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="LightCoral"
+                            Background="{DynamicResource DangerBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>

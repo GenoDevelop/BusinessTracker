@@ -8,25 +8,27 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance production:ProductsViewModel}">
-    <Grid Margin="10">
+    <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Produkty" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0" />
+        <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Produkty" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,20,0" />
             <controls:CreateButton Command="{Binding CreateProductCommand}" ToolTip="Dodaj produkt" Margin="0,0,5,0"/>
             <controls:RefreshButton Click="ProductsRefreshButton_Click" Margin="0,0,5,0" />
             <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
+        </Border>
         
         <controls:ConfigurableDataGrid x:Name="ProductsDataGrid"
                   Grid.Row="1" LayoutKey="Production.ProductsGrid"
                   ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
                   AutoGenerateColumns="False" IsReadOnly="True"
-                  Background="White"
+                  Background="{DynamicResource SurfaceBrush}"
                   ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                   ColumnVisibilityChanged="ProductsDataGrid_ColumnVisibilityChanged"
                   Sorting="DataGrid_Sorting">
@@ -159,7 +161,7 @@
     
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True" />
+                    <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
         </controls:DraggablePopup>
@@ -176,7 +178,7 @@
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
         </controls:DraggablePopup>
