@@ -141,6 +141,11 @@ public partial class PackingMaterialListView : UserControl
             : ListSortDirection.Ascending;
 
         viewModel.SetSorting(sortBy, direction == ListSortDirection.Descending);
+        foreach (var column in PackingMaterialsDataGrid.Columns)
+        {
+            column.SortDirection = null;
+        }
+
         e.Column.SortDirection = direction;
 
         await Pagination.RefreshAsync();

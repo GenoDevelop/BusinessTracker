@@ -40,7 +40,7 @@
                       SelectionChanged="PageSizeComboBox_SelectionChanged"
                       IsEnabled="{Binding CanChangePageSize, ElementName=Root}"
                       VerticalAlignment="Center"
-                      Width="64" />
+                      Style="{StaticResource PaginationPageSizeComboBoxStyle}" />
 
             <controls:ArrowLeftButton Click="PreviousButton_Click"
                                       IsEnabled="{Binding CanGoPrevious, ElementName=Root}"
@@ -135,8 +135,7 @@
                           SelectionChanged="PageSizeComboBox_SelectionChanged"
                           IsEnabled="{Binding CanChangePageSize, ElementName=Root}"
                           VerticalAlignment="Center"
-                          Width="60"
-                          Height="30" />
+                          Style="{StaticResource PaginationPageSizeComboBoxStyle}" />
 
                 <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
                     <Run Text="{Binding CompactItemsRangeLabel, ElementName=Root}" />

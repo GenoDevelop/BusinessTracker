@@ -29,13 +29,15 @@
             </Grid.RowDefinitions>
         
             <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Dostawy" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,10,0" />
-        
-                <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Margin="0,0,2,0" />
-                <controls:RefreshButton Click="SuppliesRefreshButton_Click" Margin="0,0,2,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
+            <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Dostawy" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,3,0" />
+
+                    <controls:CreateButton Command="{Binding CreateSupplyCommand}" ToolTip="Dodaj dostawę" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                    <controls:RefreshButton Click="SuppliesRefreshButton_Click" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MasterListToolbarIconToggleButtonStyle}" />
+                </StackPanel>
+            </Border>
         
             <!-- Date Range Picker -->
             <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -82,7 +84,7 @@
                 </ListBox.GroupStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center"
                                      Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
                             <StackPanel>
@@ -449,7 +451,7 @@
         
                 <!-- Description -->
                 <Grid Grid.Row="1" Grid.Column="1" MinHeight="60">
-                    <Border Style="{StaticResource GlassInsetBorderStyle}">
+                    <Border Style="{StaticResource ReadOnlyDescriptionBorderStyle}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding SelectedSupplyDetails.Description}" TextWrapping="Wrap" />
                         </ScrollViewer>

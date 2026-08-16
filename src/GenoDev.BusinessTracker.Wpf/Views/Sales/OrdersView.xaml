@@ -26,16 +26,19 @@
                 </Grid.RowDefinitions>
 
                 <!-- Toolbar -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock Text="Zamówienia" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,10,0" />
+                <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Zamówienia" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,3,0" />
 
-                    <controls:CreateButton Command="{Binding CreateOrderCommand}" ToolTip="Dodaj zamówienie" Margin="0,0,2,0" />
-                    <controls:RefreshButton Click="OrdersRefreshButton_Click" Margin="0,0,2,0" />
-                    <controls:FilterToggleButton
-                        IsChecked="{Binding IsFilterVisible,
-                                            Mode=TwoWay,
-                                            UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
+                        <controls:CreateButton Command="{Binding CreateOrderCommand}" ToolTip="Dodaj zamówienie" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                        <controls:RefreshButton Click="OrdersRefreshButton_Click" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                        <controls:FilterToggleButton
+                            Style="{StaticResource MasterListToolbarIconToggleButtonStyle}"
+                            IsChecked="{Binding IsFilterVisible,
+                                                Mode=TwoWay,
+                                                UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Border>
 
                 <!-- Date Range Picker -->
                 <Grid Grid.Row="1" Margin="0,0,0,5" Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -229,7 +232,7 @@
                                 </Grid>
 
                                 <Grid Grid.Column="2" Margin="10,0,0,0">
-                                    <Border Style="{StaticResource GlassInsetBorderStyle}">
+                                    <Border Style="{StaticResource ReadOnlyDescriptionBorderStyle}">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <TextBlock Text="{Binding SelectedOrder.Description}" TextWrapping="Wrap" />
                                         </ScrollViewer>
@@ -279,7 +282,7 @@
                                 </Grid>
 
                                 <Grid Grid.Column="1" Margin="10,0,0,0">
-                                    <Border Style="{StaticResource GlassInsetBorderStyle}">
+                                    <Border Style="{StaticResource ReadOnlyDescriptionBorderStyle}">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <TextBlock Text="{Binding SelectedOrder.ClientDetails.Description}" TextWrapping="Wrap" />
                                         </ScrollViewer>

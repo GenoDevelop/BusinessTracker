@@ -138,6 +138,11 @@ public partial class FixedAssetListView : UserControl
             : ListSortDirection.Ascending;
 
         viewModel.SetSorting(sortBy, direction == ListSortDirection.Descending);
+        foreach (var column in FixedAssetsDataGrid.Columns)
+        {
+            column.SortDirection = null;
+        }
+
         e.Column.SortDirection = direction;
 
         await Pagination.RefreshAsync();

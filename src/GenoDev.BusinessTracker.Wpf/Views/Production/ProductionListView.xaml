@@ -25,14 +25,16 @@
             </Grid.RowDefinitions>
 
             <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Produkcja"
-                           Style="{StaticResource SectionTitleTextStyle}"
-                           Margin="0,0,10,0" />
-                <controls:RefreshButton Click="ProductionsRefreshButton_Click"
-                                        Margin="0,0,2,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
+            <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Produkcja"
+                               Style="{StaticResource SectionTitleTextStyle}"
+                               Margin="0,0,3,0" />
+                    <controls:RefreshButton Click="ProductionsRefreshButton_Click"
+                                            Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MasterListToolbarIconToggleButtonStyle}" />
+                </StackPanel>
+            </Border>
 
             <!-- Search Header -->
             <Border Grid.Row="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10"
@@ -200,7 +202,7 @@
 
                         <!-- Description -->
                         <Grid Grid.Column="1" MinHeight="100" VerticalAlignment="Stretch">
-                            <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="3" Padding="8">
+                            <Border Style="{StaticResource ReadOnlyDescriptionBorderStyle}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <TextBlock TextWrapping="Wrap">
                                         <TextBlock.Style>

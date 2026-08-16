@@ -126,6 +126,8 @@
     <Geometry x:Key="AlignRightIconGeometry">M5,6 L19,6 M9,10 L19,10 M5,14 L19,14 M11,18 L19,18</Geometry>
     <Geometry x:Key="BulletsIconGeometry">M4,7 L4.1,7 M4,12 L4.1,12 M4,17 L4.1,17 M8,7 L20,7 M8,12 L20,12 M8,17 L17,17</Geometry>
     <Geometry x:Key="CheckIconGeometry">M4,12 L9,17 L20,6</Geometry>
+    <Geometry x:Key="SortAscendingIconGeometry">M2,6 L6,2 L10,6</Geometry>
+    <Geometry x:Key="SortDescendingIconGeometry">M2,2 L6,6 L10,2</Geometry>
 
     <Style x:Key="NavigationIconStyle" TargetType="{x:Type Path}">
         <Setter Property="Width" Value="17" />
@@ -210,12 +212,27 @@
         <Setter Property="Effect" Value="{StaticResource CardShadow}" />
     </Style>
 
+    <Style x:Key="MasterListToolbarBorderStyle"
+           TargetType="{x:Type Border}"
+           BasedOn="{StaticResource GlassToolbarBorderStyle}">
+        <Setter Property="CornerRadius" Value="11" />
+        <Setter Property="Padding" Value="6,4,9,4" />
+    </Style>
+
     <Style x:Key="GlassInsetBorderStyle" TargetType="{x:Type Border}">
         <Setter Property="Background" Value="{DynamicResource GlassSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="10" />
+    </Style>
+
+    <Style x:Key="ReadOnlyDescriptionBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="8" />
     </Style>
 
     <Style TargetType="{x:Type Label}">
@@ -503,6 +520,22 @@
         </Setter>
     </Style>
 
+    <Style x:Key="MasterListToolbarIconButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource IconButton}">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
+    <Style x:Key="MasterListToolbarIconToggleButtonStyle"
+           TargetType="{x:Type ToggleButton}"
+           BasedOn="{StaticResource IconToggleButton}">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
     <Style x:Key="CompactSwitchToggleButtonStyle" TargetType="{x:Type ToggleButton}">
         <Setter Property="Width" Value="42" />
         <Setter Property="Height" Value="24" />
@@ -782,6 +815,18 @@
         <Setter Property="Padding" Value="2,1" />
         <Setter Property="MinHeight" Value="24" />
         <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style x:Key="PaginationPageSizeComboBoxStyle"
+           TargetType="{x:Type ComboBox}"
+           BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Setter Property="Width" Value="52" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="Padding" Value="6,0,2,0" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
     </Style>
 
     <Style x:Key="CompactFilterClearButtonStyle"
@@ -1109,30 +1154,39 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="15,9" />
         <Setter Property="Margin" Value="2,0" />
+        <Setter Property="MinHeight" Value="41" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
-                    <Grid>
-                        <Border x:Name="TabSurface"
-                                Margin="0,0,1,0"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              RecognizesAccessKey="True" />
-                        </Border>
-                        <Border x:Name="ActiveIndicator"
-                                Height="3"
-                                Margin="12,0"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource AccentBrush}"
-                                CornerRadius="2"
-                                Opacity="0" />
+                    <Grid Margin="2"
+                          Background="Transparent"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border x:Name="TabSurface"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}"
+                                    UseLayoutRounding="True"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter ContentSource="Header"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </Border>
+                            <Border x:Name="ActiveIndicator"
+                                    Height="3"
+                                    Margin="12,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="2"
+                                    Opacity="0" />
+                        </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -1154,6 +1208,8 @@
         <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource TopNavigationTabItemStyle}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -1187,32 +1243,41 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="10,11" />
         <Setter Property="Margin" Value="7,2" />
-        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="MinWidth" Value="112" />
+        <Setter Property="MinHeight" Value="43" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
-                    <Grid>
-                        <Border x:Name="TabSurface"
-                                Margin="0,0,0,1"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Left"
-                                              VerticalAlignment="Center"
-                                              RecognizesAccessKey="True" />
-                        </Border>
-                        <Border x:Name="ActiveIndicator"
-                                Width="3"
-                                Height="20"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Background="{DynamicResource AccentBrush}"
-                                CornerRadius="2"
-                                Opacity="0" />
+                    <Grid Margin="2"
+                          Background="Transparent"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border x:Name="TabSurface"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}"
+                                    UseLayoutRounding="True"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter ContentSource="Header"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </Border>
+                            <Border x:Name="ActiveIndicator"
+                                    Width="3"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="2"
+                                    Opacity="0" />
+                        </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -1234,13 +1299,15 @@
         <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource SideNavigationTabItemStyle}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabControl}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="128" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0"
@@ -1271,24 +1338,25 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
-                    <Grid>
-                        <Border x:Name="TabSurface"
-                                Margin="0,0,1,0"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="7"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <Border x:Name="ActiveIndicator"
-                                Height="2"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource AccentBrush}"
-                                CornerRadius="1"
-                                Opacity="0" />
-                    </Grid>
+                    <Border Padding="2" Background="Transparent">
+                        <Grid>
+                            <Border x:Name="TabSurface"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="7"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter ContentSource="Header"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <Border x:Name="ActiveIndicator"
+                                    Height="2"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="1"
+                                    Opacity="0" />
+                        </Grid>
+                    </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="TabSurface" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
@@ -1483,17 +1551,99 @@
     <Style TargetType="{x:Type controls:ConfigurableDataGrid}"
            BasedOn="{StaticResource {x:Type DataGrid}}" />
 
+    <Style x:Key="DataGridColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="SizeWE" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="DataGridColumnHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
         <Setter Property="Background" Value="{DynamicResource SurfaceAlternativeBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="MinHeight" Value="34" />
         <Setter Property="Padding" Value="5,3" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                    <Grid SnapsToDevicePixels="True">
+                        <Border x:Name="HeaderSurface"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <ContentPresenter x:Name="ContentSite"
+                                                  ContentSource="Content"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  RecognizesAccessKey="True"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                <Grid Margin="{TemplateBinding Padding}"
+                                      Height="{Binding ActualHeight, ElementName=ContentSite}"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      IsHitTestVisible="False"
+                                      Panel.ZIndex="1">
+                                    <Path x:Name="SortIndicator"
+                                          Width="12"
+                                          Height="8"
+                                          Margin="0,3,2,0"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Top"
+                                          Fill="Transparent"
+                                          Stretch="None"
+                                          Stroke="{DynamicResource AccentBrush}"
+                                          StrokeThickness="1.7"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Visibility="Collapsed" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Thumb x:Name="PART_LeftHeaderGripper"
+                               HorizontalAlignment="Left"
+                               Style="{StaticResource DataGridColumnHeaderGripperStyle}" />
+                        <Thumb x:Name="PART_RightHeaderGripper"
+                               HorizontalAlignment="Right"
+                               Style="{StaticResource DataGridColumnHeaderGripperStyle}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                        </Trigger>
+                        <Trigger Property="SortDirection" Value="Ascending">
+                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                            <Setter TargetName="SortIndicator" Property="Data" Value="{StaticResource SortAscendingIconGeometry}" />
+                            <Setter TargetName="SortIndicator" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="SortDirection" Value="Descending">
+                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                            <Setter TargetName="SortIndicator" Property="Data" Value="{StaticResource SortDescendingIconGeometry}" />
+                            <Setter TargetName="SortIndicator" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource AccentMutedBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="{x:Type DataGridRow}">
