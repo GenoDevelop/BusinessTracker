@@ -1,52 +1,5 @@
 <UserControl x:Class="GenoDev.BusinessTracker.Wpf.Controls.ProductImagesPopup"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls">
-    <Grid>
-        <controls:DraggablePopup IsOpen="{Binding IsPopupOpen, Mode=TwoWay}"
-                                 Title="Zdjęcia produktu"
-                                 StaysOpen="True"
-                                 IsResizable="True"
-                                 PopupWidth="860"
-                                 PopupHeight="680"
-                                 MinPopupWidth="520"
-                                 MinPopupHeight="420">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <controls:ProductImagesPanel IsFullGallery="True" />
-
-                <Button Grid.Row="1"
-                        Content="Zamknij"
-                        Command="{Binding ClosePopupCommand}"
-                        HorizontalAlignment="Right"
-                        Margin="0,10,0,0"
-                        Padding="15,5" />
-            </Grid>
-        </controls:DraggablePopup>
-
-        <controls:DraggablePopup IsOpen="{Binding IsDeleteConfirmationOpen}"
-                                 Title="Potwierdź usunięcie zdjęcia"
-                                 StaysOpen="True">
-            <StackPanel Width="320">
-                <TextBlock Text="Czy na pewno chcesz usunąć wybrane zdjęcie produktu?"
-                           TextWrapping="Wrap"
-                           Margin="0,0,0,20" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Anuluj"
-                            Command="{Binding CancelDeleteCommand}"
-                            Margin="0,0,10,0"
-                            Padding="15,5" />
-                    <Button Content="Usuń"
-                            Command="{Binding ConfirmDeleteCommand}"
-                            Style="{StaticResource DangerButtonStyle}"
-                            Padding="15,5"
-                            IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
-        </controls:DraggablePopup>
-    </Grid>
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid />
 </UserControl>
