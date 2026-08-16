@@ -14,9 +14,9 @@ public class StatusToColorConverter : IValueConverter
         {
             return supplyStatus switch
             {
-                MaterialSupplyStatus.New => GetThemeBrush("TextSecondaryBrush", Brushes.Gray),
-                MaterialSupplyStatus.Ordered => GetThemeBrush("AccentBrush", Brushes.RoyalBlue),
-                MaterialSupplyStatus.Received => GetThemeBrush("SuccessBrush", Brushes.SeaGreen),
+                MaterialSupplyStatus.New => GetThemeBrush("SupplyStatusNewBrush", Brushes.DarkSlateGray),
+                MaterialSupplyStatus.Ordered => GetThemeBrush("SupplyStatusOrderedBrush", Brushes.RoyalBlue),
+                MaterialSupplyStatus.Received => GetThemeBrush("SupplyStatusReceivedBrush", Brushes.ForestGreen),
                 _ => Brushes.Transparent
             };
         }
@@ -25,10 +25,10 @@ public class StatusToColorConverter : IValueConverter
         {
             return orderStatus switch
             {
-                OrderStatus.New => GetThemeBrush("TextSecondaryBrush", Brushes.Gray),
-                OrderStatus.Processing => GetThemeBrush("AccentBrush", Brushes.RoyalBlue),
-                OrderStatus.Shipped => GetThemeBrush("WarningBrush", Brushes.DarkOrange),
-                OrderStatus.Delivered => GetThemeBrush("SuccessBrush", Brushes.SeaGreen),
+                OrderStatus.New => GetThemeBrush("SupplyStatusNewBrush", Brushes.DarkSlateGray),
+                OrderStatus.Processing => GetThemeBrush("SupplyStatusOrderedBrush", Brushes.RoyalBlue),
+                OrderStatus.Shipped => GetThemeBrush("OrderStatusShippedBrush", Brushes.Magenta),
+                OrderStatus.Delivered => GetThemeBrush("SupplyStatusReceivedBrush", Brushes.ForestGreen),
                 _ => Brushes.Transparent
             };
         }

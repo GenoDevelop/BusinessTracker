@@ -29,6 +29,10 @@
     <Color x:Key="SuccessSoftColor">#E1F3EC</Color>
     <Color x:Key="WarningColor">#AE6B20</Color>
     <Color x:Key="WarningSoftColor">#FCF0DE</Color>
+    <Color x:Key="SupplyStatusNewColor">#343A40</Color>
+    <Color x:Key="SupplyStatusOrderedColor">#3B82F6</Color>
+    <Color x:Key="SupplyStatusReceivedColor">#22C55E</Color>
+    <Color x:Key="OrderStatusShippedColor">#D946EF</Color>
 
     <LinearGradientBrush x:Key="AppBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#F8FAFA" />
@@ -63,6 +67,10 @@
     <SolidColorBrush x:Key="SuccessSoftBrush" Color="{StaticResource SuccessSoftColor}" />
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="WarningSoftBrush" Color="{StaticResource WarningSoftColor}" />
+    <SolidColorBrush x:Key="SupplyStatusNewBrush" Color="{StaticResource SupplyStatusNewColor}" />
+    <SolidColorBrush x:Key="SupplyStatusOrderedBrush" Color="{StaticResource SupplyStatusOrderedColor}" />
+    <SolidColorBrush x:Key="SupplyStatusReceivedBrush" Color="{StaticResource SupplyStatusReceivedColor}" />
+    <SolidColorBrush x:Key="OrderStatusShippedBrush" Color="{StaticResource OrderStatusShippedColor}" />
     <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFF" />
     <SolidColorBrush x:Key="OverlayBrush" Color="#5C122127" />
     <SolidColorBrush x:Key="TableGridLineBrush" Color="#EAF0F1" />
