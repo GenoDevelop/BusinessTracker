@@ -26,7 +26,7 @@
     <Grid Margin="14">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="320" MinWidth="240" />
-            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="8" />
             <ColumnDefinition Width="*" MinWidth="420" />
         </Grid.ColumnDefinitions>
 
@@ -97,12 +97,7 @@
         </Grid>
 
         <GridSplitter Grid.Column="1"
-                      Width="5"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      Background="{DynamicResource BorderBrush}"
-                      ResizeDirection="Columns"
-                      ResizeBehavior="PreviousAndNext" />
+                      Style="{StaticResource VerticalPanelGridSplitterStyle}" />
 
         <Border Grid.Column="2"
                 Margin="10,0,0,0"

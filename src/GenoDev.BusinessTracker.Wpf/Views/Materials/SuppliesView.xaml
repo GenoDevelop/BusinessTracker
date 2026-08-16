@@ -361,20 +361,7 @@
         
         <GridSplitter x:Name="SupplyDetailsSplitter"
                       Grid.Column="1"
-                      Width="8"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      Background="Transparent"
-                      ResizeDirection="Columns"
-                      ResizeBehavior="PreviousAndNext">
-            <GridSplitter.Template>
-                <ControlTemplate TargetType="GridSplitter">
-                    <Grid Background="Transparent">
-                        <Rectangle Width="1" Fill="{DynamicResource BorderBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
-                    </Grid>
-                </ControlTemplate>
-            </GridSplitter.Template>
-        </GridSplitter>
+                      Style="{StaticResource VerticalPanelGridSplitterStyle}" />
         
         <!-- Right Panel -->
         <Grid Grid.Column="2"
