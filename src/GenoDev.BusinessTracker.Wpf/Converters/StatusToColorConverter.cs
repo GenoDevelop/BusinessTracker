@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using GenoDev.BusinessTracker.Domain.Enums;
@@ -13,9 +14,9 @@ public class StatusToColorConverter : IValueConverter
         {
             return supplyStatus switch
             {
-                MaterialSupplyStatus.New => Brushes.Gray,
-                MaterialSupplyStatus.Ordered => Brushes.DodgerBlue,
-                MaterialSupplyStatus.Received => Brushes.LimeGreen,
+                MaterialSupplyStatus.New => GetThemeBrush("SupplyStatusNewBrush", Brushes.DarkSlateGray),
+                MaterialSupplyStatus.Ordered => GetThemeBrush("SupplyStatusOrderedBrush", Brushes.RoyalBlue),
+                MaterialSupplyStatus.Received => GetThemeBrush("SupplyStatusReceivedBrush", Brushes.ForestGreen),
                 _ => Brushes.Transparent
             };
         }
@@ -24,15 +25,20 @@ public class StatusToColorConverter : IValueConverter
         {
             return orderStatus switch
             {
-                OrderStatus.New => Brushes.Gray,
-                OrderStatus.Processing => Brushes.DodgerBlue,
-                OrderStatus.Shipped => Brushes.Magenta,
-                OrderStatus.Delivered => Brushes.LimeGreen,
+                OrderStatus.New => GetThemeBrush("SupplyStatusNewBrush", Brushes.DarkSlateGray),
+                OrderStatus.Processing => GetThemeBrush("SupplyStatusOrderedBrush", Brushes.RoyalBlue),
+                OrderStatus.Shipped => GetThemeBrush("OrderStatusShippedBrush", Brushes.Magenta),
+                OrderStatus.Delivered => GetThemeBrush("SupplyStatusReceivedBrush", Brushes.ForestGreen),
                 _ => Brushes.Transparent
             };
         }
 
         return Brushes.Transparent;
+    }
+
+    private static Brush GetThemeBrush(string resourceKey, Brush fallback)
+    {
+        return Application.Current?.TryFindResource(resourceKey) as Brush ?? fallback;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

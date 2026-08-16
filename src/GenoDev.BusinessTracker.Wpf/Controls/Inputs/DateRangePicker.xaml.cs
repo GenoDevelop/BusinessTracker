@@ -23,6 +23,18 @@ public partial class DateRangePicker : UserControl
         set => SetValue(EndDateProperty, value);
     }
 
+    public static readonly DependencyProperty IsCompactProperty = DependencyProperty.Register(
+        nameof(IsCompact),
+        typeof(bool),
+        typeof(DateRangePicker),
+        new PropertyMetadata(false));
+
+    public bool IsCompact
+    {
+        get => (bool)GetValue(IsCompactProperty);
+        set => SetValue(IsCompactProperty, value);
+    }
+
     public DateRangePicker()
     {
         InitializeComponent();

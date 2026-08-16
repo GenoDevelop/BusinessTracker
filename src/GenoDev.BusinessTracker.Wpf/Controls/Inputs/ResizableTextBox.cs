@@ -12,8 +12,16 @@ public sealed class ResizableTextBox : Control
     private const double DefaultMinimumWidth = 120;
     private const double DefaultMinimumHeight = 50;
 
+    private static readonly DependencyProperty WidthHostBaseWidthProperty = DependencyProperty.RegisterAttached(
+        "WidthHostBaseWidth",
+        typeof(double),
+        typeof(ResizableTextBox),
+        new PropertyMetadata(double.NaN));
+
     private Thumb? _resizeThumb;
     private FrameworkElement? _widthHost;
+    private double _widthHostBaseWidth;
+    private double _resizableBaseWidth;
     private bool _widthHostResolved;
 
     public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
@@ -104,18 +112,17 @@ public sealed class ResizableTextBox : Control
             }
         }
 
-        var previousWidth = Width;
         var resizedWidth = Clamp(
             Width + e.HorizontalChange,
             Math.Max(MinWidth, DefaultMinimumWidth),
             MaxWidth);
         Width = resizedWidth;
 
-        if (_widthHost is not null && resizedWidth != previousWidth)
+        if (_widthHost is not null)
         {
             _widthHost.Width = Clamp(
-                _widthHost.Width + resizedWidth - previousWidth,
-                _widthHost.MinWidth,
+                _widthHostBaseWidth + resizedWidth - _resizableBaseWidth,
+                Math.Max(_widthHost.MinWidth, _widthHostBaseWidth),
                 _widthHost.MaxWidth);
         }
 
@@ -145,10 +152,16 @@ public sealed class ResizableTextBox : Control
             }
 
             _widthHost = element;
-            if (_widthHost.MinWidth <= 0)
+            var storedBaseWidth = (double)element.GetValue(WidthHostBaseWidthProperty);
+            if (double.IsNaN(storedBaseWidth))
             {
-                _widthHost.MinWidth = _widthHost.Width;
+                storedBaseWidth = element.Width;
+                element.SetValue(WidthHostBaseWidthProperty, storedBaseWidth);
             }
+
+            _widthHostBaseWidth = storedBaseWidth;
+            var currentHostExpansion = Math.Max(0, element.Width - storedBaseWidth);
+            _resizableBaseWidth = Math.Max(0, ActualWidth - currentHostExpansion);
             return;
         }
     }

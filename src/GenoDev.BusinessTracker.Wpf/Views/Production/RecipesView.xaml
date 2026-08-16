@@ -24,15 +24,17 @@
             </Grid.RowDefinitions>
 
             <!-- Toolbar -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Przepisy" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
-                <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Margin="0,0,5,0" />
-                <controls:RefreshButton Click="RecipesRefreshButton_Click" Margin="0,0,5,0" />
-                <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
+            <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Przepisy" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,3,0" />
+                    <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                    <controls:RefreshButton Click="RecipesRefreshButton_Click" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MasterListToolbarIconToggleButtonStyle}" />
+                </StackPanel>
+            </Border>
 
             <!-- Search Header -->
-            <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10"
+            <Border Grid.Row="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10"
                     Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -40,8 +42,11 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.41L13.01,15.14C11.87,16.11 10.39,16.7 8.75,16.7A6.5,6.5 0 0,1 2.25,10.2A6.5,6.5 0 0,1 8.75,3.7M8.75,5.2A5,5 0 0,0 3.75,10.2A5,5 0 0,0 8.75,15.2A5,5 0 0,0 13.75,10.2A5,5 0 0,0 8.75,5.2Z" 
-                              Fill="Gray" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,5,0" />
+                        <Path Data="{StaticResource SearchIconGeometry}"
+                              Style="{StaticResource ToolbarIconStyle}"
+                              Stroke="{DynamicResource TextSecondaryBrush}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,7,0" />
                         <TextBox Text="{Binding SearchTerm,
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 Delay=500,
@@ -61,31 +66,10 @@
                      BorderThickness="0"
                      Padding="0">
                 <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="8,4,5,4" />
+                        <Setter Property="Margin" Value="0,1" />
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="{TemplateBinding Background}" 
-                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                            BorderThickness="{TemplateBinding BorderThickness}" 
-                                            Padding="2,3">
-                                        <ContentPresenter />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#E0EEFF" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F7FF" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
                     </Style>
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
@@ -93,10 +77,10 @@
                         <StackPanel Margin="0,0,0,0">
                             <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="12" TextWrapping="Wrap" />
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ProductName}" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
-                                <TextBlock Text=" (" Foreground="Gray" FontSize="11" />
-                                <TextBlock Text="{Binding ProductIdentifier}" Foreground="Gray" FontSize="11" />
-                                <TextBlock Text=")" Foreground="Gray" FontSize="11" />
+                                <TextBlock Text="{Binding ProductName}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                <TextBlock Text=" (" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                <TextBlock Text="{Binding ProductIdentifier}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                <TextBlock Text=")" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>
@@ -113,28 +97,15 @@
         </Grid>
 
         <GridSplitter Grid.Column="1"
-                      Width="8"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      Background="Transparent"
-                      ResizeDirection="Columns"
-                      ResizeBehavior="PreviousAndNext">
-            <GridSplitter.Template>
-                <ControlTemplate TargetType="GridSplitter">
-                    <Grid Background="Transparent">
-                        <Rectangle Width="1" Fill="#DDD" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
-                    </Grid>
-                </ControlTemplate>
-            </GridSplitter.Template>
-        </GridSplitter>
+                      Style="{StaticResource VerticalPanelGridSplitterStyle}" />
 
         <!-- Right Panel -->
-        <Grid Grid.Column="2" Background="#F9F9F9">
+        <Grid Grid.Column="2" Background="{DynamicResource SurfaceAlternativeBrush}">
             <!-- Empty state -->
             <TextBlock Text="Wybierz przepis z listy, aby zobaczyć szczegóły" 
                        HorizontalAlignment="Center" 
                        VerticalAlignment="Center" 
-                       Foreground="Gray" 
+                       Foreground="{DynamicResource TextSecondaryBrush}"
                        FontSize="14"
                        Visibility="{Binding SelectedRecipe, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Inverse'}" />
 
@@ -155,11 +126,11 @@
 
                     <!-- Header -->
                     <Grid Grid.Row="0" Margin="0,0,0,15">
-                        <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="Black" VerticalAlignment="Bottom" />
+                        <TextBlock Text="{Binding SelectedRecipe.Name}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Bottom" />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,5,0" Width="18" Height="18"/>
-                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" Width="18" Height="18"/>
+                            <controls:EditButton Command="{Binding EditRecipeCommand}" Margin="0,0,2,0" />
+                            <controls:DeleteButton Command="{Binding DeleteRecipeCommand}" />
                         </StackPanel>
                     </Grid>
 
@@ -172,13 +143,13 @@
                         <!-- Product Details -->
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                             <StackPanel Orientation="Vertical" Margin="0,0,0,4">
-                                <TextBlock Text="Produkt:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/>
+                                <TextBlock Text="Produkt:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Width="100" TextAlignment="Left"/>
                                 <TextBlock Text="{Binding SelectedRecipe.ProductName}" FontWeight="SemiBold"
                                            TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Vertical" Margin="0,0,0,4">
-                                <TextBlock Text="Identyfikator:" Foreground="Gray" FontSize="11" Width="100" TextAlignment="Left"/>
+                                <TextBlock Text="Identyfikator:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Width="100" TextAlignment="Left"/>
                                 <TextBlock Text="{Binding SelectedRecipe.ProductIdentifier}" FontWeight="SemiBold"
                                            TextAlignment="Left" TextWrapping="Wrap" MaxWidth="210"/>
                             </StackPanel>
@@ -186,7 +157,7 @@
 
                         <!-- Description -->
                         <Grid Grid.Column="1" MinHeight="75" VerticalAlignment="Stretch">
-                            <Border BorderBrush="#DDD" BorderThickness="1" Background="White" CornerRadius="3" Padding="8">
+                            <Border Style="{StaticResource ReadOnlyDescriptionBorderStyle}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <TextBlock Text="{Binding SelectedRecipe.Description}" TextWrapping="Wrap" />
                                 </ScrollViewer>
@@ -199,7 +170,7 @@
                     <GridSplitter.Template>
                         <ControlTemplate TargetType="GridSplitter">
                             <Grid Background="Transparent">
-                                <Rectangle Height="1" Fill="#DDD" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                <Rectangle Height="1" Fill="{DynamicResource BorderBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                             </Grid>
                         </ControlTemplate>
                     </GridSplitter.Template>
@@ -217,8 +188,8 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Potrzebne Materiały" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
 
-                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,5,0" ToolTip="Dodaj materiał" />
-                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,5,0" />
+                        <controls:CreateButton Command="{Binding AddRecipeMaterialCommand}" Margin="0,0,2,0" ToolTip="Dodaj materiał" />
+                        <controls:RefreshButton Click="RecipeMaterialsRefreshButton_Click" Margin="0,0,2,0" />
                         <controls:FilterToggleButton IsChecked="{Binding IsItemsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      Click="RecipeMaterialsFilterToggleButton_Click" />
                     </StackPanel>
@@ -228,7 +199,7 @@
                               Grid.Row="1" LayoutKey="Production.RecipeMaterialsGrid"
                               ItemsSource="{Binding RecipeMaterials}" SelectedItem="{Binding SelectedRecipeMaterial}"
                               AutoGenerateColumns="False" IsReadOnly="True"
-                              Background="White"
+                              Background="{DynamicResource SurfaceBrush}"
                               ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                               ColumnVisibilityChanged="RecipeMaterialsDataGrid_ColumnVisibilityChanged"
                               Sorting="MaterialsDataGrid_Sorting">
@@ -265,7 +236,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Width="Auto"
+                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
                                                     controls:ConfigurableDataGrid.ColumnKey="Actions">
                                 <DataGridTemplateColumn.Header>
                                     <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
@@ -277,12 +248,12 @@
                                                 Command="{Binding DataContext.EditRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Edytuj pozycję"
-                                                Margin="2,0" />
+                                                Margin="1,0" />
                                             <controls:DeleteButton
                                                 Command="{Binding DataContext.DeleteRecipeMaterialCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Usuń pozycję"
-                                                Margin="2,0" />
+                                                Margin="1,0" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -321,7 +292,7 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True"/>
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
         </controls:DraggablePopup>
@@ -345,7 +316,7 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="LightBlue" IsDefault="True"/>
+                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
         </controls:DraggablePopup>
@@ -356,7 +327,7 @@
                     <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelDeleteMaterialCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="LightCoral" IsDefault="True"/>
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
         </controls:DraggablePopup>
@@ -367,7 +338,7 @@
                     <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="LightCoral" IsDefault="True"/>
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
         </controls:DraggablePopup>

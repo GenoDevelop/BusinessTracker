@@ -6,7 +6,7 @@
     <StackPanel>
         <TextBlock Text="{Binding Header, ElementName=Root}"
                    FontWeight="Bold"
-                   Margin="0,0,0,2" />
+                   Margin="5,0,5,1" />
 
         <Grid>
             <Grid.Style>
@@ -34,10 +34,9 @@
                                               ElementName=Root,
                                               Mode=TwoWay,
                                               UpdateSourceTrigger=PropertyChanged}"
-                      Width="35"
-                      Height="18"
+                      Width="42"
                       Margin="0,0,2,0"
-                      Padding="7,-2,0,0"
+                      Style="{StaticResource CompactFilterComboBoxStyle}"
                       FontWeight="Normal"
                       VerticalContentAlignment="Center" />
 
@@ -52,6 +51,7 @@
                                                      Mode=TwoWay}"
                                      IsEnabled="{Binding IsValueInputEnabled, ElementName=Root}"
                                      Margin="0"
+                                     Style="{StaticResource CompactFilterNumericTextBoxStyle}"
                                      FontWeight="Normal" />
         </Grid>
     </StackPanel>

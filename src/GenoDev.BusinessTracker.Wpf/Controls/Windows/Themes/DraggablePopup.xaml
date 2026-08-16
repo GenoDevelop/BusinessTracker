@@ -4,8 +4,8 @@
     xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls">
 
     <Style TargetType="{x:Type controls:DraggablePopup}">
-        <Setter Property="Padding" Value="20" />
-        <Setter Property="Foreground" Value="#202020" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
 
@@ -18,43 +18,56 @@
                            PopupAnimation="Fade"
                            Focusable="True">
 
-                        <Border Margin="12"
-                                Background="White"
-                                BorderBrush="#AFAFAF"
+                        <Border Margin="22"
+                                Background="{DynamicResource GlassSurfaceBrush}"
+                                BorderBrush="{DynamicResource GlassBorderBrush}"
                                 BorderThickness="1"
-                                CornerRadius="6"
+                                CornerRadius="16"
                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}}"
                                 KeyboardNavigation.TabNavigation="Cycle"
                                 SnapsToDevicePixels="True">
 
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="12"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.35" />
+                                <StaticResource ResourceKey="PopupShadow" />
                             </Border.Effect>
 
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="44" />
+                                    <RowDefinition Height="58" />
                                     <RowDefinition Height="1" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
                                 <Border x:Name="PART_DragArea"
                                         Grid.Row="0"
-                                        Padding="16,0"
-                                        Background="Transparent"
+                                        Padding="22,0"
+                                        Background="{DynamicResource GlassSheenBrush}"
+                                        CornerRadius="16,16,0,0"
                                         Cursor="SizeAll">
-                                    <TextBlock Text="{TemplateBinding Title}"
-                                               Foreground="{TemplateBinding Foreground}"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               VerticalAlignment="Center"
-                                               TextTrimming="CharacterEllipsis" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="4" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="4"
+                                                Height="22"
+                                                Background="{DynamicResource AccentBrush}"
+                                                CornerRadius="2"
+                                                VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="12,0,0,0"
+                                                   Text="{TemplateBinding Title}"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   FontFamily="Segoe UI Variable Display, Segoe UI"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </Grid>
                                 </Border>
 
                                 <Border Grid.Row="1"
-                                        Background="#E8E8E8" />
+                                        Background="{DynamicResource BorderBrush}" />
 
                                 <ContentPresenter Grid.Row="2"
                                                   Margin="{TemplateBinding Padding}"

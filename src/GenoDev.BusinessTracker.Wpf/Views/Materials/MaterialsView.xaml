@@ -29,25 +29,74 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="Materiały">
+        <TabControl TabStripPlacement="Left"
+                    SelectedIndex="{Binding SelectedTabIndex}"
+                    Style="{StaticResource SideNavigationTabControlStyle}">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource MaterialsNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Materiały" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding MaterialListViewModel}" />
             </TabItem>
-            <TabItem Header="Pakunki">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource PackageNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Pakunki" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding PackingMaterialListViewModel}" />
             </TabItem>
-            <TabItem Header="Śr. trwałe">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource AssetsNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Śr. trwałe" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding FixedAssetListViewModel}" />
             </TabItem>
-            <TabItem Header="Dostawcy">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource SuppliersNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Dostawcy" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding SuppliersViewModel}" />
             </TabItem>
-            <TabItem Header="Dostawy">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource DeliveriesNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Dostawy" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding SuppliesViewModel}" />
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <TextBlock Text="Korekty&#x0a;stanu" TextAlignment="Center" />
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource AdjustmentsNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Korekty&#x0a;stanu"
+                                   TextAlignment="Left"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
                 </TabItem.Header>
                 <ContentControl Content="{Binding StockAdjustmentsViewModel}" />
             </TabItem>

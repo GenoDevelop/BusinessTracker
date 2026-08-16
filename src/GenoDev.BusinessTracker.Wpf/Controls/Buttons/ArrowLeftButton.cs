@@ -1,19 +1,16 @@
-using System.Windows.Media;
-
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public sealed class ArrowLeftButton : IconButton
 {
     private const string IconData =
-        "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z";
+        "M15,5 L8,12 L15,19";
 
     public ArrowLeftButton()
     {
         ToolTip = "Poprzednia";
         Content = IconFactory.Create(
             IconData,
-            Brushes.DodgerBlue,
-            20,
-            20);
+            16,
+            16);
     }
 }

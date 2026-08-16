@@ -25,6 +25,19 @@ public partial class EnumMultiSelectComboBox : UserControl
 
     public ObservableCollection<EnumSelectionOption> Options { get; }
 
+    public static readonly DependencyProperty IsCompactProperty =
+        DependencyProperty.Register(
+            nameof(IsCompact),
+            typeof(bool),
+            typeof(EnumMultiSelectComboBox),
+            new PropertyMetadata(false));
+
+    public bool IsCompact
+    {
+        get => (bool)GetValue(IsCompactProperty);
+        set => SetValue(IsCompactProperty, value);
+    }
+
     #region Enum source
 
     public static readonly DependencyProperty EnumTypeProperty =

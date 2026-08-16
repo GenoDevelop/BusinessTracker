@@ -1,18 +1,17 @@
-using System.Windows.Media;
-
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public sealed class DeleteButton : IconButton
 {
     private const string IconData =
-        "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z";
+        "M4,7 L20,7 M9,7 L9,4 L15,4 L15,7 M7,7 L8,20 L16,20 L17,7 M10,11 L10,16 M14,11 L14,16";
 
     public DeleteButton()
     {
+        SetResourceReference(StyleProperty, "ActionIconButton");
+        SetResourceReference(ForegroundProperty, "DangerBrush");
         ToolTip = "Usuń";
         Content = IconFactory.Create(
             IconData,
-            Brushes.IndianRed,
             18,
             18);
     }

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -10,22 +11,37 @@ internal static class IconFactory
 {
     public static Viewbox Create(
         string pathData,
-        Brush fill,
         double width,
         double height)
     {
+        var icon = new Path
+        {
+            Data = Geometry.Parse(pathData),
+            Fill = Brushes.Transparent,
+            StrokeThickness = 1.8,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Stretch = Stretch.Uniform,
+            Width = width,
+            Height = height
+        };
+        BindingOperations.SetBinding(
+            icon,
+            Shape.StrokeProperty,
+            new Binding(nameof(Control.Foreground))
+            {
+                RelativeSource = new RelativeSource(
+                    RelativeSourceMode.FindAncestor,
+                    typeof(Control),
+                    1)
+            });
+
         return new Viewbox
         {
             Stretch = Stretch.Uniform,
             StretchDirection = StretchDirection.Both,
-            Child = new Path
-            {
-                Data = Geometry.Parse(pathData),
-                Fill = fill,
-                Stretch = Stretch.Uniform,
-                Width = width,
-                Height = height
-            }
+            Child = icon
         };
     }
 }
@@ -36,10 +52,8 @@ public abstract class IconButton : Button
     {
         SetResourceReference(StyleProperty, "IconButton");
 
-        HorizontalContentAlignment = HorizontalAlignment.Stretch;
-        VerticalContentAlignment = VerticalAlignment.Stretch;
-
-        Padding = new Thickness(4);
+        HorizontalContentAlignment = HorizontalAlignment.Center;
+        VerticalContentAlignment = VerticalAlignment.Center;
     }
 }
 
@@ -49,9 +63,7 @@ public abstract class IconToggleButton : ToggleButton
     {
         SetResourceReference(StyleProperty, "IconToggleButton");
 
-        HorizontalContentAlignment = HorizontalAlignment.Stretch;
-        VerticalContentAlignment = VerticalAlignment.Stretch;
-
-        Padding = new Thickness(4);
+        HorizontalContentAlignment = HorizontalAlignment.Center;
+        VerticalContentAlignment = VerticalAlignment.Center;
     }
 }

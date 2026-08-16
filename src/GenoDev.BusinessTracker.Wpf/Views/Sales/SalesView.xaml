@@ -14,8 +14,18 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <TabControl TabStripPlacement="Left" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="Zamów.">
+        <TabControl TabStripPlacement="Left"
+                    SelectedIndex="{Binding SelectedTabIndex}"
+                    Style="{StaticResource SideNavigationTabControlStyle}">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource OrdersNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Zamów." VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding OrdersViewModel}" />
             </TabItem>
         </TabControl>

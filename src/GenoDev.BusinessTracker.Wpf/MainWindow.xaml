@@ -15,6 +15,7 @@
         xmlns:notesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Notes"
         mc:Ignorable="d"
         Title="Business Tracker" Height="768" Width="1024"
+        MinHeight="640" MinWidth="900"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <Window.Resources>
         <DataTemplate DataType="{x:Type materials:MaterialsViewModel}">
@@ -31,27 +32,76 @@
         </DataTemplate>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <TabControl SelectedIndex="{Binding SelectedMainTabIndex}">
-            <TabItem Header="Magazyn">
+        <TabControl SelectedIndex="{Binding SelectedMainTabIndex}"
+                    Style="{StaticResource TopNavigationTabControlStyle}">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource WarehouseNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Magazyn" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding MaterialsViewModel}" />
             </TabItem>
-            <TabItem Header="Produkcja">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource ProductionNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Produkcja" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding ProductionViewModel}" />
             </TabItem>
-            <TabItem Header="Sprzedaż">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource SalesNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Sprzedaż" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding SalesViewModel}" />
             </TabItem>
-            <TabItem Header="Notatki">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource NotesNavigationGeometry}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="Notatki" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <ContentControl Content="{Binding NotesViewModel}" />
             </TabItem>
         </TabControl>
 
             <Grid Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                <Rectangle Fill="#80000000" />
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                    <TextBlock Text="Ładowanie..." Foreground="White" HorizontalAlignment="Center" Margin="0,10,0,0" FontSize="18" />
-                </StackPanel>
+                <Rectangle Fill="{DynamicResource OverlayBrush}" />
+                <Border HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="28,22"
+                        Background="{DynamicResource SurfaceBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12">
+                    <Border.Effect>
+                        <StaticResource ResourceKey="PopupShadow" />
+                    </Border.Effect>
+                    <StackPanel>
+                        <ProgressBar IsIndeterminate="True" Width="220" />
+                        <TextBlock Text="Ładowanie..."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,13,0,0"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
 </Window>

@@ -10,7 +10,7 @@
     <StackPanel>
         <TextBlock Text="{Binding Header, ElementName=Root}"
                    FontWeight="Bold"
-                   Margin="0,0,0,2" />
+                   Margin="5,0,5,1" />
 
         <Grid Visibility="{Binding IsFilterVisible,
                                    ElementName=Root,
@@ -46,15 +46,17 @@
                        MinWidth="35" />
 
             <Button Grid.Column="2"
-                    Content="×"
                     ToolTip="Wyczyść filtr"
-                    Padding="4,0"
+                    Style="{StaticResource CompactFilterClearButtonStyle}"
                     Margin="4,0,0,0"
                     VerticalAlignment="Center"
                     Visibility="{Binding IsFilterActive,
                                          ElementName=Root,
                                          Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Click="ClearFilter_Click" />
+                    Click="ClearFilter_Click">
+                <Path Data="{StaticResource CloseIconGeometry}"
+                      Style="{StaticResource ToolbarIconStyle}" />
+            </Button>
         </Grid>
     </StackPanel>
 </UserControl>
