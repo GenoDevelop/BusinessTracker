@@ -8,10 +8,11 @@
     <StackPanel HorizontalAlignment="Stretch">
         <TextBlock Text="{Binding Header, ElementName=Root}"
                    FontWeight="Bold"
-                   Margin="0,0,0,2" />
+                   Margin="0,0,0,1" />
 
         <controls:DateRangePicker
             x:Name="FilterPicker"
+            IsCompact="True"
             StartDate="{Binding StartDate,
                                 ElementName=Root,
                                 Mode=TwoWay,

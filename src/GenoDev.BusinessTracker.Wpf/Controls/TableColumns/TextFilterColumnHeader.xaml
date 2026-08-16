@@ -5,7 +5,7 @@
     <StackPanel>
         <TextBlock Text="{Binding Header, ElementName=Root}"
                    FontWeight="Bold"
-                   Margin="0,0,0,2" />
+                   Margin="0,0,0,1" />
 
         <TextBox Text="{Binding FilterText,
                                 ElementName=Root,
@@ -15,7 +15,7 @@
                  FontWeight="Normal">
             <TextBox.Style>
                 <Style TargetType="TextBox"
-                       BasedOn="{StaticResource {x:Type TextBox}}">
+                       BasedOn="{StaticResource CompactFilterTextBoxStyle}">
                     <Setter Property="Visibility" Value="Collapsed" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsFilterVisible, ElementName=Root}"

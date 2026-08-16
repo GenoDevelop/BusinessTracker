@@ -66,7 +66,7 @@ public sealed class WebsiteButton : Button
 
     public WebsiteButton()
     {
-        SetResourceReference(StyleProperty, "IconButton");
+        SetResourceReference(StyleProperty, "ActionIconButton");
         SetResourceReference(ActiveBrushProperty, "AccentBrush");
         SetResourceReference(InactiveBrushProperty, "TextDisabledBrush");
         SetToolTip();

@@ -7,6 +7,7 @@ public sealed class EditButton : IconButton
 
     public EditButton()
     {
+        SetResourceReference(StyleProperty, "ActionIconButton");
         ToolTip = "Edytuj";
         Content = IconFactory.Create(
             IconData,
