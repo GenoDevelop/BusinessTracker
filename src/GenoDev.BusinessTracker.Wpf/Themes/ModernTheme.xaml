@@ -1581,7 +1581,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="MinHeight" Value="34" />
-        <Setter Property="Padding" Value="5,3" />
+        <Setter Property="Padding" Value="2,3" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -1671,7 +1671,7 @@
     </Style>
 
     <Style TargetType="{x:Type DataGridCell}">
-        <Setter Property="Padding" Value="6,3" />
+        <Setter Property="Padding" Value="2,3" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />

@@ -6,7 +6,7 @@
 
     <StackPanel>
         <TextBlock Text="{Binding Header, ElementName=Root}"
-                   Margin="0,0,0,1"
+                   Margin="5,0,5,1"
                    FontWeight="Bold" />
 
         <controls:EnumMultiSelectComboBox x:Name="FilterComboBox"

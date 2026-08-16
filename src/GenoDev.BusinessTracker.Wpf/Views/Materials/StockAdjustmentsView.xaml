@@ -37,7 +37,7 @@
                             IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             FilterChanged="Filter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemName}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemName}" VerticalAlignment="Center" Margin="5,0" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="140" SortMemberPath="ItemType">
                     <DataGridTemplateColumn.Header>
@@ -46,7 +46,7 @@
                             IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             FilterChanged="Filter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemType, Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ItemType, Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}" VerticalAlignment="Center" Margin="5,0" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="120" SortMemberPath="Ean">
                     <DataGridTemplateColumn.Header>
@@ -54,7 +54,7 @@
                             IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             FilterChanged="Filter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Ean}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Ean}" VerticalAlignment="Center" Margin="5,0" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="140" SortMemberPath="Code">
                     <DataGridTemplateColumn.Header>
@@ -62,7 +62,7 @@
                             IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             FilterChanged="Filter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Code}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="5,0" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="100" SortMemberPath="Amount">
                     <DataGridTemplateColumn.Header>
@@ -72,7 +72,7 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid Margin="5,0">
                                 <TextBlock>
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -101,7 +101,7 @@
                             IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             FilterChanged="Filter_FilterChanged" />
                     </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Date, StringFormat=dd.MM.yyyy}" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Date, StringFormat=dd.MM.yyyy}" VerticalAlignment="Center" Margin="5,0" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="*" SortMemberPath="Description">
                     <DataGridTemplateColumn.Header>
@@ -113,7 +113,9 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Description}" TextTrimming="CharacterEllipsis"
-                                       ToolTip="{Binding Description}" />
+                                       ToolTip="{Binding Description}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
