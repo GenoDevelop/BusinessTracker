@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False"
-        Background="{DynamicResource BackgroundBrush}">
+        Background="{DynamicResource GlassSurfaceBrush}">
     <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
