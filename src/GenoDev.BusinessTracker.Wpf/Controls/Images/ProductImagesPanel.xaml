@@ -24,6 +24,10 @@
                     <controls:PhotosButton Command="{Binding OpenPopupCommand}"
                                            ToolTip="Otwórz galerię"
                                            Visibility="{Binding IsFullGallery, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <controls:DownloadButton Click="DownloadButton_Click"
+                                             IsEnabled="{Binding HasImages}"
+                                             Margin="0,0,2,0"
+                                             Visibility="{Binding IsFullGallery, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <StackPanel Orientation="Horizontal"
                                 Visibility="{Binding CanManage, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <controls:CreateButton Click="UploadButton_Click"

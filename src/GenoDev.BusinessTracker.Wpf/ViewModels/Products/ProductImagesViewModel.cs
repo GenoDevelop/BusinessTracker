@@ -221,6 +221,11 @@ public partial class ProductImagesViewModel : ViewModelBase
         }
     }
 
+    public Task<ProductImageContentDto> GetOriginalImageAsync(
+        Guid imageId,
+        CancellationToken cancellationToken = default) =>
+        _mediator.Send(new GetProductImageContentQuery(imageId), cancellationToken);
+
     private void OpenDeleteConfirmation()
     {
         _imageToDelete = SelectedImage;
@@ -300,9 +305,7 @@ public partial class ProductImagesViewModel : ViewModelBase
 
         try
         {
-            var result = await _mediator.Send(
-                new GetProductImageContentQuery(image.Id),
-                cancellation.Token);
+            var result = await GetOriginalImageAsync(image.Id, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
 
             if (SelectedImage?.Id != image.Id)
