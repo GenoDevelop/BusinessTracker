@@ -436,7 +436,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Width="Auto" MinWidth="72"
+                                        <DataGridTemplateColumn Width="Auto" MinWidth="102"
                                                                 controls:ConfigurableDataGrid.ColumnKey="Actions">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="Akcje" FontWeight="Bold" Margin="5,0"/>
@@ -444,6 +444,9 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <controls:PhotosButton Command="{Binding DataContext.OpenProductImagesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                               CommandParameter="{Binding}"
+                                                                               Margin="1,0" />
                                                         <controls:EditButton Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                              CommandParameter="{Binding}"
                                                                              Margin="1,0" />
@@ -889,5 +892,7 @@
                 </StackPanel>
             </StackPanel>
         </controls:DraggablePopup>
+
+        <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
     </Grid>
 </UserControl>

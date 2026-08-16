@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls
 {
@@ -14,9 +15,11 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
     {
         private const string PartPopup = "PART_Popup";
         private const string PartDragArea = "PART_DragArea";
+        private const string PartResizeThumb = "PART_ResizeThumb";
 
         private Popup? _popup;
         private FrameworkElement? _dragArea;
+        private Thumb? _resizeThumb;
         private Window? _ownerWindow;
 
         private bool _isLoaded;
@@ -28,6 +31,10 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
 
         private Point _dragStartCursor;
         private Point _dragStartPopup;
+        private Point _restorePopupPosition;
+        private double _restorePopupWidth;
+        private double _restorePopupHeight;
+        private bool _hasRestoreBounds;
 
         static DraggablePopup()
         {
@@ -38,9 +45,14 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
 
         public DraggablePopup()
         {
+            ToggleMaximizeCommand = new RelayCommand(
+                ToggleMaximize,
+                () => IsResizable);
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
+
+        public IRelayCommand ToggleMaximizeCommand { get; }
 
         public static readonly DependencyProperty IsOpenProperty =
             DependencyProperty.Register(
@@ -82,6 +94,110 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
         {
             get => (bool)GetValue(IsDragEnabledProperty);
             set => SetValue(IsDragEnabledProperty, value);
+        }
+
+        public static readonly DependencyProperty IsResizableProperty =
+            DependencyProperty.Register(
+                nameof(IsResizable),
+                typeof(bool),
+                typeof(DraggablePopup),
+                new PropertyMetadata(false, OnIsResizableChanged));
+
+        public bool IsResizable
+        {
+            get => (bool)GetValue(IsResizableProperty);
+            set => SetValue(IsResizableProperty, value);
+        }
+
+        public static readonly DependencyProperty IsMaximizedProperty =
+            DependencyProperty.Register(
+                nameof(IsMaximized),
+                typeof(bool),
+                typeof(DraggablePopup),
+                new PropertyMetadata(false));
+
+        public bool IsMaximized
+        {
+            get => (bool)GetValue(IsMaximizedProperty);
+            private set => SetValue(IsMaximizedProperty, value);
+        }
+
+        public static readonly DependencyProperty PopupWidthProperty =
+            DependencyProperty.Register(
+                nameof(PopupWidth),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(double.NaN));
+
+        public double PopupWidth
+        {
+            get => (double)GetValue(PopupWidthProperty);
+            set => SetValue(PopupWidthProperty, value);
+        }
+
+        public static readonly DependencyProperty PopupHeightProperty =
+            DependencyProperty.Register(
+                nameof(PopupHeight),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(double.NaN));
+
+        public double PopupHeight
+        {
+            get => (double)GetValue(PopupHeightProperty);
+            set => SetValue(PopupHeightProperty, value);
+        }
+
+        public static readonly DependencyProperty MinPopupWidthProperty =
+            DependencyProperty.Register(
+                nameof(MinPopupWidth),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(0d));
+
+        public double MinPopupWidth
+        {
+            get => (double)GetValue(MinPopupWidthProperty);
+            set => SetValue(MinPopupWidthProperty, value);
+        }
+
+        public static readonly DependencyProperty MinPopupHeightProperty =
+            DependencyProperty.Register(
+                nameof(MinPopupHeight),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(0d));
+
+        public double MinPopupHeight
+        {
+            get => (double)GetValue(MinPopupHeightProperty);
+            set => SetValue(MinPopupHeightProperty, value);
+        }
+
+        public static readonly DependencyProperty MaxPopupWidthProperty =
+            DependencyProperty.Register(
+                nameof(MaxPopupWidth),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(double.PositiveInfinity));
+
+        public double MaxPopupWidth
+        {
+            get => (double)GetValue(MaxPopupWidthProperty);
+            set => SetValue(MaxPopupWidthProperty, value);
+        }
+
+        public static readonly DependencyProperty MaxPopupHeightProperty =
+            DependencyProperty.Register(
+                nameof(MaxPopupHeight),
+                typeof(double),
+                typeof(DraggablePopup),
+                new PropertyMetadata(double.PositiveInfinity));
+
+        public double MaxPopupHeight
+        {
+            get => (double)GetValue(MaxPopupHeightProperty);
+            set => SetValue(MaxPopupHeightProperty, value);
         }
 
         public static readonly DependencyProperty StaysOpenProperty =
@@ -175,6 +291,7 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
 
             _popup = GetTemplateChild(PartPopup) as Popup;
             _dragArea = GetTemplateChild(PartDragArea) as FrameworkElement;
+            _resizeThumb = GetTemplateChild(PartResizeThumb) as Thumb;
 
             if (_popup != null)
             {
@@ -197,11 +314,25 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
 
             if (e.NewValue is false)
             {
+                control.RestoreFromMaximize();
                 control._positionInitialized = false;
                 control.EndDrag();
             }
 
             control.RefreshPopupState();
+        }
+
+        private static void OnIsResizableChanged(
+            DependencyObject dependencyObject,
+            DependencyPropertyChangedEventArgs e)
+        {
+            var control = (DraggablePopup)dependencyObject;
+            if (e.NewValue is false)
+            {
+                control.RestoreFromMaximize();
+            }
+
+            control.ToggleMaximizeCommand.NotifyCanExecuteChanged();
         }
 
         private static void OnStaysOpenChanged(
@@ -328,6 +459,11 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
                 _dragArea.PreviewMouseLeftButtonUp += DragArea_MouseLeftButtonUp;
                 _dragArea.LostMouseCapture += DragArea_LostMouseCapture;
             }
+
+            if (_resizeThumb != null)
+            {
+                _resizeThumb.DragDelta += ResizeThumb_DragDelta;
+            }
         }
 
         private void DetachTemplateEvents()
@@ -343,6 +479,11 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
                 _dragArea.PreviewMouseMove -= DragArea_MouseMove;
                 _dragArea.PreviewMouseLeftButtonUp -= DragArea_MouseLeftButtonUp;
                 _dragArea.LostMouseCapture -= DragArea_LostMouseCapture;
+            }
+
+            if (_resizeThumb != null)
+            {
+                _resizeThumb.DragDelta -= ResizeThumb_DragDelta;
             }
         }
 
@@ -367,9 +508,11 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
             MouseButtonEventArgs e)
         {
             if (!IsDragEnabled ||
+                IsMaximized ||
                 e.ChangedButton != MouseButton.Left ||
                 _popup == null ||
-                _dragArea == null)
+                _dragArea == null ||
+                IsInsideButton(e.OriginalSource as DependencyObject))
             {
                 return;
             }
@@ -385,6 +528,122 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
             {
                 e.Handled = true;
             }
+        }
+
+        private static bool IsInsideButton(DependencyObject? element)
+        {
+            while (element is not null)
+            {
+                if (element is ButtonBase)
+                {
+                    return true;
+                }
+
+                element = element is Visual or System.Windows.Media.Media3D.Visual3D
+                    ? VisualTreeHelper.GetParent(element)
+                    : LogicalTreeHelper.GetParent(element);
+            }
+
+            return false;
+        }
+
+        private void ResizeThumb_DragDelta(
+            object sender,
+            DragDeltaEventArgs e)
+        {
+            if (!IsResizable || IsMaximized)
+            {
+                return;
+            }
+
+            var currentWidth = double.IsNaN(PopupWidth)
+                ? Math.Max(MinPopupWidth, _popup?.Child.RenderSize.Width ?? MinPopupWidth)
+                : PopupWidth;
+            var currentHeight = double.IsNaN(PopupHeight)
+                ? Math.Max(MinPopupHeight, _popup?.Child.RenderSize.Height ?? MinPopupHeight)
+                : PopupHeight;
+
+            PopupWidth = Math.Clamp(
+                currentWidth + e.HorizontalChange,
+                MinPopupWidth,
+                MaxPopupWidth);
+            PopupHeight = Math.Clamp(
+                currentHeight + e.VerticalChange,
+                MinPopupHeight,
+                MaxPopupHeight);
+        }
+
+        private void ToggleMaximize()
+        {
+            if (!IsResizable || _popup is null)
+            {
+                return;
+            }
+
+            if (IsMaximized)
+            {
+                RestoreFromMaximize();
+                return;
+            }
+
+            _restorePopupPosition = new Point(
+                _popup.HorizontalOffset,
+                _popup.VerticalOffset);
+            _restorePopupWidth = PopupWidth;
+            _restorePopupHeight = PopupHeight;
+            _hasRestoreBounds = true;
+
+            var workArea = GetCurrentMonitorWorkAreaInDips();
+            PopupWidth = workArea.Width;
+            PopupHeight = workArea.Height;
+            _popup.HorizontalOffset = workArea.Left;
+            _popup.VerticalOffset = workArea.Top;
+            IsMaximized = true;
+        }
+
+        private void RestoreFromMaximize()
+        {
+            if (!IsMaximized)
+            {
+                return;
+            }
+
+            if (_hasRestoreBounds)
+            {
+                PopupWidth = _restorePopupWidth;
+                PopupHeight = _restorePopupHeight;
+                if (_popup is not null)
+                {
+                    _popup.HorizontalOffset = _restorePopupPosition.X;
+                    _popup.VerticalOffset = _restorePopupPosition.Y;
+                }
+            }
+
+            IsMaximized = false;
+        }
+
+        private Rect GetCurrentMonitorWorkAreaInDips()
+        {
+            if (!GetCursorPos(out var cursorPosition))
+            {
+                return SystemParameters.WorkArea;
+            }
+
+            var monitor = MonitorFromPoint(cursorPosition, MonitorDefaultToNearest);
+            var monitorInfo = new NativeMonitorInfo
+            {
+                Size = Marshal.SizeOf<NativeMonitorInfo>()
+            };
+            if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref monitorInfo))
+            {
+                return SystemParameters.WorkArea;
+            }
+
+            var source = PresentationSource.FromVisual(_popup?.Child ?? this);
+            var transform = source?.CompositionTarget?.TransformFromDevice ?? Matrix.Identity;
+            var topLeft = transform.Transform(new Point(monitorInfo.Work.Left, monitorInfo.Work.Top));
+            var bottomRight = transform.Transform(new Point(monitorInfo.Work.Right, monitorInfo.Work.Bottom));
+            return new Rect(topLeft, bottomRight);
         }
 
         private void DragArea_MouseMove(
@@ -563,9 +822,40 @@ namespace GenoDev.BusinessTracker.Wpf.Controls
             public int Y;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeRect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeMonitorInfo
+        {
+            public int Size;
+            public NativeRect Monitor;
+            public NativeRect Work;
+            public uint Flags;
+        }
+
+        private const uint MonitorDefaultToNearest = 2;
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetCursorPos(out NativePoint point);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromPoint(
+            NativePoint point,
+            uint flags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetMonitorInfo(
+            IntPtr monitor,
+            ref NativeMonitorInfo monitorInfo);
 
         private static Point GetCursorPositionInDips(Visual referenceVisual)
         {

@@ -1,4 +1,5 @@
 <UserControl x:Class="GenoDev.BusinessTracker.Wpf.Controls.ProductImagesPanel"
+             x:Name="Root"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
@@ -19,22 +20,41 @@
                 <TextBlock Text="Zdjęcia produktu"
                            FontWeight="SemiBold"
                            VerticalAlignment="Center" />
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Visibility="{Binding CanManage, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <controls:CreateButton Click="UploadButton_Click"
-                                           ToolTip="Dodaj zdjęcia"
-                                           Margin="0,0,2,0" />
-                    <controls:DeleteButton Command="{Binding OpenDeleteConfirmationCommand}"
-                                           ToolTip="Usuń wybrane zdjęcie"
-                                           />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <controls:PhotosButton Command="{Binding OpenPopupCommand}"
+                                           ToolTip="Otwórz galerię"
+                                           Visibility="{Binding IsFullGallery, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding CanManage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <controls:CreateButton Click="UploadButton_Click"
+                                               ToolTip="Dodaj zdjęcia"
+                                               Margin="0,0,2,0" />
+                        <controls:DeleteButton Command="{Binding OpenDeleteConfirmationCommand}"
+                                               ToolTip="Usuń wybrane zdjęcie" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
             <Grid Grid.Row="1" ClipToBounds="True">
-                <Image Source="{Binding ImageSource}"
-                       Stretch="Uniform"
-                       SnapsToDevicePixels="True" />
+                <ScrollViewer x:Name="ImageScrollViewer"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              PanningMode="Both">
+                    <Grid Width="{Binding ViewportWidth, ElementName=ImageScrollViewer}"
+                          Height="{Binding ViewportHeight, ElementName=ImageScrollViewer}"
+                          MinWidth="1"
+                          MinHeight="1">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform ScaleX="{Binding ZoomFactor}"
+                                            ScaleY="{Binding ZoomFactor}" />
+                        </Grid.LayoutTransform>
+                        <Image Source="{Binding ImageSource}"
+                               Stretch="Uniform"
+                               SnapsToDevicePixels="True" />
+                    </Grid>
+                </ScrollViewer>
                 <TextBlock Text="Brak zdjęć"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -46,6 +66,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
@@ -62,7 +83,20 @@
                                HorizontalAlignment="Center"
                                FontSize="10" />
                 </StackPanel>
-                <controls:ArrowRightButton Grid.Column="2"
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="8,0"
+                            Visibility="{Binding IsFullGallery, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <controls:ZoomOutButton Command="{Binding ZoomOutCommand}" />
+                    <TextBlock Text="{Binding ZoomPercent, StringFormat={}{0}%}"
+                               Width="54"
+                               TextAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold" />
+                    <controls:ZoomInButton Command="{Binding ZoomInCommand}" />
+                </StackPanel>
+                <controls:ArrowRightButton Grid.Column="3"
                                            Command="{Binding NextImageCommand}"
                                            ToolTip="Następne zdjęcie" />
             </Grid>

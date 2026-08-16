@@ -56,7 +56,7 @@ public sealed class ProductImageHandlers_Tests
     }
 
     [Fact]
-    public async Task List_ShouldReturnOnlyRequestedProductMetadata_InNewestFirstOrder()
+    public async Task List_ShouldReturnOnlyRequestedProductMetadata_InOldestFirstOrder()
     {
         var productId = Arrange_BusinessTrackerDatabase(db =>
         {
@@ -74,7 +74,7 @@ public sealed class ProductImageHandlers_Tests
             new GetProductImagesQuery(productId),
             TestContext.Current.CancellationToken);
 
-        result.Select(x => x.FileName).Should().Equal("newer.png", "older.png");
+        result.Select(x => x.FileName).Should().Equal("older.png", "newer.png");
         result.Should().OnlyContain(x => x.ContentType == "image/png");
     }
 

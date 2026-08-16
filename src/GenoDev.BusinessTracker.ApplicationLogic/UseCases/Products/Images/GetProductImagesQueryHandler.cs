@@ -14,7 +14,7 @@ public sealed class GetProductImagesQueryHandler(IBusinessTrackerDbContext dbCon
         return await dbContext.ProductImages
             .AsNoTracking()
             .Where(x => x.ProductId == request.ProductId)
-            .OrderByDescending(x => x.CreatedAtUtc)
+            .OrderBy(x => x.CreatedAtUtc)
             .ThenBy(x => x.Id)
             .Select(x => new ProductImageDto(x.Id, x.FileName, x.ContentType, x.CreatedAtUtc))
             .ToListAsync(cancellationToken);

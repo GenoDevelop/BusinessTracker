@@ -11,6 +11,9 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 
 public partial class ProductImagesViewModel : ViewModelBase
 {
+    private const int MinZoomPercent = 25;
+    private const int MaxZoomPercent = 400;
+    private const int ZoomStepPercent = 25;
     private static readonly IReadOnlyDictionary<string, string> ContentTypesByExtension =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -38,6 +41,12 @@ public partial class ProductImagesViewModel : ViewModelBase
             CanDeleteImage);
         ConfirmDeleteCommand = new AsyncRelayCommand(DeleteSelectedImageAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
+        OpenPopupCommand = new AsyncRelayCommand(
+            OpenCurrentProductPopupAsync,
+            CanOpenPopup);
+        ClosePopupCommand = new RelayCommand(ClosePopup);
+        ZoomInCommand = new RelayCommand(ZoomIn, CanZoomIn);
+        ZoomOutCommand = new RelayCommand(ZoomOut, CanZoomOut);
     }
 
     public ObservableCollection<ProductImageDto> Images { get; } = new();
@@ -60,13 +69,40 @@ public partial class ProductImagesViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDeleteConfirmationOpen;
 
+    [ObservableProperty]
+    private bool _isPopupOpen;
+
+    [ObservableProperty]
+    private int _zoomPercent = 100;
+
     public IRelayCommand PreviousImageCommand { get; }
     public IRelayCommand NextImageCommand { get; }
     public IRelayCommand OpenDeleteConfirmationCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }
+    public IAsyncRelayCommand OpenPopupCommand { get; }
+    public IRelayCommand ClosePopupCommand { get; }
+    public IRelayCommand ZoomInCommand { get; }
+    public IRelayCommand ZoomOutCommand { get; }
 
     public bool HasImages => Images.Count > 0;
+    public double ZoomFactor => ZoomPercent / 100d;
+
+    public async Task OpenPopupAsync(Guid productId, bool canManage)
+    {
+        CanManage = canManage;
+        IsPopupOpen = true;
+        ZoomPercent = 100;
+
+        if (ProductId == productId)
+        {
+            await RefreshAsync();
+        }
+        else
+        {
+            await SetProductAsync(productId);
+        }
+    }
 
     public async Task SetProductAsync(Guid? productId)
     {
@@ -173,7 +209,7 @@ public partial class ProductImagesViewModel : ViewModelBase
             }
 
             var createdIds = await _mediator.Send(new AddProductImagesCommand(productId, uploads));
-            await RefreshAsync(createdIds.FirstOrDefault());
+            await RefreshAsync(createdIds.LastOrDefault());
         }
         catch (RequestValidationException exception)
         {
@@ -225,15 +261,29 @@ public partial class ProductImagesViewModel : ViewModelBase
 
     partial void OnSelectedImageChanged(ProductImageDto? value)
     {
+        ZoomPercent = 100;
         UpdatePositionText();
         PreviousImageCommand.NotifyCanExecuteChanged();
         NextImageCommand.NotifyCanExecuteChanged();
         OpenDeleteConfirmationCommand.NotifyCanExecuteChanged();
+        NotifyZoomCommandStates();
         _ = LoadSelectedImageContentAsync(value);
     }
 
-    partial void OnCanManageChanged(bool value) =>
+    partial void OnCanManageChanged(bool value)
+    {
         OpenDeleteConfirmationCommand.NotifyCanExecuteChanged();
+        OpenPopupCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnProductIdChanged(Guid? value) =>
+        OpenPopupCommand.NotifyCanExecuteChanged();
+
+    partial void OnZoomPercentChanged(int value)
+    {
+        OnPropertyChanged(nameof(ZoomFactor));
+        NotifyZoomCommandStates();
+    }
 
     private async Task LoadSelectedImageContentAsync(ProductImageDto? image)
     {
@@ -297,6 +347,35 @@ public partial class ProductImagesViewModel : ViewModelBase
 
     private bool CanDeleteImage() => CanManage && SelectedImage is not null;
 
+    private async Task OpenCurrentProductPopupAsync()
+    {
+        if (ProductId is null)
+        {
+            return;
+        }
+
+        IsPopupOpen = true;
+        ZoomPercent = 100;
+        await RefreshAsync();
+    }
+
+    private bool CanOpenPopup() => ProductId is not null && (CanManage || HasImages);
+
+    private void ClosePopup()
+    {
+        CancelDelete();
+        IsPopupOpen = false;
+        ZoomPercent = 100;
+    }
+
+    private void ZoomIn() => ZoomPercent = Math.Min(MaxZoomPercent, ZoomPercent + ZoomStepPercent);
+
+    private void ZoomOut() => ZoomPercent = Math.Max(MinZoomPercent, ZoomPercent - ZoomStepPercent);
+
+    private bool CanZoomIn() => HasImages && ZoomPercent < MaxZoomPercent;
+
+    private bool CanZoomOut() => HasImages && ZoomPercent > MinZoomPercent;
+
     private void ClearImages()
     {
         Images.Clear();
@@ -312,6 +391,14 @@ public partial class ProductImagesViewModel : ViewModelBase
         PreviousImageCommand.NotifyCanExecuteChanged();
         NextImageCommand.NotifyCanExecuteChanged();
         OpenDeleteConfirmationCommand.NotifyCanExecuteChanged();
+        OpenPopupCommand.NotifyCanExecuteChanged();
+        NotifyZoomCommandStates();
+    }
+
+    private void NotifyZoomCommandStates()
+    {
+        ZoomInCommand.NotifyCanExecuteChanged();
+        ZoomOutCommand.NotifyCanExecuteChanged();
     }
 
     private void UpdatePositionText()
@@ -328,7 +415,6 @@ public partial class ProductImagesViewModel : ViewModelBase
         var bitmap = new BitmapImage();
         bitmap.BeginInit();
         bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.DecodePixelWidth = 1600;
         bitmap.StreamSource = stream;
         bitmap.EndInit();
         bitmap.Freeze();

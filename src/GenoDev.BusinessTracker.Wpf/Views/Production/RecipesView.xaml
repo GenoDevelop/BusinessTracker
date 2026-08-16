@@ -348,5 +348,7 @@
                     </StackPanel>
                 </StackPanel>
         </controls:DraggablePopup>
+
+        <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
     </Grid>
 </UserControl>

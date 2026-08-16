@@ -51,7 +51,8 @@ public class GetOrderProductsQueryHandler(IBusinessTrackerDbContext dbContext)
                 x.UnitNetPrice,
                 x.UnitGrossPrice,
                 x.OrderedAmount * x.UnitNetPrice,
-                x.OrderedAmount * x.UnitGrossPrice
+                x.OrderedAmount * x.UnitGrossPrice,
+                x.Product.Images.Any()
             ))
             .ToListAsync(cancellationToken);
 

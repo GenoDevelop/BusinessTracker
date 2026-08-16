@@ -53,7 +53,6 @@ public partial class ProductsViewModel : ViewModelBase
         EditProductCommand = new RelayCommand<ProductDto>(OpenEditPopup);
         DeleteProductCommand = new RelayCommand<ProductDto>(OpenDeletePopup);
         OpenImagesCommand = new AsyncRelayCommand<ProductDto>(OpenImagesAsync);
-        CloseImagesCommand = new RelayCommand(CloseImages);
         ConfirmDeleteCommand = new AsyncRelayCommand(ConfirmDeleteAsync);
         CancelDeleteCommand = new RelayCommand(CancelDelete);
         LoadProductsCommand = new RelayCommand(() => RequestPaginationRefresh(ProductsPaginationTarget.Products));
@@ -89,14 +88,7 @@ public partial class ProductsViewModel : ViewModelBase
         }
 
         SelectedProduct = product;
-        IsImagesPopupOpen = true;
-        await ProductImages.SetProductAsync(product.Id);
-    }
-
-    private void CloseImages()
-    {
-        ProductImages.CancelDeleteCommand.Execute(null);
-        IsImagesPopupOpen = false;
+        await ProductImages.OpenPopupAsync(product.Id, canManage: true);
     }
     
     private async Task ConfirmDeleteAsync()
@@ -113,7 +105,7 @@ public partial class ProductsViewModel : ViewModelBase
             if (SelectedProduct?.Id == deletedProductId)
             {
                 SelectedProduct = null;
-                IsImagesPopupOpen = false;
+                ProductImages.ClosePopupCommand.Execute(null);
                 await ProductImages.SetProductAsync(null);
             }
             RequestPaginationRefresh(ProductsPaginationTarget.Products);
@@ -136,9 +128,6 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDeletePopupOpen;
 
-    [ObservableProperty]
-    private bool _isImagesPopupOpen;
-    
     [ObservableProperty]
     private ProductDto? _productToDelete;
     
@@ -172,7 +161,6 @@ public partial class ProductsViewModel : ViewModelBase
     public IRelayCommand<ProductDto> EditProductCommand { get; }
     public IRelayCommand<ProductDto> DeleteProductCommand { get; }
     public IAsyncRelayCommand<ProductDto> OpenImagesCommand { get; }
-    public IRelayCommand CloseImagesCommand { get; }
     public IRelayCommand LoadProductsCommand { get; }
     public IAsyncRelayCommand ConfirmDeleteCommand { get; }
     public IRelayCommand CancelDeleteCommand { get; }

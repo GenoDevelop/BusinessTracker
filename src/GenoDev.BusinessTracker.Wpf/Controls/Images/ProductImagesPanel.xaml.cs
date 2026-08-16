@@ -8,6 +8,19 @@ namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public partial class ProductImagesPanel : UserControl
 {
+    public static readonly DependencyProperty IsFullGalleryProperty =
+        DependencyProperty.Register(
+            nameof(IsFullGallery),
+            typeof(bool),
+            typeof(ProductImagesPanel),
+            new PropertyMetadata(false));
+
+    public bool IsFullGallery
+    {
+        get => (bool)GetValue(IsFullGalleryProperty);
+        set => SetValue(IsFullGalleryProperty, value);
+    }
+
     public ProductImagesPanel()
     {
         InitializeComponent();

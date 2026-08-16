@@ -27,7 +27,8 @@ public record OrderProductListDto(
     decimal UnitNetPrice,
     decimal UnitGrossPrice,
     decimal TotalNetPrice,
-    decimal TotalGrossPrice);
+    decimal TotalGrossPrice,
+    bool HasImages);
 
 public record GetOrderProductsQuery(
     Guid OrderId,

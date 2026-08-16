@@ -54,6 +54,7 @@ public class GetOrderProductsQueryHandler_Tests : BusinessTrackerUnitTestsBase<G
         item.UnitGrossPrice.Should().Be(123m);
         item.TotalNetPrice.Should().Be(1000m);
         item.TotalGrossPrice.Should().Be(1230m);
+        item.HasImages.Should().BeFalse();
     }
 
     [Fact]
@@ -148,5 +149,27 @@ public class GetOrderProductsQueryHandler_Tests : BusinessTrackerUnitTestsBase<G
         result.Items.Should().HaveCount(2);
         result.TotalCount.Should().Be(5);
         result.HasNextPage.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldProjectWhetherProductHasImages()
+    {
+        var orderId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var order = db.Arrange_Order();
+            var productWithImage = db.Arrange_Product(name: "Ze zdjęciem");
+            var productWithoutImage = db.Arrange_Product(name: "Bez zdjęcia");
+            db.Arrange_ProductImage(productWithImage);
+            db.Arrange_OrderProduct(order, productWithImage);
+            db.Arrange_OrderProduct(order, productWithoutImage);
+            return order.Id;
+        });
+
+        var result = await Sut.Handle(
+            new GetOrderProductsQuery(orderId, 0, 10),
+            TestContext.Current.CancellationToken);
+
+        result.Items.Single(x => x.ProductName == "Ze zdjęciem").HasImages.Should().BeTrue();
+        result.Items.Single(x => x.ProductName == "Bez zdjęcia").HasImages.Should().BeFalse();
     }
 }

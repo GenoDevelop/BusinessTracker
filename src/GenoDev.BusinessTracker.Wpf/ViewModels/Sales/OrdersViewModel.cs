@@ -14,6 +14,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.ComponentModel;
+using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 
 namespace GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
 
@@ -35,11 +36,15 @@ public partial class OrdersViewModel : ViewModelBase
 
     public OrdersViewModel(
         IMediator mediator,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ProductImagesViewModel productImagesViewModel)
     {
         _mediator = mediator;
         _serviceProvider = serviceProvider;
+        ProductImages = productImagesViewModel;
     }
+
+    public ProductImagesViewModel ProductImages { get; }
 
     public ObservableCollection<OrderListDto> Orders { get; } = new();
 
@@ -354,6 +359,20 @@ public partial class OrdersViewModel : ViewModelBase
         OrderPackingMaterialToDelete = packingMaterial;
         IsOrderPackingMaterialDeleteConfirmationOpen = true;
     }
+
+    [RelayCommand(CanExecute = nameof(CanOpenProductImages))]
+    private async Task OpenProductImages(OrderProductListDto? product)
+    {
+        if (product is not { HasImages: true })
+        {
+            return;
+        }
+
+        await ProductImages.OpenPopupAsync(product.ProductId, canManage: false);
+    }
+
+    private static bool CanOpenProductImages(OrderProductListDto? product) =>
+        product?.HasImages == true;
 
     [RelayCommand]
     private async Task ConfirmDeletePackingMaterial()
