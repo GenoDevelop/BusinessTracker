@@ -405,8 +405,10 @@ public sealed class PopupWindowHost : ContentControl
         }
 
         var cursor = GetCursorPositionInDips(this);
-        window.Left = cursor.X + MouseOffsetX;
-        window.Top = cursor.Y + MouseOffsetY;
+        // Left/Top describe the layered HWND including its invisible shadow
+        // gutter. Keep the visible popup corner at the configured mouse offset.
+        window.Left = cursor.X + MouseOffsetX - ShadowMargin;
+        window.Top = cursor.Y + MouseOffsetY - ShadowMargin;
     }
 
     private static void CenterWindowOnHost(PopupWindow window, Window? hostWindow)
