@@ -643,14 +643,11 @@
             </Grid>
         </Grid>
 
-        <!-- Delete History Confirmation Popup -->
-        <Popup IsOpen="{Binding IsDeletePopupOpen}" Placement="Mouse" StaysOpen="True">
-            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="15">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" Color="Black" Opacity="0.2" ShadowDepth="2" />
-                </Border.Effect>
-                <StackPanel Width="300">
-                    <TextBlock Text="Potwierdź usunięcie" FontWeight="Bold" FontSize="14" Margin="0,0,0,10" Foreground="{DynamicResource DangerBrush}"/>
+        <!-- Delete History Confirmation Window -->
+        <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}"
+                                  Title="Potwierdź usunięcie"
+                                  StaysOpen="True">
+                <StackPanel Width="320">
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
                         <Run Text="Czy na pewno chcesz usunąć tę historię produkcji z dnia " />
                         <Run Text="{Binding ProductionToDelete.ProductionDate, StringFormat='dd.MM.yyyy HH:mm', Mode=OneWay}" FontWeight="Bold" />
@@ -663,11 +660,10 @@
                         <Button Content="Tak" Command="{Binding ConfirmDeleteProductionCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource OnAccentBrush}" />
                     </StackPanel>
                 </StackPanel>
-            </Border>
-        </Popup>
+        </controls:PopupWindowHost>
 
         <!-- Add Material Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsAddingNewMaterial}" Title="Dodaj nowy materiał" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsAddingNewMaterial}" Title="Dodaj nowy materiał" StaysOpen="True">
             <StackPanel Width="350">
                 <TextBlock Text="Materiał:" Margin="0,0,0,2" />
                 <controls:SearchableComboBox ItemsSource="{Binding AllMaterials}" 
@@ -695,7 +691,7 @@
                             BorderBrush="{DynamicResource AccentBrush}" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
     </Grid>

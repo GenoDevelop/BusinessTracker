@@ -151,7 +151,7 @@
                                     Margin="0,5,0,0" />
         
         <!-- Create Product Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateProductViewModel.Title}"
                                  StaysOpen="True">
             <StackPanel Width="400" DataContext="{Binding CreateProductViewModel}">
@@ -171,12 +171,12 @@
                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
         
         <!-- Delete Product Confirmation Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}"
                                  Title="Potwierdź usunięcie"
                                  StaysOpen="True">
             <StackPanel Width="300">
@@ -190,6 +190,6 @@
                     <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
     </Grid>
 </UserControl>

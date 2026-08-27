@@ -281,7 +281,7 @@
         </Grid>
 
         <!-- Add/Edit Material Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsAddMaterialPopupOpen}" Title="{Binding AddRecipeMaterialViewModel.Title}" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsAddMaterialPopupOpen}" Title="{Binding AddRecipeMaterialViewModel.Title}" StaysOpen="True">
                 <StackPanel DataContext="{Binding AddRecipeMaterialViewModel}" Width="400">
                     <TextBlock Text="Wyszukaj materiał:" Margin="0,0,0,5"/>
                     <TextBox Text="{Binding MaterialSearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
@@ -301,10 +301,10 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Create/Edit Recipe Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="{Binding CreateRecipeViewModel.Title}" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}" Title="{Binding CreateRecipeViewModel.Title}" StaysOpen="True">
                 <StackPanel DataContext="{Binding CreateRecipeViewModel}" Width="400">
                     <TextBlock Text="Nazwa:" Margin="0,0,0,5"/>
                     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
@@ -325,10 +325,10 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Delete Material Confirmation Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -336,10 +336,10 @@
                         <Button Content="Usuń" Command="{Binding ConfirmDeleteMaterialCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Delete Recipe Confirmation -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeleteConfirmationOpen}" Title="Potwierdź usunięcie przepisu" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteConfirmationOpen}" Title="Potwierdź usunięcie przepisu" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -347,7 +347,7 @@
                         <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True"/>
                     </StackPanel>
                 </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
     </Grid>

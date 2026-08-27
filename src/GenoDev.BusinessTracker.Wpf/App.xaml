@@ -6,7 +6,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/ModernTheme.xaml" />
-                <ResourceDictionary Source="Controls/Windows/Themes/DraggablePopup.xaml" />
+                <ResourceDictionary Source="Controls/Windows/Themes/PopupWindowHost.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

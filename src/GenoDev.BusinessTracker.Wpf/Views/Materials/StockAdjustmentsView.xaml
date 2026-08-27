@@ -135,7 +135,7 @@
         <controls:PaginationControl x:Name="Pagination" Grid.Row="2" Layout="SingleLine" PageLoader="{Binding PageLoader}"
                                     InitialPageSize="50" HorizontalAlignment="Right" PaginationHorizontalAlignment="Right" Margin="0,5,0,0" />
 
-        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj korekty stanu" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj korekty stanu" StaysOpen="True">
             <Grid Width="620" DataContext="{Binding CreateViewModel}">
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="200"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <StackPanel>
@@ -186,9 +186,9 @@
                 </controls:ConfigurableDataGrid>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0"><Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Zapisz wszystkie" Command="{Binding SaveCommand}" Padding="15,5" IsDefault="True"/></StackPanel>
             </Grid>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj korektę stanu" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj korektę stanu" StaysOpen="True">
             <StackPanel Width="500" DataContext="{Binding EditViewModel}">
                 <TextBlock Text="Data:" Margin="0,0,0,5"/><DatePicker SelectedDate="{Binding Date}" Margin="0,0,0,10"/>
                 <TextBlock Text="Typ:" Margin="0,0,0,5"/><ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource StockAdjustmentItemTypeToTextConverter}}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox>
@@ -200,10 +200,10 @@
                          TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="70" Margin="0,0,0,20"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" IsDefault="True"/></StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
             <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel></StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
     </Grid>
 </UserControl>

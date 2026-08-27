@@ -1,0 +1,453 @@
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+
+namespace GenoDev.BusinessTracker.Wpf.Controls;
+
+/// <summary>
+/// Declarative bridge between an MVVM IsOpen property and a real PopupWindow.
+/// Existing inline XAML content is temporarily moved into the native window.
+/// </summary>
+public sealed class PopupWindowHost : ContentControl
+{
+    private const double ShadowMargin = 22;
+    private PopupWindow? _window;
+    private object? _detachedContent;
+    private bool _isClosingFromHost;
+
+    static PopupWindowHost()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(PopupWindowHost),
+            new FrameworkPropertyMetadata(typeof(PopupWindowHost)));
+    }
+
+    public PopupWindowHost()
+    {
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    public static readonly DependencyProperty IsOpenProperty = DependencyProperty.Register(
+        nameof(IsOpen),
+        typeof(bool),
+        typeof(PopupWindowHost),
+        new FrameworkPropertyMetadata(
+            false,
+            FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+            OnWindowPropertyChanged));
+
+    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
+        nameof(Title),
+        typeof(string),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(string.Empty, OnWindowPropertyChanged));
+
+    public static readonly DependencyProperty IsResizableProperty = DependencyProperty.Register(
+        nameof(IsResizable),
+        typeof(bool),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(false, OnWindowPropertyChanged));
+
+    public static readonly DependencyProperty PopupWidthProperty = DependencyProperty.Register(
+        nameof(PopupWidth),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(double.NaN));
+
+    public static readonly DependencyProperty PopupHeightProperty = DependencyProperty.Register(
+        nameof(PopupHeight),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(double.NaN));
+
+    public static readonly DependencyProperty MinPopupWidthProperty = DependencyProperty.Register(
+        nameof(MinPopupWidth),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(0d));
+
+    public static readonly DependencyProperty MinPopupHeightProperty = DependencyProperty.Register(
+        nameof(MinPopupHeight),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(0d));
+
+    public static readonly DependencyProperty MaxPopupWidthProperty = DependencyProperty.Register(
+        nameof(MaxPopupWidth),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(double.PositiveInfinity));
+
+    public static readonly DependencyProperty MaxPopupHeightProperty = DependencyProperty.Register(
+        nameof(MaxPopupHeight),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(double.PositiveInfinity));
+
+    public static readonly DependencyProperty OpenAtMouseProperty = DependencyProperty.Register(
+        nameof(OpenAtMouse),
+        typeof(bool),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(true));
+
+    public static readonly DependencyProperty CenterOnHostProperty = DependencyProperty.Register(
+        nameof(CenterOnHost),
+        typeof(bool),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(false));
+
+    public static readonly DependencyProperty MouseOffsetXProperty = DependencyProperty.Register(
+        nameof(MouseOffsetX),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(12d));
+
+    public static readonly DependencyProperty MouseOffsetYProperty = DependencyProperty.Register(
+        nameof(MouseOffsetY),
+        typeof(double),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(12d));
+
+    public static readonly DependencyProperty CloseCommandProperty = DependencyProperty.Register(
+        nameof(CloseCommand),
+        typeof(ICommand),
+        typeof(PopupWindowHost));
+
+    // Kept as a declarative compatibility property. A full window always stays
+    // open until its state or close button explicitly closes it.
+    public static readonly DependencyProperty StaysOpenProperty = DependencyProperty.Register(
+        nameof(StaysOpen),
+        typeof(bool),
+        typeof(PopupWindowHost),
+        new PropertyMetadata(true));
+
+    public bool IsOpen
+    {
+        get => (bool)GetValue(IsOpenProperty);
+        set => SetValue(IsOpenProperty, value);
+    }
+
+    public string Title
+    {
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
+    }
+
+    public bool IsResizable
+    {
+        get => (bool)GetValue(IsResizableProperty);
+        set => SetValue(IsResizableProperty, value);
+    }
+
+    public double PopupWidth
+    {
+        get => (double)GetValue(PopupWidthProperty);
+        set => SetValue(PopupWidthProperty, value);
+    }
+
+    public double PopupHeight
+    {
+        get => (double)GetValue(PopupHeightProperty);
+        set => SetValue(PopupHeightProperty, value);
+    }
+
+    public double MinPopupWidth
+    {
+        get => (double)GetValue(MinPopupWidthProperty);
+        set => SetValue(MinPopupWidthProperty, value);
+    }
+
+    public double MinPopupHeight
+    {
+        get => (double)GetValue(MinPopupHeightProperty);
+        set => SetValue(MinPopupHeightProperty, value);
+    }
+
+    public double MaxPopupWidth
+    {
+        get => (double)GetValue(MaxPopupWidthProperty);
+        set => SetValue(MaxPopupWidthProperty, value);
+    }
+
+    public double MaxPopupHeight
+    {
+        get => (double)GetValue(MaxPopupHeightProperty);
+        set => SetValue(MaxPopupHeightProperty, value);
+    }
+
+    public bool OpenAtMouse
+    {
+        get => (bool)GetValue(OpenAtMouseProperty);
+        set => SetValue(OpenAtMouseProperty, value);
+    }
+
+    public bool CenterOnHost
+    {
+        get => (bool)GetValue(CenterOnHostProperty);
+        set => SetValue(CenterOnHostProperty, value);
+    }
+
+    public double MouseOffsetX
+    {
+        get => (double)GetValue(MouseOffsetXProperty);
+        set => SetValue(MouseOffsetXProperty, value);
+    }
+
+    public double MouseOffsetY
+    {
+        get => (double)GetValue(MouseOffsetYProperty);
+        set => SetValue(MouseOffsetYProperty, value);
+    }
+
+    public ICommand? CloseCommand
+    {
+        get => (ICommand?)GetValue(CloseCommandProperty);
+        set => SetValue(CloseCommandProperty, value);
+    }
+
+    public bool StaysOpen
+    {
+        get => (bool)GetValue(StaysOpenProperty);
+        set => SetValue(StaysOpenProperty, value);
+    }
+
+    private static void OnWindowPropertyChanged(
+        DependencyObject dependencyObject,
+        DependencyPropertyChangedEventArgs e)
+    {
+        var host = (PopupWindowHost)dependencyObject;
+        host.SynchronizeWindow();
+        host.UpdateOpenWindowProperties();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e) => SynchronizeWindow();
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (_window != null)
+        {
+            RequestClose();
+        }
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (_window != null)
+        {
+            _window.DataContext = e.NewValue;
+        }
+    }
+
+    private void SynchronizeWindow()
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        if (IsOpen)
+        {
+            OpenWindow();
+        }
+        else
+        {
+            CloseWindow();
+        }
+    }
+
+    private void OpenWindow()
+    {
+        if (_window != null)
+        {
+            return;
+        }
+
+        var hostWindow = Window.GetWindow(this);
+        _detachedContent = Content;
+        SetCurrentValue(ContentProperty, null);
+
+        _window = new PopupWindow
+        {
+            Title = Title,
+            DataContext = DataContext,
+            HostWindow = hostWindow,
+            WindowContent = _detachedContent,
+            IsResizable = IsResizable,
+            Padding = Padding,
+            HorizontalContentAlignment = HorizontalContentAlignment,
+            VerticalContentAlignment = VerticalContentAlignment
+        };
+        ApplySize(_window);
+        SetInitialPosition(_window, hostWindow);
+        _window.Closed += Window_Closed;
+        _window.Show();
+
+        if (CenterOnHost)
+        {
+            CenterWindowOnHost(_window, hostWindow);
+        }
+    }
+
+    private void ApplySize(PopupWindow window)
+    {
+        window.MinWidth = Math.Max(window.MinWidth, MinPopupWidth + 2 * ShadowMargin);
+        window.MinHeight = Math.Max(window.MinHeight, MinPopupHeight + 2 * ShadowMargin);
+        window.MaxWidth = double.IsPositiveInfinity(MaxPopupWidth)
+            ? double.PositiveInfinity
+            : MaxPopupWidth + 2 * ShadowMargin;
+        window.MaxHeight = double.IsPositiveInfinity(MaxPopupHeight)
+            ? double.PositiveInfinity
+            : MaxPopupHeight + 2 * ShadowMargin;
+
+        var hasWidth = !double.IsNaN(PopupWidth);
+        var hasHeight = !double.IsNaN(PopupHeight);
+        if (hasWidth)
+        {
+            window.Width = PopupWidth + 2 * ShadowMargin;
+        }
+
+        if (hasHeight)
+        {
+            window.Height = PopupHeight + 2 * ShadowMargin;
+        }
+
+        window.SizeToContent = (hasWidth, hasHeight) switch
+        {
+            (true, true) => SizeToContent.Manual,
+            (true, false) => SizeToContent.Height,
+            (false, true) => SizeToContent.Width,
+            _ => SizeToContent.WidthAndHeight
+        };
+    }
+
+    private void SetInitialPosition(PopupWindow window, Window? hostWindow)
+    {
+        if (CenterOnHost)
+        {
+            CenterWindowOnHost(window, hostWindow);
+            return;
+        }
+
+        if (!OpenAtMouse)
+        {
+            CenterWindowOnHost(window, hostWindow);
+            return;
+        }
+
+        var cursor = GetCursorPositionInDips(this);
+        window.Left = cursor.X + MouseOffsetX;
+        window.Top = cursor.Y + MouseOffsetY;
+    }
+
+    private static void CenterWindowOnHost(PopupWindow window, Window? hostWindow)
+    {
+        var width = double.IsNaN(window.Width) ? window.ActualWidth : window.Width;
+        var height = double.IsNaN(window.Height) ? window.ActualHeight : window.Height;
+        if (hostWindow is not { IsVisible: true })
+        {
+            var workArea = SystemParameters.WorkArea;
+            window.Left = workArea.Left + (workArea.Width - width) / 2;
+            window.Top = workArea.Top + (workArea.Height - height) / 2;
+            return;
+        }
+
+        window.Left = hostWindow.Left + (hostWindow.ActualWidth - width) / 2;
+        window.Top = hostWindow.Top + (hostWindow.ActualHeight - height) / 2;
+    }
+
+    private void UpdateOpenWindowProperties()
+    {
+        if (_window == null)
+        {
+            return;
+        }
+
+        _window.Title = Title;
+        _window.IsResizable = IsResizable;
+    }
+
+    private void CloseWindow()
+    {
+        if (_window == null)
+        {
+            return;
+        }
+
+        _isClosingFromHost = true;
+        var window = _window;
+        _window = null;
+        window.Closed -= Window_Closed;
+        RestoreContent(window);
+        window.Close();
+        _isClosingFromHost = false;
+    }
+
+    private void Window_Closed(object? sender, EventArgs e)
+    {
+        if (sender is not PopupWindow window)
+        {
+            return;
+        }
+
+        window.Closed -= Window_Closed;
+        _window = null;
+        RestoreContent(window);
+
+        if (!_isClosingFromHost)
+        {
+            RequestClose();
+        }
+    }
+
+    private void RestoreContent(PopupWindow window)
+    {
+        window.WindowContent = null;
+        if (_detachedContent != null)
+        {
+            SetCurrentValue(ContentProperty, _detachedContent);
+            _detachedContent = null;
+        }
+    }
+
+    private void RequestClose()
+    {
+        if (CloseCommand?.CanExecute(null) == true)
+        {
+            CloseCommand.Execute(null);
+        }
+
+        if (IsOpen)
+        {
+            SetCurrentValue(IsOpenProperty, false);
+        }
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out NativePoint point);
+
+    private static Point GetCursorPositionInDips(Visual referenceVisual)
+    {
+        if (!GetCursorPos(out var cursorPosition))
+        {
+            return default;
+        }
+
+        var positionInPixels = new Point(cursorPosition.X, cursorPosition.Y);
+        var source = PresentationSource.FromVisual(referenceVisual);
+        return source?.CompositionTarget is { } compositionTarget
+            ? compositionTarget.TransformFromDevice.Transform(positionInPixels)
+            : positionInPixels;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
+}

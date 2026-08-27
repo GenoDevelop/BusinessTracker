@@ -343,7 +343,7 @@
             </Grid>
         </Border>
 
-        <controls:DraggablePopup Grid.ColumnSpan="3"
+        <controls:PopupWindowHost Grid.ColumnSpan="3"
                                  IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="Dodaj notatkę"
                                  StaysOpen="True">
@@ -363,6 +363,6 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
     </Grid>
 </UserControl>

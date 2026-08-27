@@ -580,7 +580,7 @@
             </Grid>
         </Grid>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderFormOpen}" Title="{Binding OrderFormViewModel.Title}" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderFormOpen}" Title="{Binding OrderFormViewModel.Title}" StaysOpen="True">
             <Grid Width="600" DataContext="{Binding OrderFormViewModel}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -746,9 +746,9 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                     </StackPanel>
                 </Grid>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć zamówienie " />
@@ -760,9 +760,9 @@
                     <Button Content="Usuń" Command="{Binding ConfirmDeleteOrderCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderProductFormOpen}" Title="{Binding OrderProductFormViewModel.Title}" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderProductFormOpen}" Title="{Binding OrderProductFormViewModel.Title}" StaysOpen="True">
             <Grid Width="450" DataContext="{Binding OrderProductFormViewModel}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -825,9 +825,9 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                     </StackPanel>
                 </Grid>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderProductDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderProductDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć produkt " />
@@ -839,9 +839,9 @@
                     <Button Content="Usuń" Command="{Binding ConfirmDeleteProductCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderPackingMaterialFormOpen}" Title="{Binding OrderPackingMaterialFormViewModel.Title}" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderPackingMaterialFormOpen}" Title="{Binding OrderPackingMaterialFormViewModel.Title}" StaysOpen="True">
             <Grid Width="450" DataContext="{Binding OrderPackingMaterialFormViewModel}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -877,9 +877,9 @@
                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                 </StackPanel>
             </Grid>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
-        <controls:DraggablePopup IsOpen="{Binding IsOrderPackingMaterialDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderPackingMaterialDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć materiał opakowaniowy " />
@@ -891,7 +891,7 @@
                     <Button Content="Usuń" Command="{Binding ConfirmDeletePackingMaterialCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />
     </Grid>

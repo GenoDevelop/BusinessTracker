@@ -101,7 +101,7 @@
             </ListBox>
         
             <!-- Create Supply Popup -->
-            <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj dostawę" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}" Title="Dodaj dostawę" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding CreateSupplyViewModel}">
                     <TextBlock Text="Dostawca (wymagane):" Margin="0,0,0,5" />
                     <controls:SearchableComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Name" SearchPropertyPaths="Nip" Margin="0,0,0,10" />
@@ -138,10 +138,10 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
             <!-- Edit Supply Popup -->
-            <controls:DraggablePopup IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj dostawę" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}" Title="Edytuj dostawę" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding EditSupplyViewModel}">
                     <TextBlock Text="Dostawca" Margin="0,0,0,5" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <controls:SearchableComboBox ItemsSource="{Binding Suppliers}"
@@ -200,10 +200,10 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Width="80" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
             <!-- Add Supply Item Popup -->
-            <controls:DraggablePopup IsOpen="{Binding IsAddMaterialPopupOpen}" Title="Dodaj pozycję do dostawy" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsAddMaterialPopupOpen}" Title="Dodaj pozycję do dostawy" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding AddSupplyItemViewModel}">
                     <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
                     <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
@@ -258,9 +258,9 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
-            <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć dostawę od " />
@@ -274,10 +274,10 @@
                         <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
             <!-- Delete Material Item Popup -->
-            <controls:DraggablePopup IsOpen="{Binding IsDeleteItemPopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsDeleteItemPopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć materiał " />
@@ -289,10 +289,10 @@
                         <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
             <!-- Edit Supply Item Popup -->
-            <controls:DraggablePopup IsOpen="{Binding IsEditItemPopupOpen}" Title="Edytuj pozycję w dostawie" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsEditItemPopupOpen}" Title="Edytuj pozycję w dostawie" StaysOpen="True">
                 <StackPanel Width="400" DataContext="{Binding EditSupplyItemViewModel}">
                     <TextBlock Text="Typ (wymagane):" Margin="0,0,0,5" />
                     <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Margin="0,0,0,10">
@@ -347,7 +347,7 @@
                         <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
-            </controls:DraggablePopup>
+            </controls:PopupWindowHost>
         
             <!-- Pagination -->
             <controls:PaginationControl x:Name="SuppliesPagination"

@@ -361,7 +361,7 @@
         </Grid>
 
         <!-- Create/Edit Material -->
-        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateMaterialViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj materiał;Dodaj materiał'}"
                                  StaysOpen="True">
             <StackPanel Width="400" DataContext="{Binding CreateMaterialViewModel}">
@@ -391,10 +391,10 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Create/Edit Material Variant -->
-        <controls:DraggablePopup IsOpen="{Binding IsCreateVariantPopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsCreateVariantPopupOpen}"
                                  Title="{Binding CreateMaterialVariantViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj wariant;Dodaj wariant'}"
                                  StaysOpen="True">
             <StackPanel Width="500" DataContext="{Binding CreateMaterialVariantViewModel}">
@@ -446,10 +446,10 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Delete Confirmation -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}"
                                  Title="Potwierdź usunięcie"
                                  StaysOpen="True">
             <StackPanel Width="300">
@@ -473,10 +473,10 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
 
         <!-- Delete Variant Confirmation -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeleteVariantPopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteVariantPopupOpen}"
                                  Title="Potwierdź usunięcie wariantu"
                                  StaysOpen="True">
             <StackPanel Width="300">
@@ -500,6 +500,6 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
     </Grid>
 </UserControl>

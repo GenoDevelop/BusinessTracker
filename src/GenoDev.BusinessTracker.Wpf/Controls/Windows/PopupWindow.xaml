@@ -1,11 +1,11 @@
-<Window x:Class="GenoDev.BusinessTracker.Wpf.Controls.ProductImagesWindow"
+<Window x:Class="GenoDev.BusinessTracker.Wpf.Controls.PopupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
         xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
-        Title="Zdjęcia produktu"
-        Width="904" Height="724"
-        MinWidth="564" MinHeight="464"
+        SizeToContent="WidthAndHeight"
+        MinWidth="344" MinHeight="180"
+        Padding="24"
         WindowStartupLocation="Manual"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -101,28 +101,12 @@
             </Border>
 
             <Border Grid.Row="1" Background="{DynamicResource BorderBrush}" />
-            <Grid Grid.Row="2" Margin="24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <controls:ProductImagesPanel IsFullGallery="True" />
-                <Button Grid.Row="1" Content="Zamknij" Command="{Binding ClosePopupCommand}"
-                        HorizontalAlignment="Right" Margin="0,10,0,0" Padding="15,5" />
-                <controls:DraggablePopup Grid.RowSpan="2" IsOpen="{Binding IsDeleteConfirmationOpen}"
-                                         Title="Potwierdź usunięcie zdjęcia" StaysOpen="True">
-                    <StackPanel Width="320">
-                        <TextBlock Text="Czy na pewno chcesz usunąć wybrane zdjęcie produktu?"
-                                   TextWrapping="Wrap" Margin="0,0,0,20" />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}"
-                                    Margin="0,0,10,0" Padding="15,5" />
-                            <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}"
-                                    Style="{StaticResource DangerButtonStyle}" Padding="15,5" IsDefault="True" />
-                        </StackPanel>
-                    </StackPanel>
-                </controls:DraggablePopup>
-            </Grid>
+            <ContentPresenter Grid.Row="2"
+                              Margin="{Binding Padding, RelativeSource={RelativeSource AncestorType={x:Type controls:PopupWindow}}}"
+                              Content="{Binding WindowContent, RelativeSource={RelativeSource AncestorType={x:Type controls:PopupWindow}}}"
+                              HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type controls:PopupWindow}}}"
+                              VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type controls:PopupWindow}}}"
+                              SnapsToDevicePixels="True" />
 
         </Grid>
         </Border>

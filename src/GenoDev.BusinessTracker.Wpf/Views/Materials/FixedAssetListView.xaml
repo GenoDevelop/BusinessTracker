@@ -177,7 +177,7 @@
                                     Margin="0,5,0,0" />
 
         <!-- Create Fixed Asset Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsCreatePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateFixedAssetViewModel.Title}"
                                  StaysOpen="True">
             <StackPanel Width="500" DataContext="{Binding CreateFixedAssetViewModel}">
@@ -229,9 +229,9 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
         <!-- Delete Confirmation Popup -->
-        <controls:DraggablePopup IsOpen="{Binding IsDeletePopupOpen}"
+        <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}"
                                  Title="Potwierdź usunięcie"
                                  StaysOpen="True">
             <StackPanel Width="300">
@@ -254,6 +254,6 @@
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
-        </controls:DraggablePopup>
+        </controls:PopupWindowHost>
     </Grid>
 </UserControl>

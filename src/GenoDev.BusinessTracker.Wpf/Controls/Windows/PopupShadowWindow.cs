@@ -8,10 +8,10 @@ using System.Windows.Media.Effects;
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 /// <summary>
-/// Renders the gallery shadow in a separate click-through HWND. A visible shadow
-/// cannot be mouse-transparent when it is part of the gallery's layered window.
+/// Renders a popup window's shadow in a separate click-through HWND. A visible
+/// shadow cannot be mouse-transparent inside the content window's layered HWND.
 /// </summary>
-internal sealed class ProductImagesShadowWindow : Window
+internal sealed class PopupShadowWindow : Window
 {
     private const int ExtendedWindowStyleIndex = -20;
     private const int ExtendedWindowStyleTransparent = 0x00000020;
@@ -28,7 +28,7 @@ internal sealed class ProductImagesShadowWindow : Window
     private readonly double _shadowMargin;
     private readonly double _cornerRadius;
 
-    public ProductImagesShadowWindow(Effect shadowEffect, double shadowMargin, double cornerRadius)
+    public PopupShadowWindow(Effect shadowEffect, double shadowMargin, double cornerRadius)
     {
         _shadowMargin = shadowMargin;
         _cornerRadius = cornerRadius;

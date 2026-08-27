@@ -9,7 +9,7 @@ using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public partial class ProductImagesWindow : Window
+public partial class PopupWindow : Window
 {
     private const double ScreenEdgeSnapDistance = 12;
     private const double WindowShadowMargin = 22;
@@ -38,12 +38,35 @@ public partial class ProductImagesWindow : Window
     private Point _dragStartWindow;
     private NativePoint _dragTargetInPixels;
     private HwndSource? _windowSource;
-    private ProductImagesShadowWindow? _shadowWindow;
+    private PopupShadowWindow? _shadowWindow;
 
-    public ProductImagesWindow()
+    public PopupWindow()
     {
         InitializeComponent();
         UpdateWindowChrome();
+    }
+
+    public static readonly DependencyProperty WindowContentProperty = DependencyProperty.Register(
+        nameof(WindowContent),
+        typeof(object),
+        typeof(PopupWindow));
+
+    public static readonly DependencyProperty IsResizableProperty = DependencyProperty.Register(
+        nameof(IsResizable),
+        typeof(bool),
+        typeof(PopupWindow),
+        new PropertyMetadata(false, OnIsResizableChanged));
+
+    public object? WindowContent
+    {
+        get => GetValue(WindowContentProperty);
+        set => SetValue(WindowContentProperty, value);
+    }
+
+    public bool IsResizable
+    {
+        get => (bool)GetValue(IsResizableProperty);
+        set => SetValue(IsResizableProperty, value);
     }
 
     public Window? HostWindow { get; init; }
@@ -182,12 +205,12 @@ public partial class ProductImagesWindow : Window
 
     private void Application_Activated(object? sender, EventArgs e)
     {
-        Dispatcher.BeginInvoke(DispatcherPriority.Background, RestoreGalleryWithHost);
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, RestoreWithHost);
     }
 
-    private void RestoreGalleryWithHost()
+    private void RestoreWithHost()
     {
-        // Aktywacja galerii (zwłaszcza przypiętej) nigdy nie może podnosić
+        // Aktywacja okna podrzędnego (zwłaszcza przypiętego) nigdy nie może podnosić
         // głównego okna ani przenosić go do pasma topmost.
         if (Topmost || IsActive ||
             !IsVisible ||
@@ -196,15 +219,15 @@ public partial class ProductImagesWindow : Window
             return;
         }
 
-        var galleryHandle = new WindowInteropHelper(this).Handle;
+        var windowHandle = new WindowInteropHelper(this).Handle;
         var hostHandle = new WindowInteropHelper(hostWindow).Handle;
-        if (galleryHandle == IntPtr.Zero || hostHandle == IntPtr.Zero)
+        if (windowHandle == IntPtr.Zero || hostHandle == IntPtr.Zero)
         {
             return;
         }
 
         _ = SetWindowPos(
-            galleryHandle,
+            windowHandle,
             hostHandle,
             0,
             0,
@@ -311,10 +334,12 @@ public partial class ProductImagesWindow : Window
 
     private void ResizeThumb_DragDelta(object sender, DragDeltaEventArgs e)
     {
-        if (WindowState == WindowState.Maximized || sender is not Thumb { Tag: string edge })
+        if (!IsResizable || WindowState == WindowState.Maximized || sender is not Thumb { Tag: string edge })
         {
             return;
         }
+
+        SizeToContent = SizeToContent.Manual;
 
         var left = Left;
         var top = Top;
@@ -481,8 +506,16 @@ public partial class ProductImagesWindow : Window
         }
     }
 
-    private void ToggleMaximize() =>
+    private void ToggleMaximize()
+    {
+        if (!IsResizable)
+        {
+            return;
+        }
+
+        SizeToContent = SizeToContent.Manual;
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
 
     private Point GetCursorPositionInDips()
     {
@@ -573,13 +606,17 @@ public partial class ProductImagesWindow : Window
     private void UpdateWindowChrome()
     {
         var isMaximized = WindowState == WindowState.Maximized;
-        ResizeLayer.IsHitTestVisible = !isMaximized;
+        ResizeLayer.Visibility = IsResizable && !isMaximized
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        ResizeLayer.IsHitTestVisible = IsResizable && !isMaximized;
         ResizeLayer.Margin = isMaximized
             ? new Thickness(0)
             : new Thickness(WindowShadowMargin - ResizeHitTargetThickness / 2);
         WindowBorder.Margin = isMaximized ? new Thickness(0) : new Thickness(WindowShadowMargin);
         WindowBorder.CornerRadius = isMaximized ? new CornerRadius(0) : new CornerRadius(16);
         TitleBar.CornerRadius = isMaximized ? new CornerRadius(0) : new CornerRadius(16, 16, 0, 0);
+        MaximizeButton.Visibility = IsResizable ? Visibility.Visible : Visibility.Collapsed;
         MaximizeButton.ToolTip = isMaximized ? "Przywróć rozmiar" : "Pełny ekran";
         MaximizeIcon.Data = isMaximized ? RestoreGeometry : MaximizeGeometry;
         UpdateShadowWindow();
@@ -605,7 +642,7 @@ public partial class ProductImagesWindow : Window
                 return;
             }
 
-            _shadowWindow = new ProductImagesShadowWindow(shadowEffect, WindowShadowMargin, 16)
+            _shadowWindow = new PopupShadowWindow(shadowEffect, WindowShadowMargin, 16)
             {
                 Opacity = _isPeekingThrough ? PeekOpacity : 1
             };
@@ -642,6 +679,11 @@ public partial class ProductImagesWindow : Window
 
         shadowWindow.PlaceDirectlyBehind(this, Topmost);
     }
+
+    private static void OnIsResizableChanged(
+        DependencyObject dependencyObject,
+        DependencyPropertyChangedEventArgs e) =>
+        ((PopupWindow)dependencyObject).UpdateWindowChrome();
 
     private const uint MonitorDefaultToNearest = 2;
 
