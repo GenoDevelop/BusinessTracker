@@ -80,17 +80,33 @@ public partial class ProductImagesPopup : UserControl
                 return;
             }
 
+            var hostWindow = Window.GetWindow(this);
             _window = new ProductImagesWindow
             {
                 DataContext = _viewModel,
-                Owner = Window.GetWindow(this)
+                HostWindow = hostWindow
             };
+            CenterWindowOnHost(_window, hostWindow);
             _window.Closed += OnWindowClosed;
             _window.Show();
             return;
         }
 
         CloseWindow();
+    }
+
+    private static void CenterWindowOnHost(ProductImagesWindow window, Window? hostWindow)
+    {
+        if (hostWindow is not { IsVisible: true })
+        {
+            var workArea = SystemParameters.WorkArea;
+            window.Left = workArea.Left + (workArea.Width - window.Width) / 2;
+            window.Top = workArea.Top + (workArea.Height - window.Height) / 2;
+            return;
+        }
+
+        window.Left = hostWindow.Left + (hostWindow.ActualWidth - window.Width) / 2;
+        window.Top = hostWindow.Top + (hostWindow.ActualHeight - window.Height) / 2;
     }
 
     private void OnWindowClosed(object? sender, EventArgs e)
