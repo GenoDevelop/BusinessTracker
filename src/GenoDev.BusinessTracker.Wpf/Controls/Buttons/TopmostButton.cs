@@ -9,6 +9,12 @@ public sealed class TopmostButton : IconToggleButton
 {
     public TopmostButton()
     {
+        var pinTransform = new TransformGroup();
+        pinTransform.Children.Add(new RotateTransform(45, 12, 12));
+        // The diagonal geometry has its visual center about 1.4 units to the
+        // right of the 24x24 canvas center after rotation.
+        pinTransform.Children.Add(new TranslateTransform(-1.4, 0));
+
         var pin = new Path
         {
             Data = Geometry.Parse(
@@ -18,7 +24,7 @@ public sealed class TopmostButton : IconToggleButton
             StrokeStartLineCap = PenLineCap.Round,
             StrokeEndLineCap = PenLineCap.Round,
             StrokeLineJoin = PenLineJoin.Round,
-            RenderTransform = new RotateTransform(45, 12, 12)
+            RenderTransform = pinTransform
         };
         BindingOperations.SetBinding(
             pin,
