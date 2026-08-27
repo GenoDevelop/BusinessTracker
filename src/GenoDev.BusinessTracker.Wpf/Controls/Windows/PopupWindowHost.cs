@@ -16,6 +16,7 @@ public sealed class PopupWindowHost : ContentControl
     private PopupWindow? _window;
     private object? _detachedContent;
     private bool _isClosingFromHost;
+    private bool _isWindowHiddenInRegistry;
 
     static PopupWindowHost()
     {
@@ -231,6 +232,7 @@ public sealed class PopupWindowHost : ContentControl
         if (_window != null)
         {
             RequestClose();
+            CloseWindow();
         }
     }
 
@@ -255,7 +257,10 @@ public sealed class PopupWindowHost : ContentControl
         }
         else
         {
-            CloseWindow();
+            if (!_isWindowHiddenInRegistry || _window is not { IsVisible: false })
+            {
+                CloseWindow();
+            }
         }
     }
 
@@ -263,6 +268,13 @@ public sealed class PopupWindowHost : ContentControl
     {
         if (_window != null)
         {
+            if (!_window.IsVisible)
+            {
+                _isWindowHiddenInRegistry = false;
+                _window.Show();
+                _window.BringToFront();
+            }
+
             return;
         }
 
@@ -284,6 +296,8 @@ public sealed class PopupWindowHost : ContentControl
         ApplySize(_window);
         SetInitialPosition(_window, hostWindow);
         _window.Closed += Window_Closed;
+        _window.HiddenToRegistry += Window_HiddenToRegistry;
+        _window.RestoreRequested += Window_RestoreRequested;
         _window.Show();
 
         if (CenterOnHost)
@@ -380,7 +394,10 @@ public sealed class PopupWindowHost : ContentControl
         _isClosingFromHost = true;
         var window = _window;
         _window = null;
+        _isWindowHiddenInRegistry = false;
         window.Closed -= Window_Closed;
+        window.HiddenToRegistry -= Window_HiddenToRegistry;
+        window.RestoreRequested -= Window_RestoreRequested;
         RestoreContent(window);
         window.Close();
         _isClosingFromHost = false;
@@ -394,12 +411,32 @@ public sealed class PopupWindowHost : ContentControl
         }
 
         window.Closed -= Window_Closed;
+        window.HiddenToRegistry -= Window_HiddenToRegistry;
+        window.RestoreRequested -= Window_RestoreRequested;
         _window = null;
+        _isWindowHiddenInRegistry = false;
         RestoreContent(window);
 
         if (!_isClosingFromHost)
         {
             RequestClose();
+        }
+    }
+
+    private void Window_HiddenToRegistry(object? sender, EventArgs e)
+    {
+        _isWindowHiddenInRegistry = true;
+        if (IsOpen)
+        {
+            SetCurrentValue(IsOpenProperty, false);
+        }
+    }
+
+    private void Window_RestoreRequested(object? sender, EventArgs e)
+    {
+        if (!IsOpen)
+        {
+            SetCurrentValue(IsOpenProperty, true);
         }
     }
 

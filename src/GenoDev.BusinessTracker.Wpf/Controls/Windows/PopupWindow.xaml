@@ -56,6 +56,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Border Width="4" Height="22" Background="{DynamicResource AccentBrush}"
                             CornerRadius="2" VerticalAlignment="Center" />
@@ -74,7 +75,20 @@
                                             Margin="8,0,0,0"
                                             Checked="TopmostButton_CheckedChanged"
                                             Unchecked="TopmostButton_CheckedChanged" />
-                    <Button x:Name="MaximizeButton" Grid.Column="4" Style="{StaticResource IconButton}"
+                    <Button Grid.Column="4" Style="{StaticResource IconButton}"
+                            Margin="8,0,0,0" Padding="0" ToolTip="Ukryj okno"
+                            Click="MinimizeButton_Click">
+                        <Viewbox Width="16" Height="16">
+                            <Canvas Width="20" Height="20">
+                                <Path Data="M3,15 L17,15"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="MaximizeButton" Grid.Column="5" Style="{StaticResource IconButton}"
                             Margin="8,0,0,0" Padding="0" ToolTip="Pełny ekran"
                             Click="MaximizeButton_Click">
                         <Viewbox Width="16" Height="16">
@@ -86,7 +100,7 @@
                             </Canvas>
                         </Viewbox>
                     </Button>
-                    <Button Grid.Column="5" Style="{StaticResource IconButton}" Margin="8,0,0,0" Padding="0"
+                    <Button Grid.Column="6" Style="{StaticResource IconButton}" Margin="8,0,0,0" Padding="0"
                             ToolTip="Zamknij"
                             Click="CloseButton_Click">
                         <Viewbox Width="16" Height="16">

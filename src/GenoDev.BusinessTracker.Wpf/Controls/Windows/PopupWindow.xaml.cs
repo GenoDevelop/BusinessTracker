@@ -45,6 +45,7 @@ public partial class PopupWindow : Window
     public PopupWindow()
     {
         InitializeComponent();
+        IsVisibleChanged += Window_IsVisibleChanged;
         UpdateWindowChrome();
     }
 
@@ -72,6 +73,9 @@ public partial class PopupWindow : Window
     }
 
     public Window? HostWindow { get; init; }
+
+    public event EventHandler? HiddenToRegistry;
+    public event EventHandler? RestoreRequested;
 
     protected override void OnSourceInitialized(EventArgs e)
     {
@@ -117,6 +121,7 @@ public partial class PopupWindow : Window
         DetachHostWindowEvents();
         _windowSource?.RemoveHook(WindowMessageHook);
         _windowSource = null;
+        IsVisibleChanged -= Window_IsVisibleChanged;
         _shadowWindow?.Close();
         _shadowWindow = null;
         base.OnClosed(e);
@@ -439,6 +444,7 @@ public partial class PopupWindow : Window
     }
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e) => ToggleMaximize();
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e) => HideToRegistry();
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
     private void Window_StateChanged(object? sender, EventArgs e) => UpdateWindowChrome();
 
@@ -465,7 +471,7 @@ public partial class PopupWindow : Window
                 SetWindowPositionNoActivate);
         }
 
-        if (!isTopmost)
+        if (!isTopmost && IsVisible)
         {
             Activate();
             Focus();
@@ -525,7 +531,13 @@ public partial class PopupWindow : Window
     {
         if (!IsVisible)
         {
-            return;
+            RestoreRequested?.Invoke(this, EventArgs.Empty);
+            if (!IsVisible)
+            {
+                Show();
+            }
+
+            UpdateShadowWindow();
         }
 
         if (WindowState == WindowState.Minimized)
@@ -553,6 +565,13 @@ public partial class PopupWindow : Window
     }
 
     public void TogglePinned() => TopmostButton.IsChecked = TopmostButton.IsChecked != true;
+
+    public void HideToRegistry()
+    {
+        _shadowWindow?.Hide();
+        Hide();
+        HiddenToRegistry?.Invoke(this, EventArgs.Empty);
+    }
 
     public void CloseFromWindowMenu()
     {
@@ -722,6 +741,9 @@ public partial class PopupWindow : Window
 
         shadowWindow.PlaceDirectlyBehind(this, Topmost);
     }
+
+    private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+        UpdateShadowWindow();
 
     private static void OnIsResizableChanged(
         DependencyObject dependencyObject,
