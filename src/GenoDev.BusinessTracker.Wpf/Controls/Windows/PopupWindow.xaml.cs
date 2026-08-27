@@ -23,6 +23,7 @@ public partial class PopupWindow : Window
 
     private static readonly IntPtr WindowInsertTopmost = new(-1);
     private static readonly IntPtr WindowInsertNotTopmost = new(-2);
+    private static readonly IntPtr WindowInsertTop = IntPtr.Zero;
 
     private static readonly Geometry MaximizeGeometry = Geometry.Parse("M2,2 L18,2 L18,18 L2,18 Z");
     private static readonly Geometry RestoreGeometry = Geometry.Parse("M5,2 L18,2 L18,15 M2,5 L15,5 L15,18 L2,18 Z");
@@ -33,6 +34,7 @@ public partial class PopupWindow : Window
     private bool _hostWindowEventsAttached;
     private bool _wasMinimizedWithHost;
     private bool _isPeekingThrough;
+    private bool _suppressHostActivationOnClose;
     private WindowState _stateBeforeHostMinimized = WindowState.Normal;
     private Point _dragStartCursor;
     private Point _dragStartWindow;
@@ -85,6 +87,7 @@ public partial class PopupWindow : Window
     protected override void OnContentRendered(EventArgs e)
     {
         base.OnContentRendered(e);
+        PopupWindowRegistry.Register(this);
         UpdateShadowWindow();
     }
 
@@ -109,6 +112,7 @@ public partial class PopupWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         var hostWindow = HostWindow;
+        PopupWindowRegistry.Unregister(this);
         DetachApplicationEvents();
         DetachHostWindowEvents();
         _windowSource?.RemoveHook(WindowMessageHook);
@@ -117,7 +121,7 @@ public partial class PopupWindow : Window
         _shadowWindow = null;
         base.OnClosed(e);
 
-        if (hostWindow is not { IsVisible: true })
+        if (_suppressHostActivationOnClose || hostWindow is not { IsVisible: true })
         {
             return;
         }
@@ -515,6 +519,45 @@ public partial class PopupWindow : Window
 
         SizeToContent = SizeToContent.Manual;
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    public void BringToFront()
+    {
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+        }
+
+        var windowHandle = new WindowInteropHelper(this).Handle;
+        if (windowHandle != IntPtr.Zero)
+        {
+            _ = SetWindowPos(
+                windowHandle,
+                Topmost ? WindowInsertTopmost : WindowInsertTop,
+                0,
+                0,
+                0,
+                0,
+                SetWindowPositionNoMove |
+                SetWindowPositionNoSize);
+        }
+
+        Activate();
+        Focus();
+        PlaceShadowBehindWindow();
+    }
+
+    public void TogglePinned() => TopmostButton.IsChecked = TopmostButton.IsChecked != true;
+
+    public void CloseFromWindowMenu()
+    {
+        _suppressHostActivationOnClose = true;
+        Close();
     }
 
     private Point GetCursorPositionInDips()

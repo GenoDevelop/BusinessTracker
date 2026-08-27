@@ -13,6 +13,7 @@
         xmlns:productionViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Production"
         xmlns:notes="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Notes"
         xmlns:notesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Notes"
+        xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
         mc:Ignorable="d"
         Title="Business Tracker" Height="768" Width="1024"
         MinHeight="640" MinWidth="900"
@@ -79,6 +80,154 @@
                 <ContentControl Content="{Binding NotesViewModel}" />
             </TabItem>
         </TabControl>
+
+        <ToggleButton x:Name="PopupWindowsToggle"
+                      Panel.ZIndex="20"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Top"
+                      Width="30"
+                      Height="30"
+                      Margin="0,11,16,0"
+                      Padding="3"
+                      ToolTipService.ShowOnDisabled="True"
+                      ToolTip="Pokaż otwarte okna">
+            <ToggleButton.Style>
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource IconToggleButton}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Source={x:Static controls:PopupWindowRegistry.Windows}, Path=Count}"
+                                     Value="0">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ToggleButton.Style>
+            <Grid Width="22" Height="22">
+                <Viewbox Width="17" Height="17"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Bottom">
+                    <Canvas Width="20" Height="20">
+                        <Path Data="M3,6 L15,6 L15,17 L3,17 Z M7,3 L18,3 L18,14"
+                              Fill="Transparent"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                              StrokeThickness="1.7"
+                              StrokeLineJoin="Round" />
+                    </Canvas>
+                </Viewbox>
+                <Border MinWidth="13"
+                        Height="13"
+                        Padding="2,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="{DynamicResource AccentBrush}"
+                        CornerRadius="7">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Static controls:PopupWindowRegistry.Windows}, Path=Count}"
+                                             Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding Source={x:Static controls:PopupWindowRegistry.Windows}, Path=Count}"
+                               Foreground="{DynamicResource OnAccentBrush}"
+                               FontSize="8"
+                               FontWeight="Bold"
+                               TextAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+            </Grid>
+        </ToggleButton>
+
+        <Popup Panel.ZIndex="21"
+               Placement="Bottom"
+               PlacementTarget="{Binding ElementName=PopupWindowsToggle}"
+               HorizontalOffset="-270"
+               VerticalOffset="4"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               IsOpen="{Binding IsChecked, ElementName=PopupWindowsToggle, Mode=TwoWay}">
+            <Border Width="300"
+                    MaxHeight="340"
+                    Padding="6"
+                    Background="{DynamicResource GlassSurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderStrongBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10">
+                <Border.Effect>
+                    <StaticResource ResourceKey="PopupShadow" />
+                </Border.Effect>
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{x:Static controls:PopupWindowRegistry.Windows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type controls:PopupWindowEntry}">
+                                    <Grid Margin="0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Padding="10,8"
+                                                Background="Transparent"
+                                                BorderBrush="Transparent"
+                                                HorizontalContentAlignment="Stretch"
+                                                Click="PopupWindowListItem_Click">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="4" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="4" Height="18"
+                                                        Background="{DynamicResource AccentBrush}"
+                                                        CornerRadius="2"
+                                                        VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1"
+                                                           Margin="10,0,0,0"
+                                                           Text="{Binding Title}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Button>
+                                        <controls:TopmostButton Grid.Column="1"
+                                                                Width="28"
+                                                                Height="28"
+                                                                Margin="3,0"
+                                                                Padding="4"
+                                                                VerticalAlignment="Center"
+                                                                IsChecked="{Binding IsPinned, Mode=OneWay}"
+                                                                ToolTip="Przypnij lub odepnij okno"
+                                                                Click="PopupWindowPin_Click" />
+                                        <Button Grid.Column="2"
+                                                Width="28"
+                                                Height="28"
+                                                Margin="0,0,2,0"
+                                                Padding="5"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource IconButton}"
+                                                ToolTip="Zamknij okno"
+                                                Click="PopupWindowClose_Click">
+                                            <Viewbox Width="14" Height="14">
+                                                <Canvas Width="20" Height="20">
+                                                    <Path Data="M3,3 L17,17 M17,3 L3,17"
+                                                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                          StrokeThickness="1.8"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Popup>
 
             <Grid Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                 <Rectangle Fill="{DynamicResource OverlayBrush}" />
