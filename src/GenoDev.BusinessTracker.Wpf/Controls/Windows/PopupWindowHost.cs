@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -15,6 +16,7 @@ public sealed class PopupWindowHost : ContentControl
     private const double ShadowMargin = 22;
     private PopupWindow? _window;
     private object? _detachedContent;
+    private PopupContentLayoutSnapshot? _contentLayoutSnapshot;
     private bool _isClosingFromHost;
     private bool _isWindowHiddenInRegistry;
 
@@ -280,6 +282,7 @@ public sealed class PopupWindowHost : ContentControl
 
         var hostWindow = Window.GetWindow(this);
         _detachedContent = Content;
+        _contentLayoutSnapshot = PopupContentLayoutSnapshot.Capture(_detachedContent as DependencyObject);
         SetCurrentValue(ContentProperty, null);
 
         _window = new PopupWindow
@@ -443,6 +446,8 @@ public sealed class PopupWindowHost : ContentControl
     private void RestoreContent(PopupWindow window)
     {
         window.WindowContent = null;
+        _contentLayoutSnapshot?.Restore();
+        _contentLayoutSnapshot = null;
         if (_detachedContent != null)
         {
             SetCurrentValue(ContentProperty, _detachedContent);
@@ -486,5 +491,128 @@ public sealed class PopupWindowHost : ContentControl
     {
         public int X;
         public int Y;
+    }
+
+    private sealed class PopupContentLayoutSnapshot
+    {
+        private static readonly DependencyProperty[] SessionLayoutProperties =
+        [
+            FrameworkElement.WidthProperty,
+            FrameworkElement.HeightProperty,
+            FrameworkElement.HorizontalAlignmentProperty,
+            FrameworkElement.VerticalAlignmentProperty
+        ];
+
+        private readonly List<ElementLayoutSnapshot> _elements;
+
+        private PopupContentLayoutSnapshot(List<ElementLayoutSnapshot> elements)
+        {
+            _elements = elements;
+        }
+
+        public static PopupContentLayoutSnapshot? Capture(DependencyObject? root)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+
+            var elements = EnumerateLogicalDescendants(root)
+                .OfType<FrameworkElement>()
+                .Select(ElementLayoutSnapshot.Capture)
+                .ToList();
+            return new PopupContentLayoutSnapshot(elements);
+        }
+
+        public void Restore()
+        {
+            foreach (var element in _elements)
+            {
+                element.Restore();
+            }
+        }
+
+        private static IEnumerable<DependencyObject> EnumerateLogicalDescendants(DependencyObject root)
+        {
+            yield return root;
+            foreach (var child in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
+            {
+                foreach (var descendant in EnumerateLogicalDescendants(child))
+                {
+                    yield return descendant;
+                }
+            }
+        }
+
+        private sealed class ElementLayoutSnapshot
+        {
+            private readonly FrameworkElement _element;
+            private readonly PropertySnapshot[] _properties;
+
+            private ElementLayoutSnapshot(
+                FrameworkElement element,
+                PropertySnapshot[] properties)
+            {
+                _element = element;
+                _properties = properties;
+            }
+
+            public static ElementLayoutSnapshot Capture(FrameworkElement element) =>
+                new(
+                    element,
+                    SessionLayoutProperties
+                        .Select(property => PropertySnapshot.Capture(element, property))
+                        .ToArray());
+
+            public void Restore()
+            {
+                foreach (var property in _properties)
+                {
+                    property.Restore(_element);
+                }
+            }
+        }
+
+        private sealed class PropertySnapshot
+        {
+            private readonly DependencyProperty _property;
+            private readonly BindingBase? _binding;
+            private readonly object _localValue;
+
+            private PropertySnapshot(
+                DependencyProperty property,
+                BindingBase? binding,
+                object localValue)
+            {
+                _property = property;
+                _binding = binding;
+                _localValue = localValue;
+            }
+
+            public static PropertySnapshot Capture(
+                FrameworkElement element,
+                DependencyProperty property) =>
+                new(
+                    property,
+                    BindingOperations.GetBindingBase(element, property),
+                    element.ReadLocalValue(property));
+
+            public void Restore(FrameworkElement element)
+            {
+                BindingOperations.ClearBinding(element, _property);
+                if (_binding != null)
+                {
+                    BindingOperations.SetBinding(element, _property, _binding);
+                }
+                else if (_localValue != DependencyProperty.UnsetValue)
+                {
+                    element.SetValue(_property, _localValue);
+                }
+                else
+                {
+                    element.ClearValue(_property);
+                }
+            }
+        }
     }
 }
