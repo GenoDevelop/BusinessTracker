@@ -564,6 +564,25 @@ public partial class PopupWindow : Window
         PlaceShadowBehindWindow();
     }
 
+    public void ConstrainToWorkArea(bool useCursorMonitor)
+    {
+        var monitorAnchor = useCursorMonitor
+            ? GetCursorPositionInDips()
+            : new Point(Left + ActualWidth / 2, Top + ActualHeight / 2);
+        var workArea = GetMonitorWorkAreaInDips(monitorAnchor);
+        var minimumLeft = workArea.Left - WindowShadowMargin;
+        var maximumLeft = workArea.Right - ActualWidth + WindowShadowMargin;
+        var minimumTop = workArea.Top - WindowShadowMargin;
+        var maximumTop = workArea.Bottom - ActualHeight + WindowShadowMargin;
+
+        Left = maximumLeft >= minimumLeft
+            ? Math.Clamp(Left, minimumLeft, maximumLeft)
+            : minimumLeft;
+        Top = maximumTop >= minimumTop
+            ? Math.Clamp(Top, minimumTop, maximumTop)
+            : minimumTop;
+    }
+
     public void TogglePinned() => TopmostButton.IsChecked = TopmostButton.IsChecked != true;
 
     public void HideToRegistry()

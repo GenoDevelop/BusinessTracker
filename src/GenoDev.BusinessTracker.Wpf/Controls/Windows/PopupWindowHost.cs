@@ -274,6 +274,7 @@ public sealed class PopupWindowHost : ContentControl
             {
                 _isWindowHiddenInRegistry = false;
                 _window.Show();
+                _window.ConstrainToWorkArea(false);
                 _window.BringToFront();
             }
 
@@ -303,10 +304,12 @@ public sealed class PopupWindowHost : ContentControl
         _window.RestoreRequested += Window_RestoreRequested;
         _window.Show();
 
-        if (CenterOnHost)
+        if (CenterOnHost || !OpenAtMouse)
         {
             CenterWindowOnHost(_window, hostWindow);
         }
+
+        _window.ConstrainToWorkArea(OpenAtMouse && !CenterOnHost);
     }
 
     private void ApplySize(PopupWindow window)
