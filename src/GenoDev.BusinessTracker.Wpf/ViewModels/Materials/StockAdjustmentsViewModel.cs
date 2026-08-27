@@ -67,6 +67,7 @@ public partial class StockAdjustmentsViewModel(IMediator mediator, IServiceProvi
         };
         await CreateViewModel.InitializeAsync();
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     [RelayCommand]
@@ -81,6 +82,7 @@ public partial class StockAdjustmentsViewModel(IMediator mediator, IServiceProvi
         };
         await EditViewModel.InitializeAsync();
         IsEditPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditPopupOpen));
     }
 
     [RelayCommand]
@@ -89,6 +91,7 @@ public partial class StockAdjustmentsViewModel(IMediator mediator, IServiceProvi
         if (adjustment is null) return;
         AdjustmentToDelete = adjustment;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     [RelayCommand]

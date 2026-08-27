@@ -166,6 +166,7 @@ public partial class ProductionListViewModel : ViewModelBase
     private async Task OpenAddMaterialPopupAsync()
     {
         IsAddingNewMaterial = true;
+        RequestPopupOpen(nameof(IsAddingNewMaterial));
         SelectedMaterialToAdd = null;
         SelectedVariantToAdd = null;
         NewMaterialAmount = 1.0;
@@ -658,6 +659,7 @@ public partial class ProductionListViewModel : ViewModelBase
 
         ProductionToDelete = production;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     private async Task ConfirmDeleteProductionAsync()

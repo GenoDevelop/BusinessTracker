@@ -348,6 +348,7 @@ public partial class SuppliesViewModel : ViewModelBase
     
         await CreateSupplyViewModel.InitializeAsync();
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
     
     [RelayCommand]
@@ -374,6 +375,7 @@ public partial class SuppliesViewModel : ViewModelBase
     
         await EditSupplyViewModel.InitializeAsync();
         IsEditPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditPopupOpen));
     }
     
     [RelayCommand]
@@ -402,6 +404,7 @@ public partial class SuppliesViewModel : ViewModelBase
     
         await AddSupplyItemViewModel.InitializeAsync();
         IsAddMaterialPopupOpen = true;
+        RequestPopupOpen(nameof(IsAddMaterialPopupOpen));
     }
     
     [RelayCommand]
@@ -429,6 +432,7 @@ public partial class SuppliesViewModel : ViewModelBase
     
         await EditSupplyItemViewModel.InitializeAsync();
         IsEditItemPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditItemPopupOpen));
     }
     
     [RelayCommand]
@@ -437,6 +441,7 @@ public partial class SuppliesViewModel : ViewModelBase
         if (SelectedSupply is not null)
         {
             IsDeletePopupOpen = true;
+            RequestPopupOpen(nameof(IsDeletePopupOpen));
         }
     }
     
@@ -480,6 +485,7 @@ public partial class SuppliesViewModel : ViewModelBase
     
         SupplyItemToRemove = item;
         IsDeleteItemPopupOpen = true;
+        RequestPopupOpen(nameof(IsDeleteItemPopupOpen));
     }
     
     [RelayCommand]

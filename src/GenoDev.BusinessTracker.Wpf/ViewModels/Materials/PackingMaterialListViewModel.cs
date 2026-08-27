@@ -146,6 +146,7 @@ public partial class PackingMaterialListViewModel : ViewModelBase
 
         CreatePackingMaterialViewModel = editor;
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     private void OpenDeletePopup(PackingMaterialDto? dto)
@@ -153,6 +154,7 @@ public partial class PackingMaterialListViewModel : ViewModelBase
         if (dto is null) return;
         MaterialToDelete = dto;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     private async Task ConfirmDeleteAsync()

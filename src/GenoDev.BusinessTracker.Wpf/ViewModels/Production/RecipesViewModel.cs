@@ -250,6 +250,7 @@ public partial class RecipesViewModel : ViewModelBase
         CreateRecipeViewModel!.Clear();
         await CreateRecipeViewModel.LoadProductsAsync();
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     private async Task EditRecipeAsync()
@@ -264,6 +265,7 @@ public partial class RecipesViewModel : ViewModelBase
         await CreateRecipeViewModel!.LoadProductsAsync();
         CreateRecipeViewModel.LoadRecipe(SelectedRecipe);
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     private void EnsureCreateViewModelInitialized()
@@ -295,6 +297,7 @@ public partial class RecipesViewModel : ViewModelBase
         EnsureAddMaterialViewModelInitialized();
         AddRecipeMaterialViewModel!.InitializeForAdd(SelectedRecipe.Id);
         IsAddMaterialPopupOpen = true;
+        RequestPopupOpen(nameof(IsAddMaterialPopupOpen));
     }
 
     private void EditRecipeMaterial(RecipeMaterialDto? material)
@@ -307,6 +310,7 @@ public partial class RecipesViewModel : ViewModelBase
         EnsureAddMaterialViewModelInitialized();
         AddRecipeMaterialViewModel!.InitializeForEdit(SelectedRecipe.Id, material);
         IsAddMaterialPopupOpen = true;
+        RequestPopupOpen(nameof(IsAddMaterialPopupOpen));
     }
 
     private void EnsureAddMaterialViewModelInitialized()
@@ -337,6 +341,7 @@ public partial class RecipesViewModel : ViewModelBase
 
         _materialToDelete = material;
         IsDeleteMaterialConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsDeleteMaterialConfirmationOpen));
     }
 
     private async Task ConfirmDeleteMaterialAsync()
@@ -382,6 +387,7 @@ public partial class RecipesViewModel : ViewModelBase
         }
 
         IsDeleteConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsDeleteConfirmationOpen));
     }
 
     private async Task ConfirmDeleteAsync()

@@ -144,6 +144,7 @@ public partial class FixedAssetListViewModel : ViewModelBase
 
         CreateFixedAssetViewModel = editor;
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     private void OpenDeletePopup(FixedAssetDto? dto)
@@ -151,6 +152,7 @@ public partial class FixedAssetListViewModel : ViewModelBase
         if (dto is null) return;
         AssetToDelete = dto;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     private async Task ConfirmDeleteAsync()

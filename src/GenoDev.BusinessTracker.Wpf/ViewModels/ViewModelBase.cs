@@ -24,6 +24,11 @@ public readonly record struct EditorCloseResult(
     public bool RequiresRefresh => WasSaved || WasDeleted;
 }
 
+public sealed class PopupOpenRequestedEventArgs(string propertyName) : EventArgs
+{
+    public string PropertyName { get; } = propertyName;
+}
+
 public partial class ViewModelBase : ObservableObject, INotifyDataErrorInfo
 {
     private readonly Dictionary<string, List<string>> _validationErrors = new(StringComparer.Ordinal);
@@ -34,6 +39,7 @@ public partial class ViewModelBase : ObservableObject, INotifyDataErrorInfo
     public bool HasErrors => _validationErrors.Count > 0;
 
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    public event EventHandler<PopupOpenRequestedEventArgs>? PopupOpenRequested;
 
     public IEnumerable GetErrors(string? propertyName)
     {
@@ -58,6 +64,13 @@ public partial class ViewModelBase : ObservableObject, INotifyDataErrorInfo
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
     }
+
+    /// <summary>
+    /// Announces an explicit UI request to show a popup even when its boolean
+    /// open-state property was already true and therefore emitted no change.
+    /// </summary>
+    protected void RequestPopupOpen(string propertyName) =>
+        PopupOpenRequested?.Invoke(this, new PopupOpenRequestedEventArgs(propertyName));
 
     protected void ApplyValidationErrors(RequestValidationException exception)
     {

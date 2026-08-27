@@ -280,6 +280,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         CreateMaterialViewModel = editor;
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 
     private void OpenCreateVariantPopup()
@@ -304,6 +305,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         CreateMaterialVariantViewModel = editor;
         IsCreateVariantPopupOpen = true;
+        RequestPopupOpen(nameof(IsCreateVariantPopupOpen));
     }
 
     private void OpenEditVariantPopup(MaterialVariantDto? variant)
@@ -328,6 +330,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         CreateMaterialVariantViewModel = editor;
         IsCreateVariantPopupOpen = true;
+        RequestPopupOpen(nameof(IsCreateVariantPopupOpen));
     }
 
     private bool CanOpenCreateVariantPopup() => SelectedMaterial is not null;
@@ -341,6 +344,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         MaterialToDelete = material;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     private async Task ConfirmDeleteAsync()
@@ -426,6 +430,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         VariantToDelete = variant;
         IsDeleteVariantPopupOpen = true;
+        RequestPopupOpen(nameof(IsDeleteVariantPopupOpen));
     }
 
     private void RequestPaginationRefresh()

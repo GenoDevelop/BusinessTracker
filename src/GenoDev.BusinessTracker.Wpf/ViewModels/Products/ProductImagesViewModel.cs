@@ -92,6 +92,7 @@ public partial class ProductImagesViewModel : ViewModelBase
     {
         CanManage = canManage;
         IsPopupOpen = true;
+        RequestPopupOpen(nameof(IsPopupOpen));
         ZoomPercent = 100;
 
         if (ProductId == productId)
@@ -230,6 +231,10 @@ public partial class ProductImagesViewModel : ViewModelBase
     {
         _imageToDelete = SelectedImage;
         IsDeleteConfirmationOpen = _imageToDelete is not null;
+        if (IsDeleteConfirmationOpen)
+        {
+            RequestPopupOpen(nameof(IsDeleteConfirmationOpen));
+        }
     }
 
     private void CancelDelete()
@@ -358,6 +363,7 @@ public partial class ProductImagesViewModel : ViewModelBase
         }
 
         IsPopupOpen = true;
+        RequestPopupOpen(nameof(IsPopupOpen));
         ZoomPercent = 100;
         await RefreshAsync();
     }

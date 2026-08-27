@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using GenoDev.BusinessTracker.Wpf.ViewModels;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
@@ -17,6 +18,7 @@ public sealed class PopupWindowHost : ContentControl
     private PopupWindow? _window;
     private object? _detachedContent;
     private PopupContentLayoutSnapshot? _contentLayoutSnapshot;
+    private ViewModelBase? _observedViewModel;
     private bool _isClosingFromHost;
     private bool _isWindowHiddenInRegistry;
 
@@ -227,10 +229,15 @@ public sealed class PopupWindowHost : ContentControl
         host.UpdateOpenWindowProperties();
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e) => SynchronizeWindow();
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        AttachViewModel(DataContext as ViewModelBase);
+        SynchronizeWindow();
+    }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        AttachViewModel(null);
         if (_window != null)
         {
             RequestClose();
@@ -240,10 +247,49 @@ public sealed class PopupWindowHost : ContentControl
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
+        if (IsLoaded)
+        {
+            AttachViewModel(e.NewValue as ViewModelBase);
+        }
+
         if (_window != null)
         {
             _window.DataContext = e.NewValue;
         }
+    }
+
+    private void AttachViewModel(ViewModelBase? viewModel)
+    {
+        if (ReferenceEquals(_observedViewModel, viewModel))
+        {
+            return;
+        }
+
+        if (_observedViewModel != null)
+        {
+            _observedViewModel.PopupOpenRequested -= ViewModel_PopupOpenRequested;
+        }
+
+        _observedViewModel = viewModel;
+        if (_observedViewModel != null)
+        {
+            _observedViewModel.PopupOpenRequested += ViewModel_PopupOpenRequested;
+        }
+    }
+
+    private void ViewModel_PopupOpenRequested(object? sender, PopupOpenRequestedEventArgs e)
+    {
+        var boundPropertyName = BindingOperations
+            .GetBindingExpression(this, IsOpenProperty)?
+            .ParentBinding.Path?.Path;
+        if (_window == null ||
+            !IsOpen ||
+            !string.Equals(boundPropertyName, e.PropertyName, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _window.BringToFront();
     }
 
     private void SynchronizeWindow()

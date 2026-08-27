@@ -280,5 +280,6 @@ public partial class NotesViewModel : ViewModelBase
 
         CreateNoteViewModel = editor;
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
 }

@@ -129,6 +129,7 @@ public partial class OrderFormViewModel : ViewModelBase
     private void Delete()
     {
         IsDeleteConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsDeleteConfirmationOpen));
     }
 
     [RelayCommand]

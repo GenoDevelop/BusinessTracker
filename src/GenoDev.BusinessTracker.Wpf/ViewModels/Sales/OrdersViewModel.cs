@@ -167,6 +167,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderFormOpen));
         await Task.CompletedTask;
     }
 
@@ -188,6 +189,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderFormOpen));
         await Task.CompletedTask;
     }
 
@@ -200,6 +202,7 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
         IsOrderDeleteConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsOrderDeleteConfirmationOpen));
     }
 
     [RelayCommand]
@@ -246,6 +249,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderProductFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderProductFormOpen));
         await Task.CompletedTask;
     }
 
@@ -268,6 +272,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderProductFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderProductFormOpen));
         await Task.CompletedTask;
     }
 
@@ -276,6 +281,7 @@ public partial class OrdersViewModel : ViewModelBase
     {
         OrderProductToDelete = product;
         IsOrderProductDeleteConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsOrderProductDeleteConfirmationOpen));
     }
 
     [RelayCommand]
@@ -328,6 +334,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderPackingMaterialFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderPackingMaterialFormOpen));
         await Task.CompletedTask;
     }
 
@@ -350,6 +357,7 @@ public partial class OrdersViewModel : ViewModelBase
             await Task.CompletedTask;
         };
         IsOrderPackingMaterialFormOpen = true;
+        RequestPopupOpen(nameof(IsOrderPackingMaterialFormOpen));
         await Task.CompletedTask;
     }
 
@@ -358,6 +366,7 @@ public partial class OrdersViewModel : ViewModelBase
     {
         OrderPackingMaterialToDelete = packingMaterial;
         IsOrderPackingMaterialDeleteConfirmationOpen = true;
+        RequestPopupOpen(nameof(IsOrderPackingMaterialDeleteConfirmationOpen));
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenProductImages))]

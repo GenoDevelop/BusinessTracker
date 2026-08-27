@@ -160,6 +160,7 @@ public partial class SuppliersViewModel : ViewModelBase
     
         CreateSupplierViewModel = editor;
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
     
     private void OpenDeletePopup(SupplierDto? supplier)
@@ -171,6 +172,7 @@ public partial class SuppliersViewModel : ViewModelBase
     
         SupplierToDelete = supplier;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
     
     private async Task ConfirmDeleteAsync()

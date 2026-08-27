@@ -64,6 +64,7 @@ public partial class ProductsViewModel : ViewModelBase
     {
         CreateProductViewModel.Clear();
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
     
     private void OpenEditPopup(ProductDto? product)
@@ -71,6 +72,7 @@ public partial class ProductsViewModel : ViewModelBase
         if (product == null) return;
         CreateProductViewModel.InitializeForEdit(product);
         IsCreatePopupOpen = true;
+        RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
     
     private void OpenDeletePopup(ProductDto? product)
@@ -78,6 +80,7 @@ public partial class ProductsViewModel : ViewModelBase
         if (product == null) return;
         ProductToDelete = product;
         IsDeletePopupOpen = true;
+        RequestPopupOpen(nameof(IsDeletePopupOpen));
     }
 
     private async Task OpenImagesAsync(ProductDto? product)
