@@ -139,7 +139,7 @@
         
         <!-- Create/Edit popup -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
-                                 Title="{Binding CreateSupplierViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj dostawcę;Dodaj dostawcę'}"
+                                 Title="{Binding CreateSupplierViewModel.Title}"
                                  StaysOpen="True">
             <StackPanel DataContext="{Binding CreateSupplierViewModel}" Width="400">
                 <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />

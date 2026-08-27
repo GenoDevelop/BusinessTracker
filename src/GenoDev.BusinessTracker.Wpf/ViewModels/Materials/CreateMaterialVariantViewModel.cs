@@ -14,16 +14,20 @@ public partial class CreateMaterialVariantViewModel(IMediator mediator) : ViewMo
     private Guid _materialId;
     private Guid? _variantId;
 
+    public string Title { get; private set; } = "Dodaj wariant";
+
     public void Initialize(Guid materialId)
     {
         _materialId = materialId;
         _variantId = null;
+        Title = "Dodaj wariant";
     }
 
     public void InitializeForEdit(MaterialVariantDto variant)
     {
         _materialId = variant.MaterialId;
         _variantId = variant.Id;
+        Title = "Edytuj wariant";
         Name = variant.Name;
         Ean = variant.Ean;
         ManufacturerCode = variant.ManufacturerCode;

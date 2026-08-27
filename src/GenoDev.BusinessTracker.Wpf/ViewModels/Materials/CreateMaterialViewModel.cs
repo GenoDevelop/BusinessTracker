@@ -13,9 +13,12 @@ public partial class CreateMaterialViewModel(IMediator mediator) : ViewModelBase
 {
     private Guid? _editingMaterialId;
 
+    public string Title { get; private set; } = "Dodaj materiał";
+
     public void InitializeForEdit(MaterialDto material)
     {
         _editingMaterialId = material.Id;
+        Title = "Edytuj materiał";
         Name = material.Name;
         Description = material.Description;
     }

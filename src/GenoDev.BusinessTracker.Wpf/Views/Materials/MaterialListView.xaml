@@ -362,7 +362,7 @@
 
         <!-- Create/Edit Material -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
-                                 Title="{Binding CreateMaterialViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj materiał;Dodaj materiał'}"
+                                 Title="{Binding CreateMaterialViewModel.Title}"
                                  StaysOpen="True">
             <StackPanel Width="400" DataContext="{Binding CreateMaterialViewModel}">
                 <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
@@ -395,7 +395,7 @@
 
         <!-- Create/Edit Material Variant -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreateVariantPopupOpen}"
-                                 Title="{Binding CreateMaterialVariantViewModel.Name, Converter={StaticResource NullToAllConverter}, ConverterParameter='Edytuj wariant;Dodaj wariant'}"
+                                 Title="{Binding CreateMaterialVariantViewModel.Title}"
                                  StaysOpen="True">
             <StackPanel Width="500" DataContext="{Binding CreateMaterialVariantViewModel}">
                 <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />

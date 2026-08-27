@@ -12,10 +12,13 @@ namespace GenoDev.BusinessTracker.Wpf.ViewModels.Materials;
 public partial class CreateSupplierViewModel : ViewModelBase
 {
     private Guid? _editingSupplierId;
+
+    public string Title { get; private set; } = "Dodaj dostawcę";
     
     public void InitializeForEdit(SupplierDto supplier)
     {
         _editingSupplierId = supplier.Id;
+        Title = "Edytuj dostawcę";
         Name = supplier.Name;
         Nip = supplier.Nip;
         Description = supplier.Description;
