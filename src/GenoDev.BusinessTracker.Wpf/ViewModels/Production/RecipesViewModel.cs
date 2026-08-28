@@ -118,6 +118,12 @@ public partial class RecipesViewModel : ViewModelBase
     private bool _isAddMaterialPopupOpen;
 
     [ObservableProperty]
+    private AddRecipeMaterialViewModel? _editRecipeMaterialViewModel;
+
+    [ObservableProperty]
+    private bool _isEditMaterialPopupOpen;
+
+    [ObservableProperty]
     private bool _isDeleteMaterialConfirmationOpen;
 
     [ObservableProperty]
@@ -125,6 +131,12 @@ public partial class RecipesViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isCreatePopupOpen;
+
+    [ObservableProperty]
+    private CreateRecipeViewModel? _editRecipeViewModel;
+
+    [ObservableProperty]
+    private bool _isEditPopupOpen;
 
     public IAsyncRelayCommand CreateRecipeCommand { get; }
 
@@ -245,10 +257,8 @@ public partial class RecipesViewModel : ViewModelBase
 
     private async Task CreateRecipeAsync()
     {
-        EnsureCreateViewModelInitialized();
-
-        CreateRecipeViewModel!.Clear();
-        await CreateRecipeViewModel.LoadProductsAsync();
+        var editor = CreateRecipeEditor(isEdit: false);
+        await editor.LoadProductsAsync();
         IsCreatePopupOpen = true;
         RequestPopupOpen(nameof(IsCreatePopupOpen));
     }
@@ -260,31 +270,30 @@ public partial class RecipesViewModel : ViewModelBase
             return;
         }
 
-        EnsureCreateViewModelInitialized();
-
-        await CreateRecipeViewModel!.LoadProductsAsync();
-        CreateRecipeViewModel.LoadRecipe(SelectedRecipe);
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        var editor = CreateRecipeEditor(isEdit: true);
+        await editor.LoadProductsAsync();
+        editor.LoadRecipe(SelectedRecipe);
+        IsEditPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditPopupOpen));
     }
 
-    private void EnsureCreateViewModelInitialized()
+    private CreateRecipeViewModel CreateRecipeEditor(bool isEdit)
     {
-        if (CreateRecipeViewModel is not null)
+        var editor = _serviceProvider.GetRequiredService<CreateRecipeViewModel>();
+        editor.RequestClose += result =>
         {
-            return;
-        }
-
-        CreateRecipeViewModel = _serviceProvider.GetRequiredService<CreateRecipeViewModel>();
-        CreateRecipeViewModel.RequestClose += result =>
-        {
-            IsCreatePopupOpen = false;
+            if (isEdit) IsEditPopupOpen = false;
+            else IsCreatePopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedRecipeId = result.CreatedEntityId;
                 RequestPaginationRefresh(RecipesPaginationTarget.Recipes);
             }
         };
+
+        if (isEdit) EditRecipeViewModel = editor;
+        else CreateRecipeViewModel = editor;
+        return editor;
     }
 
     private void AddRecipeMaterial()
@@ -294,8 +303,8 @@ public partial class RecipesViewModel : ViewModelBase
             return;
         }
 
-        EnsureAddMaterialViewModelInitialized();
-        AddRecipeMaterialViewModel!.InitializeForAdd(SelectedRecipe.Id);
+        var editor = CreateRecipeMaterialEditor(isEdit: false);
+        editor.InitializeForAdd(SelectedRecipe.Id);
         IsAddMaterialPopupOpen = true;
         RequestPopupOpen(nameof(IsAddMaterialPopupOpen));
     }
@@ -307,29 +316,29 @@ public partial class RecipesViewModel : ViewModelBase
             return;
         }
 
-        EnsureAddMaterialViewModelInitialized();
-        AddRecipeMaterialViewModel!.InitializeForEdit(SelectedRecipe.Id, material);
-        IsAddMaterialPopupOpen = true;
-        RequestPopupOpen(nameof(IsAddMaterialPopupOpen));
+        var editor = CreateRecipeMaterialEditor(isEdit: true);
+        editor.InitializeForEdit(SelectedRecipe.Id, material);
+        IsEditMaterialPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditMaterialPopupOpen));
     }
 
-    private void EnsureAddMaterialViewModelInitialized()
+    private AddRecipeMaterialViewModel CreateRecipeMaterialEditor(bool isEdit)
     {
-        if (AddRecipeMaterialViewModel is not null)
+        var editor = _serviceProvider.GetRequiredService<AddRecipeMaterialViewModel>();
+        editor.RequestClose += result =>
         {
-            return;
-        }
-
-        AddRecipeMaterialViewModel = _serviceProvider.GetRequiredService<AddRecipeMaterialViewModel>();
-        AddRecipeMaterialViewModel.RequestClose += result =>
-        {
-            IsAddMaterialPopupOpen = false;
+            if (isEdit) IsEditMaterialPopupOpen = false;
+            else IsAddMaterialPopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedRecipeMaterialId = result.CreatedEntityId;
                 RequestPaginationRefresh(RecipesPaginationTarget.RecipeMaterials);
             }
         };
+
+        if (isEdit) EditRecipeMaterialViewModel = editor;
+        else AddRecipeMaterialViewModel = editor;
+        return editor;
     }
 
     private void DeleteRecipeMaterial(RecipeMaterialDto? material)

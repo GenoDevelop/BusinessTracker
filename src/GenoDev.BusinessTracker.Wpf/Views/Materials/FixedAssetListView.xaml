@@ -180,55 +180,12 @@
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateFixedAssetViewModel.Title}"
                                  StaysOpen="True">
-            <StackPanel Width="500" DataContext="{Binding CreateFixedAssetViewModel}">
-                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="EAN:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,0,0,10" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Kod producenta:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding ManufacturerCode, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,0,0,10" />
-                    </StackPanel>
-                </Grid>
-
-                <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         MinHeight="80"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         Margin="0,0,0,20" />
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Content="Anuluj"
-                            Command="{Binding CancelCommand}"
-                            Margin="0,0,10,0"
-                            Padding="15,5" />
-                    <Button Content="Zapisz"
-                            Command="{Binding SaveCommand}"
-                            Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
-                            IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
+            <controls:InventoryItemEditor DataContext="{Binding CreateFixedAssetViewModel}" />
+        </controls:PopupWindowHost>
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}"
+                                  Title="{Binding EditFixedAssetViewModel.Title}"
+                                  StaysOpen="True">
+            <controls:InventoryItemEditor DataContext="{Binding EditFixedAssetViewModel}" />
         </controls:PopupWindowHost>
         <!-- Delete Confirmation Popup -->
         <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}"

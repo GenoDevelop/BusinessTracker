@@ -282,49 +282,18 @@
 
         <!-- Add/Edit Material Popup -->
         <controls:PopupWindowHost IsOpen="{Binding IsAddMaterialPopupOpen}" Title="{Binding AddRecipeMaterialViewModel.Title}" StaysOpen="True">
-                <StackPanel DataContext="{Binding AddRecipeMaterialViewModel}" Width="400">
-                    <TextBlock Text="Wyszukaj materiał:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding MaterialSearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Wybierz materiał:" Margin="0,0,0,5"/>
-                    <controls:SearchableComboBox ItemsSource="{Binding Materials}" 
-                              SelectedItem="{Binding SelectedMaterial}" 
-                              DisplayMemberPath="Name"
-                              Margin="0,0,0,10" Height="25"/>
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5"/>
-                    <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
-                    </StackPanel>
-                </StackPanel>
+            <controls:RecipeMaterialEditor DataContext="{Binding AddRecipeMaterialViewModel}" />
+        </controls:PopupWindowHost>
+        <controls:PopupWindowHost IsOpen="{Binding IsEditMaterialPopupOpen}" Title="{Binding EditRecipeMaterialViewModel.Title}" StaysOpen="True">
+            <controls:RecipeMaterialEditor DataContext="{Binding EditRecipeMaterialViewModel}" />
         </controls:PopupWindowHost>
 
         <!-- Create/Edit Recipe Popup -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}" Title="{Binding CreateRecipeViewModel.Title}" StaysOpen="True">
-                <StackPanel DataContext="{Binding CreateRecipeViewModel}" Width="400">
-                    <TextBlock Text="Nazwa:" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Produkt:" Margin="0,0,0,5"/>
-                    <controls:SearchableComboBox ItemsSource="{Binding Products}" 
-                              SelectedItem="{Binding SelectedProduct}" 
-                              DisplayMemberPath="Name"
-                              SearchPropertyPaths="Identifier"
-                              Margin="0,0,0,10" Height="25"/>
-
-                    <TextBlock Text="Opis:" Margin="0,0,0,5"/>
-                    <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True"/>
-                    </StackPanel>
-                </StackPanel>
+            <controls:RecipeEditor DataContext="{Binding CreateRecipeViewModel}" />
+        </controls:PopupWindowHost>
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}" Title="{Binding EditRecipeViewModel.Title}" StaysOpen="True">
+            <controls:RecipeEditor DataContext="{Binding EditRecipeViewModel}" />
         </controls:PopupWindowHost>
 
         <!-- Delete Material Confirmation Popup -->

@@ -9,6 +9,28 @@
              d:DesignHeight="450"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:MaterialListViewModel}">
+    <UserControl.Resources>
+        <DataTemplate x:Key="MaterialEditorTemplate">
+            <StackPanel Width="400">
+                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                <TextBlock Text="Opis:" Margin="0,0,0,5" />
+                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                           AcceptsReturn="True" MinHeight="80" TextWrapping="Wrap"
+                                           VerticalScrollBarVisibility="Auto" Margin="0,0,0,20" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
+                    <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5"
+                            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"
+                            IsDefault="True" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MaterialVariantEditorTemplate">
+            <controls:InventoryItemEditor />
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -360,92 +382,36 @@
             </Grid>
         </Grid>
 
-        <!-- Create/Edit Material -->
+        <!-- Create Material -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateMaterialViewModel.Title}"
                                  StaysOpen="True">
-            <StackPanel Width="400" DataContext="{Binding CreateMaterialViewModel}">
-                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         MinHeight="80"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         Margin="0,0,0,20" />
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Content="Anuluj"
-                            Command="{Binding CancelCommand}"
-                            Margin="0,0,10,0"
-                            Padding="15,5" />
-                    <Button Content="Zapisz"
-                            Command="{Binding SaveCommand}"
-                            Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
-                            IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
+            <ContentControl Content="{Binding CreateMaterialViewModel}"
+                            ContentTemplate="{StaticResource MaterialEditorTemplate}" />
         </controls:PopupWindowHost>
 
-        <!-- Create/Edit Material Variant -->
+        <!-- Edit Material -->
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}"
+                                  Title="{Binding EditMaterialViewModel.Title}"
+                                  StaysOpen="True">
+            <ContentControl Content="{Binding EditMaterialViewModel}"
+                            ContentTemplate="{StaticResource MaterialEditorTemplate}" />
+        </controls:PopupWindowHost>
+
+        <!-- Create Material Variant -->
         <controls:PopupWindowHost IsOpen="{Binding IsCreateVariantPopupOpen}"
                                  Title="{Binding CreateMaterialVariantViewModel.Title}"
                                  StaysOpen="True">
-            <StackPanel Width="500" DataContext="{Binding CreateMaterialVariantViewModel}">
-                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
+            <ContentControl Content="{Binding CreateMaterialVariantViewModel}"
+                            ContentTemplate="{StaticResource MaterialVariantEditorTemplate}" />
+        </controls:PopupWindowHost>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="EAN:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Ean, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,0,0,10" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Kod producenta:" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding ManufacturerCode, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,0,0,10" />
-                    </StackPanel>
-                </Grid>
-
-                <TextBlock Text="Jednostka:" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         MinHeight="80"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         Margin="0,0,0,20" />
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Content="Anuluj"
-                            Command="{Binding CancelCommand}"
-                            Margin="0,0,10,0"
-                            Padding="15,5" />
-                    <Button Content="Zapisz"
-                            Command="{Binding SaveCommand}"
-                            Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
-                            IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
+        <!-- Edit Material Variant -->
+        <controls:PopupWindowHost IsOpen="{Binding IsEditVariantPopupOpen}"
+                                  Title="{Binding EditMaterialVariantViewModel.Title}"
+                                  StaysOpen="True">
+            <ContentControl Content="{Binding EditMaterialVariantViewModel}"
+                            ContentTemplate="{StaticResource MaterialVariantEditorTemplate}" />
         </controls:PopupWindowHost>
 
         <!-- Delete Confirmation -->

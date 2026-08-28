@@ -59,6 +59,12 @@ public partial class FixedAssetListViewModel : ViewModelBase
     private CreateFixedAssetViewModel? _createFixedAssetViewModel;
 
     [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private CreateFixedAssetViewModel? _editFixedAssetViewModel;
+
+    [ObservableProperty]
     private bool _isDeletePopupOpen;
 
     [ObservableProperty]
@@ -118,23 +124,24 @@ public partial class FixedAssetListViewModel : ViewModelBase
 
     private void OpenCreatePopup()
     {
-        OpenEditor();
+        OpenEditor(isEdit: false);
     }
 
     private void OpenEditPopup(FixedAssetDto? dto)
     {
         if (dto is null) return;
-        OpenEditor(vm => vm.InitializeForEdit(dto));
+        OpenEditor(isEdit: true, vm => vm.InitializeForEdit(dto));
     }
 
-    private void OpenEditor(Action<CreateFixedAssetViewModel>? initialize = null)
+    private void OpenEditor(bool isEdit, Action<CreateFixedAssetViewModel>? initialize = null)
     {
         var editor = _serviceProvider.GetRequiredService<CreateFixedAssetViewModel>();
         initialize?.Invoke(editor);
 
         editor.RequestClose += result =>
         {
-            IsCreatePopupOpen = false;
+            if (isEdit) IsEditPopupOpen = false;
+            else IsCreatePopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedFixedAssetId = result.CreatedEntityId;
@@ -142,9 +149,18 @@ public partial class FixedAssetListViewModel : ViewModelBase
             }
         };
 
-        CreateFixedAssetViewModel = editor;
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        if (isEdit)
+        {
+            EditFixedAssetViewModel = editor;
+            IsEditPopupOpen = true;
+            RequestPopupOpen(nameof(IsEditPopupOpen));
+        }
+        else
+        {
+            CreateFixedAssetViewModel = editor;
+            IsCreatePopupOpen = true;
+            RequestPopupOpen(nameof(IsCreatePopupOpen));
+        }
     }
 
     private void OpenDeletePopup(FixedAssetDto? dto)

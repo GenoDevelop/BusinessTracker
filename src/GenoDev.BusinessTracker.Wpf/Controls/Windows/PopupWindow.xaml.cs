@@ -594,6 +594,11 @@ public partial class PopupWindow : Window
 
     public void CloseFromWindowMenu()
     {
+        CloseWithoutHostActivation();
+    }
+
+    public void CloseWithoutHostActivation()
+    {
         _suppressHostActivationOnClose = true;
         Close();
     }

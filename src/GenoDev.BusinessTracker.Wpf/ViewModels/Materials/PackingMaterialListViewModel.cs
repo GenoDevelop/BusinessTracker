@@ -59,6 +59,12 @@ public partial class PackingMaterialListViewModel : ViewModelBase
     private CreatePackingMaterialViewModel? _createPackingMaterialViewModel;
 
     [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private CreatePackingMaterialViewModel? _editPackingMaterialViewModel;
+
+    [ObservableProperty]
     private bool _isDeletePopupOpen;
 
     [ObservableProperty]
@@ -120,23 +126,24 @@ public partial class PackingMaterialListViewModel : ViewModelBase
 
     private void OpenCreatePopup()
     {
-        OpenEditor();
+        OpenEditor(isEdit: false);
     }
 
     private void OpenEditPopup(PackingMaterialDto? dto)
     {
         if (dto is null) return;
-        OpenEditor(vm => vm.InitializeForEdit(dto));
+        OpenEditor(isEdit: true, vm => vm.InitializeForEdit(dto));
     }
 
-    private void OpenEditor(Action<CreatePackingMaterialViewModel>? initialize = null)
+    private void OpenEditor(bool isEdit, Action<CreatePackingMaterialViewModel>? initialize = null)
     {
         var editor = _serviceProvider.GetRequiredService<CreatePackingMaterialViewModel>();
         initialize?.Invoke(editor);
 
         editor.RequestClose += result =>
         {
-            IsCreatePopupOpen = false;
+            if (isEdit) IsEditPopupOpen = false;
+            else IsCreatePopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedPackingMaterialId = result.CreatedEntityId;
@@ -144,9 +151,18 @@ public partial class PackingMaterialListViewModel : ViewModelBase
             }
         };
 
-        CreatePackingMaterialViewModel = editor;
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        if (isEdit)
+        {
+            EditPackingMaterialViewModel = editor;
+            IsEditPopupOpen = true;
+            RequestPopupOpen(nameof(IsEditPopupOpen));
+        }
+        else
+        {
+            CreatePackingMaterialViewModel = editor;
+            IsCreatePopupOpen = true;
+            RequestPopupOpen(nameof(IsCreatePopupOpen));
+        }
     }
 
     private void OpenDeletePopup(PackingMaterialDto? dto)

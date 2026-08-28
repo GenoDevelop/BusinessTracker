@@ -52,6 +52,12 @@ public partial class SuppliersViewModel : ViewModelBase
     
     [ObservableProperty]
     private CreateSupplierViewModel? _createSupplierViewModel;
+
+    [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private CreateSupplierViewModel? _editSupplierViewModel;
     
     [ObservableProperty]
     private bool _isDeletePopupOpen;
@@ -141,6 +147,7 @@ public partial class SuppliersViewModel : ViewModelBase
     
     private void OpenSupplierPopup(SupplierDto? supplier = null)
     {
+        var isEdit = supplier is not null;
         var editor = _serviceProvider.GetRequiredService<CreateSupplierViewModel>();
     
         if (supplier is not null)
@@ -150,7 +157,8 @@ public partial class SuppliersViewModel : ViewModelBase
     
         editor.RequestClose += result =>
         {
-            IsCreatePopupOpen = false;
+            if (isEdit) IsEditPopupOpen = false;
+            else IsCreatePopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedSupplierId = result.CreatedEntityId;
@@ -158,9 +166,18 @@ public partial class SuppliersViewModel : ViewModelBase
             }
         };
     
-        CreateSupplierViewModel = editor;
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        if (isEdit)
+        {
+            EditSupplierViewModel = editor;
+            IsEditPopupOpen = true;
+            RequestPopupOpen(nameof(IsEditPopupOpen));
+        }
+        else
+        {
+            CreateSupplierViewModel = editor;
+            IsCreatePopupOpen = true;
+            RequestPopupOpen(nameof(IsCreatePopupOpen));
+        }
     }
     
     private void OpenDeletePopup(SupplierDto? supplier)

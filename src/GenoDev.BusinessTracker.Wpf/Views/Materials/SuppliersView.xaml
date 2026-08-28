@@ -141,39 +141,12 @@
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateSupplierViewModel.Title}"
                                  StaysOpen="True">
-            <StackPanel DataContext="{Binding CreateSupplierViewModel}" Width="400">
-                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="NIP:" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Nip, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         VerticalScrollBarVisibility="Auto"
-                         TextWrapping="Wrap"
-                         Height="100"
-                         Margin="0,0,0,10" />
-
-                <TextBlock Text="Strona WWW:" Margin="0,0,0,5" />
-                <TextBox Text="{Binding WebsiteUrl, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,20" />
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Anuluj"
-                            Command="{Binding CancelCommand}"
-                            Margin="0,0,10,0"
-                            Padding="15,5" />
-                    <Button Content="Zapisz"
-                            Command="{Binding SaveCommand}"
-                            Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
-                            IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
+            <controls:SupplierEditor DataContext="{Binding CreateSupplierViewModel}" />
+        </controls:PopupWindowHost>
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}"
+                                  Title="{Binding EditSupplierViewModel.Title}"
+                                  StaysOpen="True">
+            <controls:SupplierEditor DataContext="{Binding EditSupplierViewModel}" />
         </controls:PopupWindowHost>
         
         <!-- Delete confirmation -->

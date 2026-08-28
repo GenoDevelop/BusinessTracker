@@ -77,16 +77,34 @@ public partial class OrdersViewModel : ViewModelBase
     private bool _isOrderFormOpen;
 
     [ObservableProperty]
+    private OrderFormViewModel? _editOrderFormViewModel;
+
+    [ObservableProperty]
+    private bool _isEditOrderFormOpen;
+
+    [ObservableProperty]
     private OrderProductFormViewModel? _orderProductFormViewModel;
 
     [ObservableProperty]
     private bool _isOrderProductFormOpen;
 
     [ObservableProperty]
+    private OrderProductFormViewModel? _editOrderProductFormViewModel;
+
+    [ObservableProperty]
+    private bool _isEditOrderProductFormOpen;
+
+    [ObservableProperty]
     private OrderPackingMaterialFormViewModel? _orderPackingMaterialFormViewModel;
 
     [ObservableProperty]
     private bool _isOrderPackingMaterialFormOpen;
+
+    [ObservableProperty]
+    private OrderPackingMaterialFormViewModel? _editOrderPackingMaterialFormViewModel;
+
+    [ObservableProperty]
+    private bool _isEditOrderPackingMaterialFormOpen;
 
     [ObservableProperty]
     private OrderProductListDto? _orderProductToDelete;
@@ -154,9 +172,9 @@ public partial class OrdersViewModel : ViewModelBase
     [RelayCommand]
     private async Task CreateOrder()
     {
-        OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
             _serviceProvider);
-        OrderFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
             IsOrderFormOpen = false;
             if (result.RequiresRefresh)
@@ -166,6 +184,7 @@ public partial class OrdersViewModel : ViewModelBase
             }
             await Task.CompletedTask;
         };
+        OrderFormViewModel = editor;
         IsOrderFormOpen = true;
         RequestPopupOpen(nameof(IsOrderFormOpen));
         await Task.CompletedTask;
@@ -176,20 +195,21 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderFormViewModel = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderFormViewModel>(
             _serviceProvider,
             SelectedOrder);
-        OrderFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
-            IsOrderFormOpen = false;
+            IsEditOrderFormOpen = false;
             if (result.RequiresRefresh)
             {
                 RequestPaginationRefresh(OrdersPaginationTarget.Orders);
             }
             await Task.CompletedTask;
         };
-        IsOrderFormOpen = true;
-        RequestPopupOpen(nameof(IsOrderFormOpen));
+        EditOrderFormViewModel = editor;
+        IsEditOrderFormOpen = true;
+        RequestPopupOpen(nameof(IsEditOrderFormOpen));
         await Task.CompletedTask;
     }
 
@@ -235,10 +255,10 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderProductFormViewModel = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id);
-        OrderProductFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
             IsOrderProductFormOpen = false;
             if (result.RequiresRefresh)
@@ -248,6 +268,7 @@ public partial class OrdersViewModel : ViewModelBase
             }
             await Task.CompletedTask;
         };
+        OrderProductFormViewModel = editor;
         IsOrderProductFormOpen = true;
         RequestPopupOpen(nameof(IsOrderProductFormOpen));
         await Task.CompletedTask;
@@ -258,21 +279,22 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderProductFormViewModel = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderProductFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id,
             product);
-        OrderProductFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
-            IsOrderProductFormOpen = false;
+            IsEditOrderProductFormOpen = false;
             if (result.RequiresRefresh)
             {
                 RequestPaginationRefresh(OrdersPaginationTarget.Products);
             }
             await Task.CompletedTask;
         };
-        IsOrderProductFormOpen = true;
-        RequestPopupOpen(nameof(IsOrderProductFormOpen));
+        EditOrderProductFormViewModel = editor;
+        IsEditOrderProductFormOpen = true;
+        RequestPopupOpen(nameof(IsEditOrderProductFormOpen));
         await Task.CompletedTask;
     }
 
@@ -320,10 +342,10 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderPackingMaterialFormViewModel = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id);
-        OrderPackingMaterialFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
             IsOrderPackingMaterialFormOpen = false;
             if (result.RequiresRefresh)
@@ -333,6 +355,7 @@ public partial class OrdersViewModel : ViewModelBase
             }
             await Task.CompletedTask;
         };
+        OrderPackingMaterialFormViewModel = editor;
         IsOrderPackingMaterialFormOpen = true;
         RequestPopupOpen(nameof(IsOrderPackingMaterialFormOpen));
         await Task.CompletedTask;
@@ -343,21 +366,22 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (SelectedOrder == null) return;
 
-        OrderPackingMaterialFormViewModel = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
+        var editor = ActivatorUtilities.CreateInstance<OrderPackingMaterialFormViewModel>(
             _serviceProvider,
             SelectedOrder.Id,
             packingMaterial);
-        OrderPackingMaterialFormViewModel.RequestClose += async result =>
+        editor.RequestClose += async result =>
         {
-            IsOrderPackingMaterialFormOpen = false;
+            IsEditOrderPackingMaterialFormOpen = false;
             if (result.RequiresRefresh)
             {
                 RequestPaginationRefresh(OrdersPaginationTarget.PackingMaterials);
             }
             await Task.CompletedTask;
         };
-        IsOrderPackingMaterialFormOpen = true;
-        RequestPopupOpen(nameof(IsOrderPackingMaterialFormOpen));
+        EditOrderPackingMaterialFormViewModel = editor;
+        IsEditOrderPackingMaterialFormOpen = true;
+        RequestPopupOpen(nameof(IsEditOrderPackingMaterialFormOpen));
         await Task.CompletedTask;
     }
 

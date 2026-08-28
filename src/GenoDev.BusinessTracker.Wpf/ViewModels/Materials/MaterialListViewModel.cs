@@ -99,10 +99,22 @@ public partial class MaterialListViewModel : ViewModelBase
     private CreateMaterialViewModel? _createMaterialViewModel;
 
     [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private CreateMaterialViewModel? _editMaterialViewModel;
+
+    [ObservableProperty]
     private bool _isCreateVariantPopupOpen;
 
     [ObservableProperty]
     private CreateMaterialVariantViewModel? _createMaterialVariantViewModel;
+
+    [ObservableProperty]
+    private bool _isEditVariantPopupOpen;
+
+    [ObservableProperty]
+    private CreateMaterialVariantViewModel? _editMaterialVariantViewModel;
 
     [ObservableProperty]
     private bool _isDeletePopupOpen;
@@ -250,7 +262,8 @@ public partial class MaterialListViewModel : ViewModelBase
 
     private void OpenCreatePopup()
     {
-        OpenEditor();
+        var editor = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
+        AttachMaterialEditor(editor, isEdit: false);
     }
 
     private void OpenEditPopup(MaterialDto? material)
@@ -260,17 +273,24 @@ public partial class MaterialListViewModel : ViewModelBase
             return;
         }
 
-        OpenEditor(viewModel => viewModel.InitializeForEdit(material));
+        var editor = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
+        editor.InitializeForEdit(material);
+        AttachMaterialEditor(editor, isEdit: true);
     }
 
-    private void OpenEditor(Action<CreateMaterialViewModel>? initialize = null)
+    private void AttachMaterialEditor(CreateMaterialViewModel editor, bool isEdit)
     {
-        var editor = _serviceProvider.GetRequiredService<CreateMaterialViewModel>();
-        initialize?.Invoke(editor);
-
         editor.RequestClose += result =>
         {
-            IsCreatePopupOpen = false;
+            if (isEdit)
+            {
+                IsEditPopupOpen = false;
+            }
+            else
+            {
+                IsCreatePopupOpen = false;
+            }
+
             if (result.RequiresRefresh)
             {
                 _pendingCreatedMaterialId = result.CreatedEntityId;
@@ -278,9 +298,18 @@ public partial class MaterialListViewModel : ViewModelBase
             }
         };
 
-        CreateMaterialViewModel = editor;
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        if (isEdit)
+        {
+            EditMaterialViewModel = editor;
+            IsEditPopupOpen = true;
+            RequestPopupOpen(nameof(IsEditPopupOpen));
+        }
+        else
+        {
+            CreateMaterialViewModel = editor;
+            IsCreatePopupOpen = true;
+            RequestPopupOpen(nameof(IsCreatePopupOpen));
+        }
     }
 
     private void OpenCreateVariantPopup()
@@ -320,7 +349,7 @@ public partial class MaterialListViewModel : ViewModelBase
 
         editor.RequestClose += result =>
         {
-            IsCreateVariantPopupOpen = false;
+            IsEditVariantPopupOpen = false;
             if (result.RequiresRefresh)
             {
                 _pendingCreatedVariantId = result.CreatedEntityId;
@@ -328,9 +357,9 @@ public partial class MaterialListViewModel : ViewModelBase
             }
         };
 
-        CreateMaterialVariantViewModel = editor;
-        IsCreateVariantPopupOpen = true;
-        RequestPopupOpen(nameof(IsCreateVariantPopupOpen));
+        EditMaterialVariantViewModel = editor;
+        IsEditVariantPopupOpen = true;
+        RequestPopupOpen(nameof(IsEditVariantPopupOpen));
     }
 
     private bool CanOpenCreateVariantPopup() => SelectedMaterial is not null;

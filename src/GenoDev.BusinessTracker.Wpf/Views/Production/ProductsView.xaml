@@ -154,23 +154,13 @@
         <controls:PopupWindowHost IsOpen="{Binding IsCreatePopupOpen}"
                                  Title="{Binding CreateProductViewModel.Title}"
                                  StaysOpen="True">
-            <StackPanel Width="400" DataContext="{Binding CreateProductViewModel}">
-                <TextBlock Text="Nazwa (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-    
-                <TextBlock Text="Identyfikator (wymagane):" Margin="0,0,0,5" />
-                <TextBox Text="{Binding Identifier, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
-    
-                <TextBlock Text="Opis:" Margin="0,0,0,5" />
-                <controls:ResizableTextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"
-                         Height="100" Margin="0,0,0,20" />
-    
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5" Background="{DynamicResource AccentBrush}" IsDefault="True" />
-                </StackPanel>
-            </StackPanel>
+            <controls:ProductEditor DataContext="{Binding CreateProductViewModel}" />
+        </controls:PopupWindowHost>
+
+        <controls:PopupWindowHost IsOpen="{Binding IsEditPopupOpen}"
+                                  Title="{Binding EditProductViewModel.Title}"
+                                  StaysOpen="True">
+            <controls:ProductEditor DataContext="{Binding EditProductViewModel}" />
         </controls:PopupWindowHost>
 
         <controls:ProductImagesPopup DataContext="{Binding ProductImages}" />

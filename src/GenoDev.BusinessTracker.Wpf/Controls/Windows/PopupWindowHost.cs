@@ -19,8 +19,10 @@ public sealed class PopupWindowHost : ContentControl
     private object? _detachedContent;
     private PopupContentLayoutSnapshot? _contentLayoutSnapshot;
     private ViewModelBase? _observedViewModel;
+    private Window? _logicalHostWindow;
     private bool _isClosingFromHost;
     private bool _isWindowHiddenInRegistry;
+    private bool _hasHandledOpenRequestForCurrentWindow;
 
     static PopupWindowHost()
     {
@@ -231,6 +233,7 @@ public sealed class PopupWindowHost : ContentControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        _logicalHostWindow = Window.GetWindow(this) ?? _logicalHostWindow;
         AttachViewModel(DataContext as ViewModelBase);
         SynchronizeWindow();
     }
@@ -292,7 +295,34 @@ public sealed class PopupWindowHost : ContentControl
             return;
         }
 
-        _window.BringToFront();
+        if (!_hasHandledOpenRequestForCurrentWindow)
+        {
+            // Setting IsOpen=true creates the first window synchronously. The
+            // explicit request immediately following it belongs to that same
+            // opening and must not recreate the freshly initialized shell.
+            _hasHandledOpenRequestForCurrentWindow = true;
+            _window.BringToFront();
+            return;
+        }
+
+        ReopenWindowAsNewSession();
+    }
+
+    private void ReopenWindowAsNewSession()
+    {
+        CloseWindow(suppressHostActivation: true);
+
+        // An explicit ViewModel action may target a host in an inactive tab,
+        // so recreate directly instead of relying on IsLoaded-based
+        // synchronization. A new PopupWindow restores default size, cursor
+        // placement, topmost state and every other per-window shell setting.
+        if (IsOpen)
+        {
+            OpenWindow();
+            AttachViewModel(DataContext as ViewModelBase);
+            _hasHandledOpenRequestForCurrentWindow = true;
+            _window?.BringToFront();
+        }
     }
 
     private void SynchronizeWindow()
@@ -330,7 +360,8 @@ public sealed class PopupWindowHost : ContentControl
             return;
         }
 
-        var hostWindow = Window.GetWindow(this);
+        var hostWindow = Window.GetWindow(this) ?? _logicalHostWindow;
+        _logicalHostWindow = hostWindow;
         _detachedContent = Content;
         _contentLayoutSnapshot = PopupContentLayoutSnapshot.Capture(_detachedContent as DependencyObject);
         SetCurrentValue(ContentProperty, null);
@@ -346,6 +377,7 @@ public sealed class PopupWindowHost : ContentControl
             HorizontalContentAlignment = HorizontalContentAlignment,
             VerticalContentAlignment = VerticalContentAlignment
         };
+        _hasHandledOpenRequestForCurrentWindow = false;
         ApplySize(_window);
         SetInitialPosition(_window, hostWindow);
         _window.Closed += Window_Closed;
@@ -441,7 +473,7 @@ public sealed class PopupWindowHost : ContentControl
         _window.IsResizable = IsResizable;
     }
 
-    private void CloseWindow()
+    private void CloseWindow(bool suppressHostActivation = false)
     {
         if (_window == null)
         {
@@ -452,11 +484,19 @@ public sealed class PopupWindowHost : ContentControl
         var window = _window;
         _window = null;
         _isWindowHiddenInRegistry = false;
+        _hasHandledOpenRequestForCurrentWindow = false;
         window.Closed -= Window_Closed;
         window.HiddenToRegistry -= Window_HiddenToRegistry;
         window.RestoreRequested -= Window_RestoreRequested;
         RestoreContent(window);
-        window.Close();
+        if (suppressHostActivation)
+        {
+            window.CloseWithoutHostActivation();
+        }
+        else
+        {
+            window.Close();
+        }
         _isClosingFromHost = false;
 
         if (!IsLoaded)
@@ -477,6 +517,7 @@ public sealed class PopupWindowHost : ContentControl
         window.RestoreRequested -= Window_RestoreRequested;
         _window = null;
         _isWindowHiddenInRegistry = false;
+        _hasHandledOpenRequestForCurrentWindow = false;
         RestoreContent(window);
 
         if (!_isClosingFromHost)
@@ -514,6 +555,16 @@ public sealed class PopupWindowHost : ContentControl
         _contentLayoutSnapshot = null;
         if (_detachedContent != null)
         {
+            if (_detachedContent is ContentControl { ContentTemplate: { } template } templateHost)
+            {
+                // A DataTemplate may have been instantiated only after its
+                // ContentControl moved into the popup, too late for the
+                // pre-open layout snapshot. Recreate that visual subtree so
+                // per-session editor resizing cannot leak into the next shell.
+                templateHost.ContentTemplate = null;
+                templateHost.ContentTemplate = template;
+            }
+
             SetCurrentValue(ContentProperty, _detachedContent);
             _detachedContent = null;
         }
@@ -581,7 +632,7 @@ public sealed class PopupWindowHost : ContentControl
                 return null;
             }
 
-            var elements = EnumerateLogicalDescendants(root)
+            var elements = EnumerateDescendants(root)
                 .OfType<FrameworkElement>()
                 .Select(ElementLayoutSnapshot.Capture)
                 .ToList();
@@ -596,12 +647,43 @@ public sealed class PopupWindowHost : ContentControl
             }
         }
 
-        private static IEnumerable<DependencyObject> EnumerateLogicalDescendants(DependencyObject root)
+        private static IEnumerable<DependencyObject> EnumerateDescendants(DependencyObject root)
         {
+            var visited = new HashSet<DependencyObject>();
+            foreach (var descendant in EnumerateDescendants(root, visited))
+            {
+                yield return descendant;
+            }
+        }
+
+        private static IEnumerable<DependencyObject> EnumerateDescendants(
+            DependencyObject root,
+            HashSet<DependencyObject> visited)
+        {
+            if (!visited.Add(root))
+            {
+                yield break;
+            }
+
             yield return root;
             foreach (var child in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
             {
-                foreach (var descendant in EnumerateLogicalDescendants(child))
+                foreach (var descendant in EnumerateDescendants(child, visited))
+                {
+                    yield return descendant;
+                }
+            }
+
+            if (root is not Visual && root is not System.Windows.Media.Media3D.Visual3D)
+            {
+                yield break;
+            }
+
+            for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+            {
+                foreach (var descendant in EnumerateDescendants(
+                             VisualTreeHelper.GetChild(root, index),
+                             visited))
                 {
                     yield return descendant;
                 }

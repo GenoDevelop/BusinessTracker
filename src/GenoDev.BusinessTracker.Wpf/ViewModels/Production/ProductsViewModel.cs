@@ -24,10 +24,9 @@ public enum ProductsPaginationTarget
 public partial class ProductsViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
+    private readonly IServiceProvider _serviceProvider;
     private ProductsFilterCriteria _productsFilter = ProductsFilterCriteria.Empty;
     private Guid? _pendingCreatedProductId;
-    
-    public CreateProductViewModel CreateProductViewModel { get; }
     
     public ProductsViewModel(
         IMediator mediator,
@@ -35,19 +34,9 @@ public partial class ProductsViewModel : ViewModelBase
         ProductImagesViewModel productImagesViewModel)
     {
         _mediator = mediator;
+        _serviceProvider = serviceProvider;
         ProductImages = productImagesViewModel;
         ProductImages.CanManage = true;
-        CreateProductViewModel = serviceProvider.GetRequiredService<CreateProductViewModel>();
-        CreateProductViewModel.RequestClose += async result =>
-        {
-            IsCreatePopupOpen = false;
-            if (result.RequiresRefresh)
-            {
-                _pendingCreatedProductId = result.CreatedEntityId;
-                RequestPaginationRefresh(ProductsPaginationTarget.Products);
-            }
-            await Task.CompletedTask;
-        };
     
         CreateProductCommand = new RelayCommand(OpenCreatePopup);
         EditProductCommand = new RelayCommand<ProductDto>(OpenEditPopup);
@@ -62,17 +51,43 @@ public partial class ProductsViewModel : ViewModelBase
     
     private void OpenCreatePopup()
     {
-        CreateProductViewModel.Clear();
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        AttachProductEditor(_serviceProvider.GetRequiredService<CreateProductViewModel>(), isEdit: false);
     }
     
     private void OpenEditPopup(ProductDto? product)
     {
         if (product == null) return;
-        CreateProductViewModel.InitializeForEdit(product);
-        IsCreatePopupOpen = true;
-        RequestPopupOpen(nameof(IsCreatePopupOpen));
+        var editor = _serviceProvider.GetRequiredService<CreateProductViewModel>();
+        editor.InitializeForEdit(product);
+        AttachProductEditor(editor, isEdit: true);
+    }
+
+    private void AttachProductEditor(CreateProductViewModel editor, bool isEdit)
+    {
+        editor.RequestClose += result =>
+        {
+            if (isEdit) IsEditPopupOpen = false;
+            else IsCreatePopupOpen = false;
+
+            if (result.RequiresRefresh)
+            {
+                _pendingCreatedProductId = result.CreatedEntityId;
+                RequestPaginationRefresh(ProductsPaginationTarget.Products);
+            }
+        };
+
+        if (isEdit)
+        {
+            EditProductViewModel = editor;
+            IsEditPopupOpen = true;
+            RequestPopupOpen(nameof(IsEditPopupOpen));
+        }
+        else
+        {
+            CreateProductViewModel = editor;
+            IsCreatePopupOpen = true;
+            RequestPopupOpen(nameof(IsCreatePopupOpen));
+        }
     }
     
     private void OpenDeletePopup(ProductDto? product)
@@ -127,6 +142,15 @@ public partial class ProductsViewModel : ViewModelBase
     
     [ObservableProperty]
     private bool _isCreatePopupOpen;
+
+    [ObservableProperty]
+    private CreateProductViewModel? _createProductViewModel;
+
+    [ObservableProperty]
+    private bool _isEditPopupOpen;
+
+    [ObservableProperty]
+    private CreateProductViewModel? _editProductViewModel;
     
     [ObservableProperty]
     private bool _isDeletePopupOpen;
