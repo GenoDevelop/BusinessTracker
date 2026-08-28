@@ -237,17 +237,20 @@ public sealed class PopupWindowHost : ContentControl
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
-        AttachViewModel(null);
-        if (_window != null)
+        // Tab navigation unloads inactive views even though their hosted popup
+        // is still a live, independent application window. Keep both the
+        // window and its open-request subscription alive across that transient
+        // visual-tree change. Once no window exists, the subscription is no
+        // longer needed while the host remains unloaded.
+        if (_window == null)
         {
-            RequestClose();
-            CloseWindow();
+            AttachViewModel(null);
         }
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (IsLoaded)
+        if (IsLoaded || _window != null)
         {
             AttachViewModel(e.NewValue as ViewModelBase);
         }
@@ -455,6 +458,11 @@ public sealed class PopupWindowHost : ContentControl
         RestoreContent(window);
         window.Close();
         _isClosingFromHost = false;
+
+        if (!IsLoaded)
+        {
+            AttachViewModel(null);
+        }
     }
 
     private void Window_Closed(object? sender, EventArgs e)
@@ -474,6 +482,11 @@ public sealed class PopupWindowHost : ContentControl
         if (!_isClosingFromHost)
         {
             RequestClose();
+        }
+
+        if (!IsLoaded)
+        {
+            AttachViewModel(null);
         }
     }
 
