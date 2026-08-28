@@ -1559,6 +1559,19 @@
     <Style TargetType="{x:Type controls:ConfigurableDataGrid}"
            BasedOn="{StaticResource {x:Type DataGrid}}" />
 
+    <Style x:Key="TechnicalIdDataGridCellTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <DataTemplate x:Key="TechnicalIdDataGridHeaderTemplate">
+        <TextBlock Text="{Binding}"
+                   FontWeight="Bold"
+                   Margin="5,0"
+                   VerticalAlignment="Center" />
+    </DataTemplate>
+
     <Style x:Key="DataGridColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
         <Setter Property="Width" Value="8" />
         <Setter Property="Background" Value="Transparent" />

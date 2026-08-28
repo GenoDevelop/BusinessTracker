@@ -333,6 +333,12 @@
                                           ColumnVisibilityChanged="OrderProductsDataGrid_ColumnVisibilityChanged"
                                           Sorting="ProductsDataGrid_Sorting">
                                     <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                                            Visibility="Collapsed" CanUserSort="False"
+                                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                                         <DataGridTemplateColumn Width="2*" SortMemberPath="ProductName">
                                             <DataGridTemplateColumn.Header>
                                                 <controls:TextFilterColumnHeader x:Name="ProductNameFilterColumn" Header="Produkt"
@@ -491,6 +497,12 @@
                                           ColumnVisibilityChanged="OrderPackingMaterialsDataGrid_ColumnVisibilityChanged"
                                           Sorting="PackingMaterialsDataGrid_Sorting">
                                     <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                                            Visibility="Collapsed" CanUserSort="False"
+                                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                                         <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
                                             <DataGridTemplateColumn.Header>
                                                 <controls:TextFilterColumnHeader x:Name="PackingMaterialNameFilterColumn" Header="Nazwa"

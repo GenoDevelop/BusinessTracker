@@ -31,6 +31,12 @@
                   ColumnVisibilityChanged="AdjustmentsDataGrid_ColumnVisibilityChanged"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                    Visibility="Collapsed" CanUserSort="False"
+                                    controls:ConfigurableDataGrid.ColumnKey="Id"
+                                    ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                    HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                    controls:ConfigurableDataGrid.ColumnTitle="ID" />
                 <DataGridTemplateColumn Width="*" SortMemberPath="ItemName">
                     <DataGridTemplateColumn.Header>
                         <controls:TextFilterColumnHeader x:Name="NameFilter" Header="Nazwa" DebounceMilliseconds="500"
@@ -158,6 +164,12 @@
                                                Grid.Row="3" LayoutKey="Materials.NewStockAdjustmentItemsGrid"
                                                ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Option.Id}" Width="Auto"
+                                            Visibility="Collapsed" CanUserSort="False"
+                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                         <DataGridTextColumn Header="Nazwa" Binding="{Binding Option.Name}" Width="*"
                                             controls:ConfigurableDataGrid.ColumnKey="Name"/>
                         <DataGridTemplateColumn Header="Typ" Width="130"

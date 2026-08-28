@@ -292,6 +292,12 @@
                                           ColumnVisibilityChanged="HistoryDataGrid_ColumnVisibilityChanged"
                                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
                                     <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                                            Visibility="Collapsed" CanUserSort="False"
+                                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                                         <DataGridTemplateColumn Width="Auto"
                                                                 controls:ConfigurableDataGrid.ColumnKey="Date">
                                             <DataGridTemplateColumn.Header>

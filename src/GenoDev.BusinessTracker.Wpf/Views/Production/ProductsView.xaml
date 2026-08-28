@@ -33,6 +33,12 @@
                   ColumnVisibilityChanged="ProductsDataGrid_ColumnVisibilityChanged"
                   Sorting="DataGrid_Sorting">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                    Visibility="Collapsed" CanUserSort="False"
+                                    controls:ConfigurableDataGrid.ColumnKey="Id"
+                                    ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                    HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                    controls:ConfigurableDataGrid.ColumnTitle="ID" />
                 <DataGridTemplateColumn Width="2*" SortMemberPath="Name">
                     <DataGridTemplateColumn.Header>
                         <controls:TextFilterColumnHeader

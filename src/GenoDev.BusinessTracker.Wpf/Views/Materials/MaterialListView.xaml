@@ -77,6 +77,12 @@
                           ColumnVisibilityChanged="MaterialsDataGrid_ColumnVisibilityChanged"
                           Sorting="MaterialsDataGrid_Sorting">
                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                            Visibility="Collapsed" CanUserSort="False"
+                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                         <DataGridTemplateColumn Width="*" SortMemberPath="Name"
                                                 controls:ConfigurableDataGrid.ColumnKey="Name"
                                                 controls:ConfigurableDataGrid.ColumnTitle="Nazwa">
@@ -227,6 +233,12 @@
                           ColumnVisibilityChanged="VariantsDataGrid_ColumnVisibilityChanged"
                           Sorting="VariantsDataGrid_Sorting">
                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                            Visibility="Collapsed" CanUserSort="False"
+                                            controls:ConfigurableDataGrid.ColumnKey="Id"
+                                            ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                            HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                            controls:ConfigurableDataGrid.ColumnTitle="ID" />
                         <DataGridTemplateColumn Width="*" SortMemberPath="Name">
                             <DataGridTemplateColumn.Header>
                                 <controls:TextFilterColumnHeader

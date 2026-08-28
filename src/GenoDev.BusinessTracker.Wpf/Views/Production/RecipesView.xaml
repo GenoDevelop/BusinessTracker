@@ -210,6 +210,12 @@
                               ColumnVisibilityChanged="RecipeMaterialsDataGrid_ColumnVisibilityChanged"
                               Sorting="MaterialsDataGrid_Sorting">
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
+                                                Visibility="Collapsed" CanUserSort="False"
+                                                controls:ConfigurableDataGrid.ColumnKey="Id"
+                                                ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
+                                                HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
+                                                controls:ConfigurableDataGrid.ColumnTitle="ID" />
                             <DataGridTemplateColumn Width="1.5*" SortMemberPath="MaterialName">
                                 <DataGridTemplateColumn.Header>
                                     <controls:TextFilterColumnHeader
