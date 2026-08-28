@@ -916,7 +916,7 @@
                 </Grid>
             </controls:PopupWindowHost>
 
-        <controls:PopupWindowHost IsOpen="{Binding IsOrderDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderDeleteConfirmationOpen}" Title="Usuń zamówienie" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć zamówienie " />
@@ -1060,7 +1060,7 @@
                 </Grid>
             </controls:PopupWindowHost>
 
-        <controls:PopupWindowHost IsOpen="{Binding IsOrderProductDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderProductDeleteConfirmationOpen}" Title="Usuń produkt z zamówienia" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć produkt " />
@@ -1150,7 +1150,7 @@
             </Grid>
         </controls:PopupWindowHost>
 
-        <controls:PopupWindowHost IsOpen="{Binding IsOrderPackingMaterialDeleteConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsOrderPackingMaterialDeleteConfirmationOpen}" Title="Usuń materiał opakowaniowy z zamówienia" StaysOpen="True">
             <StackPanel Width="300">
                 <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                     <Run Text="Czy na pewno chcesz usunąć materiał opakowaniowy " />

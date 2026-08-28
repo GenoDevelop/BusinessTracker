@@ -297,7 +297,7 @@
         </controls:PopupWindowHost>
 
         <!-- Delete Material Confirmation Popup -->
-        <controls:PopupWindowHost IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteMaterialConfirmationOpen}" Title="Usuń materiał z przepisu" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Text="Czy na pewno chcesz usunąć ten materiał z przepisu?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -308,7 +308,7 @@
         </controls:PopupWindowHost>
 
         <!-- Delete Recipe Confirmation -->
-        <controls:PopupWindowHost IsOpen="{Binding IsDeleteConfirmationOpen}" Title="Potwierdź usunięcie przepisu" StaysOpen="True">
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteConfirmationOpen}" Title="Usuń przepis" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Text="Czy na pewno chcesz usunąć ten przepis?" TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

@@ -23,7 +23,7 @@
                         HorizontalAlignment="Right" Margin="0,10,0,0" Padding="15,5" />
                 <controls:PopupWindowHost Grid.RowSpan="2"
                                           IsOpen="{Binding IsDeleteConfirmationOpen}"
-                                          Title="Potwierdź usunięcie zdjęcia"
+                                          Title="Usuń zdjęcie produktu"
                                           StaysOpen="True">
                     <StackPanel Width="320">
                         <TextBlock Text="Czy na pewno chcesz usunąć wybrane zdjęcie produktu?"

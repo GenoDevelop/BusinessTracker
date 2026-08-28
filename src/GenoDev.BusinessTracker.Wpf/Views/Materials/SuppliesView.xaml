@@ -260,7 +260,7 @@
                 </StackPanel>
             </controls:PopupWindowHost>
         
-            <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}" Title="Usuń dostawę" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć dostawę od " />
@@ -277,7 +277,7 @@
             </controls:PopupWindowHost>
         
             <!-- Delete Material Item Popup -->
-            <controls:PopupWindowHost IsOpen="{Binding IsDeleteItemPopupOpen}" Title="Potwierdź usunięcie" StaysOpen="True">
+            <controls:PopupWindowHost IsOpen="{Binding IsDeleteItemPopupOpen}" Title="Usuń pozycję dostawy" StaysOpen="True">
                 <StackPanel Width="300">
                     <TextBlock Margin="0,0,0,20" TextWrapping="Wrap">
                         <Run Text="Czy na pewno chcesz usunąć materiał " />
