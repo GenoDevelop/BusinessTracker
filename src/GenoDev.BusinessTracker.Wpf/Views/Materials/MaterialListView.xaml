@@ -32,29 +32,7 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid Margin="14">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <!-- Toolbar -->
-        <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Materiały"
-                       Style="{StaticResource PageTitleTextStyle}"
-                       Margin="0,0,20,0" />
-            <controls:CreateButton Command="{Binding CreateMaterialCommand}"
-                                   ToolTip="Dodaj materiał"
-                                   Margin="0,0,2,0" />
-            <controls:RefreshButton Click="RefreshButton_Click"
-                                    Margin="0,0,2,0" />
-            <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Click="FilterToggleButton_Click" />
-        </StackPanel>
-        </Border>
-
-        <Grid Grid.Row="1">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -62,12 +40,31 @@
             </Grid.RowDefinitions>
 
             <!-- Materials -->
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" ClipToBounds="True">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+
+                <!-- Toolbar -->
+                <Border Grid.Row="0" Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Materiały"
+                               Style="{StaticResource PageTitleTextStyle}"
+                               Margin="0,0,20,0" />
+                    <controls:CreateButton Command="{Binding CreateMaterialCommand}"
+                                           ToolTip="Dodaj materiał"
+                                           Margin="0,0,2,0" />
+                    <controls:RefreshButton Click="RefreshButton_Click"
+                                            Margin="0,0,2,0" />
+                    <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Click="FilterToggleButton_Click" />
+                </StackPanel>
+                </Border>
+
                 <controls:ConfigurableDataGrid x:Name="MaterialsDataGrid"
+                          Grid.Row="1"
                           LayoutKey="Materials.MaterialsGrid"
                           ItemsSource="{Binding Materials}"
                           SelectedItem="{Binding SelectedMaterial}"
@@ -176,7 +173,7 @@
 
                 <!-- Pagination for Materials -->
                 <controls:PaginationControl x:Name="MaterialsPagination"
-                                            Grid.Row="1"
+                                            Grid.Row="2"
                                             Layout="SingleLine"
                                             PageLoader="{Binding MaterialsPageLoader}"
                                             InitialPageSize="20"

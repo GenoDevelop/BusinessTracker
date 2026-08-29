@@ -26,7 +26,7 @@
             <!-- Toolbar -->
             <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Przepisy" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,3,0" />
+                    <TextBlock Text="Przepisy" Style="{StaticResource MasterListTitleTextStyle}" Margin="0,0,3,0" />
                     <controls:CreateButton Command="{Binding CreateRecipeCommand}" ToolTip="Dodaj przepis" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
                     <controls:RefreshButton Click="RecipesRefreshButton_Click" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
                     <controls:FilterToggleButton IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MasterListToolbarIconToggleButtonStyle}" />
@@ -118,7 +118,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Upper space: Basic Information -->
-                <Grid Grid.Row="0" Margin="10">
+                <Grid Grid.Row="0" Margin="{StaticResource DetailPaneMargin}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -138,7 +138,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Product Details -->
@@ -165,17 +166,20 @@
                             </Border>
                         </Grid>
 
-                        <controls:ProductImagesPanel Grid.Column="2"
+                        <controls:RatioGridSplitter Grid.Column="2"
+                                                    Orientation="Vertical"
+                                                    Margin="1,0,2,0" />
+
+                        <controls:ProductImagesPanel Grid.Column="3"
                                                      DataContext="{Binding ProductImages}"
-                                                     Height="170"
-                                                     Margin="10,0,0,0" />
+                                                     VerticalAlignment="Stretch" />
                     </Grid>
                 </Grid>
 
                 <controls:RatioGridSplitter Grid.Row="1" />
 
                 <!-- Bottom Panel: Required Materials -->
-                <Grid Grid.Row="2" Margin="10, 10, 0, 5">
+                <Grid Grid.Row="2" Margin="{StaticResource DetailPaneMargin}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />

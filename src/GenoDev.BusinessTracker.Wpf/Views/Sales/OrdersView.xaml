@@ -10,9 +10,9 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:OrdersViewModel}">
     <Grid x:Name="RootGrid" ClipToBounds="True">
-        <Grid x:Name="LayoutGrid" SizeChanged="LayoutGrid_SizeChanged">
+        <Grid x:Name="LayoutGrid">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="OrdersColumn" Width="200" MinWidth="0"/>
+                <ColumnDefinition Width="200" MinWidth="0"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*" MinWidth="0"/>
             </Grid.ColumnDefinitions>
@@ -28,7 +28,7 @@
                 <!-- Toolbar -->
                 <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,10">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Zamówienia" Style="{StaticResource SectionTitleTextStyle}" Margin="0,0,3,0" />
+                        <TextBlock Text="Zamówienia" Style="{StaticResource MasterListTitleTextStyle}" Margin="0,0,3,0" />
 
                         <controls:CreateButton Command="{Binding CreateOrderCommand}" ToolTip="Dodaj zamówienie" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
                         <controls:RefreshButton Click="OrdersRefreshButton_Click" Style="{StaticResource MasterListToolbarIconButtonStyle}" />
@@ -120,15 +120,23 @@
 
             <!-- Details Panel -->
             <Grid Grid.Column="2" Background="{DynamicResource SurfaceAlternativeBrush}">
-                <Grid Margin="5,0,0,3" Visibility="{Binding SelectedOrder, Converter={StaticResource NullToVisibilityConverter}}">
+                <Grid Visibility="{Binding SelectedOrder, Converter={StaticResource NullToVisibilityConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
+                    <Grid Grid.Row="0"
+                          Margin="{StaticResource DetailPaneMargin}"
+                          ClipToBounds="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
                     <!-- Header -->
-                    <Grid Grid.Row="0" Margin="5,5,5,10">
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Bottom">
                                 <Run Text="{Binding SelectedOrder.OrderDate, StringFormat='dd.MM.yyyy'}" />
@@ -143,7 +151,7 @@
                     </Grid>
 
                     <!-- Top Tabs -->
-                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0,1,0,0" Margin="0,0,0,10">
+                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0,1,0,0">
                         <TabControl.Resources>
                             <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
                                 <Setter Property="Padding" Value="10,2" />
@@ -288,14 +296,15 @@
                             </Grid>
                         </TabItem>
                     </TabControl>
+                    </Grid>
 
-                    <controls:RatioGridSplitter Grid.Row="1"
-                                                VerticalAlignment="Bottom"
-                                                Margin="0"
-                                                ResizeBehavior="CurrentAndNext" />
+                    <controls:RatioGridSplitter Grid.Row="1" />
 
                     <!-- Bottom Tabs (Products/Materials) -->
-                    <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0,1,0,0" Margin="0,5,0,0">
+                    <TabControl Grid.Row="2"
+                                Background="Transparent"
+                                BorderThickness="0,1,0,0"
+                                Margin="{StaticResource DetailPaneMargin}">
                         <TabControl.Resources>
                             <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
                                 <Setter Property="Padding" Value="10,2" />

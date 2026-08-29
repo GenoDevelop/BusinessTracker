@@ -74,16 +74,6 @@ public partial class OrdersView : UserControl
         UpdateFilterHeadersVisibility(_attachedViewModel);
     }
 
-    private void LayoutGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        UpdateOrdersColumnMaxWidth(e.NewSize.Width);
-    }
-
-    private void UpdateOrdersColumnMaxWidth(double layoutWidth)
-    {
-        OrdersColumn.MaxWidth = Math.Max(0, layoutWidth - 100);
-    }
-
     private static void ConfigureOrdersView(OrdersViewModel viewModel)
     {
         var view = CollectionViewSource.GetDefaultView(viewModel.Orders);

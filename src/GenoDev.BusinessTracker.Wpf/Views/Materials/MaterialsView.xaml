@@ -60,7 +60,10 @@
                         <Path Data="{StaticResource AssetsNavigationGeometry}"
                               Style="{StaticResource NavigationIconStyle}"
                               Margin="0,0,8,0" />
-                        <TextBlock Text="Śr. trwałe" VerticalAlignment="Center" />
+                        <TextBlock VerticalAlignment="Center"
+                                   TextAlignment="Center">
+                            <Run Text="Środki" /><LineBreak /><Run Text="Trwałe" />
+                        </TextBlock>
                     </StackPanel>
                 </TabItem.Header>
                 <ContentControl Content="{Binding FixedAssetListViewModel}" />

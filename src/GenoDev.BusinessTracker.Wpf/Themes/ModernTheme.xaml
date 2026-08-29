@@ -67,6 +67,8 @@
     <SolidColorBrush x:Key="SuccessSoftBrush" Color="{StaticResource SuccessSoftColor}" />
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="WarningSoftBrush" Color="{StaticResource WarningSoftColor}" />
+
+    <Thickness x:Key="DetailPaneMargin">10</Thickness>
     <SolidColorBrush x:Key="SupplyStatusNewBrush" Color="{StaticResource SupplyStatusNewColor}" />
     <SolidColorBrush x:Key="SupplyStatusOrderedBrush" Color="{StaticResource SupplyStatusOrderedColor}" />
     <SolidColorBrush x:Key="SupplyStatusReceivedBrush" Color="{StaticResource SupplyStatusReceivedColor}" />
@@ -197,6 +199,12 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <Style x:Key="MasterListTitleTextStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource SectionTitleTextStyle}">
+        <Setter Property="FontSize" Value="15" />
+    </Style>
+
     <Style x:Key="CaptionTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
@@ -224,7 +232,7 @@
            TargetType="{x:Type Border}"
            BasedOn="{StaticResource GlassToolbarBorderStyle}">
         <Setter Property="CornerRadius" Value="11" />
-        <Setter Property="Padding" Value="6,4,9,4" />
+        <Setter Property="Padding" Value="9,4" />
     </Style>
 
     <Style x:Key="GlassInsetBorderStyle" TargetType="{x:Type Border}">

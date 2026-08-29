@@ -25,7 +25,7 @@
 
     <Grid Margin="14">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="320" MinWidth="240" />
+            <ColumnDefinition Width="320" MinWidth="0" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" MinWidth="420" />
         </Grid.ColumnDefinitions>
@@ -37,17 +37,18 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+            <Border Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Notatki"
-                           Style="{StaticResource PageTitleTextStyle}"
-                           Margin="0,0,20,0" />
+                           Style="{StaticResource MasterListTitleTextStyle}"
+                           Margin="0,0,3,0" />
                 <controls:CreateButton Command="{Binding CreateNoteCommand}"
                                        ToolTip="Dodaj notatkę"
-                                       Margin="0,0,2,0" />
+                                       Style="{StaticResource MasterListToolbarIconButtonStyle}" />
                 <controls:RefreshButton Click="RefreshButton_Click"
-                                        Margin="0,0,2,0" />
+                                        Style="{StaticResource MasterListToolbarIconButtonStyle}" />
                 <controls:FilterToggleButton
+                    Style="{StaticResource MasterListToolbarIconToggleButtonStyle}"
                     IsChecked="{Binding IsFilterVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Click="FilterToggleButton_Click" />
             </StackPanel>
