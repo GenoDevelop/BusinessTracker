@@ -77,6 +77,9 @@
     <SolidColorBrush x:Key="OverlayBrush" Color="#5C122127" />
     <SolidColorBrush x:Key="TableGridLineBrush" Color="#EAF0F1" />
 
+    <!-- One shared state keeps every module navigation rail in the same mode. -->
+    <controls:SideNavigationSettings x:Key="SideNavigationSettings" />
+
     <LinearGradientBrush x:Key="GlassSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#FFFFFFFF" />
         <GradientStop Offset="0.45" Color="#F8F8FBFB" />
@@ -138,6 +141,8 @@
     <Geometry x:Key="CheckIconGeometry">M4,12 L9,17 L20,6</Geometry>
     <Geometry x:Key="SortAscendingIconGeometry">M2,6 L6,2 L10,6</Geometry>
     <Geometry x:Key="SortDescendingIconGeometry">M2,2 L6,6 L10,2</Geometry>
+    <Geometry x:Key="CollapseNavigationIconGeometry">M11,5 L4,12 L11,19 M20,5 L13,12 L20,19</Geometry>
+    <Geometry x:Key="ExpandNavigationIconGeometry">M4,5 L11,12 L4,19 M13,5 L20,12 L13,19</Geometry>
 
     <Style x:Key="NavigationIconStyle" TargetType="{x:Type Path}">
         <Setter Property="Width" Value="17" />
@@ -306,11 +311,6 @@
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           RecognizesAccessKey="True" />
-                        <Border x:Name="FocusRing"
-                                BorderBrush="{DynamicResource FocusBrush}"
-                                BorderThickness="2"
-                                CornerRadius="8"
-                                Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -324,9 +324,6 @@
                                     <TranslateTransform Y="1" />
                                 </Setter.Value>
                             </Setter>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
@@ -404,11 +401,6 @@
                                           Margin="{TemplateBinding Padding}"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center" />
-                        <Border x:Name="FocusRing"
-                                BorderBrush="{DynamicResource FocusBrush}"
-                                BorderThickness="2"
-                                CornerRadius="9"
-                                Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -422,9 +414,6 @@
                                     <TranslateTransform Y="1" />
                                 </Setter.Value>
                             </Setter>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.34" />
@@ -1254,6 +1243,33 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type controls:SideNavigationHeader}">
+        <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:SideNavigationHeader}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path x:Name="HeaderIcon"
+                              Data="{TemplateBinding Icon}"
+                              Style="{StaticResource NavigationIconStyle}"
+                              Margin="0,0,8,0" />
+                        <TextBlock x:Name="HeaderText"
+                                   Text="{TemplateBinding Text}"
+                                   TextAlignment="Left"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                     Value="True">
+                            <Setter TargetName="HeaderIcon" Property="Margin" Value="0" />
+                            <Setter TargetName="HeaderText" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="SideNavigationTabItemStyle" TargetType="{x:Type TabItem}">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Background" Value="Transparent" />
@@ -1280,7 +1296,8 @@
                                     Padding="{TemplateBinding Padding}"
                                     UseLayoutRounding="True"
                                     SnapsToDevicePixels="True">
-                                <ContentPresenter ContentSource="Header"
+                                <ContentPresenter x:Name="HeaderPresenter"
+                                                  ContentSource="Header"
                                                   HorizontalAlignment="Left"
                                                   VerticalAlignment="Center"
                                                   RecognizesAccessKey="True" />
@@ -1305,6 +1322,14 @@
                             <Setter TargetName="ActiveIndicator" Property="Opacity" Value="1" />
                             <Setter Property="Foreground" Value="{DynamicResource SelectedTabTextBrush}" />
                         </Trigger>
+                        <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                     Value="True">
+                            <Setter Property="Margin" Value="4,2" />
+                            <Setter Property="MinWidth" Value="44" />
+                            <Setter TargetName="HeaderPresenter"
+                                    Property="HorizontalAlignment"
+                                    Value="Center" />
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -1323,14 +1348,74 @@
                 <ControlTemplate TargetType="{x:Type TabControl}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="128" />
+                            <ColumnDefinition x:Name="NavigationColumn" Width="128" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0"
                                 Background="{DynamicResource NavigationSurfaceBrush}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="0,0,1,0">
-                            <TabPanel Margin="0,9" IsItemsHost="True" KeyboardNavigation.TabIndex="1" />
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TabPanel Margin="0,9,0,0"
+                                          IsItemsHost="True"
+                                          KeyboardNavigation.TabIndex="1" />
+                                <Button Grid.Row="1"
+                                        Width="34"
+                                        Height="34"
+                                        Margin="8,4,0,10"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding ToggleCompactModeCommand, Source={StaticResource SideNavigationSettings}}">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}"
+                                               BasedOn="{StaticResource IconButton}">
+                                            <Setter Property="ToolTip" Value="Włącz tryb kompaktowy" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                                             Value="True">
+                                                    <Setter Property="ToolTip" Value="Wyłącz tryb kompaktowy" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Grid>
+                                        <Path Data="{StaticResource CollapseNavigationIconGeometry}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center">
+                                            <Path.Style>
+                                                <Style TargetType="{x:Type Path}"
+                                                       BasedOn="{StaticResource ToolbarIconStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                                                     Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                        <Path Data="{StaticResource ExpandNavigationIconGeometry}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center">
+                                            <Path.Style>
+                                                <Style TargetType="{x:Type Path}"
+                                                       BasedOn="{StaticResource ToolbarIconStyle}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                                                     Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                    </Grid>
+                                </Button>
+                            </Grid>
                         </Border>
                         <Border Grid.Column="1" Background="{TemplateBinding Background}">
                             <ContentPresenter x:Name="PART_SelectedContentHost"
@@ -1339,6 +1424,12 @@
                                               ContentStringFormat="{TemplateBinding SelectedContentStringFormat}" />
                         </Border>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsCompact, Source={StaticResource SideNavigationSettings}}"
+                                     Value="True">
+                            <Setter TargetName="NavigationColumn" Property="Width" Value="52" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

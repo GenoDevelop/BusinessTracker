@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Production"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
              xmlns:vm="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Production"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -25,34 +26,22 @@
                     Style="{StaticResource SideNavigationTabControlStyle}">
             <TabItem>
                 <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Path Data="{StaticResource ProductsNavigationGeometry}"
-                              Style="{StaticResource NavigationIconStyle}"
-                              Margin="0,0,8,0" />
-                        <TextBlock Text="Produkty" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <controls:SideNavigationHeader Icon="{StaticResource ProductsNavigationGeometry}"
+                                                   Text="Produkty" />
                 </TabItem.Header>
                 <ContentControl Content="{Binding ProductsViewModel}" />
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Path Data="{StaticResource RecipesNavigationGeometry}"
-                              Style="{StaticResource NavigationIconStyle}"
-                              Margin="0,0,8,0" />
-                        <TextBlock Text="Przepisy" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <controls:SideNavigationHeader Icon="{StaticResource RecipesNavigationGeometry}"
+                                                   Text="Przepisy" />
                 </TabItem.Header>
                 <ContentControl Content="{Binding RecipesViewModel}" />
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Path Data="{StaticResource ProductionNavigationGeometry}"
-                              Style="{StaticResource NavigationIconStyle}"
-                              Margin="0,0,8,0" />
-                        <TextBlock Text="Produkcja" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <controls:SideNavigationHeader Icon="{StaticResource ProductionNavigationGeometry}"
+                                                   Text="Produkcja" />
                 </TabItem.Header>
                 <ContentControl Content="{Binding ProductionListViewModel}" />
             </TabItem>
