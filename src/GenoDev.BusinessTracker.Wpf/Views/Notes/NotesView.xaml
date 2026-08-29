@@ -33,6 +33,7 @@
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -54,47 +55,55 @@
             </StackPanel>
             </Border>
 
-            <controls:ConfigurableDataGrid x:Name="NotesDataGrid"
-                                           Grid.Row="1"
-                                           LayoutKey="Notes.NotesGrid"
-                                           ItemsSource="{Binding Notes}"
-                                           SelectedItem="{Binding SelectedNote, Mode=OneWay}"
-                                           AutoGenerateColumns="False"
-                                           IsReadOnly="True"
-                                           ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
-                                           SelectionChanged="NotesDataGrid_SelectionChanged"
-                                           ColumnVisibilityChanged="NotesDataGrid_ColumnVisibilityChanged"
-                                           Sorting="NotesDataGrid_Sorting">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"
-                                        Visibility="Collapsed" CanUserSort="False"
-                                        controls:ConfigurableDataGrid.ColumnKey="Id"
-                                        ElementStyle="{StaticResource TechnicalIdDataGridCellTextStyle}"
-                                        HeaderTemplate="{StaticResource TechnicalIdDataGridHeaderTemplate}"
-                                        controls:ConfigurableDataGrid.ColumnTitle="ID" />
-                    <DataGridTemplateColumn Width="*" SortMemberPath="Name">
-                        <DataGridTemplateColumn.Header>
-                            <controls:TextFilterColumnHeader
-                                x:Name="NameFilterColumn"
-                                Header="Nazwa"
-                                DebounceMilliseconds="500"
-                                IsFilterVisible="{Binding DataContext.IsFilterVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                FilterChanged="NoteFilter_FilterChanged" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center"
-                                           Margin="5,0" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </controls:ConfigurableDataGrid>
+            <Border Grid.Row="1"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="0,0,0,10"
+                    Margin="0,0,0,10"
+                    Visibility="{Binding IsFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource SearchIconGeometry}"
+                          Style="{StaticResource ToolbarIconStyle}"
+                          Stroke="{DynamicResource TextSecondaryBrush}"
+                          VerticalAlignment="Center"
+                          Margin="0,0,7,0" />
+                    <TextBox Text="{Binding SearchTerm,
+                                            UpdateSourceTrigger=PropertyChanged,
+                                            Delay=500,
+                                            NotifyOnSourceUpdated=True}"
+                             SourceUpdated="SearchTerm_SourceUpdated"
+                             Width="220"
+                             VerticalContentAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <ListBox x:Name="NotesList"
+                     Grid.Row="2"
+                     ItemsSource="{Binding Notes}"
+                     SelectedItem="{Binding SelectedNote, Mode=OneWay}"
+                     SelectionChanged="NotesList_SelectionChanged"
+                     BorderThickness="0"
+                     Padding="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="8,6" />
+                        <Setter Property="Margin" Value="0,1" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"
+                                   FontWeight="Bold"
+                                   FontSize="13"
+                                   TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <controls:PaginationControl x:Name="NotesPagination"
-                                        Grid.Row="2"
+                                        Grid.Row="3"
                                         Layout="CompactTwoRows"
                                         PageLoader="{Binding NotesPageLoader}"
                                         InitialPageSize="20"

@@ -1,13 +1,10 @@
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Notes.GetAll;
-using GenoDev.BusinessTracker.Domain.Enums;
-using GenoDev.BusinessTracker.Wpf.Controls;
-using GenoDev.BusinessTracker.Wpf.Filtering;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Notes;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -104,74 +101,14 @@ public partial class NotesView : UserControl
         await NotesPagination.RefreshAsync();
     }
 
-    private async void NoteFilter_FilterChanged(object sender, RoutedEventArgs e)
-    {
-        if (!UpdateNotesFilter())
-        {
-            return;
-        }
-
-        await NotesPagination.RefreshAsync();
-    }
-
-    private async void NotesDataGrid_ColumnVisibilityChanged(
-        object? sender,
-        ConfigurableDataGridColumnVisibilityChangedEventArgs e)
-    {
-        if (!UpdateNotesFilter() || !e.AffectsActiveFilter ||
-            DataContext is not NotesViewModel { IsFilterVisible: true })
-        {
-            return;
-        }
-
-        await NotesPagination.RefreshAsync();
-    }
-
-    private bool UpdateNotesFilter()
-    {
-        if (DataContext is not NotesViewModel viewModel)
-        {
-            return false;
-        }
-
-        viewModel.SetNotesFilter(new NotesFilterCriteria(
-            NotesDataGrid.IsColumnVisible("Name")
-                ? NameFilterColumn.FilterText
-                : null));
-        return true;
-    }
-
-    private async void NotesDataGrid_Sorting(
+    private async void SearchTerm_SourceUpdated(
         object sender,
-        DataGridSortingEventArgs e)
+        DataTransferEventArgs e)
     {
-        if (DataContext is not NotesViewModel viewModel ||
-            sender is not DataGrid dataGrid ||
-            !Enum.TryParse(
-                e.Column.SortMemberPath,
-                ignoreCase: true,
-                out NoteSortBy sortBy))
-        {
-            return;
-        }
-
-        e.Handled = true;
-        var isDescending = viewModel.SortBy == sortBy && !viewModel.IsDescending;
-
-        foreach (var column in dataGrid.Columns)
-        {
-            column.SortDirection = null;
-        }
-
-        e.Column.SortDirection = isDescending
-            ? ListSortDirection.Descending
-            : ListSortDirection.Ascending;
-
-        viewModel.SetSorting(sortBy, isDescending);
         await NotesPagination.RefreshAsync();
     }
 
-    private async void NotesDataGrid_SelectionChanged(
+    private async void NotesList_SelectionChanged(
         object sender,
         SelectionChangedEventArgs e)
     {
@@ -181,14 +118,14 @@ public partial class NotesView : UserControl
             return;
         }
 
-        var requestedNote = NotesDataGrid.SelectedItem as NoteListItemDto;
+        var requestedNote = NotesList.SelectedItem as NoteListItemDto;
         var currentNote = viewModel.SelectedNote;
         if (requestedNote?.Id == currentNote?.Id)
         {
             return;
         }
 
-        // ObservableCollection.Clear() temporarily clears DataGrid.SelectedItem.
+        // ObservableCollection.Clear() temporarily clears ListBox.SelectedItem.
         // The ViewModel restores the stable-ID selection after replacing the page.
         if (requestedNote is null && currentNote is not null && viewModel.Notes.Count == 0)
         {
@@ -196,12 +133,12 @@ public partial class NotesView : UserControl
         }
 
         _isResolvingNoteSelection = true;
-        NotesDataGrid.IsEnabled = false;
+        NotesList.IsEnabled = false;
         try
         {
-            SynchronizeGridSelection(currentNote);
+            SynchronizeListSelection(currentNote);
             var selectionChanged = await viewModel.RequestSelectionChangeAsync(requestedNote);
-            SynchronizeGridSelection(viewModel.SelectedNote);
+            SynchronizeListSelection(viewModel.SelectedNote);
             if (!selectionChanged)
             {
                 RestoreEditorFocusAndFormattingState();
@@ -209,7 +146,7 @@ public partial class NotesView : UserControl
         }
         finally
         {
-            NotesDataGrid.IsEnabled = true;
+            NotesList.IsEnabled = true;
             _isResolvingNoteSelection = false;
         }
     }
@@ -221,9 +158,9 @@ public partial class NotesView : UserControl
             return true;
         }
 
-        var wasGridEnabled = NotesDataGrid.IsEnabled;
-        NotesDataGrid.IsEnabled = false;
-        SynchronizeGridSelection(currentNote);
+        var wasListEnabled = NotesList.IsEnabled;
+        NotesList.IsEnabled = false;
+        SynchronizeListSelection(currentNote);
         try
         {
             var decision = MessageBox.Show(
@@ -255,16 +192,16 @@ public partial class NotesView : UserControl
         }
         finally
         {
-            NotesDataGrid.IsEnabled = wasGridEnabled;
+            NotesList.IsEnabled = wasListEnabled;
         }
     }
 
-    private void SynchronizeGridSelection(NoteListItemDto? note)
+    private void SynchronizeListSelection(NoteListItemDto? note)
     {
         _isSynchronizingNoteSelection = true;
         try
         {
-            NotesDataGrid.SelectedItem = note;
+            NotesList.SelectedItem = note;
         }
         finally
         {

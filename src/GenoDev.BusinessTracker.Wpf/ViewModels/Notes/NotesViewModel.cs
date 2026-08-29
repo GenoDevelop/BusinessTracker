@@ -6,7 +6,6 @@ using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Notes.GetDetails;
 using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Notes.UpdateContent;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Wpf.Controls;
-using GenoDev.BusinessTracker.Wpf.Filtering;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -17,7 +16,6 @@ public partial class NotesViewModel : ViewModelBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
-    private NotesFilterCriteria _notesFilter = NotesFilterCriteria.Empty;
     private CancellationTokenSource? _detailsCancellation;
     private Guid? _loadedNoteId;
     private Guid? _pendingCreatedNoteId;
@@ -72,6 +70,9 @@ public partial class NotesViewModel : ViewModelBase
     private bool _isFilterVisible;
 
     [ObservableProperty]
+    private string? _searchTerm;
+
+    [ObservableProperty]
     private NoteSortBy _sortBy = NoteSortBy.Name;
 
     [ObservableProperty]
@@ -79,11 +80,6 @@ public partial class NotesViewModel : ViewModelBase
 
     public bool IsEditorEnabled =>
         _loadedNoteId.HasValue && !IsEditorLoading && !IsSavingContent;
-
-    public void SetNotesFilter(NotesFilterCriteria filter)
-    {
-        _notesFilter = filter;
-    }
 
     public void SetSorting(NoteSortBy sortBy, bool isDescending)
     {
@@ -163,14 +159,13 @@ public partial class NotesViewModel : ViewModelBase
     {
         var previousSelection = SelectedNote;
         var previousSelectionId = previousSelection?.Id;
-        var filter = _notesFilter;
         var result = await _mediator.Send(
             new GetNotesQuery(
                 state.PageIndex,
                 state.PageSize,
                 SortBy,
                 IsDescending,
-                IsFilterVisible ? filter.Name : null),
+                IsFilterVisible ? SearchTerm : null),
             cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
