@@ -13,7 +13,7 @@ namespace GenoDev.BusinessTracker.Wpf.Views.Materials;
 
 public partial class SuppliesView : UserControl
 {
-    private const double DefaultSplitterWidth = 8d;
+    private const double DefaultSplitterWidth = 14d;
 
     private SuppliesViewModel? _attachedViewModel;
 
@@ -56,8 +56,8 @@ public partial class SuppliesView : UserControl
 
     private void UpdateSuppliesColumnMaxWidth(double layoutWidth)
     {
-        var splitterWidth = SupplyDetailsSplitter.ActualWidth > 0
-            ? SupplyDetailsSplitter.ActualWidth
+        var splitterWidth = SupplyDetailsSplitterColumn.ActualWidth > 0
+            ? SupplyDetailsSplitterColumn.ActualWidth
             : DefaultSplitterWidth;
 
         SuppliesColumn.MaxWidth = Math.Max(0d, layoutWidth - splitterWidth);

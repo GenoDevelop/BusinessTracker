@@ -26,7 +26,7 @@
     <Grid Margin="14">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="320" MinWidth="240" />
-            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" MinWidth="420" />
         </Grid.ColumnDefinitions>
 
@@ -102,8 +102,8 @@
                                         Margin="0,8,0,0" />
         </Grid>
 
-        <GridSplitter Grid.Column="1"
-                      Style="{StaticResource VerticalPanelGridSplitterStyle}" />
+        <controls:RatioGridSplitter Grid.Column="1"
+                                    Orientation="Vertical" />
 
         <Border Grid.Column="2"
                 Margin="10,0,0,0"

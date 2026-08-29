@@ -1742,26 +1742,58 @@
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
-    <Style x:Key="VerticalPanelGridSplitterStyle"
-           TargetType="{x:Type GridSplitter}"
+    <Style TargetType="{x:Type controls:RatioGridSplitter}"
            BasedOn="{StaticResource {x:Type GridSplitter}}">
-        <Setter Property="Width" Value="8" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-        <Setter Property="VerticalAlignment" Value="Stretch" />
-        <Setter Property="ResizeDirection" Value="Columns" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="ResizeBehavior" Value="PreviousAndNext" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type GridSplitter}">
-                    <Grid Background="Transparent">
-                        <Rectangle Width="1"
-                                   HorizontalAlignment="Right"
-                                   VerticalAlignment="Stretch"
+                <ControlTemplate TargetType="{x:Type controls:RatioGridSplitter}">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Rectangle x:Name="HorizontalDivider"
+                                   Height="1"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
                                    Fill="{DynamicResource BorderBrush}" />
+                        <Rectangle x:Name="VerticalDivider"
+                                   Width="1"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Stretch"
+                                   Fill="{DynamicResource BorderBrush}"
+                                   Visibility="Collapsed" />
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Vertical">
+                            <Setter TargetName="HorizontalDivider" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="VerticalDivider" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HorizontalDivider" Property="Fill" Value="{DynamicResource BorderStrongBrush}" />
+                            <Setter TargetName="VerticalDivider" Property="Fill" Value="{DynamicResource BorderStrongBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="8" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,3" />
+                <Setter Property="ResizeDirection" Value="Rows" />
+                <Setter Property="Cursor" Value="SizeNS" />
+            </Trigger>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="8" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="Margin" Value="3,0" />
+                <Setter Property="ResizeDirection" Value="Columns" />
+                <Setter Property="Cursor" Value="SizeWE" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type Separator}">
