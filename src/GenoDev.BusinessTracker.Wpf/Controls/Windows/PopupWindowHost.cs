@@ -354,6 +354,7 @@ public sealed class PopupWindowHost : ContentControl
                 _isWindowHiddenInRegistry = false;
                 _window.Show();
                 _window.ConstrainToWorkArea(false);
+                _window.BeginOpeningAnimation();
                 _window.BringToFront();
             }
 
@@ -391,6 +392,7 @@ public sealed class PopupWindowHost : ContentControl
         }
 
         _window.ConstrainToWorkArea(OpenAtMouse && !CenterOnHost);
+        _window.BeginOpeningAnimation();
     }
 
     private void ApplySize(PopupWindow window)
@@ -482,27 +484,27 @@ public sealed class PopupWindowHost : ContentControl
 
         _isClosingFromHost = true;
         var window = _window;
-        _window = null;
         _isWindowHiddenInRegistry = false;
         _hasHandledOpenRequestForCurrentWindow = false;
-        window.Closed -= Window_Closed;
-        window.HiddenToRegistry -= Window_HiddenToRegistry;
-        window.RestoreRequested -= Window_RestoreRequested;
-        RestoreContent(window);
         if (suppressHostActivation)
         {
-            window.CloseWithoutHostActivation();
-        }
-        else
-        {
-            window.Close();
-        }
-        _isClosingFromHost = false;
+            _window = null;
+            window.Closed -= Window_Closed;
+            window.HiddenToRegistry -= Window_HiddenToRegistry;
+            window.RestoreRequested -= Window_RestoreRequested;
+            RestoreContent(window);
+            window.CloseImmediatelyWithoutHostActivation();
+            _isClosingFromHost = false;
 
-        if (!IsLoaded)
-        {
-            AttachViewModel(null);
+            if (!IsLoaded)
+            {
+                AttachViewModel(null);
+            }
+
+            return;
         }
+
+        window.Close();
     }
 
     private void Window_Closed(object? sender, EventArgs e)
@@ -520,7 +522,9 @@ public sealed class PopupWindowHost : ContentControl
         _hasHandledOpenRequestForCurrentWindow = false;
         RestoreContent(window);
 
-        if (!_isClosingFromHost)
+        var wasClosingFromHost = _isClosingFromHost;
+        _isClosingFromHost = false;
+        if (!wasClosingFromHost)
         {
             RequestClose();
         }

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
@@ -25,6 +26,7 @@ internal sealed class PopupShadowWindow : Window
     private static readonly IntPtr WindowInsertNotTopmost = new(-2);
 
     private readonly Grid _shadowRoot;
+    private readonly ScaleTransform _openingScaleTransform;
     private readonly double _shadowMargin;
     private readonly double _cornerRadius;
 
@@ -42,9 +44,12 @@ internal sealed class PopupShadowWindow : Window
         UseLayoutRounding = true;
         SnapsToDevicePixels = true;
 
+        _openingScaleTransform = new ScaleTransform(1, 1);
         _shadowRoot = new Grid
         {
-            IsHitTestVisible = false
+            IsHitTestVisible = false,
+            RenderTransformOrigin = new Point(0.5, 0.5),
+            RenderTransform = _openingScaleTransform
         };
         _shadowRoot.Children.Add(new Border
         {
@@ -54,6 +59,72 @@ internal sealed class PopupShadowWindow : Window
             Effect = shadowEffect.CloneCurrentValue()
         });
         Content = _shadowRoot;
+    }
+
+    public void SetOpeningScale(double scale)
+    {
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        _openingScaleTransform.ScaleX = scale;
+        _openingScaleTransform.ScaleY = scale;
+    }
+
+    public void BeginOpeningScaleAnimation(
+        double openingScale,
+        Duration duration,
+        IEasingFunction easingFunction)
+    {
+        _openingScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleXProperty,
+            new DoubleAnimation(openingScale, 1, duration)
+            {
+                EasingFunction = easingFunction,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        _openingScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleYProperty,
+            new DoubleAnimation(openingScale, 1, duration)
+            {
+                EasingFunction = easingFunction,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+    }
+
+    public void CommitOpeningScale()
+    {
+        _openingScaleTransform.ScaleX = 1;
+        _openingScaleTransform.ScaleY = 1;
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+    }
+
+    public void BeginClosingScaleAnimation(
+        double closingScale,
+        Duration duration,
+        IEasingFunction easingFunction)
+    {
+        _openingScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleXProperty,
+            new DoubleAnimation(1, closingScale, duration)
+            {
+                EasingFunction = easingFunction,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        _openingScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleYProperty,
+            new DoubleAnimation(1, closingScale, duration)
+            {
+                EasingFunction = easingFunction,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+    }
+
+    public void CommitClosingScale(double closingScale)
+    {
+        _openingScaleTransform.ScaleX = closingScale;
+        _openingScaleTransform.ScaleY = closingScale;
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        _openingScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
     }
 
     protected override void OnSourceInitialized(EventArgs e)

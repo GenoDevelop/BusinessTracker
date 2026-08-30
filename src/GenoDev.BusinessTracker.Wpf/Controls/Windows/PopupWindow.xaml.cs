@@ -1,9 +1,11 @@
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 
@@ -15,6 +17,9 @@ public partial class PopupWindow : Window
     private const double WindowShadowMargin = 22;
     private const double ResizeHitTargetThickness = 8;
     private const double PeekOpacity = 0.2;
+    private const double OpeningScale = 0.975;
+    private static readonly Duration OpeningFadeDuration = TimeSpan.FromMilliseconds(120);
+    private static readonly Duration OpeningScaleDuration = TimeSpan.FromMilliseconds(160);
     private const int WindowPositionChangingMessage = 0x0046;
     private const uint SetWindowPositionNoSize = 0x0001;
     private const uint SetWindowPositionNoMove = 0x0002;
@@ -34,6 +39,13 @@ public partial class PopupWindow : Window
     private bool _hostWindowEventsAttached;
     private bool _wasMinimizedWithHost;
     private bool _isPeekingThrough;
+    private bool _hasAnimatedCurrentVisibility;
+    private bool _isClosingAnimationRunning;
+    private bool _isHideAnimationRunning;
+    private bool _skipClosingAnimation;
+    private bool _fadeWindowOnNextOpening;
+    private bool _notifyRegistryAfterHide;
+    private bool _restoreWithHostAfterHide;
     private bool _suppressHostActivationOnClose;
     private WindowState _stateBeforeHostMinimized = WindowState.Normal;
     private Point _dragStartCursor;
@@ -45,6 +57,7 @@ public partial class PopupWindow : Window
     public PopupWindow()
     {
         InitializeComponent();
+        PrepareOpeningVisual();
         IsVisibleChanged += Window_IsVisibleChanged;
         UpdateWindowChrome();
     }
@@ -93,6 +106,25 @@ public partial class PopupWindow : Window
         base.OnContentRendered(e);
         PopupWindowRegistry.Register(this);
         UpdateShadowWindow();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (_skipClosingAnimation ||
+            !IsVisible ||
+            !SystemParameters.ClientAreaAnimation)
+        {
+            base.OnClosing(e);
+            return;
+        }
+
+        e.Cancel = true;
+        if (!_isClosingAnimationRunning)
+        {
+            StartClosingAnimation();
+        }
+
+        base.OnClosing(e);
     }
 
     protected override void OnActivated(EventArgs e)
@@ -193,11 +225,12 @@ public partial class PopupWindow : Window
     {
         if (HostWindow?.WindowState == WindowState.Minimized)
         {
-            if (WindowState != WindowState.Minimized)
+            if (!_wasMinimizedWithHost && IsVisible)
             {
                 _stateBeforeHostMinimized = WindowState;
                 _wasMinimizedWithHost = true;
-                WindowState = WindowState.Minimized;
+                _hasAnimatedCurrentVisibility = false;
+                StartHideAnimation(notifyRegistry: false);
             }
 
             return;
@@ -206,11 +239,18 @@ public partial class PopupWindow : Window
         if (_wasMinimizedWithHost)
         {
             _wasMinimizedWithHost = false;
-            WindowState = _stateBeforeHostMinimized;
+            if (_isHideAnimationRunning)
+            {
+                _restoreWithHostAfterHide = true;
+                return;
+            }
+
+            RestoreAfterHostMinimized();
         }
     }
 
-    private void HostWindow_Closed(object? sender, EventArgs e) => Close();
+    private void HostWindow_Closed(object? sender, EventArgs e) =>
+        CloseImmediatelyWithoutHostActivation();
 
     private void Application_Activated(object? sender, EventArgs e)
     {
@@ -488,9 +528,11 @@ public partial class PopupWindow : Window
         }
 
         _isPeekingThrough = true;
+        BeginAnimation(OpacityProperty, null);
         Opacity = PeekOpacity;
         if (_shadowWindow != null)
         {
+            _shadowWindow.BeginAnimation(OpacityProperty, null);
             _shadowWindow.Opacity = PeekOpacity;
         }
     }
@@ -509,9 +551,11 @@ public partial class PopupWindow : Window
         }
 
         _isPeekingThrough = false;
+        BeginAnimation(OpacityProperty, null);
         Opacity = 1;
         if (_shadowWindow != null)
         {
+            _shadowWindow.BeginAnimation(OpacityProperty, null);
             _shadowWindow.Opacity = 1;
         }
     }
@@ -587,9 +631,7 @@ public partial class PopupWindow : Window
 
     public void HideToRegistry()
     {
-        _shadowWindow?.Hide();
-        Hide();
-        HiddenToRegistry?.Invoke(this, EventArgs.Empty);
+        StartHideAnimation(notifyRegistry: true);
     }
 
     public void CloseFromWindowMenu()
@@ -600,6 +642,13 @@ public partial class PopupWindow : Window
     public void CloseWithoutHostActivation()
     {
         _suppressHostActivationOnClose = true;
+        Close();
+    }
+
+    public void CloseImmediatelyWithoutHostActivation()
+    {
+        _suppressHostActivationOnClose = true;
+        _skipClosingAnimation = true;
         Close();
     }
 
@@ -730,8 +779,17 @@ public partial class PopupWindow : Window
 
             _shadowWindow = new PopupShadowWindow(shadowEffect, WindowShadowMargin, 16)
             {
-                Opacity = _isPeekingThrough ? PeekOpacity : 1
+                Opacity = _isPeekingThrough
+                    ? PeekOpacity
+                    : SystemParameters.ClientAreaAnimation && !_hasAnimatedCurrentVisibility
+                        ? 0
+                        : 1
             };
+            if (SystemParameters.ClientAreaAnimation && !_hasAnimatedCurrentVisibility)
+            {
+                _shadowWindow.SetOpeningScale(OpeningScale);
+            }
+
             _shadowWindow.MatchBounds(this);
             _shadowWindow.Show();
         }
@@ -766,8 +824,359 @@ public partial class PopupWindow : Window
         shadowWindow.PlaceDirectlyBehind(this, Topmost);
     }
 
-    private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+    private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
         UpdateShadowWindow();
+
+        if (e.NewValue is false)
+        {
+            _hasAnimatedCurrentVisibility = false;
+            PrepareOpeningVisual();
+        }
+    }
+
+    public void BeginOpeningAnimation()
+    {
+        if (_hasAnimatedCurrentVisibility || !IsVisible)
+        {
+            return;
+        }
+
+        _hasAnimatedCurrentVisibility = true;
+        if (!SystemParameters.ClientAreaAnimation)
+        {
+            _fadeWindowOnNextOpening = false;
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 1;
+            ResetOpeningAnimation();
+            return;
+        }
+
+        // The surface is already hidden before Show(), so the first frame
+        // rendered after PopupWindowHost finishes positioning belongs to the
+        // animation instead of briefly flashing at full opacity.
+        var fadeNativeWindow = _fadeWindowOnNextOpening;
+        _fadeWindowOnNextOpening = false;
+        BeginAnimation(OpacityProperty, null);
+        var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
+        if (fadeNativeWindow)
+        {
+            // The native HWND remains fully transparent while the border is
+            // switched to its visible base value, so DWM cannot expose the
+            // cached pre-hide frame between these operations.
+            WindowBorder.Opacity = 1;
+        }
+
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.BeginOpeningScaleAnimation(
+                OpeningScale,
+                OpeningScaleDuration,
+                easing);
+        }
+
+        if (fadeNativeWindow)
+        {
+            BeginAnimation(
+                OpacityProperty,
+                new DoubleAnimation(0, 1, OpeningFadeDuration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+        }
+        else
+        {
+            WindowBorder.BeginAnimation(
+                OpacityProperty,
+                new DoubleAnimation(0, 1, OpeningFadeDuration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+        }
+        _shadowWindow?.BeginAnimation(
+            OpacityProperty,
+            new DoubleAnimation(0, 1, OpeningFadeDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleXProperty,
+            new DoubleAnimation(OpeningScale, 1, OpeningScaleDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        var scaleYAnimation = new DoubleAnimation(OpeningScale, 1, OpeningScaleDuration)
+        {
+            EasingFunction = easing,
+            FillBehavior = FillBehavior.HoldEnd
+        };
+        scaleYAnimation.Completed += OpeningAnimation_Completed;
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleYProperty,
+            scaleYAnimation);
+    }
+
+    private void OpeningAnimation_Completed(object? sender, EventArgs e)
+    {
+        if (!IsVisible || _isClosingAnimationRunning)
+        {
+            return;
+        }
+
+        // Commit final base values while the HoldEnd clocks still expose the
+        // same effective values, then detach the clocks without a visual gap.
+        Opacity = _isPeekingThrough ? PeekOpacity : 1;
+        WindowBorder.Opacity = 1;
+        OpeningScaleTransform.ScaleX = 1;
+        OpeningScaleTransform.ScaleY = 1;
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.Opacity = _isPeekingThrough ? PeekOpacity : 1;
+            _shadowWindow.CommitOpeningScale();
+        }
+
+        BeginAnimation(OpacityProperty, null);
+        WindowBorder.BeginAnimation(OpacityProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        _shadowWindow?.BeginAnimation(OpacityProperty, null);
+    }
+
+    private void StartClosingAnimation()
+    {
+        _isHideAnimationRunning = false;
+        _notifyRegistryAfterHide = false;
+        _restoreWithHostAfterHide = false;
+        _isClosingAnimationRunning = true;
+        IsHitTestVisible = false;
+        EndPeekThrough();
+        BeginAnimation(OpacityProperty, null);
+        Opacity = 1;
+        ResetOpeningAnimation();
+
+        var easing = new CubicEase { EasingMode = EasingMode.EaseIn };
+        WindowBorder.Opacity = 0;
+        WindowBorder.BeginAnimation(
+            OpacityProperty,
+            new DoubleAnimation(1, 0, OpeningFadeDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.Opacity = 0;
+            _shadowWindow.BeginAnimation(
+                OpacityProperty,
+                new DoubleAnimation(1, 0, OpeningFadeDuration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.Stop
+                });
+            _shadowWindow.BeginClosingScaleAnimation(
+                OpeningScale,
+                OpeningScaleDuration,
+                easing);
+        }
+
+        OpeningScaleTransform.ScaleX = OpeningScale;
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleXProperty,
+            new DoubleAnimation(1, OpeningScale, OpeningScaleDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+        OpeningScaleTransform.ScaleY = OpeningScale;
+        var scaleYAnimation = new DoubleAnimation(1, OpeningScale, OpeningScaleDuration)
+        {
+            EasingFunction = easing,
+            FillBehavior = FillBehavior.Stop
+        };
+        scaleYAnimation.Completed += ClosingAnimation_Completed;
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleYProperty,
+            scaleYAnimation);
+    }
+
+    private void StartHideAnimation(bool notifyRegistry)
+    {
+        _notifyRegistryAfterHide |= notifyRegistry;
+        if (_isHideAnimationRunning || !IsVisible || _isClosingAnimationRunning)
+        {
+            return;
+        }
+
+        _isHideAnimationRunning = true;
+        IsHitTestVisible = false;
+        EndPeekThrough();
+        BeginAnimation(OpacityProperty, null);
+        Opacity = 1;
+        ResetOpeningAnimation();
+
+        if (!SystemParameters.ClientAreaAnimation)
+        {
+            CompleteHideAnimation();
+            return;
+        }
+
+        var easing = new CubicEase { EasingMode = EasingMode.EaseIn };
+        BeginAnimation(
+            OpacityProperty,
+            new DoubleAnimation(1, 0, OpeningFadeDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.BeginAnimation(
+                OpacityProperty,
+                new DoubleAnimation(1, 0, OpeningFadeDuration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+            _shadowWindow.BeginClosingScaleAnimation(
+                OpeningScale,
+                OpeningScaleDuration,
+                easing);
+        }
+
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleXProperty,
+            new DoubleAnimation(1, OpeningScale, OpeningScaleDuration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.HoldEnd
+            });
+        var scaleYAnimation = new DoubleAnimation(1, OpeningScale, OpeningScaleDuration)
+        {
+            EasingFunction = easing,
+            FillBehavior = FillBehavior.HoldEnd
+        };
+        scaleYAnimation.Completed += HideAnimation_Completed;
+        OpeningScaleTransform.BeginAnimation(
+            ScaleTransform.ScaleYProperty,
+            scaleYAnimation);
+    }
+
+    private void HideAnimation_Completed(object? sender, EventArgs e) =>
+        CompleteHideAnimation();
+
+    private void CompleteHideAnimation()
+    {
+        if (!_isHideAnimationRunning)
+        {
+            return;
+        }
+
+        // Commit the hidden frame under the active HoldEnd clocks before
+        // hiding the HWND, so this is also the exact state retained for Show().
+        Opacity = 0;
+        OpeningScaleTransform.ScaleX = OpeningScale;
+        OpeningScaleTransform.ScaleY = OpeningScale;
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.Opacity = 0;
+            _shadowWindow.CommitClosingScale(OpeningScale);
+        }
+
+        BeginAnimation(OpacityProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        _shadowWindow?.BeginAnimation(OpacityProperty, null);
+
+        _isHideAnimationRunning = false;
+        _fadeWindowOnNextOpening = true;
+        _shadowWindow?.Hide();
+        Hide();
+        IsHitTestVisible = true;
+
+        var notifyRegistry = _notifyRegistryAfterHide;
+        _notifyRegistryAfterHide = false;
+        if (notifyRegistry)
+        {
+            HiddenToRegistry?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (_restoreWithHostAfterHide)
+        {
+            _restoreWithHostAfterHide = false;
+            RestoreAfterHostMinimized();
+        }
+    }
+
+    private void RestoreAfterHostMinimized()
+    {
+        WindowState = _stateBeforeHostMinimized;
+        ShowActivated = false;
+        try
+        {
+            Show();
+        }
+        finally
+        {
+            ShowActivated = true;
+        }
+
+        if (WindowState == WindowState.Normal)
+        {
+            ConstrainToWorkArea(false);
+        }
+
+        BeginOpeningAnimation();
+    }
+
+    private void ClosingAnimation_Completed(object? sender, EventArgs e)
+    {
+        if (!_isClosingAnimationRunning)
+        {
+            return;
+        }
+
+        _isClosingAnimationRunning = false;
+        _skipClosingAnimation = true;
+        Close();
+    }
+
+    private void PrepareOpeningVisual()
+    {
+        ResetOpeningAnimation();
+        if (!SystemParameters.ClientAreaAnimation)
+        {
+            return;
+        }
+
+        WindowBorder.Opacity = 0;
+        OpeningScaleTransform.ScaleX = OpeningScale;
+        OpeningScaleTransform.ScaleY = OpeningScale;
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.Opacity = 0;
+            _shadowWindow.SetOpeningScale(OpeningScale);
+        }
+    }
+
+    private void ResetOpeningAnimation()
+    {
+        WindowBorder.BeginAnimation(OpacityProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        _shadowWindow?.BeginAnimation(OpacityProperty, null);
+        WindowBorder.Opacity = 1;
+        OpeningScaleTransform.ScaleX = 1;
+        OpeningScaleTransform.ScaleY = 1;
+        if (_shadowWindow != null)
+        {
+            _shadowWindow.Opacity = _isPeekingThrough ? PeekOpacity : 1;
+            _shadowWindow.SetOpeningScale(1);
+        }
+    }
 
     private static void OnIsResizableChanged(
         DependencyObject dependencyObject,
