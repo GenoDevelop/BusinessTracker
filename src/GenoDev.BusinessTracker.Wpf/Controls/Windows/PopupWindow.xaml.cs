@@ -47,6 +47,7 @@ public partial class PopupWindow : Window
     private bool _notifyRegistryAfterHide;
     private bool _restoreWithHostAfterHide;
     private bool _suppressHostActivationOnClose;
+    private bool _isClosed;
     private WindowState _stateBeforeHostMinimized = WindowState.Normal;
     private Point _dragStartCursor;
     private Point _dragStartWindow;
@@ -87,6 +88,8 @@ public partial class PopupWindow : Window
 
     public Window? HostWindow { get; init; }
 
+    internal bool IsClosed => _isClosed;
+
     public event EventHandler? HiddenToRegistry;
     public event EventHandler? RestoreRequested;
 
@@ -99,12 +102,17 @@ public partial class PopupWindow : Window
         _windowSource?.AddHook(WindowMessageHook);
         AttachApplicationEvents();
         AttachHostWindowEvents();
+        if (!_isClosed)
+        {
+            // The HWND is now valid and actionable, while content rendering
+            // and the opening transition have not started yet.
+            PopupWindowRegistry.Register(this);
+        }
     }
 
     protected override void OnContentRendered(EventArgs e)
     {
         base.OnContentRendered(e);
-        PopupWindowRegistry.Register(this);
         UpdateShadowWindow();
     }
 
@@ -121,6 +129,10 @@ public partial class PopupWindow : Window
         e.Cancel = true;
         if (!_isClosingAnimationRunning)
         {
+            // The registry is navigation state, not the native HWND lifetime.
+            // Remove the accepted close target before its visual transition so
+            // users can immediately act on the next registry entry.
+            PopupWindowRegistry.Unregister(this);
             StartClosingAnimation();
         }
 
@@ -147,6 +159,7 @@ public partial class PopupWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _isClosed = true;
         var hostWindow = HostWindow;
         PopupWindowRegistry.Unregister(this);
         DetachApplicationEvents();

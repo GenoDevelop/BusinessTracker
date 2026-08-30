@@ -64,7 +64,7 @@ public static class PopupWindowRegistry
 
     internal static void Register(PopupWindow window)
     {
-        if (EntriesByWindow.ContainsKey(window))
+        if (window.IsClosed || EntriesByWindow.ContainsKey(window))
         {
             return;
         }
