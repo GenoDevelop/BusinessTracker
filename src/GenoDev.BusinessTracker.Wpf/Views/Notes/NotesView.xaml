@@ -81,7 +81,8 @@
                      Grid.Row="2"
                      ItemsSource="{Binding Notes}"
                      SelectedItem="{Binding SelectedNote, Mode=OneWay}"
-                     SelectionChanged="NotesList_SelectionChanged"
+                     controls:ListSelectionBehavior.IsEnabled="True"
+                     controls:ListSelectionBehavior.SelectionSettled="NotesList_SelectionChanged"
                      BorderThickness="0"
                      Padding="0"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">

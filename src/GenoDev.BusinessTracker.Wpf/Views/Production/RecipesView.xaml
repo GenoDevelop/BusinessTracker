@@ -61,8 +61,9 @@
             <!-- Recipes List -->
             <ListBox Grid.Row="2"
                      ItemsSource="{Binding Recipes}"
-                     SelectedItem="{Binding SelectedRecipe}"
-                     SelectionChanged="RecipesList_SelectionChanged"
+                     controls:ListSelectionBehavior.IsEnabled="True"
+                     controls:ListSelectionBehavior.SettledSelectedItem="{Binding SelectedRecipe}"
+                     controls:ListSelectionBehavior.SelectionSettled="RecipesList_SelectionChanged"
                      BorderThickness="0"
                      Padding="0">
                 <ListBox.ItemContainerStyle>

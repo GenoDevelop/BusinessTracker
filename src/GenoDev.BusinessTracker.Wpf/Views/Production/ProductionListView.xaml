@@ -64,8 +64,9 @@
             <!-- Products List -->
             <ListBox Grid.Row="2"
                      ItemsSource="{Binding Products}"
-                     SelectedItem="{Binding SelectedProduct}"
-                     SelectionChanged="ProductsList_SelectionChanged"
+                     controls:ListSelectionBehavior.IsEnabled="True"
+                     controls:ListSelectionBehavior.SettledSelectedItem="{Binding SelectedProduct}"
+                     controls:ListSelectionBehavior.SelectionSettled="ProductsList_SelectionChanged"
                      BorderThickness="0"
                      Padding="0">
                 <ListBox.ItemContainerStyle>

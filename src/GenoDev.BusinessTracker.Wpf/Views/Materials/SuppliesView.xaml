@@ -47,8 +47,9 @@
             <!-- Supplies List -->
             <ListBox Grid.Row="2"
                      ItemsSource="{Binding Supplies}"
-                     SelectedItem="{Binding SelectedSupply}"
-                     SelectionChanged="SuppliesList_SelectionChanged"
+                     controls:ListSelectionBehavior.IsEnabled="True"
+                     controls:ListSelectionBehavior.SettledSelectedItem="{Binding SelectedSupply}"
+                     controls:ListSelectionBehavior.SelectionSettled="SuppliesList_SelectionChanged"
                      Margin="0,0,0,3"
                      BorderThickness="0"
                      Padding="0">

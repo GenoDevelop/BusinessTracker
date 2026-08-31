@@ -110,7 +110,7 @@ public partial class NotesView : UserControl
 
     private async void NotesList_SelectionChanged(
         object sender,
-        SelectionChangedEventArgs e)
+        RoutedEventArgs e)
     {
         if (_isSynchronizingNoteSelection || _isResolvingNoteSelection ||
             DataContext is not NotesViewModel viewModel)

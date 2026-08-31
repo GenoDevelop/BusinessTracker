@@ -136,7 +136,7 @@ public partial class SuppliesView : UserControl
 
     private async void SuppliesList_SelectionChanged(
         object sender,
-        SelectionChangedEventArgs e)
+        RoutedEventArgs e)
     {
         if (DataContext is SuppliesViewModel { IsRestoringSuppliesSelection: true })
         {

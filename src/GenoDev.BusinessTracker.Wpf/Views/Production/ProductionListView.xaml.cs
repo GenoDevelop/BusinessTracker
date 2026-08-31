@@ -96,7 +96,7 @@ public partial class ProductionListView : UserControl
 
     private async void ProductsList_SelectionChanged(
         object sender,
-        SelectionChangedEventArgs e)
+        RoutedEventArgs e)
     {
         if (DataContext is ProductionListViewModel { IsRestoringProductsSelection: true })
         {

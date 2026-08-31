@@ -104,7 +104,7 @@ public partial class RecipesView : UserControl
 
     private async void RecipesList_SelectionChanged(
         object sender,
-        SelectionChangedEventArgs e)
+        RoutedEventArgs e)
     {
         if (DataContext is RecipesViewModel { IsRestoringRecipesSelection: true })
         {
