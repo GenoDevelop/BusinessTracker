@@ -13,6 +13,9 @@
         <DataTemplate DataType="{x:Type vm:OrdersViewModel}">
             <local:OrdersView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MailingViewModel}">
+            <local:MailingView />
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <TabControl TabStripPlacement="Left"
@@ -24,6 +27,13 @@
                                                    Text="Zamów." />
                 </TabItem.Header>
                 <ContentControl Content="{Binding OrdersViewModel}" />
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <controls:SideNavigationHeader Icon="{StaticResource MailingNavigationGeometry}"
+                                                   Text="Mailing" />
+                </TabItem.Header>
+                <ContentControl Content="{Binding MailingViewModel}" />
             </TabItem>
         </TabControl>
     </Grid>

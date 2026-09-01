@@ -7,9 +7,15 @@ namespace GenoDev.BusinessTracker.Wpf;
 
 internal sealed class GlobalExceptionHandler
 {
+    private static readonly TimeSpan RepeatedExceptionQuietPeriod = TimeSpan.FromSeconds(5);
+    private readonly object _exceptionStateLock = new();
+    private int _isShowingException;
+    private string? _lastExceptionFingerprint;
+    private DateTimeOffset _lastExceptionAt;
+
     public void HandleDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs args)
     {
-        ShowException(args.Exception);
+        ShowExceptionOnce(args.Exception);
         args.Handled = true;
     }
 
@@ -21,13 +27,56 @@ internal sealed class GlobalExceptionHandler
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is not null && !dispatcher.HasShutdownStarted)
         {
-            dispatcher.BeginInvoke(() => ShowException(exception));
+            dispatcher.BeginInvoke(() => ShowExceptionOnce(exception));
+        }
+    }
+
+    private void ShowExceptionOnce(Exception exception)
+    {
+        var diagnosticMessage = $"[{DateTimeOffset.Now:O}] Nieobsłużony wyjątek aplikacji:{Environment.NewLine}{exception}";
+        Trace.TraceError(diagnosticMessage);
+        Console.Error.WriteLine(diagnosticMessage);
+
+        // A modal error dialog pumps the dispatcher. If the same UI failure occurs again while
+        // that dialog is opening, showing another dialog recursively can end in a stack overflow.
+        if (Interlocked.CompareExchange(ref _isShowingException, 1, 0) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!ShouldShowException(exception)) return;
+            ShowException(exception);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _isShowingException, 0);
+        }
+    }
+
+    private bool ShouldShowException(Exception exception)
+    {
+        var baseException = exception.GetBaseException();
+        var fingerprint = $"{baseException.GetType().FullName}|{baseException.Message}";
+        var now = DateTimeOffset.UtcNow;
+
+        lock (_exceptionStateLock)
+        {
+            var isContinuousRepeat = string.Equals(
+                    fingerprint,
+                    _lastExceptionFingerprint,
+                    StringComparison.Ordinal) &&
+                now - _lastExceptionAt < RepeatedExceptionQuietPeriod;
+
+            _lastExceptionFingerprint = fingerprint;
+            _lastExceptionAt = now;
+            return !isContinuousRepeat;
         }
     }
 
     private static void ShowException(Exception exception)
     {
-        Trace.TraceError(exception.ToString());
 
         var validationException = FindValidationException(exception);
         if (validationException is not null)

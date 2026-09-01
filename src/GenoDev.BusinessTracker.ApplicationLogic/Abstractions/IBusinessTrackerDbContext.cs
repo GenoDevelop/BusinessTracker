@@ -24,6 +24,12 @@ public interface IBusinessTrackerDbContext
     DbSet<ClientDetails> ClientDetails { get; }
     DbSet<StockAdjustment> StockAdjustments { get; }
     DbSet<Note> Notes { get; }
+    DbSet<SmtpAccount> SmtpAccounts { get; }
+    DbSet<MailSnippet> MailSnippets { get; }
+    DbSet<MailTemplate> MailTemplates { get; }
+    DbSet<MailTemplateAttachment> MailTemplateAttachments { get; }
+    DbSet<OutgoingEmail> OutgoingEmails { get; }
+    DbSet<OutgoingEmailAttachment> OutgoingEmailAttachments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

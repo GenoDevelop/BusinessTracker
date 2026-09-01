@@ -129,6 +129,7 @@
     <Geometry x:Key="ProductsNavigationGeometry">M4,7 L12,3 L20,7 L20,17 L12,21 L4,17 Z M4,7 L12,11 L20,7</Geometry>
     <Geometry x:Key="RecipesNavigationGeometry">M6,3 L16,3 L20,7 L20,21 L6,21 Z M16,3 L16,8 L20,8 M9,12 L17,12 M9,16 L17,16</Geometry>
     <Geometry x:Key="OrdersNavigationGeometry">M6,3 L18,3 L18,21 L15,19 L12,21 L9,19 L6,21 Z M9,8 L15,8 M9,12 L15,12 M9,16 L13,16</Geometry>
+    <Geometry x:Key="MailingNavigationGeometry">M3,6 L21,6 L21,18 L3,18 Z M3,7 L12,14 L21,7</Geometry>
 
     <!-- Shared interface icons. Keeping these as vectors avoids font-glyph inconsistencies. -->
     <Geometry x:Key="SearchIconGeometry">M10.5,4 A6.5,6.5 0 1 0 10.5,17 A6.5,6.5 0 1 0 10.5,4 M15.2,15.2 L20,20</Geometry>
@@ -647,6 +648,59 @@
         </Style.Triggers>
     </Style>
 
+    <Style TargetType="{x:Type PasswordBox}">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Validation.ErrorTemplate" Value="{StaticResource RequestValidationErrorTemplate}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type PasswordBox}">
+                    <Grid>
+                        <Border x:Name="InputBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <Border x:Name="FocusRing"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                IsHitTestVisible="False"
+                                Opacity="0" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource AccentMutedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                            <Setter TargetName="FocusRing" Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="InputBorder" Property="Background" Value="{DynamicResource SurfaceAlternativeBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type controls:NumericTextBox}"
            BasedOn="{StaticResource {x:Type TextBox}}">
         <Style.Triggers>
@@ -654,6 +708,82 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type controls:CodeTextBox}"
+           BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:CodeTextBox}">
+                    <Grid>
+                        <Border x:Name="InputBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                SnapsToDevicePixels="True">
+                            <Grid ClipToBounds="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{DynamicResource SurfaceAlternativeBrush}"
+                                        BorderBrush="{DynamicResource BorderStrongBrush}"
+                                        BorderThickness="0,0,1,0">
+                                    <Grid ClipToBounds="True">
+                                        <controls:CodeLineNumberMargin x:Name="PART_LineNumbers"
+                                                                       Owner="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                       FontFamily="{TemplateBinding FontFamily}"
+                                                                       FontSize="{TemplateBinding FontSize}"
+                                                                       IsHitTestVisible="False"
+                                                                       Focusable="False" />
+                                    </Grid>
+                                </Border>
+                                <Grid Grid.Column="1" ClipToBounds="True">
+                                    <controls:CodeCurrentLineHighlight x:Name="PART_CurrentLineHighlight"
+                                                                       Owner="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                                       Background="{DynamicResource SurfaceHoverBrush}"
+                                                                       IsHitTestVisible="False"
+                                                                       Focusable="False" />
+                                    <ScrollViewer x:Name="PART_ContentHost"
+                                                  Margin="0,4,4,4" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="FocusRing"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                IsHitTestVisible="False"
+                                Opacity="0" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource AccentMutedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                            <Setter TargetName="FocusRing" Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                            <Setter TargetName="FocusRing" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="InputBorder" Property="Background" Value="{DynamicResource SurfaceAlternativeBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsReadOnly" Value="True">
+                            <Setter TargetName="InputBorder" Property="Background" Value="{DynamicResource SurfaceAlternativeBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="{x:Type RichTextBox}">

@@ -23,6 +23,7 @@ public static class DependencyInjectionExtensions
         // WPF resolves MediatR requests from the host provider without per-request scopes.
         // Keep this service aligned with its transient DbContext dependency.
         services.AddTransient<IItemsService, ItemsService>();
+        services.AddTransient<IMailTemplateRenderer, MailTemplateRenderer>();
 
         return services;
     }

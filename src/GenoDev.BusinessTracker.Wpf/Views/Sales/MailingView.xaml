@@ -1,0 +1,183 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Views.Sales.MailingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+             xmlns:local="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Sales"
+             Loaded="MailingView_Loaded" Unloaded="MailingView_Unloaded">
+    <UserControl.Resources>
+        <DataTemplate x:Key="MailSyntaxItemTemplate">
+            <StackPanel Margin="5,4">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Description}" Margin="0,2,0,3" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Token}" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Margin="{StaticResource DetailPaneMargin}">
+        <TabControl>
+            <TabItem Header="Szablony">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="210"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="1.2*"/></Grid.ColumnDefinitions>
+                    <DockPanel Grid.Column="0" ClipToBounds="True">
+                        <Border DockPanel.Dock="Top" Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal"><TextBlock Text="Szablony" Style="{StaticResource MasterListTitleTextStyle}"/><controls:CreateButton Command="{Binding NewTemplateCommand}" ToolTip="Nowy szablon" Margin="8,0,2,0"/><controls:RefreshButton Command="{Binding RefreshMailingWorkspaceCommand}" Style="{StaticResource MasterListToolbarIconButtonStyle}" Margin="2,0,0,0"/></StackPanel>
+                        </Border>
+                        <ListBox ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="Name"/>
+                    </DockPanel>
+                    <controls:RatioGridSplitter Grid.Column="1" Orientation="Vertical"/>
+                    <Grid Grid.Column="2" Margin="8,0" ClipToBounds="True">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                            <StackPanel><TextBlock Text="Nazwa"/><TextBox Text="{Binding TemplateName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Konto SMTP"/><ComboBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding TemplateAccount}" DisplayMemberPath="Name"/></StackPanel>
+                        </Grid>
+                        <StackPanel Grid.Row="1" Margin="0,8,0,0"><TextBlock Text="Temat"/><TextBox x:Name="SubjectTemplateEditor" Text="{Binding SubjectTemplate, UpdateSourceTrigger=PropertyChanged}" GotKeyboardFocus="Editor_GotKeyboardFocus"/></StackPanel>
+                        <TextBlock Grid.Row="2" Text="HTML" Margin="0,8,0,3"/>
+                        <controls:CodeTextBox x:Name="HtmlTemplateEditor" Grid.Row="3" Text="{Binding HtmlTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"
+                                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
+                        <StackPanel Grid.Row="4" Margin="0,8,0,0">
+                            <DockPanel><Button DockPanel.Dock="Right" Content="Dodaj pliki" Command="{Binding AddTemplateAttachmentsCommand}"/>
+                                <TextBlock Text="Załączniki szablonu" FontWeight="Bold" VerticalAlignment="Center"/></DockPanel>
+                            <TextBlock Text="{Binding TemplateAttachmentErrorMessage}" Foreground="{DynamicResource WarningBrush}"
+                                       TextWrapping="Wrap" Margin="0,4,0,0"
+                                       Visibility="{Binding TemplateAttachmentErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,4,0,0">
+                            <ItemsControl ItemsSource="{Binding TemplateAttachments}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <controls:MailAttachmentCard Margin="0,0,7,5"
+                                            IsDownloadAvailable="True"
+                                            DownloadCommand="{Binding DataContext.DownloadTemplateAttachmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            RemoveCommand="{Binding DataContext.RemoveTemplateAttachmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                            <CheckBox Content="Aktywny" IsChecked="{Binding IsTemplateActive}" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                            <Button Content="Usuń" Command="{Binding DeleteTemplateCommand}" Margin="0,0,8,0" Visibility="{Binding TemplateId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveTemplateCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                    <controls:RatioGridSplitter Grid.Column="3" Orientation="Vertical"/>
+                    <Grid Grid.Column="4" Margin="8,0,0,0" ClipToBounds="True">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="2*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <StackPanel Margin="0,0,0,8">
+                            <TextBlock Text="Zamówienie używane w podglądzie" Margin="0,0,0,3"/>
+                            <controls:SearchableComboBox ItemsSource="{Binding PreviewOrders}" SelectedItem="{Binding SelectedPreviewOrder}"
+                                                         DisplayMemberPath="DisplayName" SearchPropertyPaths="DisplayName"/>
+                        </StackPanel>
+                        <controls:HtmlPreview Grid.Row="1" Html="{Binding TemplatePreviewHtml}"/>
+                        <controls:RatioGridSplitter Grid.Row="2"/>
+                        <TabControl Grid.Row="3">
+                            <TabItem Header="Zmienne"><ListBox ItemsSource="{Binding Variables}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Warunki"><ListBox ItemsSource="{Binding Conditions}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Pętle"><ListBox ItemsSource="{Binding Loops}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Snippety"><ListBox ItemsSource="{Binding Snippets}" MouseDoubleClick="SnippetList_MouseDoubleClick"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Name}"/><TextBlock Text="{Binding Key}" FontFamily="Consolas" FontSize="11"/></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></TabItem>
+                        </TabControl>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Snippety">
+                <Grid Margin="5"><Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <DockPanel Grid.Column="0"><Border DockPanel.Dock="Top" Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,8"><StackPanel Orientation="Horizontal"><TextBlock Text="Snippety" Style="{StaticResource MasterListTitleTextStyle}"/><controls:CreateButton Command="{Binding NewSnippetCommand}" Margin="8,0,2,0"/><controls:RefreshButton Command="{Binding RefreshMailingWorkspaceCommand}" Style="{StaticResource MasterListToolbarIconButtonStyle}" Margin="2,0,0,0"/></StackPanel></Border><ListBox ItemsSource="{Binding Snippets}" SelectedItem="{Binding SelectedSnippet}" DisplayMemberPath="Name"/></DockPanel>
+                    <controls:RatioGridSplitter Grid.Column="1" Orientation="Vertical"/>
+                    <Grid Grid.Column="2" Margin="8,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Nazwa"/><TextBox Text="{Binding SnippetName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Unikalny klucz"/><TextBox Text="{Binding SnippetKey, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></Grid>
+                        <StackPanel Grid.Row="1" Margin="0,8,0,0"><TextBlock Text="Opis"/><TextBox Text="{Binding SnippetDescription, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                        <TextBlock Grid.Row="2" Text="HTML" Margin="0,8,0,3"/><controls:CodeTextBox x:Name="SnippetHtmlEditor" Grid.Row="3" Text="{Binding SnippetHtml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0"><CheckBox Content="Aktywny" IsChecked="{Binding IsSnippetActive}" Margin="0,0,15,0"/><Button Content="Usuń" Command="{Binding DeleteSnippetCommand}" Margin="0,0,8,0" Visibility="{Binding SnippetId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveSnippetCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel>
+                    </Grid>
+                    <controls:RatioGridSplitter Grid.Column="3" Orientation="Vertical"/>
+                    <Grid Grid.Column="4" Margin="8,0,0,0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="2*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <StackPanel Margin="0,0,0,8">
+                            <TextBlock Text="Zamówienie używane w podglądzie" Margin="0,0,0,3"/>
+                            <controls:SearchableComboBox ItemsSource="{Binding PreviewOrders}" SelectedItem="{Binding SelectedPreviewOrder}"
+                                                         DisplayMemberPath="DisplayName" SearchPropertyPaths="DisplayName"/>
+                        </StackPanel>
+                        <controls:HtmlPreview Grid.Row="1" Html="{Binding SnippetPreviewHtml}"/>
+                        <controls:RatioGridSplitter Grid.Row="2"/>
+                        <TabControl Grid.Row="3">
+                            <TabItem Header="Zmienne"><ListBox ItemsSource="{Binding Variables}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Warunki"><ListBox ItemsSource="{Binding Conditions}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Pętle"><ListBox ItemsSource="{Binding Loops}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Snippety"><ListBox ItemsSource="{Binding Snippets}" MouseDoubleClick="SnippetList_MouseDoubleClick"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Name}"/><TextBlock Text="{Binding Key}" FontFamily="Consolas" FontSize="11"/></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></TabItem>
+                        </TabControl>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Konta nadawcze">
+                <Grid Margin="5"><Grid.ColumnDefinitions><ColumnDefinition Width="240"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <DockPanel><Border DockPanel.Dock="Top" Style="{StaticResource MasterListToolbarBorderStyle}" Margin="0,0,0,8"><StackPanel Orientation="Horizontal"><TextBlock Text="Konta SMTP" Style="{StaticResource MasterListTitleTextStyle}"/><controls:CreateButton Command="{Binding NewAccountCommand}" Margin="8,0,2,0"/><controls:RefreshButton Command="{Binding RefreshMailingWorkspaceCommand}" Style="{StaticResource MasterListToolbarIconButtonStyle}" Margin="2,0,0,0"/></StackPanel></Border><ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}" DisplayMemberPath="Name"/></DockPanel>
+                    <controls:RatioGridSplitter Grid.Column="1" Orientation="Vertical"/>
+                    <Grid Grid.Column="2" Margin="15,0" MaxWidth="760" HorizontalAlignment="Left"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="120"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Nazwa"/><TextBox Text="{Binding AccountName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Port"/><TextBox Text="{Binding SmtpPort, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></Grid>
+                        <StackPanel Grid.Row="1" Margin="0,8,0,0"><TextBlock Text="Host"/><TextBox Text="{Binding SmtpHost, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                        <Grid Grid.Row="2" Margin="0,8,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Użytkownik"/><TextBox Text="{Binding SmtpUserName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Hasło / hasło aplikacji (pozostaw puste, aby zachować)"/><PasswordBox PasswordChanged="SmtpPasswordBox_PasswordChanged"/></StackPanel></Grid>
+                        <Grid Grid.Row="3" Margin="0,8,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Adres nadawcy"/><TextBox Text="{Binding FromAddress, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Nazwa nadawcy"/><TextBox Text="{Binding FromName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></Grid>
+                        <StackPanel Grid.Row="4" Margin="0,8,0,0"><TextBlock Text="Reply-To (opcjonalnie)"/><TextBox Text="{Binding ReplyToAddress, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,12,0,0"><CheckBox Content="STARTTLS" IsChecked="{Binding UseStartTls}" Margin="0,0,15,0"/><CheckBox Content="Domyślne" IsChecked="{Binding IsDefaultAccount}" Margin="0,0,15,0"/><CheckBox Content="Aktywne" IsChecked="{Binding IsAccountEnabled}"/></StackPanel>
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0"><Button Content="Usuń" Command="{Binding DeleteAccountCommand}" Margin="0,0,8,0" Visibility="{Binding AccountId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveAccountCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Historia wysyłek">
+                <Grid Margin="5"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border Style="{StaticResource GlassToolbarBorderStyle}" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Historia wysyłek" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,20,0"/>
+                            <controls:RefreshButton Click="HistoryRefreshButton_Click"/>
+                            <Button Content="Wyślij ponownie" Command="{Binding ResendCommand}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <controls:ConfigurableDataGrid Grid.Row="1" x:Name="HistoryGrid" LayoutKey="Sales.Mailing.History" ItemsSource="{Binding History}" SelectedItem="{Binding SelectedHistoryItem}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Visibility="Collapsed" controls:ConfigurableDataGrid.ColumnKey="Id" controls:ConfigurableDataGrid.ColumnTitle="ID"/>
+                            <DataGridTextColumn Header="Utworzono" Binding="{Binding CreatedAtUtc, StringFormat='dd.MM.yyyy HH:mm'}" controls:ConfigurableDataGrid.ColumnKey="CreatedAtUtc"/>
+                            <DataGridTextColumn Header="Zamówienie" Binding="{Binding OrderIdentifier}" controls:ConfigurableDataGrid.ColumnKey="OrderIdentifier"/>
+                            <DataGridTextColumn Header="Odbiorca" Binding="{Binding RecipientAddress}" controls:ConfigurableDataGrid.ColumnKey="RecipientAddress"/>
+                            <DataGridTextColumn Header="Temat" Binding="{Binding Subject}" Width="*" controls:ConfigurableDataGrid.ColumnKey="Subject"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" controls:ConfigurableDataGrid.ColumnKey="Status"/>
+                            <DataGridTextColumn Header="Załączniki" Binding="{Binding AttachmentCount}" controls:ConfigurableDataGrid.ColumnKey="AttachmentCount"/>
+                            <DataGridCheckBoxColumn Header="Pliki wygasły" Binding="{Binding HasExpiredAttachments}" controls:ConfigurableDataGrid.ColumnKey="HasExpiredAttachments"/>
+                            <DataGridTextColumn Header="Błąd" Binding="{Binding ErrorMessage}" controls:ConfigurableDataGrid.ColumnKey="ErrorMessage"/>
+                        </DataGrid.Columns>
+                    </controls:ConfigurableDataGrid>
+                    <controls:PaginationControl x:Name="HistoryPagination" Grid.Row="2" PageLoader="{Binding HistoryPageLoader}" InitialPageSize="20"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <controls:PopupWindowHost IsOpen="{Binding IsDeleteConfirmationOpen}"
+                                  Title="{Binding DeleteConfirmationTitle}"
+                                  StaysOpen="True"
+                                  CloseCommand="{Binding CancelDeleteCommand}">
+            <StackPanel Width="340">
+                <TextBlock TextWrapping="Wrap" Margin="0,0,0,20">
+                    <Run Text="Czy na pewno chcesz usunąć "/>
+                    <Run Text="{Binding DeleteConfirmationItemName, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text="?"/>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/>
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5"
+                            Background="{DynamicResource DangerBrush}" IsDefault="True"/>
+                </StackPanel>
+            </StackPanel>
+        </controls:PopupWindowHost>
+        <controls:PopupWindowHost IsOpen="{Binding IsResendOpen}"
+                                  Title="Wyślij wiadomość ponownie"
+                                  StaysOpen="True"
+                                  IsResizable="True"
+                                  PopupWidth="1150"
+                                  PopupHeight="820"
+                                  MinPopupWidth="1050"
+                                  MinPopupHeight="760"
+                                  OpenAtMouse="False"
+                                  CenterOnHost="True"
+                                  CloseCommand="{Binding ResendComposer.CloseCommand}">
+            <local:MailComposerControl DataContext="{Binding ResendComposer}"/>
+        </controls:PopupWindowHost>
+    </Grid>
+</UserControl>

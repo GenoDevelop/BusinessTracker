@@ -22,4 +22,5 @@ public class Order
     public virtual ClientDetails? ClientDetails { get; set; }
     public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new HashSet<OrderProduct>();
     public virtual ICollection<OrderPackingMaterial> OrderPackingMaterials { get; set; } = new HashSet<OrderPackingMaterial>();
+    public virtual ICollection<OutgoingEmail> OutgoingEmails { get; set; } = new HashSet<OutgoingEmail>();
 }

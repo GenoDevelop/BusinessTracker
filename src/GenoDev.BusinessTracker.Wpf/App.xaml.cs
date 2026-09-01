@@ -11,6 +11,7 @@ using GenoDev.BusinessTracker.Wpf.ViewModels.Notes;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Production;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Products;
 using GenoDev.BusinessTracker.Wpf.ViewModels.Sales;
+using GenoDev.BusinessTracker.Wpf.Services;
 
 namespace GenoDev.BusinessTracker.Wpf;
 
@@ -67,6 +68,9 @@ public partial class App : Application
         services.AddTransient<ProductionListViewModel>();
         services.AddTransient<SalesViewModel>();
         services.AddTransient<OrdersViewModel>();
+        services.AddTransient<MailingViewModel>();
+        services.AddTransient<MailComposerViewModel>();
+        services.AddHostedService<MailOutboxHostedService>();
         services.AddTransient<CreateMaterialVariantViewModel>();
         services.AddTransient<CreatePackingMaterialViewModel>();
         services.AddTransient<CreateFixedAssetViewModel>();

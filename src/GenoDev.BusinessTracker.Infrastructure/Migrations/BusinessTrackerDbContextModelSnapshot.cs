@@ -126,6 +126,150 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.ToTable("fixed_assets", "business_tracker");
                 });
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailSnippet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("HtmlContent")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("html_content");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mail_snippets");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_mail_snippets_key");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_mail_snippets_name");
+
+                    b.ToTable("mail_snippets", "sales");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("HtmlTemplate")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("html_template");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("SmtpAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("smtp_account_id");
+
+                    b.Property<string>("SubjectTemplate")
+                        .IsRequired()
+                        .HasMaxLength(998)
+                        .HasColumnType("character varying(998)")
+                        .HasColumnName("subject_template");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mail_templates");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_mail_templates_name");
+
+                    b.HasIndex("SmtpAccountId")
+                        .HasDatabaseName("ix_mail_templates_smtp_account_id");
+
+                    b.ToTable("mail_templates", "sales");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailTemplateAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("content");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("content_type");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<Guid>("MailTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mail_template_id");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("sha256")
+                        .IsFixedLength();
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mail_template_attachments");
+
+                    b.HasIndex("MailTemplateId", "SortOrder")
+                        .HasDatabaseName("ix_mail_template_attachments_mail_template_id_sort_order");
+
+                    b.ToTable("mail_template_attachments", "sales");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Material", b =>
                 {
                     b.Property<Guid>("Id")
@@ -375,6 +519,167 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                         .HasDatabaseName("ix_order_products_product_id");
 
                     b.ToTable("order_products", "business_tracker");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("error_message");
+
+                    b.Property<string>("HtmlBody")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("html_body");
+
+                    b.Property<DateTime?>("LastAttemptAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_attempt_at_utc");
+
+                    b.Property<Guid?>("MailTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mail_template_id");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("ProcessingBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("processing_by");
+
+                    b.Property<DateTime?>("ProcessingStartedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processing_started_at_utc");
+
+                    b.Property<string>("RecipientAddress")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("recipient_address");
+
+                    b.Property<string>("RecipientName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("recipient_name");
+
+                    b.Property<Guid?>("ResentFromEmailId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resent_from_email_id");
+
+                    b.Property<DateTime?>("SentAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at_utc");
+
+                    b.Property<Guid>("SmtpAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("smtp_account_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(998)
+                        .HasColumnType("character varying(998)")
+                        .HasColumnName("subject");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outgoing_emails");
+
+                    b.HasIndex("MailTemplateId")
+                        .HasDatabaseName("ix_outgoing_emails_mail_template_id");
+
+                    b.HasIndex("ResentFromEmailId")
+                        .HasDatabaseName("ix_outgoing_emails_resent_from_email_id");
+
+                    b.HasIndex("SmtpAccountId")
+                        .HasDatabaseName("ix_outgoing_emails_smtp_account_id");
+
+                    b.HasIndex("OrderId", "CreatedAtUtc")
+                        .HasDatabaseName("ix_outgoing_emails_order_id_created_at_utc");
+
+                    b.HasIndex("Status", "CreatedAtUtc")
+                        .HasDatabaseName("ix_outgoing_emails_status_created_at_utc");
+
+                    b.ToTable("outgoing_emails", "sales");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmailAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Content")
+                        .HasColumnType("bytea")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime?>("ContentDeletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("content_deleted_at_utc");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("content_type");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<Guid>("OutgoingEmailId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("outgoing_email_id");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("sha256")
+                        .IsFixedLength();
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<Guid?>("TemplateAttachmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("template_attachment_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outgoing_email_attachments");
+
+                    b.HasIndex("OutgoingEmailId", "SortOrder")
+                        .HasDatabaseName("ix_outgoing_email_attachments_outgoing_email_id_sort_order");
+
+                    b.ToTable("outgoing_email_attachments", "sales");
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.PackingMaterial", b =>
@@ -632,6 +937,85 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.ToTable("production_materials", "business_tracker");
                 });
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.SmtpAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("FromAddress")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("from_address");
+
+                    b.Property<string>("FromName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("from_name");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("host");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("password");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("integer")
+                        .HasColumnName("port");
+
+                    b.Property<string>("ReplyToAddress")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("reply_to_address");
+
+                    b.Property<bool>("UseStartTls")
+                        .HasColumnType("boolean")
+                        .HasColumnName("use_start_tls");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("user_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_smtp_accounts");
+
+                    b.HasIndex("IsDefault")
+                        .IsUnique()
+                        .HasDatabaseName("ix_smtp_accounts_is_default")
+                        .HasFilter("is_default");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_smtp_accounts_name");
+
+                    b.ToTable("smtp_accounts", "sales");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.StockAdjustment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -864,6 +1248,29 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailTemplate", b =>
+                {
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.SmtpAccount", "SmtpAccount")
+                        .WithMany("Templates")
+                        .HasForeignKey("SmtpAccountId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_mail_templates_smtp_accounts_smtp_account_id");
+
+                    b.Navigation("SmtpAccount");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailTemplateAttachment", b =>
+                {
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.MailTemplate", "MailTemplate")
+                        .WithMany("Attachments")
+                        .HasForeignKey("MailTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mail_template_attachments_mail_templates_mail_template_id");
+
+                    b.Navigation("MailTemplate");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MaterialVariant", b =>
                 {
                     b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Material", "Material")
@@ -916,6 +1323,55 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmail", b =>
+                {
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.MailTemplate", "MailTemplate")
+                        .WithMany("OutgoingEmails")
+                        .HasForeignKey("MailTemplateId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_outgoing_emails_mail_templates_mail_template_id");
+
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.Order", "Order")
+                        .WithMany("OutgoingEmails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_outgoing_emails_orders_order_id");
+
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmail", "ResentFromEmail")
+                        .WithMany("Resends")
+                        .HasForeignKey("ResentFromEmailId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_outgoing_emails_outgoing_emails_resent_from_email_id");
+
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.SmtpAccount", "SmtpAccount")
+                        .WithMany("OutgoingEmails")
+                        .HasForeignKey("SmtpAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_outgoing_emails_smtp_accounts_smtp_account_id");
+
+                    b.Navigation("MailTemplate");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("ResentFromEmail");
+
+                    b.Navigation("SmtpAccount");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmailAttachment", b =>
+                {
+                    b.HasOne("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmail", "OutgoingEmail")
+                        .WithMany("Attachments")
+                        .HasForeignKey("OutgoingEmailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_outgoing_email_attachments_outgoing_emails_outgoing_email_id");
+
+                    b.Navigation("OutgoingEmail");
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.ProductImage", b =>
@@ -1081,6 +1537,13 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.Navigation("SupplyItems");
                 });
 
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.MailTemplate", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("OutgoingEmails");
+                });
+
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Material", b =>
                 {
                     b.Navigation("MaterialVariants");
@@ -1102,6 +1565,15 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
                     b.Navigation("OrderPackingMaterials");
 
                     b.Navigation("OrderProducts");
+
+                    b.Navigation("OutgoingEmails");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.OutgoingEmail", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("Resends");
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.PackingMaterial", b =>
@@ -1130,6 +1602,13 @@ namespace GenoDev.BusinessTracker.Infrastructure.Migrations
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Production", b =>
                 {
                     b.Navigation("ProductionMaterials");
+                });
+
+            modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.SmtpAccount", b =>
+                {
+                    b.Navigation("OutgoingEmails");
+
+                    b.Navigation("Templates");
                 });
 
             modelBuilder.Entity("GenoDev.BusinessTracker.Domain.Entities.Supplier", b =>

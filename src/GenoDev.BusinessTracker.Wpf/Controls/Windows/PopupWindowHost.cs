@@ -520,18 +520,29 @@ public sealed class PopupWindowHost : ContentControl
         _window = null;
         _isWindowHiddenInRegistry = false;
         _hasHandledOpenRequestForCurrentWindow = false;
-        RestoreContent(window);
-
         var wasClosingFromHost = _isClosingFromHost;
         _isClosingFromHost = false;
-        if (!wasClosingFromHost)
+        try
         {
-            RequestClose();
+            if (!wasClosingFromHost)
+            {
+                // Clear dynamic editor content while it still has a stable parent.
+                // Reparenting its live DataTemplate first can recursively invalidate
+                // ContentPresenter bindings during the native close callback.
+                RequestClose();
+            }
         }
-
-        if (!IsLoaded)
+        finally
         {
-            AttachViewModel(null);
+            // A close command can indirectly touch complex controls (for example
+            // a WebBrowser-backed preview). Never let such an exception strand
+            // the declarative content inside an HWND that has already closed.
+            RestoreContent(window);
+
+            if (!IsLoaded)
+            {
+                AttachViewModel(null);
+            }
         }
     }
 
@@ -554,36 +565,54 @@ public sealed class PopupWindowHost : ContentControl
 
     private void RestoreContent(PopupWindow window)
     {
-        window.WindowContent = null;
-        _contentLayoutSnapshot?.Restore();
-        _contentLayoutSnapshot = null;
-        if (_detachedContent != null)
+        var content = _detachedContent;
+        var pinnedDataContextElement = PinInheritedDataContext(content, DataContext);
+        try
         {
-            if (_detachedContent is ContentControl { ContentTemplate: { } template } templateHost)
-            {
-                // A DataTemplate may have been instantiated only after its
-                // ContentControl moved into the popup, too late for the
-                // pre-open layout snapshot. Recreate that visual subtree so
-                // per-session editor resizing cannot leak into the next shell.
-                templateHost.ContentTemplate = null;
-                templateHost.ContentTemplate = template;
-            }
+            window.WindowContent = null;
+            _contentLayoutSnapshot?.Restore();
+            _contentLayoutSnapshot = null;
+            if (content == null) return;
 
-            SetCurrentValue(ContentProperty, _detachedContent);
+            SetCurrentValue(ContentProperty, content);
             _detachedContent = null;
+
         }
+        finally
+        {
+            pinnedDataContextElement?.ClearValue(DataContextProperty);
+        }
+    }
+
+    private static FrameworkElement? PinInheritedDataContext(object? content, object? dataContext)
+    {
+        if (content is not FrameworkElement element ||
+            element.ReadLocalValue(DataContextProperty) != DependencyProperty.UnsetValue)
+        {
+            return null;
+        }
+
+        element.SetCurrentValue(DataContextProperty, dataContext);
+        return element;
     }
 
     private void RequestClose()
     {
-        if (CloseCommand?.CanExecute(null) == true)
+        try
         {
-            CloseCommand.Execute(null);
+            if (CloseCommand?.CanExecute(null) == true)
+            {
+                CloseCommand.Execute(null);
+            }
         }
-
-        if (IsOpen)
+        finally
         {
-            SetCurrentValue(IsOpenProperty, false);
+            // Keep two-way popup state recoverable even when ViewModel cleanup
+            // fails. A later explicit open request must always create a session.
+            if (IsOpen)
+            {
+                SetCurrentValue(IsOpenProperty, false);
+            }
         }
     }
 

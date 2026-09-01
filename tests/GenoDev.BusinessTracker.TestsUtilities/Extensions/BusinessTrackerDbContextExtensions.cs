@@ -555,5 +555,118 @@ public static class BusinessTrackerDbContextExtensions
             db.OrderPackingMaterials.Add(opm);
             return opm;
         }
+
+        public SmtpAccount Arrange_SmtpAccount(
+            Guid? id = null,
+            string name = "Test SMTP",
+            bool isDefault = true,
+            bool isEnabled = true)
+        {
+            var account = new SmtpAccount
+            {
+                Id = id ?? Guid.NewGuid(), Name = name, Host = "smtp.example.com", Port = 587,
+                UseStartTls = true, UserName = "sender@example.com", Password = "secret",
+                FromAddress = "sender@example.com", FromName = "Test Sender",
+                IsDefault = isDefault, IsEnabled = isEnabled
+            };
+            db.SmtpAccounts.Add(account);
+            return account;
+        }
+
+        public MailSnippet Arrange_MailSnippet(
+            Guid? id = null,
+            string key = "footer",
+            string name = "Stopka",
+            string htmlContent = "<p>{{ sender.name }}</p>",
+            bool isActive = true)
+        {
+            var snippet = new MailSnippet { Id = id ?? Guid.NewGuid(), Key = key, Name = name, HtmlContent = htmlContent, IsActive = isActive };
+            db.MailSnippets.Add(snippet);
+            return snippet;
+        }
+
+        public MailTemplate Arrange_MailTemplate(
+            SmtpAccount? account = null,
+            Guid? id = null,
+            string name = "Potwierdzenie",
+            string subjectTemplate = "Zamówienie {{ order.identifier }}",
+            string htmlTemplate = "<p>Dzień dobry {{ client.name }}</p>{{> footer }}",
+            bool isActive = true)
+        {
+            account ??= db.Arrange_SmtpAccount();
+            var template = new MailTemplate
+            {
+                Id = id ?? Guid.NewGuid(), SmtpAccountId = account.Id, SmtpAccount = account,
+                Name = name, SubjectTemplate = subjectTemplate, HtmlTemplate = htmlTemplate,
+                IsActive = isActive, Attachments = []
+            };
+            account.Templates.Add(template);
+            db.MailTemplates.Add(template);
+            return template;
+        }
+
+        public MailTemplateAttachment Arrange_MailTemplateAttachment(
+            MailTemplate? template = null,
+            Guid? id = null,
+            string fileName = "regulamin.pdf",
+            byte[]? content = null)
+        {
+            template ??= db.Arrange_MailTemplate();
+            content ??= [1, 2, 3];
+            var attachment = new MailTemplateAttachment
+            {
+                Id = id ?? Guid.NewGuid(), MailTemplateId = template.Id, MailTemplate = template,
+                FileName = fileName, ContentType = "application/pdf", Content = content,
+                Size = content.LongLength, Sha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(content))
+            };
+            template.Attachments.Add(attachment);
+            db.MailTemplateAttachments.Add(attachment);
+            return attachment;
+        }
+
+        public OutgoingEmail Arrange_OutgoingEmail(
+            Order? order = null,
+            SmtpAccount? account = null,
+            MailTemplate? template = null,
+            Guid? id = null,
+            MailDeliveryStatus status = MailDeliveryStatus.Sent,
+            DateTime? createdAtUtc = null,
+            DateTime? sentAtUtc = null)
+        {
+            order ??= db.Arrange_Order();
+            account ??= template?.SmtpAccount ?? db.Arrange_SmtpAccount();
+            var email = new OutgoingEmail
+            {
+                Id = id ?? Guid.NewGuid(), OrderId = order.Id, Order = order,
+                SmtpAccountId = account.Id, SmtpAccount = account, MailTemplateId = template?.Id, MailTemplate = template,
+                RecipientAddress = "client@example.com", Subject = "Test", HtmlBody = "<p>Test</p>",
+                Status = status, CreatedAtUtc = createdAtUtc ?? DateTime.UtcNow, SentAtUtc = sentAtUtc,
+                Attachments = []
+            };
+            order.OutgoingEmails.Add(email); account.OutgoingEmails.Add(email); template?.OutgoingEmails.Add(email);
+            db.OutgoingEmails.Add(email);
+            return email;
+        }
+
+        public OutgoingEmailAttachment Arrange_OutgoingEmailAttachment(
+            OutgoingEmail? email = null,
+            Guid? id = null,
+            Guid? templateAttachmentId = null,
+            string fileName = "plik.pdf",
+            byte[]? content = null)
+        {
+            email ??= db.Arrange_OutgoingEmail();
+            content ??= [4, 5, 6];
+            var attachment = new OutgoingEmailAttachment
+            {
+                Id = id ?? Guid.NewGuid(), OutgoingEmailId = email.Id, OutgoingEmail = email,
+                TemplateAttachmentId = templateAttachmentId, FileName = fileName, ContentType = "application/pdf",
+                Content = content, Size = content.LongLength,
+                Sha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(content))
+            };
+            email.Attachments.Add(attachment);
+            db.OutgoingEmailAttachments.Add(attachment);
+            return attachment;
+        }
     }
 }

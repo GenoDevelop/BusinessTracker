@@ -83,6 +83,12 @@ public partial class OrdersViewModel : ViewModelBase
     private bool _isEditOrderFormOpen;
 
     [ObservableProperty]
+    private MailComposerViewModel? _mailComposer;
+
+    [ObservableProperty]
+    private bool _isMailComposerOpen;
+
+    [ObservableProperty]
     private OrderProductFormViewModel? _orderProductFormViewModel;
 
     [ObservableProperty]
@@ -189,6 +195,20 @@ public partial class OrdersViewModel : ViewModelBase
         RequestPopupOpen(nameof(IsOrderFormOpen));
         await Task.CompletedTask;
     }
+
+    [RelayCommand(CanExecute = nameof(CanComposeMail))]
+    private async Task ComposeMail()
+    {
+        if (SelectedOrder is null) return;
+        var composer = ActivatorUtilities.CreateInstance<MailComposerViewModel>(_serviceProvider, SelectedOrder.Id, false);
+        composer.RequestClose += (_, _) => IsMailComposerOpen = false;
+        MailComposer = composer;
+        IsMailComposerOpen = true;
+        RequestPopupOpen(nameof(IsMailComposerOpen));
+        await composer.InitializeAsync();
+    }
+
+    private bool CanComposeMail() => !string.IsNullOrWhiteSpace(SelectedOrder?.ClientDetails?.Email);
 
     [RelayCommand]
     private async Task EditOrder()
@@ -464,6 +484,7 @@ public partial class OrdersViewModel : ViewModelBase
 
     partial void OnSelectedOrderChanged(OrderListDto? value)
     {
+        ComposeMailCommand.NotifyCanExecuteChanged();
         if (_isRestoringOrdersSelection)
         {
             return;

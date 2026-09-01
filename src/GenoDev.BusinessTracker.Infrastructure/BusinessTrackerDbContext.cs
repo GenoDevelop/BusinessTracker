@@ -31,6 +31,12 @@ public class BusinessTrackerDbContext(DbContextOptions<BusinessTrackerDbContext>
     public DbSet<ClientDetails> ClientDetails { get; set; }
     public DbSet<StockAdjustment> StockAdjustments { get; set; }
     public DbSet<Note> Notes { get; set; }
+    public DbSet<SmtpAccount> SmtpAccounts { get; set; }
+    public DbSet<MailSnippet> MailSnippets { get; set; }
+    public DbSet<MailTemplate> MailTemplates { get; set; }
+    public DbSet<MailTemplateAttachment> MailTemplateAttachments { get; set; }
+    public DbSet<OutgoingEmail> OutgoingEmails { get; set; }
+    public DbSet<OutgoingEmailAttachment> OutgoingEmailAttachments { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
