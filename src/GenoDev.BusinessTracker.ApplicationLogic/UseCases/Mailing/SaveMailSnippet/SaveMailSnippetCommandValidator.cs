@@ -14,6 +14,11 @@ public sealed class SaveMailSnippetCommandValidator : AbstractValidator<SaveMail
         RuleFor(x => x.Name).NotEmpty().WithMessage("Nazwa snippetu jest wymagana.")
             .MaximumLength(150).WithMessage("Nazwa snippetu może mieć maksymalnie 150 znaków.");
         RuleFor(x => x.HtmlContent).NotEmpty().WithMessage("Treść HTML snippetu jest wymagana.");
+        RuleFor(x => x.HtmlContent).Custom((html, context) =>
+        {
+            var error = MailInlineImages.Validate(html);
+            if (error is not null) context.AddFailure(error);
+        });
         RuleFor(x => x).CustomAsync(async (command, context, ct) =>
         {
             if (string.IsNullOrWhiteSpace(command.Key) || string.IsNullOrWhiteSpace(command.HtmlContent)) return;

@@ -12,6 +12,19 @@
                 <TextBlock Text="{Binding Token}" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap"/>
             </StackPanel>
         </DataTemplate>
+        <DataTemplate x:Key="MailVariableCategoriesTemplate">
+            <TabControl ItemsSource="{Binding}" SelectedIndex="0">
+                <TabControl.ItemTemplate>
+                    <DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <ListBox ItemsSource="{Binding Variables}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}"
+                                 MouseDoubleClick="TokenList_MouseDoubleClick"/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid Margin="{StaticResource DetailPaneMargin}">
         <TabControl>
@@ -32,8 +45,11 @@
                             <StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Konto SMTP"/><ComboBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding TemplateAccount}" DisplayMemberPath="Name"/></StackPanel>
                         </Grid>
                         <StackPanel Grid.Row="1" Margin="0,8,0,0"><TextBlock Text="Temat"/><TextBox x:Name="SubjectTemplateEditor" Text="{Binding SubjectTemplate, UpdateSourceTrigger=PropertyChanged}" GotKeyboardFocus="Editor_GotKeyboardFocus"/></StackPanel>
-                        <TextBlock Grid.Row="2" Text="HTML" Margin="0,8,0,3"/>
-                        <controls:CodeTextBox x:Name="HtmlTemplateEditor" Grid.Row="3" Text="{Binding HtmlTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"
+                        <StackPanel Grid.Row="2" Margin="0,8,0,3">
+                            <TextBlock Text="HTML" Margin="0,0,0,4"/>
+                            <controls:MailImageInsertControl Editor="{Binding ElementName=HtmlTemplateEditor}"/>
+                        </StackPanel>
+                        <controls:MailHtmlEditor x:Name="HtmlTemplateEditor" Grid.Row="3" Html="{Binding HtmlTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"
                                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
                         <StackPanel Grid.Row="4" Margin="0,8,0,0">
                             <DockPanel><Button DockPanel.Dock="Right" Content="Dodaj pliki" Command="{Binding AddTemplateAttachmentsCommand}"/>
@@ -71,7 +87,10 @@
                         <controls:HtmlPreview Grid.Row="1" Html="{Binding TemplatePreviewHtml}"/>
                         <controls:RatioGridSplitter Grid.Row="2"/>
                         <TabControl Grid.Row="3">
-                            <TabItem Header="Zmienne"><ListBox ItemsSource="{Binding Variables}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Zmienne">
+                                <ContentControl Content="{Binding VariableCategories}" ContentTemplate="{StaticResource MailVariableCategoriesTemplate}"
+                                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                            </TabItem>
                             <TabItem Header="Warunki"><ListBox ItemsSource="{Binding Conditions}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
                             <TabItem Header="Pętle"><ListBox ItemsSource="{Binding Loops}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
                             <TabItem Header="Snippety"><ListBox ItemsSource="{Binding Snippets}" MouseDoubleClick="SnippetList_MouseDoubleClick"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Name}"/><TextBlock Text="{Binding Key}" FontFamily="Consolas" FontSize="11"/></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></TabItem>
@@ -86,7 +105,11 @@
                     <Grid Grid.Column="2" Margin="8,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                         <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Nazwa"/><TextBox Text="{Binding SnippetName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Unikalny klucz"/><TextBox Text="{Binding SnippetKey, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></Grid>
                         <StackPanel Grid.Row="1" Margin="0,8,0,0"><TextBlock Text="Opis"/><TextBox Text="{Binding SnippetDescription, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
-                        <TextBlock Grid.Row="2" Text="HTML" Margin="0,8,0,3"/><controls:CodeTextBox x:Name="SnippetHtmlEditor" Grid.Row="3" Text="{Binding SnippetHtml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
+                        <StackPanel Grid.Row="2" Margin="0,8,0,3">
+                            <TextBlock Text="HTML" Margin="0,0,0,4"/>
+                            <controls:MailImageInsertControl Editor="{Binding ElementName=SnippetHtmlEditor}"/>
+                        </StackPanel>
+                        <controls:MailHtmlEditor x:Name="SnippetHtmlEditor" Grid.Row="3" Html="{Binding SnippetHtml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
                         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0"><CheckBox Content="Aktywny" IsChecked="{Binding IsSnippetActive}" Margin="0,0,15,0"/><Button Content="Usuń" Command="{Binding DeleteSnippetCommand}" Margin="0,0,8,0" Visibility="{Binding SnippetId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveSnippetCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel>
                     </Grid>
                     <controls:RatioGridSplitter Grid.Column="3" Orientation="Vertical"/>
@@ -100,7 +123,10 @@
                         <controls:HtmlPreview Grid.Row="1" Html="{Binding SnippetPreviewHtml}"/>
                         <controls:RatioGridSplitter Grid.Row="2"/>
                         <TabControl Grid.Row="3">
-                            <TabItem Header="Zmienne"><ListBox ItemsSource="{Binding Variables}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
+                            <TabItem Header="Zmienne">
+                                <ContentControl Content="{Binding VariableCategories}" ContentTemplate="{StaticResource MailVariableCategoriesTemplate}"
+                                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                            </TabItem>
                             <TabItem Header="Warunki"><ListBox ItemsSource="{Binding Conditions}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
                             <TabItem Header="Pętle"><ListBox ItemsSource="{Binding Loops}" ItemTemplate="{StaticResource MailSyntaxItemTemplate}" MouseDoubleClick="TokenList_MouseDoubleClick"/></TabItem>
                             <TabItem Header="Snippety"><ListBox ItemsSource="{Binding Snippets}" MouseDoubleClick="SnippetList_MouseDoubleClick"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Name}"/><TextBlock Text="{Binding Key}" FontFamily="Consolas" FontSize="11"/></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></TabItem>

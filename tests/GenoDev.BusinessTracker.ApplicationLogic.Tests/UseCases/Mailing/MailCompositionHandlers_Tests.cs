@@ -39,6 +39,33 @@ public sealed class GetMailComposerHandler_Tests : BusinessTrackerUnitTestsBase<
         result.Subject.Should().Contain("ORD-1"); result.HtmlBody.Should().Contain("Jan &amp; Syn").And.Contain("Produkt").And.Contain("Test Sender");
         result.Attachments.Should().ContainSingle();
     }
+
+    [Theory]
+    [InlineData(true, "Firma")]
+    [InlineData(false, "Osoba prywatna")]
+    public async Task Handle_ShouldRenderTrackingUrlAndCompanyConditionsInTemplateAndSnippet(bool companyOrder, string expectedClientType)
+    {
+        // Arrange
+        var data = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var order = db.Arrange_Order(carrier: Carrier.InPost, trackingNumber: "123&456", companyOrder: companyOrder);
+            db.Arrange_ClientDetails(order);
+            var account = db.Arrange_SmtpAccount();
+            db.Arrange_MailSnippet(htmlContent:
+                "{{#if client.isCompany}}Firma{{/if}}{{#if client.isNotCompany}}Osoba prywatna{{/if}}");
+            var template = db.Arrange_MailTemplate(account,
+                subjectTemplate: "{{ order.trackingUrl }}",
+                htmlTemplate: "<a href=\"{{ order.trackingUrl }}\">{{> footer }}</a>");
+            return (order.Id, template.Id);
+        });
+
+        // Act
+        var result = await Sut.Handle(new GetMailComposerQuery(data.Item1, data.Item2), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Subject.Should().Be("https://inpost.pl/sledzenie-przesylek?number=123&456");
+        result.HtmlBody.Should().Be($"<a href=\"https://inpost.pl/sledzenie-przesylek?number=123&amp;456\">{expectedClientType}</a>");
+    }
 }
 
 public sealed class RenderMailPreviewHandler_Tests : BusinessTrackerUnitTestsBase<RenderMailPreviewQueryHandler>
@@ -68,6 +95,55 @@ public sealed class RenderMailPreviewHandler_Tests : BusinessTrackerUnitTestsBas
             TestContext.Current.CancellationToken);
 
         result.Should().Contain("Jan &amp; Syn").And.Contain("Produkt").And.Contain("Nadawca testowy");
+    }
+
+    [Theory]
+    [InlineData(Carrier.InPost, "123", "https://inpost.pl/sledzenie-przesylek?number=123")]
+    [InlineData(Carrier.InPost, "123&456", "https://inpost.pl/sledzenie-przesylek?number=123&amp;456")]
+    [InlineData(Carrier.InPost, null, "")]
+    [InlineData(Carrier.InPost, "", "")]
+    [InlineData(Carrier.InPost, "   ", "")]
+    [InlineData(null, "123", "")]
+    [InlineData(null, null, "")]
+    [InlineData(Carrier.Ups, "123", "")]
+    public async Task Handle_ShouldRenderTrackingUrlOnlyWhenAvailable(Carrier? carrier, string? trackingNumber, string expectedUrl)
+    {
+        // Arrange
+        var orderId = Arrange_BusinessTrackerDatabase(db =>
+            db.Arrange_Order(carrier: carrier, trackingNumber: trackingNumber).Id);
+
+        // Act
+        var result = await Sut.Handle(new RenderMailPreviewQuery(orderId, null,
+            "<span>{{ order.trackingUrl }}</span>{{#if order.trackingUrl}}<a href=\"{{ order.trackingUrl }}\">Tracking</a>{{/if}}"),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        var expectedLink = expectedUrl.Length == 0 ? string.Empty : $"<a href=\"{expectedUrl}\">Tracking</a>";
+        result.Should().Be($"<span>{expectedUrl}</span>{expectedLink}");
+    }
+
+    [Theory]
+    [InlineData(true, true, "Firma")]
+    [InlineData(false, true, "Osoba prywatna")]
+    [InlineData(true, false, "Firma")]
+    [InlineData(false, false, "Osoba prywatna")]
+    public async Task Handle_ShouldSelectCompanyConditionFromOrderFlag(bool companyOrder, bool hasClientDetails, string expectedClientType)
+    {
+        // Arrange
+        var orderId = Arrange_BusinessTrackerDatabase(db =>
+        {
+            var order = db.Arrange_Order(companyOrder: companyOrder);
+            if (hasClientDetails) db.Arrange_ClientDetails(order);
+            return order.Id;
+        });
+
+        // Act
+        var result = await Sut.Handle(new RenderMailPreviewQuery(orderId, null,
+            "{{#if client.isCompany}}Firma{{/if}}{{#if client.isNotCompany}}Osoba prywatna{{/if}}"),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be(expectedClientType);
     }
 }
 

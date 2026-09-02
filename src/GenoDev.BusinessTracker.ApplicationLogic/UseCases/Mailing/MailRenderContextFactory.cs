@@ -1,5 +1,6 @@
 using System.Globalization;
 using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.Domain.Enums;
 
 namespace GenoDev.BusinessTracker.ApplicationLogic.UseCases.Mailing;
 
@@ -22,6 +23,7 @@ internal static class MailRenderContextFactory
             ["order.source"] = order.OrderSource,
             ["order.description"] = order.Description,
             ["order.trackingNumber"] = order.TrackingNumber,
+            ["order.trackingUrl"] = order.Carrier?.GetTrackingUrl(order.TrackingNumber ?? string.Empty),
             ["order.carrier"] = order.Carrier?.ToString(),
             ["order.totalNetPrice"] = totalNet.ToString("N2", PolishCulture) + " zł",
             ["order.totalGrossPrice"] = totalGross.ToString("N2", PolishCulture) + " zł",
@@ -34,6 +36,8 @@ internal static class MailRenderContextFactory
             ["client.postCode"] = client?.PostCode,
             ["client.city"] = client?.City,
             ["client.description"] = client?.Description,
+            ["client.isCompany"] = order.CompanyOrder.ToString(),
+            ["client.isNotCompany"] = (!order.CompanyOrder).ToString(),
             ["sender.name"] = account?.FromName,
             ["sender.email"] = account?.FromAddress
         };

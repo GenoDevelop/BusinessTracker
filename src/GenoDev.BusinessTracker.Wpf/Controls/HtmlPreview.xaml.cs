@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
@@ -12,8 +13,14 @@ public partial class HtmlPreview : UserControl
     private Window? _hostWindow;
     private Window? _browserWindow;
     private WebBrowser? _layeredBrowser;
+    private WebBrowser? _loadedBrowser;
+    private WebBrowser? _navigatingBrowser;
     private Rect _lastBrowserBounds = Rect.Empty;
     private bool _isUpdatingLayeredBrowser;
+    private readonly DispatcherTimer _renderTimer = new(DispatcherPriority.Background)
+    {
+        Interval = TimeSpan.FromMilliseconds(250)
+    };
 
     public static readonly DependencyProperty HtmlProperty = DependencyProperty.Register(
         nameof(Html), typeof(string), typeof(HtmlPreview), new PropertyMetadata(string.Empty, OnHtmlChanged));
@@ -21,6 +28,7 @@ public partial class HtmlPreview : UserControl
     public HtmlPreview()
     {
         InitializeComponent();
+        _renderTimer.Tick += (_, _) => Render();
         Loaded += HtmlPreview_Loaded;
         Unloaded += HtmlPreview_Unloaded;
         IsVisibleChanged += HtmlPreview_IsVisibleChanged;
@@ -32,7 +40,12 @@ public partial class HtmlPreview : UserControl
         set => SetValue(HtmlProperty, value);
     }
 
-    private static void OnHtmlChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((HtmlPreview)d).Render();
+    private static void OnHtmlChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var preview = (HtmlPreview)d;
+        preview._renderTimer.Stop();
+        if (preview.IsLoaded) preview._renderTimer.Start();
+    }
 
     private void HtmlPreview_Loaded(object sender, RoutedEventArgs e)
     {
@@ -53,7 +66,11 @@ public partial class HtmlPreview : UserControl
         Render();
     }
 
-    private void HtmlPreview_Unloaded(object sender, RoutedEventArgs e) => DisposeLayeredHostBrowser();
+    private void HtmlPreview_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _renderTimer.Stop();
+        DisposeLayeredHostBrowser();
+    }
 
     private void HtmlPreview_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) =>
         UpdateLayeredBrowserBounds();
@@ -64,6 +81,7 @@ public partial class HtmlPreview : UserControl
 
         _layeredBrowser = new WebBrowser();
         _layeredBrowser.Navigating += Browser_Navigating;
+        _layeredBrowser.LoadCompleted += Browser_LoadCompleted;
         _browserWindow = new Window
         {
             WindowStyle = WindowStyle.None,
@@ -134,7 +152,11 @@ public partial class HtmlPreview : UserControl
             _hostWindow.Closed -= HostWindow_Closed;
         }
 
-        if (_layeredBrowser is not null) _layeredBrowser.Navigating -= Browser_Navigating;
+        if (_layeredBrowser is not null)
+        {
+            _layeredBrowser.Navigating -= Browser_Navigating;
+            _layeredBrowser.LoadCompleted -= Browser_LoadCompleted;
+        }
         var browserWindow = _browserWindow;
         _browserWindow = null;
         if (browserWindow is not null)
@@ -144,6 +166,8 @@ public partial class HtmlPreview : UserControl
         }
 
         _layeredBrowser = null;
+        _loadedBrowser = null;
+        _navigatingBrowser = null;
         _hostWindow = null;
         _lastBrowserBounds = Rect.Empty;
         _isUpdatingLayeredBrowser = false;
@@ -152,16 +176,30 @@ public partial class HtmlPreview : UserControl
 
     private void Render()
     {
+        _renderTimer.Stop();
         // Data bindings may change while a popup's native window is already
         // closing but its WPF subtree is still marked as loaded. Navigating the
         // hosted WebBrowser in that interval calls a torn-down COM object.
         if (!IsLoaded || _hostWindow is { IsVisible: false }) return;
 
-        _internalNavigation = true;
         var browser = _layeredBrowser ?? Browser;
         try
         {
-            browser.NavigateToString($"<!doctype html><html><head><meta charset=\"utf-8\"><style>body{{font-family:Segoe UI,Arial,sans-serif;font-size:14px;padding:14px;color:#202124}}img{{max-width:100%}}</style></head><body>{Html}</body></html>");
+            // Reuse the loaded document: repeated NavigateToString calls recreate the
+            // native document and can leave an empty preview during rapid edits.
+            if (ReferenceEquals(_loadedBrowser, browser) && browser.Document is { } document)
+            {
+                object? body = ((dynamic)document).body;
+                if (body is not null and not DBNull)
+                {
+                    ((dynamic)body).innerHTML = Html ?? string.Empty;
+                    return;
+                }
+            }
+            if (ReferenceEquals(_navigatingBrowser, browser)) return;
+            _navigatingBrowser = browser;
+            _internalNavigation = true;
+            browser.NavigateToString($"<!doctype html><html><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta charset=\"utf-8\"><style>body{{font-family:Segoe UI,Arial,sans-serif;font-size:14px;padding:14px;color:#202124}}img{{max-width:100%}}</style></head><body>{Html}</body></html>");
         }
         catch (COMException)
         {
@@ -169,11 +207,21 @@ public partial class HtmlPreview : UserControl
             // host is being recreated or torn down. A preview failure must not
             // terminate the application; a later load or HTML change rerenders.
             _internalNavigation = false;
+            _navigatingBrowser = null;
         }
         catch (InvalidOperationException) when (!IsLoaded || _hostWindow is null || !_hostWindow.IsVisible)
         {
             _internalNavigation = false;
+            _navigatingBrowser = null;
         }
+    }
+
+    private void Browser_LoadCompleted(object sender, NavigationEventArgs e)
+    {
+        if (!ReferenceEquals(sender, _layeredBrowser ?? Browser)) return;
+        _navigatingBrowser = null;
+        _loadedBrowser = (WebBrowser)sender;
+        Render();
     }
 
     private void Browser_Navigating(object sender, NavigatingCancelEventArgs e)

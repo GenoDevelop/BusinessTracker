@@ -89,4 +89,51 @@ public sealed class MailingValidators_Tests : BusinessTrackerUnitTestsBase<SaveS
             x.PropertyName == nameof(SaveMailSnippetCommand.HtmlContent) &&
             x.ErrorMessage.Contains("second → first → second", StringComparison.Ordinal));
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ImageValidators_ShouldAcceptEmbeddedImagesAndRejectDamagedData(bool damaged)
+    {
+        // Arrange
+        var data = Arrange_BusinessTrackerDatabase(db => (db.Arrange_Order().Id, db.Arrange_SmtpAccount().Id));
+        var html = damaged ? "<img src='data:image/png;base64,broken'>" : MailImageTestData.Html;
+
+        // Act
+        var snippet = await _sp.GetRequiredService<IValidator<SaveMailSnippetCommand>>().ValidateAsync(
+            new SaveMailSnippetCommand(null, "logo", "Logo", null, html, true), TestContext.Current.CancellationToken);
+        var template = await _sp.GetRequiredService<IValidator<SaveMailTemplateCommand>>().ValidateAsync(
+            new SaveMailTemplateCommand(null, data.Item2, "Template", "Subject", html, true, []), TestContext.Current.CancellationToken);
+        var queue = await _sp.GetRequiredService<IValidator<QueueOutgoingEmailCommand>>().ValidateAsync(
+            new QueueOutgoingEmailCommand(data.Item1, data.Item2, null, null, "client@example.com", null, "Subject", html, []), TestContext.Current.CancellationToken);
+
+        // Assert
+        snippet.IsValid.Should().Be(!damaged);
+        template.IsValid.Should().Be(!damaged);
+        queue.IsValid.Should().Be(!damaged);
+        if (damaged)
+        {
+            snippet.Errors.Should().Contain(x => x.PropertyName == nameof(SaveMailSnippetCommand.HtmlContent));
+            template.Errors.Should().Contain(x => x.PropertyName == nameof(SaveMailTemplateCommand.HtmlTemplate));
+            queue.Errors.Should().Contain(x => x.PropertyName == nameof(QueueOutgoingEmailCommand.HtmlBody));
+        }
+    }
+
+    [Fact]
+    public async Task TemplateAndQueueValidators_ShouldIncludeImagesInTotalAttachmentSize()
+    {
+        // Arrange
+        var data = Arrange_BusinessTrackerDatabase(db => (db.Arrange_Order().Id, db.Arrange_SmtpAccount().Id));
+        var attachments = new[] { new MailAttachmentInput(null, "file.pdf", "application/pdf", new byte[MailAttachmentConstraints.MaxTotalSizeBytes]) };
+
+        // Act
+        var template = await _sp.GetRequiredService<IValidator<SaveMailTemplateCommand>>().ValidateAsync(
+            new SaveMailTemplateCommand(null, data.Item2, "Template", "Subject", MailImageTestData.Html, true, attachments), TestContext.Current.CancellationToken);
+        var queue = await _sp.GetRequiredService<IValidator<QueueOutgoingEmailCommand>>().ValidateAsync(
+            new QueueOutgoingEmailCommand(data.Item1, data.Item2, null, null, "client@example.com", null, "Subject", MailImageTestData.Html, attachments), TestContext.Current.CancellationToken);
+
+        // Assert
+        template.Errors.Should().Contain(x => x.PropertyName == nameof(SaveMailTemplateCommand.HtmlTemplate) && x.ErrorMessage.Contains("20 MB"));
+        queue.Errors.Should().Contain(x => x.PropertyName == nameof(QueueOutgoingEmailCommand.HtmlBody) && x.ErrorMessage.Contains("20 MB"));
+    }
 }

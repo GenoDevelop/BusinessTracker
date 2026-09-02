@@ -21,6 +21,11 @@ public sealed class QueueOutgoingEmailCommandValidator : AbstractValidator<Queue
         RuleFor(x => x.Subject).NotEmpty().WithMessage("Temat wiadomości jest wymagany.")
             .MaximumLength(998).WithMessage("Temat wiadomości jest zbyt długi.");
         RuleFor(x => x.HtmlBody).NotEmpty().WithMessage("Treść HTML wiadomości jest wymagana.");
+        RuleFor(x => x).Custom((command, context) =>
+        {
+            var error = MailInlineImages.Validate(command.HtmlBody, command.Attachments?.Sum(x => (long)(x.Content?.Length ?? 0)) ?? 0);
+            if (error is not null) context.AddFailure(nameof(command.HtmlBody), error);
+        });
         RuleFor(x => x.Attachments).NotNull().WithMessage("Lista załączników jest wymagana.")
             .Must(x => x is null || x.Count <= MailAttachmentConstraints.MaxFilesPerMessage)
             .WithMessage("Wiadomość może zawierać maksymalnie 20 załączników.")

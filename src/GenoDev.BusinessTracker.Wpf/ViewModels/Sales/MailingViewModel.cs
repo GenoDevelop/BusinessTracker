@@ -31,7 +31,7 @@ public partial class MailingViewModel(IMediator mediator, IServiceProvider servi
     public PaginationPageLoader HistoryPageLoader => LoadHistoryPageAsync;
     public event Action? HistoryRefreshRequested;
 
-    public IReadOnlyList<MailTokenDto> Variables { get; } = MailTokenCatalog.Variables;
+    public IReadOnlyList<MailVariableCategory> VariableCategories { get; } = MailTokenCatalog.VariableCategories;
     public IReadOnlyList<MailTokenDto> Conditions { get; } = MailTokenCatalog.Conditions;
     public IReadOnlyList<MailTokenDto> Loops { get; } = MailTokenCatalog.Loops;
 
@@ -445,47 +445,73 @@ public sealed record MailPreviewOrderOption(Guid? Id, string DisplayName)
     public override string ToString() => DisplayName;
 }
 
+public sealed record MailVariableCategory(string Name, IReadOnlyList<MailTokenDto> Variables);
+
 public static class MailTokenCatalog
 {
-    public static IReadOnlyList<MailTokenDto> Variables { get; } =
+    public static IReadOnlyList<MailVariableCategory> VariableCategories { get; } =
     [
-        new("{{ order.id }}", "Techniczny identyfikator zamówienia", "Zmienne", "Identyfikator GUID zamówienia"),
-        new("{{ order.identifier }}", "Numer zamówienia", "Zmienne", "Czytelny identyfikator zamówienia"),
-        new("{{ order.paymentIdentifier }}", "Identyfikator płatności", "Zmienne", "Identyfikator używany przy płatności"),
-        new("{{ order.orderDate }}", "Data zamówienia", "Zmienne", "Data w formacie dzień.miesiąc.rok"),
-        new("{{ order.status }}", "Status zamówienia", "Zmienne", "Aktualny status zamówienia"),
-        new("{{ order.source }}", "Źródło zamówienia", "Zmienne", "Źródło, z którego pochodzi zamówienie"),
-        new("{{ order.description }}", "Opis zamówienia", "Zmienne", "Dodatkowy opis zamówienia"),
-        new("{{ order.trackingNumber }}", "Numer przesyłki", "Zmienne", "Numer śledzenia przesyłki"),
-        new("{{ order.carrier }}", "Przewoźnik", "Zmienne", "Przewoźnik przypisany do zamówienia"),
-        new("{{ order.totalNetPrice }}", "Łączna wartość netto", "Zmienne", "Wartość produktów i wysyłki netto"),
-        new("{{ order.totalGrossPrice }}", "Łączna wartość brutto", "Zmienne", "Wartość produktów i wysyłki brutto"),
-        new("{{ order.shippingNetClientPrice }}", "Koszt wysyłki netto", "Zmienne", "Koszt wysyłki netto dla klienta"),
-        new("{{ order.shippingGrossClientPrice }}", "Koszt wysyłki brutto", "Zmienne", "Koszt wysyłki brutto dla klienta"),
-        new("{{ client.name }}", "Nazwa klienta", "Zmienne", "Imię, nazwisko lub nazwa klienta"),
-        new("{{ client.email }}", "E-mail klienta", "Zmienne", "Adres e-mail klienta"),
-        new("{{ client.phone }}", "Telefon klienta", "Zmienne", "Numer telefonu klienta"),
-        new("{{ client.street }}", "Ulica klienta", "Zmienne", "Ulica i numer klienta"),
-        new("{{ client.postCode }}", "Kod pocztowy klienta", "Zmienne", "Kod pocztowy klienta"),
-        new("{{ client.city }}", "Miasto klienta", "Zmienne", "Miasto klienta"),
-        new("{{ client.description }}", "Opis klienta", "Zmienne", "Dodatkowy opis klienta"),
-        new("{{ sender.name }}", "Nazwa nadawcy", "Zmienne", "Nazwa nadawcy z wybranego konta SMTP"),
-        new("{{ sender.email }}", "E-mail nadawcy", "Zmienne", "Adres nadawcy z wybranego konta SMTP"),
-        new("{{ product.name }}", "Nazwa produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.identifier }}", "Identyfikator produktu", "Zmienne", "Dostępny wewnątrz pętli produktów"),
-        new("{{ product.orderedAmount }}", "Zamówiona ilość produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.assignedAmount }}", "Przypisana ilość produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.unitNetPrice }}", "Cena jednostkowa netto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.unitGrossPrice }}", "Cena jednostkowa brutto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.totalNetPrice }}", "Łączna cena netto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ product.totalGrossPrice }}", "Łączna cena brutto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
-        new("{{ packingMaterial.name }}", "Nazwa materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych"),
-        new("{{ packingMaterial.amount }}", "Ilość materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych"),
-        new("{{ packingMaterial.unit }}", "Jednostka materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych")
+        new("Zamówienie",
+        [
+            new("{{ order.id }}", "Techniczny identyfikator zamówienia", "Zmienne", "Identyfikator GUID zamówienia"),
+            new("{{ order.identifier }}", "Numer zamówienia", "Zmienne", "Czytelny identyfikator zamówienia"),
+            new("{{ order.orderDate }}", "Data zamówienia", "Zmienne", "Data w formacie dzień.miesiąc.rok"),
+            new("{{ order.status }}", "Status zamówienia", "Zmienne", "Aktualny status zamówienia"),
+            new("{{ order.source }}", "Źródło zamówienia", "Zmienne", "Źródło, z którego pochodzi zamówienie"),
+            new("{{ order.description }}", "Opis zamówienia", "Zmienne", "Dodatkowy opis zamówienia"),
+        ]),
+        new("Wysyłka",
+        [
+            new("{{ order.trackingNumber }}", "Numer przesyłki", "Zmienne", "Numer śledzenia przesyłki"),
+            new("{{ order.trackingUrl }}", "URL do śledzenia przesyłki", "Zmienne", "Link na podstawie przewoźnika i numeru przesyłki, jak w szczegółach zamówienia; pusty przy braku danych lub obsługi przewoźnika"),
+            new("{{ order.carrier }}", "Przewoźnik", "Zmienne", "Przewoźnik przypisany do zamówienia"),
+            new("{{ order.shippingNetClientPrice }}", "Koszt wysyłki netto", "Zmienne", "Koszt wysyłki netto dla klienta"),
+            new("{{ order.shippingGrossClientPrice }}", "Koszt wysyłki brutto", "Zmienne", "Koszt wysyłki brutto dla klienta"),
+        ]),
+        new("Płatności",
+        [
+            new("{{ order.paymentIdentifier }}", "Identyfikator płatności", "Zmienne", "Identyfikator używany przy płatności"),
+            new("{{ order.totalNetPrice }}", "Łączna wartość netto", "Zmienne", "Wartość produktów i wysyłki netto"),
+            new("{{ order.totalGrossPrice }}", "Łączna wartość brutto", "Zmienne", "Wartość produktów i wysyłki brutto"),
+        ]),
+        new("Klient",
+        [
+            new("{{ client.name }}", "Nazwa klienta", "Zmienne", "Imię, nazwisko lub nazwa klienta"),
+            new("{{ client.email }}", "E-mail klienta", "Zmienne", "Adres e-mail klienta"),
+            new("{{ client.phone }}", "Telefon klienta", "Zmienne", "Numer telefonu klienta"),
+            new("{{ client.street }}", "Ulica klienta", "Zmienne", "Ulica i numer klienta"),
+            new("{{ client.postCode }}", "Kod pocztowy klienta", "Zmienne", "Kod pocztowy klienta"),
+            new("{{ client.city }}", "Miasto klienta", "Zmienne", "Miasto klienta"),
+            new("{{ client.description }}", "Opis klienta", "Zmienne", "Dodatkowy opis klienta"),
+        ]),
+        new("Produkty",
+        [
+            new("{{ product.name }}", "Nazwa produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.identifier }}", "Identyfikator produktu", "Zmienne", "Dostępny wewnątrz pętli produktów"),
+            new("{{ product.orderedAmount }}", "Zamówiona ilość produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.assignedAmount }}", "Przypisana ilość produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.unitNetPrice }}", "Cena jednostkowa netto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.unitGrossPrice }}", "Cena jednostkowa brutto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.totalNetPrice }}", "Łączna cena netto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+            new("{{ product.totalGrossPrice }}", "Łączna cena brutto produktu", "Zmienne", "Dostępna wewnątrz pętli produktów"),
+        ]),
+        new("Materiały pakowe",
+        [
+            new("{{ packingMaterial.name }}", "Nazwa materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych"),
+            new("{{ packingMaterial.amount }}", "Ilość materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych"),
+            new("{{ packingMaterial.unit }}", "Jednostka materiału pakowego", "Zmienne", "Dostępna wewnątrz pętli materiałów pakowych")
+        ]),
+        new("Nadawca",
+        [
+            new("{{ sender.name }}", "Nazwa nadawcy", "Zmienne", "Nazwa nadawcy z wybranego konta SMTP"),
+            new("{{ sender.email }}", "E-mail nadawcy", "Zmienne", "Adres nadawcy z wybranego konta SMTP"),
+        ])
     ];
 
     public static IReadOnlyList<MailTokenDto> Conditions { get; } =
     [
+        new("{{#if client.isCompany}}\n    ...\n{{/if}}", "Klient jest firmą", "Warunki", "Wyświetla zawartość, gdy w zamówieniu zaznaczono pole Firma"),
+        new("{{#if client.isNotCompany}}\n    ...\n{{/if}}", "Klient nie jest firmą", "Warunki", "Wyświetla zawartość, gdy w zamówieniu nie zaznaczono pola Firma"),
         new("{{#if order.trackingNumber}}\n    ...\n{{/if}}", "Jeżeli istnieje numer przesyłki", "Warunki", "Wyświetla zawartość tylko po przypisaniu numeru śledzenia"),
         new("{{#if order.carrier}}\n    ...\n{{/if}}", "Jeżeli wybrano przewoźnika", "Warunki", "Wyświetla zawartość tylko po wybraniu przewoźnika"),
         new("{{#if order.description}}\n    ...\n{{/if}}", "Jeżeli zamówienie ma opis", "Warunki", "Wyświetla zawartość tylko dla zamówienia z opisem"),

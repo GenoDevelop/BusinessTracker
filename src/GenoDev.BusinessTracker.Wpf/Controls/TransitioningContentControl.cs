@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
@@ -182,13 +183,18 @@ public sealed class TransitioningContentControl : ContentControl
         presenter = new ContentPresenter
         {
             Content = content,
-            ContentTemplate = ContentTemplate,
-            ContentTemplateSelector = ContentTemplateSelector,
-            ContentStringFormat = ContentStringFormat,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Visibility = Visibility.Collapsed
         };
+        // TabControl may supply its selected content before its content template.
+        // Keep cached presenters synchronized when the presentation settings arrive later.
+        presenter.SetBinding(ContentPresenter.ContentTemplateProperty,
+            new Binding(nameof(ContentTemplate)) { Source = this, Mode = BindingMode.OneWay });
+        presenter.SetBinding(ContentPresenter.ContentTemplateSelectorProperty,
+            new Binding(nameof(ContentTemplateSelector)) { Source = this, Mode = BindingMode.OneWay });
+        presenter.SetBinding(ContentPresenter.ContentStringFormatProperty,
+            new Binding(nameof(ContentStringFormat)) { Source = this, Mode = BindingMode.OneWay });
         _presenters.Add(content, presenter);
         _contentCache!.Children.Add(presenter);
         return presenter;

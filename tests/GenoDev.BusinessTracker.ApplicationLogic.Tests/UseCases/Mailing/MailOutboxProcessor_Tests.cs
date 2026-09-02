@@ -1,6 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
 using GenoDev.BusinessTracker.Domain.Entities;
+using GenoDev.BusinessTracker.ApplicationLogic.UseCases.Mailing;
 using GenoDev.BusinessTracker.Domain.Enums;
 using GenoDev.BusinessTracker.Infrastructure;
 using GenoDev.BusinessTracker.Infrastructure.Services;
@@ -64,6 +65,60 @@ public sealed class MailOutboxProcessor_Tests : BusinessTrackerUnitTestsBase<Mai
 
 public sealed class MailMessageFactory_Tests
 {
+    [Fact]
+    public async Task Create_ShouldSerializeCidImagesAsRelatedPartsAlongsideOrdinaryAttachments()
+    {
+        // Arrange
+        var email = new OutgoingEmail
+        {
+            RecipientAddress = "client@example.com", Subject = "Images",
+            HtmlBody = MailImageTestData.Html + MailImageTestData.Html + MailInlineImages.CreateImageHtml(MailImageTestData.Gif, "Icon", 100),
+            SmtpAccount = new SmtpAccount { FromAddress = "sender@example.com", FromName = "Sender" },
+            Attachments = { new OutgoingEmailAttachment { FileName = "document.pdf", ContentType = "application/pdf", Content = [1, 2, 3], Size = 3 } }
+        };
+        var originalHtml = email.HtmlBody;
+        var directory = Directory.CreateTempSubdirectory("genodev-mail-cid-");
+
+        try
+        {
+            // Act
+            using var message = MailMessageFactory.Create(email);
+            using var smtp = new System.Net.Mail.SmtpClient
+            {
+                DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory,
+                PickupDirectoryLocation = directory.FullName
+            };
+            await smtp.SendMailAsync(message, TestContext.Current.CancellationToken);
+            var mime = await File.ReadAllTextAsync(Directory.GetFiles(directory.FullName).Single(), TestContext.Current.CancellationToken);
+
+            // Assert
+            var view = message.AlternateViews.Should().ContainSingle().Subject;
+            view.ContentStream.Position = 0;
+            using var reader = new StreamReader(view.ContentStream, leaveOpen: true);
+            var html = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
+            html.Should().NotContain("data:");
+            view.LinkedResources.Should().HaveCount(2);
+            foreach (var image in view.LinkedResources)
+            {
+                html.Should().Contain("cid:" + image.ContentId);
+                mime.Should().Contain("Content-ID: <" + image.ContentId + ">");
+                image.TransferEncoding.Should().Be(System.Net.Mime.TransferEncoding.Base64);
+                image.ContentStream.Position = 0;
+                using var copy = new MemoryStream();
+                await image.ContentStream.CopyToAsync(copy, TestContext.Current.CancellationToken);
+                copy.ToArray().Should().Equal(image.ContentType.MediaType == "image/png" ? MailImageTestData.Png : MailImageTestData.Gif);
+            }
+            mime.Should().Contain("multipart/related").And.Contain("image/png").And.Contain("image/gif");
+            message.Attachments.Should().ContainSingle().Which.ContentDisposition!.Inline.Should().BeFalse();
+            email.HtmlBody.Should().Be(originalHtml);
+        }
+        finally
+        {
+            foreach (var file in Directory.GetFiles(directory.FullName)) File.Delete(file);
+            directory.Delete();
+        }
+    }
+
     [Fact]
     public void Create_ShouldBuildBase64MimeAttachmentWithAttachmentDisposition()
     {

@@ -15,6 +15,11 @@ public sealed class SaveMailTemplateCommandValidator : AbstractValidator<SaveMai
             .Must(x => !x.Contains("{{>", StringComparison.Ordinal) && !x.Contains("{{#", StringComparison.Ordinal))
             .WithMessage("Temat może zawierać wyłącznie zmienne, bez snippetów, warunków i pętli.");
         RuleFor(x => x.HtmlTemplate).NotEmpty().WithMessage("Treść HTML szablonu jest wymagana.");
+        RuleFor(x => x).Custom((command, context) =>
+        {
+            var error = MailInlineImages.Validate(command.HtmlTemplate, command.Attachments?.Sum(x => (long)(x.Content?.Length ?? 0)) ?? 0);
+            if (error is not null) context.AddFailure(nameof(command.HtmlTemplate), error);
+        });
         RuleFor(x => x.SmtpAccountId).MustAsync(async (id, ct) => id is null || await dbContext.SmtpAccounts.AnyAsync(x => x.Id == id, ct))
             .WithMessage("Nie znaleziono wybranego konta SMTP.");
         RuleFor(x => x).MustAsync(async (command, ct) =>

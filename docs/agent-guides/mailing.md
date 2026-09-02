@@ -8,6 +8,7 @@ Read this guide for mailing UI, templates, SMTP configuration, attachments, pers
 - Templates support HTML-encoded `{{ dotted.variable }}`, snippets `{{> snippet_key }}`, optional blocks, and order product/packing-material loops. Subjects allow scalars only.
 - Validate the full reachable snippet graph before save: reject missing references and direct/indirect cycles with the cycle path, cap nesting at 32, and retain renderer guards.
 - Editors can preview unsaved HTML with the same renderer/order context used for delivery; explicit no-order preview displays raw HTML.
+- Inline PNG/JPEG/GIF images are self-contained Base64 data URLs in persisted HTML, including snippets and queued/resend snapshots; never persist local file paths. Bind mail HTML editors through `MailHtmlEditor.Html`: its editable `Text` uses short session-only references and must never be saved directly. `MailInlineImages` validates persisted HTML and the SMTP factory converts images to deduplicated CID-linked MIME resources. They follow HTML history retention; ordinary attachment retention remains separate. Keep image insertion shared across all mail HTML editors.
 - `HtmlPreview` uses WPF `WebBrowser` in ordinary views. Inside layered `PopupWindow`, use the bounds-synchronized opaque companion window and contain expected teardown COM races.
 - New/resend composers are resizable/maximizable popup sessions. Put initial/minimum dimensions on `PopupWindowHost`; keep the composer root stretch-aligned without fixed dimensions.
 

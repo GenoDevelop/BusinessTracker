@@ -1,0 +1,12 @@
+<UserControl x:Class="GenoDev.BusinessTracker.Wpf.Controls.MailImageInsertControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="InsertButton" Content="Wstaw obraz" Click="InsertButton_Click" Padding="10,4"
+                    ToolTip="Wstaw PNG, JPG lub GIF (do 5 MB). Obraz zostanie zapisany razem z treścią wiadomości."/>
+        </StackPanel>
+        <TextBlock x:Name="ErrorText" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"
+                   Visibility="Collapsed" Margin="0,4,0,0"/>
+    </StackPanel>
+</UserControl>

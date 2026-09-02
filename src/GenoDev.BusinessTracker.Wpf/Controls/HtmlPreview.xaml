@@ -2,6 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Border Background="White" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4">
-        <WebBrowser x:Name="Browser" Navigating="Browser_Navigating" />
+        <WebBrowser x:Name="Browser" Navigating="Browser_Navigating" LoadCompleted="Browser_LoadCompleted" />
     </Border>
 </UserControl>

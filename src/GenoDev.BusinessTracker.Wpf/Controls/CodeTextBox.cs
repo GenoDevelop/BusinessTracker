@@ -1,11 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
-public sealed class CodeTextBox : TextBox
+public class CodeTextBox : TextBox
 {
     private ScrollViewer? _contentHost;
     private CodeLineNumberMargin? _lineNumberMargin;
@@ -47,6 +48,86 @@ public sealed class CodeTextBox : TextBox
         base.OnSelectionChanged(e);
         QueueEditorChromeRefresh(measureLineNumbers: false);
     }
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (Keyboard.Modifiers == ModifierKeys.Alt && key is Key.Up or Key.Down)
+        {
+            e.Handled = true;
+            if (!IsReadOnly) MoveSelectedLines(key == Key.Up ? -1 : 1);
+            return;
+        }
+
+        base.OnPreviewKeyDown(e);
+    }
+
+    private void MoveSelectedLines(int direction)
+    {
+        var text = Text;
+        var lines = GetLogicalLines(text);
+        var selectionStart = SelectionStart;
+        var selectionLength = SelectionLength;
+        var selectionEnd = selectionStart + Math.Max(0, selectionLength - 1);
+        var first = lines.FindIndex(line => selectionStart < line.End);
+        var last = lines.FindIndex(line => selectionEnd < line.End);
+        if (first < 0) first = lines.Count - 1;
+        if (last < 0) last = lines.Count - 1;
+        if (direction < 0 && first == 0 || direction > 0 && last == lines.Count - 1) return;
+
+        var blockStart = lines[first].Start;
+        var blockEnd = lines[last].ContentEnd;
+        int replaceStart, replaceEnd, offset;
+        string replacement;
+        if (direction < 0)
+        {
+            var previous = lines[first - 1];
+            replaceStart = previous.Start;
+            replaceEnd = blockEnd;
+            replacement = text[blockStart..blockEnd] + text[previous.ContentEnd..blockStart] + text[previous.Start..previous.ContentEnd];
+            offset = previous.Start - blockStart;
+        }
+        else
+        {
+            var next = lines[last + 1];
+            replaceStart = blockStart;
+            replaceEnd = next.ContentEnd;
+            replacement = text[next.Start..next.ContentEnd] + text[blockEnd..next.Start] + text[blockStart..blockEnd];
+            offset = next.ContentEnd - blockEnd;
+        }
+
+        BeginChange();
+        try
+        {
+            Select(replaceStart, replaceEnd - replaceStart);
+            SelectedText = replacement;
+            var movedStart = selectionStart + offset;
+            Select(movedStart, Math.Min(selectionLength, Text.Length - movedStart));
+        }
+        finally { EndChange(); }
+
+        var caretLine = GetLineIndexFromCharacterIndex(CaretIndex);
+        if (caretLine >= 0) ScrollToLine(caretLine);
+    }
+
+    private static List<LogicalLine> GetLogicalLines(string text)
+    {
+        // Work with actual line breaks, independently of visual wrapping and layout.
+        var lines = new List<LogicalLine>();
+        var start = 0;
+        for (var index = 0; index < text.Length; index++)
+        {
+            if (text[index] is not ('\r' or '\n')) continue;
+            var contentEnd = index;
+            if (text[index] == '\r' && index + 1 < text.Length && text[index + 1] == '\n') index++;
+            lines.Add(new LogicalLine(start, contentEnd, index + 1));
+            start = index + 1;
+        }
+        lines.Add(new LogicalLine(start, text.Length, text.Length));
+        return lines;
+    }
+
+    private readonly record struct LogicalLine(int Start, int ContentEnd, int End);
 
     private void ContentHost_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
