@@ -2,6 +2,10 @@
 
 Read this guide for mailing UI, templates, SMTP configuration, attachments, persistence, delivery, or tests.
 
+## Authoring manual
+
+- [Mail and snippet authoring manual](../mailing/template-authoring.md) is the canonical, standalone Polish reference for users and external AI chats. Read it when changing authoring behavior, and update its supported syntax, variables, formatting, scopes, examples, editor/image limits, and rendering lifecycle in the same change whenever those capabilities change. Keep it complete without requiring repository access; exclude private account/customer data and database-specific snippet inventories.
+
 ## Templates and preview
 
 - Mailing is a sibling Orders module. SMTP accounts, templates, snippets, and history are global; order composition starts from an order and client e-mail.
