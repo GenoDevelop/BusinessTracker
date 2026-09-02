@@ -53,6 +53,12 @@
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="CodeHtmlTagBrush" Color="#235E9B" />
+    <SolidColorBrush x:Key="CodeHtmlAttributeBrush" Color="#885119" />
+    <SolidColorBrush x:Key="CodeHtmlValueBrush" Color="#28734D" />
+    <SolidColorBrush x:Key="CodeHtmlCommentBrush" Color="#708175" />
+    <SolidColorBrush x:Key="CodeHtmlExpressionBrush" Color="#8652A0" />
+    <SolidColorBrush x:Key="CodeIndentGuideBrush" Color="#D5DFE3" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
     <SolidColorBrush x:Key="AccentPressedBrush" Color="{StaticResource AccentPressedColor}" />
@@ -751,6 +757,18 @@
                                                                        Focusable="False" />
                                     <ScrollViewer x:Name="PART_ContentHost"
                                                   Margin="0,4,4,4" />
+                                    <controls:CodeHtmlSyntaxLayer x:Name="PART_HtmlSyntax"
+                                                                  Owner="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                  TagBrush="{DynamicResource CodeHtmlTagBrush}"
+                                                                  AttributeBrush="{DynamicResource CodeHtmlAttributeBrush}"
+                                                                  ValueBrush="{DynamicResource CodeHtmlValueBrush}"
+                                                                  CommentBrush="{DynamicResource CodeHtmlCommentBrush}"
+                                                                  ExpressionBrush="{DynamicResource CodeHtmlExpressionBrush}"
+                                                                  GuideBrush="{DynamicResource CodeIndentGuideBrush}"
+                                                                  Visibility="Collapsed"
+                                                                  IsHitTestVisible="False"
+                                                                  Focusable="False" />
                                 </Grid>
                             </Grid>
                         </Border>
@@ -780,14 +798,27 @@
                         <Trigger Property="IsReadOnly" Value="True">
                             <Setter TargetName="InputBorder" Property="Background" Value="{DynamicResource SurfaceAlternativeBrush}" />
                         </Trigger>
+                        <Trigger Property="IsHtmlHighlightingEnabled" Value="True">
+                            <Setter TargetName="PART_HtmlSyntax" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="PART_HtmlSyntax" Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsHtmlHighlightingEnabled" Value="True">
+                <Setter Property="Foreground" Value="Transparent" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type controls:MailHtmlEditor}"
-           BasedOn="{StaticResource {x:Type controls:CodeTextBox}}" />
+           BasedOn="{StaticResource {x:Type controls:CodeTextBox}}">
+        <Setter Property="IsHtmlHighlightingEnabled" Value="True" />
+    </Style>
 
     <Style TargetType="{x:Type RichTextBox}">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />

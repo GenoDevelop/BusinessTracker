@@ -11,8 +11,19 @@ public class CodeTextBox : TextBox
     private ScrollViewer? _contentHost;
     private CodeLineNumberMargin? _lineNumberMargin;
     private CodeCurrentLineHighlight? _currentLineHighlight;
+    private CodeHtmlSyntaxLayer? _htmlSyntaxLayer;
     private bool _lineNumberRefreshPending;
     private bool _lineNumberMeasurePending;
+
+    public bool IsHtmlHighlightingEnabled
+    {
+        get => (bool)GetValue(IsHtmlHighlightingEnabledProperty);
+        set => SetValue(IsHtmlHighlightingEnabledProperty, value);
+    }
+
+    public static readonly DependencyProperty IsHtmlHighlightingEnabledProperty = DependencyProperty.Register(
+        nameof(IsHtmlHighlightingEnabled), typeof(bool), typeof(CodeTextBox),
+        new FrameworkPropertyMetadata(false, (owner, _) => ((CodeTextBox)owner).QueueEditorChromeRefresh(false)));
 
     static CodeTextBox()
     {
@@ -33,6 +44,7 @@ public class CodeTextBox : TextBox
 
         _lineNumberMargin = GetTemplateChild("PART_LineNumbers") as CodeLineNumberMargin;
         _currentLineHighlight = GetTemplateChild("PART_CurrentLineHighlight") as CodeCurrentLineHighlight;
+        _htmlSyntaxLayer = GetTemplateChild("PART_HtmlSyntax") as CodeHtmlSyntaxLayer;
         QueueEditorChromeRefresh(measureLineNumbers: true);
     }
 
@@ -133,6 +145,7 @@ public class CodeTextBox : TextBox
     {
         _lineNumberMargin?.InvalidateVisual();
         _currentLineHighlight?.InvalidateVisual();
+        _htmlSyntaxLayer?.InvalidateVisual();
     }
 
     private void QueueEditorChromeRefresh(bool measureLineNumbers)
@@ -144,7 +157,8 @@ public class CodeTextBox : TextBox
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
         {
             _lineNumberRefreshPending = false;
-            if (_lineNumberMeasurePending) _lineNumberMargin?.InvalidateMeasure();
+            if (_lineNumberMeasurePending) _lineNumberMargin?.RefreshLineCount();
+            if (_lineNumberMeasurePending) _htmlSyntaxLayer?.InvalidateVisual();
             _lineNumberMeasurePending = false;
             _lineNumberMargin?.InvalidateVisual();
             _currentLineHighlight?.InvalidateVisual();
@@ -192,6 +206,16 @@ public sealed class CodeCurrentLineHighlight : Control
 
 public sealed class CodeLineNumberMargin : Control
 {
+    private int _measuredDigits;
+
+    internal void RefreshLineCount()
+    {
+        // Typing within the existing digit count does not change the gutter width.
+        if (_measuredDigits != GetDigitCount()) InvalidateMeasure();
+    }
+
+    private int GetDigitCount() => Math.Max(1, (Owner?.LineCount ?? 1).ToString().Length);
+
     public CodeTextBox? Owner
     {
         get => (CodeTextBox?)GetValue(OwnerProperty);
@@ -206,8 +230,8 @@ public sealed class CodeLineNumberMargin : Control
 
     protected override Size MeasureOverride(Size constraint)
     {
-        var digits = Math.Max(1, (Owner?.LineCount ?? 1).ToString().Length);
-        var sample = CreateText(new string('0', digits));
+        _measuredDigits = GetDigitCount();
+        var sample = CreateText(new string('0', _measuredDigits));
         return new Size(Math.Ceiling(sample.WidthIncludingTrailingWhitespace) + 18, 0);
     }
 
