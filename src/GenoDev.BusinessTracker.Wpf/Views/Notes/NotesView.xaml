@@ -354,7 +354,7 @@
                             IsEnabled="{Binding IsEditorEnabled}"
                             MinWidth="90"
                             Padding="15,6"
-                            Background="{DynamicResource AccentBrush}"
+                            Background="{DynamicResource PrimaryButtonBackgroundBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </Grid>
@@ -376,7 +376,7 @@
                     <Button Content="Dodaj"
                             Command="{Binding SaveCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
+                            Background="{DynamicResource PrimaryButtonBackgroundBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>

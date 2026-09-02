@@ -21,7 +21,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelCommand}" Margin="0,0,10,0" Padding="15,5" />
                     <Button Content="Zapisz" Command="{Binding SaveCommand}" Padding="15,5"
-                            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"
+                            Background="{DynamicResource PrimaryButtonBackgroundBrush}" Foreground="{DynamicResource PrimaryButtonForegroundBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
@@ -431,8 +431,8 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource DangerBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
+                            Background="{DynamicResource DangerButtonBackgroundBrush}"
+                            Foreground="{DynamicResource DangerButtonForegroundBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
@@ -458,8 +458,8 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource DangerBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
+                            Background="{DynamicResource DangerButtonBackgroundBrush}"
+                            Foreground="{DynamicResource DangerButtonForegroundBrush}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>

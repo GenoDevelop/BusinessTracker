@@ -42,6 +42,7 @@ These rules apply under `GenoDev.BusinessTracker.Wpf` in addition to the reposit
 - Application tables are explicit read-only `ConfigurableDataGrid`s with `AutoGenerateColumns="False"`, shared headers, explicit templates/bindings, and a stable unique `LayoutKey`. See the narrower DataGrids guidance when changing grid internals.
 - Table filters use the controls under `Controls/TableColumns`; reusable filter/header behavior belongs there.
 - Use semantic brushes and implicit control styles from `Themes/ModernTheme.xaml`; do not hard-code presentation colors or create view-local scrollbar/input/table chrome. Add a token only when no semantic role fits.
+- Keep light/dark colors in `Themes/LightPalette.xaml` and `Themes/DarkPalette.xaml`; both themes share templates and brush instances so switching preserves layout and updates existing converter results and popup sessions.
 - Supply statuses use the dedicated new/ordered/received brushes; order statuses reuse them for new/processing/delivered, while shipped uses `OrderStatusShippedBrush`.
 - Use `RatioGridSplitter` for neighboring regions (`Vertical` resizes columns; default horizontal resizes rows). A collapsible pane contains its heading, toolbar, and content and uses `ClipToBounds="True"`.
 - Use the shared detail-pane margins, compact master-list toolbar styles, action-icon dimensions, input styles, and splitter styles rather than local variants.

@@ -73,7 +73,7 @@
                         </ScrollViewer>
                         <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                             <CheckBox Content="Aktywny" IsChecked="{Binding IsTemplateActive}" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                            <Button Content="Usuń" Command="{Binding DeleteTemplateCommand}" Margin="0,0,8,0" Visibility="{Binding TemplateId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveTemplateCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/>
+                            <Button Content="Usuń" Command="{Binding DeleteTemplateCommand}" Margin="0,0,8,0" Visibility="{Binding TemplateId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveTemplateCommand}" Background="{DynamicResource PrimaryButtonBackgroundBrush}" Foreground="{DynamicResource PrimaryButtonForegroundBrush}"/>
                         </StackPanel>
                     </Grid>
                     <controls:RatioGridSplitter Grid.Column="3" Orientation="Vertical"/>
@@ -110,7 +110,7 @@
                             <controls:MailImageInsertControl Editor="{Binding ElementName=SnippetHtmlEditor}"/>
                         </StackPanel>
                         <controls:MailHtmlEditor x:Name="SnippetHtmlEditor" Grid.Row="3" Html="{Binding SnippetHtml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotKeyboardFocus="Editor_GotKeyboardFocus"/>
-                        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0"><CheckBox Content="Aktywny" IsChecked="{Binding IsSnippetActive}" Margin="0,0,15,0"/><Button Content="Usuń" Command="{Binding DeleteSnippetCommand}" Margin="0,0,8,0" Visibility="{Binding SnippetId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveSnippetCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0"><CheckBox Content="Aktywny" IsChecked="{Binding IsSnippetActive}" Margin="0,0,15,0"/><Button Content="Usuń" Command="{Binding DeleteSnippetCommand}" Margin="0,0,8,0" Visibility="{Binding SnippetId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveSnippetCommand}" Background="{DynamicResource PrimaryButtonBackgroundBrush}" Foreground="{DynamicResource PrimaryButtonForegroundBrush}"/></StackPanel>
                     </Grid>
                     <controls:RatioGridSplitter Grid.Column="3" Orientation="Vertical"/>
                     <Grid Grid.Column="4" Margin="8,0,0,0">
@@ -145,7 +145,7 @@
                         <Grid Grid.Row="3" Margin="0,8,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Adres nadawcy"/><TextBox Text="{Binding FromAddress, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="1" Margin="8,0,0,0"><TextBlock Text="Nazwa nadawcy"/><TextBox Text="{Binding FromName, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></Grid>
                         <StackPanel Grid.Row="4" Margin="0,8,0,0"><TextBlock Text="Reply-To (opcjonalnie)"/><TextBox Text="{Binding ReplyToAddress, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
                         <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,12,0,0"><CheckBox Content="STARTTLS" IsChecked="{Binding UseStartTls}" Margin="0,0,15,0"/><CheckBox Content="Domyślne" IsChecked="{Binding IsDefaultAccount}" Margin="0,0,15,0"/><CheckBox Content="Aktywne" IsChecked="{Binding IsAccountEnabled}"/></StackPanel>
-                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0"><Button Content="Usuń" Command="{Binding DeleteAccountCommand}" Margin="0,0,8,0" Visibility="{Binding AccountId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveAccountCommand}" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"/></StackPanel>
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0"><Button Content="Usuń" Command="{Binding DeleteAccountCommand}" Margin="0,0,8,0" Visibility="{Binding AccountId, Converter={StaticResource NullToVisibilityConverter}}"/><Button Content="Zapisz" Command="{Binding SaveAccountCommand}" Background="{DynamicResource PrimaryButtonBackgroundBrush}" Foreground="{DynamicResource PrimaryButtonForegroundBrush}"/></StackPanel>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -188,7 +188,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/>
                     <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5"
-                            Background="{DynamicResource DangerBrush}" IsDefault="True"/>
+                            Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True"/>
                 </StackPanel>
             </StackPanel>
         </controls:PopupWindowHost>

@@ -12,6 +12,7 @@
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Background="Transparent"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         StateChanged="Window_StateChanged">

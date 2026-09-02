@@ -564,10 +564,10 @@
                                                         <TextBlock FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,18,5">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
-                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding HasEnough}" Value="False">
-                                                                            <Setter Property="Foreground" Value="Red" />
+                                                                            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -636,8 +636,8 @@
                                 <Button Content="Zapisz produkcję"
                                         Command="{Binding SaveProductionCommand}"
                                         Padding="15,5"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Foreground="{DynamicResource OnAccentBrush}"
+                                        Background="{DynamicResource PrimaryButtonBackgroundBrush}"
+                                        Foreground="{DynamicResource PrimaryButtonForegroundBrush}"
                                         BorderBrush="{DynamicResource AccentBrush}" />
                             </StackPanel>
                         </Grid>
@@ -660,7 +660,7 @@
                     </TextBlock>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Nie" Command="{Binding CancelDeleteProductionCommand}" Margin="0,0,10,0" Padding="15,5"/>
-                        <Button Content="Tak" Command="{Binding ConfirmDeleteProductionCommand}" Padding="15,5" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource OnAccentBrush}" />
+                        <Button Content="Tak" Command="{Binding ConfirmDeleteProductionCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" Foreground="{DynamicResource DangerButtonForegroundBrush}" />
                     </StackPanel>
                 </StackPanel>
         </controls:PopupWindowHost>
@@ -689,8 +689,8 @@
                     <Button Content="Dodaj"
                             Command="{Binding ConfirmAddMaterialCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource AccentBrush}"
-                            Foreground="{DynamicResource OnAccentBrush}"
+                            Background="{DynamicResource PrimaryButtonBackgroundBrush}"
+                            Foreground="{DynamicResource PrimaryButtonForegroundBrush}"
                             BorderBrush="{DynamicResource AccentBrush}" />
                 </StackPanel>
             </StackPanel>

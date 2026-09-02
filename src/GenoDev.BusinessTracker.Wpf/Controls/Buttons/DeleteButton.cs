@@ -8,7 +8,7 @@ public sealed class DeleteButton : IconButton
     public DeleteButton()
     {
         SetResourceReference(StyleProperty, "ActionIconButton");
-        SetResourceReference(ForegroundProperty, "DangerBrush");
+        SetResourceReference(ForegroundProperty, "DangerIconBrush");
         ToolTip = "Usuń";
         Content = IconFactory.Create(
             IconData,

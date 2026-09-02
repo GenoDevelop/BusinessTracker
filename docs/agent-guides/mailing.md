@@ -32,7 +32,7 @@ Read this guide for mailing UI, templates, SMTP configuration, attachments, pers
 - Resend differences are yellow warning cards in that same row with full historical filename/reason tooltips. Each requires explicit remove or replace/accept before queueing.
 - Added/changed current template files remain pending yellow cards until accepted or removed; never duplicate them as ordinary attachments. Available bytes allow download/accept/remove; unavailable files allow replace/remove.
 - Save-to-computer appears wherever bytes exist. Expected access/I/O failures remain in inline attachment validation; expired/missing files expose no unavailable download action.
-- Ordinary cards use high-contrast dark glyphs on blue; warning cards use dark brown glyphs on yellow. Hover darkens the fill without losing contrast.
+- Attachment cards use semantic theme brushes: teal accents for ordinary cards and amber accents for warnings. Keep glyphs readable against normal and hovered surfaces in the active palette.
 - Optional attachment validation collapses completely when null. Composer header rows share label columns so recipient/subject editors align.
 - Resend shows the original template name read-only and cannot switch/reapply templates; new composition retains its selector/apply action.
 - Templates, snippets, and SMTP accounts expose refresh beside create and use shared entity-specific popup confirmations. Successful create reselects the returned ID; ordinary refresh preserves selection.

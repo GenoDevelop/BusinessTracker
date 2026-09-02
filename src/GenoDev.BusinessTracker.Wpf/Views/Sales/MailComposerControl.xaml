@@ -93,7 +93,7 @@
                        Visibility="{Binding HasDifferences, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button Content="Anuluj" Command="{Binding CloseCommand}" Margin="0,0,8,0" Padding="14,5"/>
-                <Button Content="Dodaj do kolejki" Command="{Binding SendCommand}" IsDefault="True" Padding="14,5" Background="{DynamicResource AccentBrush}"/>
+                <Button Content="Dodaj do kolejki" Command="{Binding SendCommand}" IsDefault="True" Padding="14,5" Background="{DynamicResource PrimaryButtonBackgroundBrush}"/>
             </StackPanel>
         </Grid>
     </Grid>

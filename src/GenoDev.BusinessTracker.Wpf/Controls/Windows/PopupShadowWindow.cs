@@ -56,7 +56,8 @@ internal sealed class PopupShadowWindow : Window
             Margin = new Thickness(shadowMargin),
             Background = Brushes.White,
             CornerRadius = new CornerRadius(cornerRadius),
-            Effect = shadowEffect.CloneCurrentValue()
+            // Keep dynamic palette references when the application theme changes.
+            Effect = shadowEffect.Clone()
         });
         Content = _shadowRoot;
     }

@@ -86,6 +86,7 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        ((Themes.ThemeSettings)Resources["ThemeSettings"]).Initialize(Resources);
         await _host.StartAsync();
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();

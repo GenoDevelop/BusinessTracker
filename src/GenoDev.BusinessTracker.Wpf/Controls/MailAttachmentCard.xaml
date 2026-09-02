@@ -27,9 +27,9 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#C5E2E5"/></Trigger>
+                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource AttachmentActionHoverBrush}"/></Trigger>
                 <DataTrigger Binding="{Binding IsWarning, RelativeSource={RelativeSource AncestorType={x:Type controls:MailAttachmentCard}}}" Value="True">
-                    <Setter Property="Foreground" Value="#5B390F"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AttachmentWarningForegroundBrush}"/>
                     <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
                     <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
                 </DataTrigger>
@@ -38,7 +38,7 @@
                         <Condition Binding="{Binding IsWarning, RelativeSource={RelativeSource AncestorType={x:Type controls:MailAttachmentCard}}}" Value="True"/>
                         <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Background" Value="#E9C98E"/>
+                    <Setter Property="Background" Value="{DynamicResource WarningHoverBrush}"/>
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -79,7 +79,7 @@
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}"/>
-                        <Style.Triggers><DataTrigger Binding="{Binding IsWarning, ElementName=Root}" Value="True"><Setter Property="Background" Value="#FFF0CE"/></DataTrigger></Style.Triggers>
+                        <Style.Triggers><DataTrigger Binding="{Binding IsWarning, ElementName=Root}" Value="True"><Setter Property="Background" Value="{DynamicResource AttachmentWarningSurfaceBrush}"/></DataTrigger></Style.Triggers>
                     </Style>
                 </Border.Style>
                 <Grid>
@@ -99,7 +99,7 @@
                                 <Style.Triggers><DataTrigger Binding="{Binding IsWarning, ElementName=Root}" Value="True"><Setter Property="Background" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock Text="{Binding FileTypeLabel}" Foreground="White" FontSize="8" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding FileTypeLabel}" Foreground="{DynamicResource OnAccentBrush}" FontSize="8" FontWeight="Bold"/>
                     </Border>
                 </Grid>
             </Border>
@@ -111,8 +111,8 @@
             <Border x:Name="HoverOverlay" Grid.ColumnSpan="2" Opacity="0">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="#26000000"/>
-                        <Style.Triggers><DataTrigger Binding="{Binding IsWarning, ElementName=Root}" Value="True"><Setter Property="Background" Value="#33AE6B20"/></DataTrigger></Style.Triggers>
+                        <Setter Property="Background" Value="{DynamicResource AttachmentHoverOverlayBrush}"/>
+                        <Style.Triggers><DataTrigger Binding="{Binding IsWarning, ElementName=Root}" Value="True"><Setter Property="Background" Value="{DynamicResource AttachmentWarningHoverOverlayBrush}"/></DataTrigger></Style.Triggers>
                     </Style>
                 </Border.Style>
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,5,5">
