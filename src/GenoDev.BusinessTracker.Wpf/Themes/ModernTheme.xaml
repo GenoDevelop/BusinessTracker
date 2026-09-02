@@ -1702,6 +1702,65 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type controls:TabHeaderScrollViewer}">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="CanContentScroll" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:TabHeaderScrollViewer}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="PreviousHeadersButton"
+                                Grid.Column="0"
+                                Style="{StaticResource IconButton}"
+                                VerticalAlignment="Center"
+                                Focusable="False"
+                                Visibility="Collapsed"
+                                IsEnabled="{TemplateBinding CanScrollLeft}"
+                                ToolTip="Przesuń zakładki w lewo"
+                                AutomationProperties.Name="Przesuń zakładki w lewo"
+                                Command="{x:Static ScrollBar.PageLeftCommand}"
+                                CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                            <Path Data="{StaticResource CollapseNavigationIconGeometry}"
+                                  Style="{StaticResource ToolbarIconStyle}" />
+                        </Button>
+                        <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                                Grid.Column="1"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                CanContentScroll="{TemplateBinding CanContentScroll}" />
+                        <Button x:Name="NextHeadersButton"
+                                Grid.Column="2"
+                                Style="{StaticResource IconButton}"
+                                VerticalAlignment="Center"
+                                Focusable="False"
+                                Visibility="Collapsed"
+                                IsEnabled="{TemplateBinding CanScrollRight}"
+                                ToolTip="Przesuń zakładki w prawo"
+                                AutomationProperties.Name="Przesuń zakładki w prawo"
+                                Command="{x:Static ScrollBar.PageRightCommand}"
+                                CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                            <Path Data="{StaticResource ExpandNavigationIconGeometry}"
+                                  Style="{StaticResource ToolbarIconStyle}" />
+                        </Button>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasOverflow" Value="True">
+                            <Setter TargetName="PreviousHeadersButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="NextHeadersButton" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type TabControl}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
@@ -1717,27 +1776,29 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Grid x:Name="PART_HeaderAnimationHost">
-                            <Border x:Name="PART_SelectionSurface"
-                                    Panel.ZIndex="0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Background="{DynamicResource SurfaceBrush}"
-                                    CornerRadius="7"
-                                    IsHitTestVisible="False"
-                                    Opacity="0" />
-                            <TabPanel Panel.ZIndex="1"
-                                      IsItemsHost="True"
-                                      KeyboardNavigation.TabIndex="1" />
-                            <Border x:Name="PART_ActiveIndicator"
-                                    Panel.ZIndex="2"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Background="{DynamicResource AccentBrush}"
-                                    CornerRadius="1"
-                                    IsHitTestVisible="False"
-                                    Opacity="0" />
-                        </Grid>
+                        <controls:TabHeaderScrollViewer>
+                            <Grid x:Name="PART_HeaderAnimationHost">
+                                <Border x:Name="PART_SelectionSurface"
+                                        Panel.ZIndex="0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Background="{DynamicResource SurfaceBrush}"
+                                        CornerRadius="7"
+                                        IsHitTestVisible="False"
+                                        Opacity="0" />
+                                <TabPanel Panel.ZIndex="1"
+                                          IsItemsHost="True"
+                                          KeyboardNavigation.TabIndex="1" />
+                                <Border x:Name="PART_ActiveIndicator"
+                                        Panel.ZIndex="2"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Background="{DynamicResource AccentBrush}"
+                                        CornerRadius="1"
+                                        IsHitTestVisible="False"
+                                        Opacity="0" />
+                            </Grid>
+                        </controls:TabHeaderScrollViewer>
                         <Border Grid.Row="1"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
