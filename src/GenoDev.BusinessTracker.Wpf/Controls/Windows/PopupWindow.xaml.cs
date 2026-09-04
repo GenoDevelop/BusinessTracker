@@ -486,7 +486,9 @@ public partial class PopupWindow : Window
     private void UpdateWindowChrome()
     {
         var isMaximized = WindowState == WindowState.Maximized;
-        ResizeMode = IsResizable ? ResizeMode.CanResize : ResizeMode.NoResize;
+        ResizeMode = IsResizable && !isMaximized
+            ? ResizeMode.CanResize
+            : ResizeMode.NoResize;
         if (WindowChrome.GetWindowChrome(this) is { } windowChrome)
         {
             windowChrome.ResizeBorderThickness = IsResizable && !isMaximized
@@ -494,16 +496,17 @@ public partial class PopupWindow : Window
                 : default;
         }
 
-        WindowBorder.Margin = isMaximized
-            ? SystemParameters.WindowResizeBorderThickness
-            : default;
-        WindowBorder.Padding = isMaximized
-            ? new Thickness(3)
-            : default;
         MaximizeButton.Visibility = IsResizable ? Visibility.Visible : Visibility.Collapsed;
         MaximizeButton.ToolTip = isMaximized ? "Przywróć rozmiar" : "Pełny ekran";
         MaximizeIcon.Data = isMaximized ? RestoreGeometry : MaximizeGeometry;
         UpdateNativeFrame();
+
+        if (isMaximized)
+        {
+            _ = Dispatcher.BeginInvoke(
+                DispatcherPriority.Background,
+                () => MaximizedWindowBounds.FitToMonitorWorkArea(this));
+        }
     }
 
     private void AttachNativeBorderBrush()

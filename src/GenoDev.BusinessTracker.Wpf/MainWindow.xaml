@@ -21,6 +21,9 @@
         MinHeight="640" MinWidth="900"
         WindowStyle="None"
         ResizeMode="CanResize"
+        Background="Transparent"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
         StateChanged="MainWindow_StateChanged"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <shell:WindowChrome.WindowChrome>
@@ -99,7 +102,7 @@
             <Grid>
                 <Border Background="{DynamicResource GlassSheenBrush}"
                         IsHitTestVisible="False" />
-                <StackPanel Margin="18,0,300,0"
+                <StackPanel Margin="18,1,300,0"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <Border Width="4"

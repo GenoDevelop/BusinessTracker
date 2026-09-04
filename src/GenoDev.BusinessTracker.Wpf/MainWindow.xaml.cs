@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shell;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using GenoDev.BusinessTracker.Wpf.Controls;
 
 namespace GenoDev.BusinessTracker.Wpf;
@@ -22,8 +23,12 @@ public partial class MainWindow : Window
     private const int DwmWindowAttributeNcRenderingPolicy = 2;
     private const int DwmWindowAttributeCornerPreference = 33;
     private const int DwmWindowAttributeBorderColor = 34;
+    private const int DwmWindowAttributeSystemBackdropType = 38;
+    private const int DwmWindowAttributeRedirectionBitmapAlpha = 39;
+    private const int DwmWindowAttributeBorderMargins = 40;
     private const int DwmNcRenderingEnabled = 2;
     private const int DwmCornerPreferenceRound = 2;
+    private const int DwmSystemBackdropNone = 1;
     private const uint SetWindowPositionNoSize = 0x0001;
     private const uint SetWindowPositionNoMove = 0x0002;
     private const uint SetWindowPositionNoZOrder = 0x0004;
@@ -43,6 +48,13 @@ public partial class MainWindow : Window
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
+
+        var windowHandle = new WindowInteropHelper(this).Handle;
+        if (HwndSource.FromHwnd(windowHandle)?.CompositionTarget is { } compositionTarget)
+        {
+            compositionTarget.BackgroundColor = Colors.Transparent;
+        }
+
         AttachNativeBorderBrush();
     }
 
@@ -82,6 +94,7 @@ public partial class MainWindow : Window
     private void UpdateWindowChrome()
     {
         var isMaximized = WindowState == WindowState.Maximized;
+        ResizeMode = isMaximized ? ResizeMode.NoResize : ResizeMode.CanResize;
         if (WindowChrome.GetWindowChrome(this) is { } windowChrome)
         {
             windowChrome.ResizeBorderThickness = isMaximized
@@ -89,13 +102,14 @@ public partial class MainWindow : Window
                 : SystemParameters.WindowResizeBorderThickness;
         }
 
-        MainWindowBorder.Margin = isMaximized
-            ? SystemParameters.WindowResizeBorderThickness
-            : default;
-        MainWindowBorder.Padding = isMaximized
-            ? new Thickness(3)
-            : default;
         UpdateNativeFrame();
+
+        if (isMaximized)
+        {
+            _ = Dispatcher.BeginInvoke(
+                DispatcherPriority.Background,
+                () => MaximizedWindowBounds.FitToMonitorWorkArea(this));
+        }
     }
 
     private void UpdateNativeFrame()
@@ -120,7 +134,30 @@ public partial class MainWindow : Window
             ref cornerPreference,
             sizeof(int));
 
+        var systemBackdrop = DwmSystemBackdropNone;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeSystemBackdropType,
+            ref systemBackdrop,
+            sizeof(int));
+
+        var redirectionBitmapAlphaEnabled = 1;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeRedirectionBitmapAlpha,
+            ref redirectionBitmapAlphaEnabled,
+            sizeof(int));
+
         UpdateNativeBorderColor(handle);
+
+        var borderMargins = WindowState == WindowState.Maximized
+            ? default
+            : new NativeMargins { Left = 1, Right = 1, Top = 1, Bottom = 1 };
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeBorderMargins,
+            ref borderMargins,
+            Marshal.SizeOf<NativeMargins>());
 
         _ = SetWindowPos(
             handle,
@@ -247,4 +284,20 @@ public partial class MainWindow : Window
         int attribute,
         ref int attributeValue,
         int attributeSize);
+
+    [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr windowHandle,
+        int attribute,
+        ref NativeMargins attributeValue,
+        int attributeSize);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeMargins
+    {
+        public int Left;
+        public int Right;
+        public int Top;
+        public int Bottom;
+    }
 }
