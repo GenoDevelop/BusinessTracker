@@ -19,11 +19,14 @@
         Title="Business Tracker" Height="768" Width="1024"
         Foreground="{DynamicResource TextPrimaryBrush}"
         MinHeight="640" MinWidth="900"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        StateChanged="MainWindow_StateChanged"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="32"
                             GlassFrameThickness="0"
-                            ResizeBorderThickness="6"
+                            ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"
                             UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
     <Window.Resources>
@@ -81,6 +84,8 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+    <Border x:Name="MainWindowBorder"
+            Background="{DynamicResource GlassSurfaceBrush}">
     <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="32" />
@@ -462,4 +467,5 @@
                 </Border>
             </Grid>
         </Grid>
+    </Border>
 </Window>

@@ -494,6 +494,12 @@ public partial class PopupWindow : Window
                 : default;
         }
 
+        WindowBorder.Margin = isMaximized
+            ? SystemParameters.WindowResizeBorderThickness
+            : default;
+        WindowBorder.Padding = isMaximized
+            ? new Thickness(3)
+            : default;
         MaximizeButton.Visibility = IsResizable ? Visibility.Visible : Visibility.Collapsed;
         MaximizeButton.ToolTip = isMaximized ? "Przywróć rozmiar" : "Pełny ekran";
         MaximizeIcon.Data = isMaximized ? RestoreGeometry : MaximizeGeometry;
