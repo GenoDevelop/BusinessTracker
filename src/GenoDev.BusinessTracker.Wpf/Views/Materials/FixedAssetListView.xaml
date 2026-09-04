@@ -213,7 +213,7 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource DangerButtonBackgroundBrush}"
+                            Style="{StaticResource DangerButtonStyle}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>

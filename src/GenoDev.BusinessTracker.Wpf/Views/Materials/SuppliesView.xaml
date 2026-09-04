@@ -272,7 +272,7 @@
                     </TextBlock>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True" />
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
             </controls:PopupWindowHost>
@@ -287,7 +287,7 @@
                     </TextBlock>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Anuluj" Command="{Binding CancelDeleteItemCommand}" Margin="0,0,10,0" Padding="15,5" />
-                        <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True" />
+                        <Button Content="Usuń" Command="{Binding ConfirmDeleteItemCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
             </controls:PopupWindowHost>

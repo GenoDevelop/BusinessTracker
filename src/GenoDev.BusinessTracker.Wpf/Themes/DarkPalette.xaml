@@ -76,5 +76,5 @@
     <Color x:Key="DangerButtonBorderColor">#643E4A</Color>
     <Color x:Key="IconForegroundColor">#859CA7</Color>
     <Color x:Key="IconHoverColor">#83AFB1</Color>
-    <Color x:Key="DangerIconColor">#C75E68</Color>
+    <Color x:Key="DangerIconColor">#A96872</Color>
 </ResourceDictionary>

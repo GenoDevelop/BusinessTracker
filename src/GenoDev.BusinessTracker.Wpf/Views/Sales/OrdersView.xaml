@@ -944,7 +944,7 @@
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelDeleteOrderCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Usuń" Command="{Binding ConfirmDeleteOrderCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteOrderCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
         </controls:PopupWindowHost>
@@ -1088,7 +1088,7 @@
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelDeleteProductCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Usuń" Command="{Binding ConfirmDeleteProductCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeleteProductCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
         </controls:PopupWindowHost>
@@ -1178,7 +1178,7 @@
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Anuluj" Command="{Binding CancelDeletePackingMaterialCommand}" Margin="0,0,10,0" Padding="15,5" />
-                    <Button Content="Usuń" Command="{Binding ConfirmDeletePackingMaterialCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" IsDefault="True" />
+                    <Button Content="Usuń" Command="{Binding ConfirmDeletePackingMaterialCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}" IsDefault="True" />
                 </StackPanel>
             </StackPanel>
         </controls:PopupWindowHost>

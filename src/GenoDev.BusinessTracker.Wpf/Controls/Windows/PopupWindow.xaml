@@ -51,7 +51,7 @@
                     </Grid.ColumnDefinitions>
                     <Border Width="4" Height="22" Background="{DynamicResource AccentBrush}"
                             CornerRadius="2" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="1" Margin="12,0,0,0"
+                    <TextBlock Grid.Column="1" Margin="12,-2,0,0"
                                Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}"
                                Foreground="{DynamicResource TextPrimaryBrush}"
                                FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="18" FontWeight="SemiBold"

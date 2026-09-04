@@ -215,7 +215,7 @@
         </controls:PopupWindowHost>
 
         <controls:PopupWindowHost IsOpen="{Binding IsDeletePopupOpen}" Title="Usuń korektę stanu" StaysOpen="True">
-            <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Background="{DynamicResource DangerButtonBackgroundBrush}" Foreground="{DynamicResource DangerButtonForegroundBrush}"/></StackPanel></StackPanel>
+            <StackPanel Width="340"><TextBlock Text="Usunięcie korekty odwróci jej wpływ na stan magazynowy. Czy kontynuować?" TextWrapping="Wrap" Margin="0,0,0,20"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Anuluj" Command="{Binding CancelDeleteCommand}" Margin="0,0,10,0" Padding="15,5"/><Button Content="Usuń" Command="{Binding ConfirmDeleteCommand}" Padding="15,5" Style="{StaticResource DangerButtonStyle}"/></StackPanel></StackPanel>
         </controls:PopupWindowHost>
     </Grid>
 </UserControl>

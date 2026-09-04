@@ -431,8 +431,7 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource DangerButtonBackgroundBrush}"
-                            Foreground="{DynamicResource DangerButtonForegroundBrush}"
+                            Style="{StaticResource DangerButtonStyle}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>
@@ -458,8 +457,7 @@
                     <Button Content="Usuń"
                             Command="{Binding ConfirmDeleteCommand}"
                             Padding="15,5"
-                            Background="{DynamicResource DangerButtonBackgroundBrush}"
-                            Foreground="{DynamicResource DangerButtonForegroundBrush}"
+                            Style="{StaticResource DangerButtonStyle}"
                             IsDefault="True" />
                 </StackPanel>
             </StackPanel>

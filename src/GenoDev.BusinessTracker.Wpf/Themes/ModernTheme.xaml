@@ -312,11 +312,11 @@
                                           Margin="{TemplateBinding Padding}"
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          RecognizesAccessKey="True" />
+                        RecognizesAccessKey="True" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AccentMutedBrush}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource AccentMutedBrush}" />
                             <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.055" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
@@ -371,6 +371,11 @@
         <Setter Property="Foreground" Value="{DynamicResource DangerButtonForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource DangerButtonBorderBrush}" />
         <Style.Triggers>
+            <Trigger Property="IsDefault" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DangerButtonBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource DangerButtonForegroundBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource DangerButtonBorderBrush}" />
+            </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource DangerButtonHoverBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource DangerButtonHoverBrush}" />
