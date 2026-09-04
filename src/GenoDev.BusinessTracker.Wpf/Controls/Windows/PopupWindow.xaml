@@ -2,13 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
-        xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         SizeToContent="WidthAndHeight"
-        MinWidth="344" MinHeight="180"
+        MinWidth="300" MinHeight="136"
         Padding="24"
         WindowStartupLocation="Manual"
         WindowStyle="None"
-        AllowsTransparency="True"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Background="Transparent"
@@ -16,43 +15,30 @@
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         StateChanged="Window_StateChanged">
-    <Window.Resources>
-        <Style x:Key="ManualWindowResizeThumbStyle" TargetType="{x:Type primitives:Thumb}">
-            <!-- Layered HWNDs ignore fully transparent pixels during native hit testing. -->
-            <Setter Property="Background" Value="#01FFFFFF" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type primitives:Thumb}">
-                        <Border Background="{TemplateBinding Background}" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="46"
+                            GlassFrameThickness="0"
+                            ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
 
     <Grid>
-        <Border x:Name="WindowBorder" Margin="22"
+        <Border x:Name="WindowBorder"
                 Background="{DynamicResource GlassSurfaceBrush}"
-                BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1"
-                CornerRadius="16" SnapsToDevicePixels="True"
+                SnapsToDevicePixels="True"
                 RenderTransformOrigin="0.5,0.5">
         <Border.RenderTransform>
             <ScaleTransform x:Name="OpeningScaleTransform" ScaleX="1" ScaleY="1" />
         </Border.RenderTransform>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="58" />
+                <RowDefinition Height="46" />
                 <RowDefinition Height="1" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <Border x:Name="TitleBar" Grid.Row="0" Padding="22,0"
-                    Background="{DynamicResource GlassSheenBrush}" CornerRadius="16,16,0,0"
-                    Cursor="SizeAll"
-                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
-                    MouseMove="TitleBar_MouseMove"
-                    MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
-                    LostMouseCapture="TitleBar_LostMouseCapture">
+                    Background="{DynamicResource GlassSheenBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="4" />
@@ -72,16 +58,19 @@
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     <controls:PeekThroughButton Grid.Column="2"
                                                 Margin="8,0,0,0"
+                                                shell:WindowChrome.IsHitTestVisibleInChrome="True"
                                                 PreviewMouseLeftButtonDown="PeekThroughButton_PreviewMouseLeftButtonDown"
                                                 PreviewMouseLeftButtonUp="PeekThroughButton_PreviewMouseLeftButtonUp"
                                                 LostMouseCapture="PeekThroughButton_LostMouseCapture" />
                     <controls:TopmostButton x:Name="TopmostButton"
                                             Grid.Column="3"
                                             Margin="8,0,0,0"
+                                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
                                             Checked="TopmostButton_CheckedChanged"
                                             Unchecked="TopmostButton_CheckedChanged" />
                     <Button Grid.Column="4" Style="{StaticResource IconButton}"
                             Margin="8,0,0,0" Padding="0" ToolTip="Ukryj okno"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="MinimizeButton_Click">
                         <Viewbox Width="16" Height="16">
                             <Canvas Width="20" Height="20">
@@ -95,6 +84,7 @@
                     </Button>
                     <Button x:Name="MaximizeButton" Grid.Column="5" Style="{StaticResource IconButton}"
                             Margin="8,0,0,0" Padding="0" ToolTip="Pełny ekran"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="MaximizeButton_Click">
                         <Viewbox Width="16" Height="16">
                             <Canvas Width="20" Height="20">
@@ -107,6 +97,7 @@
                     </Button>
                     <Button Grid.Column="6" Style="{StaticResource IconButton}" Margin="8,0,0,0" Padding="0"
                             ToolTip="Zamknij"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="CloseButton_Click">
                         <Viewbox Width="16" Height="16">
                             <Canvas Width="20" Height="20">
@@ -130,36 +121,5 @@
         </Grid>
         </Border>
 
-        <Grid x:Name="ResizeLayer" Margin="18" Panel.ZIndex="100">
-            <primitives:Thumb Tag="Left" Width="8" HorizontalAlignment="Left"
-                              Cursor="SizeWE" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="Right" Width="8" HorizontalAlignment="Right"
-                              Cursor="SizeWE" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="Top" Height="8" VerticalAlignment="Top"
-                              Cursor="SizeNS" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="Bottom" Height="8" VerticalAlignment="Bottom"
-                              Cursor="SizeNS" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-
-            <primitives:Thumb Tag="TopLeft" Width="8" Height="8"
-                              HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Cursor="SizeNWSE" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="TopRight" Width="8" Height="8"
-                              HorizontalAlignment="Right" VerticalAlignment="Top"
-                              Cursor="SizeNESW" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="BottomLeft" Width="8" Height="8"
-                              HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                              Cursor="SizeNESW" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-            <primitives:Thumb Tag="BottomRight" Width="8" Height="8"
-                              HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                              Cursor="SizeNWSE" Style="{StaticResource ManualWindowResizeThumbStyle}"
-                              DragDelta="ResizeThumb_DragDelta" />
-        </Grid>
     </Grid>
 </Window>

@@ -14,11 +14,18 @@
         xmlns:notes="clr-namespace:GenoDev.BusinessTracker.Wpf.ViewModels.Notes"
         xmlns:notesViews="clr-namespace:GenoDev.BusinessTracker.Wpf.Views.Notes"
         xmlns:controls="clr-namespace:GenoDev.BusinessTracker.Wpf.Controls"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
         Title="Business Tracker" Height="768" Width="1024"
         Foreground="{DynamicResource TextPrimaryBrush}"
         MinHeight="640" MinWidth="900"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="32"
+                            GlassFrameThickness="0"
+                            ResizeBorderThickness="6"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
     <Window.Resources>
         <DataTemplate DataType="{x:Type materials:MaterialsViewModel}">
             <materialsViews:MaterialsView />
@@ -32,9 +39,83 @@
         <DataTemplate DataType="{x:Type notes:NotesViewModel}">
             <notesViews:NotesView />
         </DataTemplate>
+        <Style x:Key="ApplicationCaptionButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource IconForegroundBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource IconHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ApplicationCloseButtonStyle"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource ApplicationCaptionButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DangerButtonBackgroundBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource DangerButtonForegroundBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DangerButtonHoverBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <TabControl SelectedIndex="{Binding SelectedMainTabIndex}"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{DynamicResource GlassSurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Border Background="{DynamicResource GlassSheenBrush}"
+                        IsHitTestVisible="False" />
+                <StackPanel Margin="18,0,300,0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Border Width="4"
+                            Height="22"
+                            Margin="0,0,12,0"
+                            Background="{DynamicResource AccentBrush}"
+                            CornerRadius="2" />
+                    <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}"
+                               Margin="0,-2,0,0"
+                               FontFamily="Segoe UI Variable Display, Segoe UI"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1"
+                    SelectedIndex="{Binding SelectedMainTabIndex}"
                     Style="{StaticResource TopNavigationTabControlStyle}">
             <TabItem>
                 <TabItem.Header>
@@ -82,27 +163,43 @@
             </TabItem>
         </TabControl>
 
-        <ToggleButton x:Name="ThemeToggle"
-                      Panel.ZIndex="20"
-                      HorizontalAlignment="Right"
-                      VerticalAlignment="Top"
-                      Width="30"
-                      Height="30"
-                      Margin="0,11,54,0"
-                      Padding="5"
-                      IsChecked="{Binding IsDark, Source={StaticResource ThemeSettings}, Mode=TwoWay}"
-                      AutomationProperties.Name="Motyw ciemny">
-            <ToggleButton.Style>
-                <Style TargetType="ToggleButton" BasedOn="{StaticResource IconToggleButton}">
+        <controls:TopmostButton x:Name="MainWindowTopmostButton"
+                                Grid.Row="0"
+                                Panel.ZIndex="20"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Width="30"
+                                Height="30"
+                                Margin="0,0,222,0"
+                                Padding="5"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                                Checked="MainWindowTopmostButton_CheckedChanged"
+                                Unchecked="MainWindowTopmostButton_CheckedChanged" />
+
+        <Button x:Name="ThemeButton"
+                Grid.Row="0"
+                Panel.ZIndex="20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Width="30"
+                Height="30"
+                Margin="0,0,184,0"
+                Padding="5"
+                shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                AutomationProperties.Name="Zmień motyw"
+                Click="ThemeButton_Click">
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                     <Setter Property="ToolTip" Value="Włącz motyw ciemny" />
                     <Style.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
+                        <DataTrigger Binding="{Binding IsDark, Source={StaticResource ThemeSettings}}"
+                                     Value="True">
                             <Setter Property="ToolTip" Value="Włącz motyw jasny" />
-                        </Trigger>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </ToggleButton.Style>
-            <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+            </Button.Style>
+            <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                   StrokeThickness="1.7"
                   StrokeStartLineCap="Round"
                   StrokeEndLineCap="Round"
@@ -113,23 +210,26 @@
                     <Style TargetType="Path">
                         <Setter Property="Data" Value="M20,14 A8.5,8.5 0 1 1 10,4 A7,7 0 0 0 20,14 Z" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Value="True">
+                            <DataTrigger Binding="{Binding IsDark, Source={StaticResource ThemeSettings}}"
+                                         Value="True">
                                 <Setter Property="Data" Value="M12,7 A5,5 0 1 1 12,17 A5,5 0 1 1 12,7 M12,1 L12,3 M12,21 L12,23 M1,12 L3,12 M21,12 L23,12 M4,4 L5.5,5.5 M18.5,18.5 L20,20 M4,20 L5.5,18.5 M18.5,5.5 L20,4" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Path.Style>
             </Path>
-        </ToggleButton>
+        </Button>
 
         <ToggleButton x:Name="PopupWindowsToggle"
+                      Grid.Row="0"
                       Panel.ZIndex="20"
                       HorizontalAlignment="Right"
-                      VerticalAlignment="Top"
+                      VerticalAlignment="Center"
                       Width="30"
                       Height="30"
-                      Margin="0,11,16,0"
+                      Margin="0,0,146,0"
                       Padding="3"
+                      shell:WindowChrome.IsHitTestVisibleInChrome="True"
                       ToolTipService.ShowOnDisabled="True"
                       ToolTip="Pokaż otwarte okna">
             <ToggleButton.Style>
@@ -180,6 +280,72 @@
                 </Border>
             </Grid>
         </ToggleButton>
+
+        <Button Grid.Row="0"
+                Panel.ZIndex="20"
+                HorizontalAlignment="Right"
+                Margin="0,0,92,0"
+                Style="{StaticResource ApplicationCaptionButtonStyle}"
+                shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                ToolTip="Minimalizuj"
+                AutomationProperties.Name="Minimalizuj"
+                Click="MinimizeButton_Click">
+            <Path Width="12"
+                  Height="12"
+                  Data="M2,10 L10,10"
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  StrokeThickness="1.5"
+                  StrokeStartLineCap="Square"
+                  Stretch="Uniform" />
+        </Button>
+
+        <Button Grid.Row="0"
+                Panel.ZIndex="20"
+                HorizontalAlignment="Right"
+                Margin="0,0,46,0"
+                Style="{StaticResource ApplicationCaptionButtonStyle}"
+                shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                ToolTip="Maksymalizuj lub przywróć"
+                AutomationProperties.Name="Maksymalizuj lub przywróć"
+                Click="MaximizeRestoreButton_Click">
+            <Path Width="12"
+                  Height="12"
+                  Fill="Transparent"
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  StrokeThickness="1.35"
+                  StrokeLineJoin="Miter"
+                  Stretch="Uniform">
+                <Path.Style>
+                    <Style TargetType="{x:Type Path}">
+                        <Setter Property="Data" Value="M2,2 L10,2 L10,10 L2,10 Z" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}"
+                                         Value="Maximized">
+                                <Setter Property="Data" Value="M4,1 L11,1 L11,8 M1,4 L8,4 L8,11 L1,11 Z" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Path.Style>
+            </Path>
+        </Button>
+
+        <Button Grid.Row="0"
+                Panel.ZIndex="20"
+                HorizontalAlignment="Right"
+                Style="{StaticResource ApplicationCloseButtonStyle}"
+                shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                ToolTip="Zamknij"
+                AutomationProperties.Name="Zamknij"
+                Click="CloseButton_Click">
+            <Path Width="12"
+                  Height="12"
+                  Data="M2,2 L10,10 M10,2 L2,10"
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  StrokeThickness="1.5"
+                  StrokeStartLineCap="Square"
+                  StrokeEndLineCap="Square"
+                  Stretch="Uniform" />
+        </Button>
 
         <Popup Panel.ZIndex="21"
                Placement="Bottom"
@@ -270,7 +436,9 @@
             </Border>
         </Popup>
 
-            <Grid Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+            <Grid Grid.RowSpan="2"
+                  Panel.ZIndex="30"
+                  Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                 <Rectangle Fill="{DynamicResource OverlayBrush}" />
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Center"

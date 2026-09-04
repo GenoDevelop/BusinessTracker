@@ -14,7 +14,6 @@ namespace GenoDev.BusinessTracker.Wpf.Controls;
 /// </summary>
 public sealed class PopupWindowHost : ContentControl
 {
-    private const double ShadowMargin = 22;
     private PopupWindow? _window;
     private object? _detachedContent;
     private PopupContentLayoutSnapshot? _contentLayoutSnapshot;
@@ -397,25 +396,25 @@ public sealed class PopupWindowHost : ContentControl
 
     private void ApplySize(PopupWindow window)
     {
-        window.MinWidth = Math.Max(window.MinWidth, MinPopupWidth + 2 * ShadowMargin);
-        window.MinHeight = Math.Max(window.MinHeight, MinPopupHeight + 2 * ShadowMargin);
+        window.MinWidth = Math.Max(window.MinWidth, MinPopupWidth);
+        window.MinHeight = Math.Max(window.MinHeight, MinPopupHeight);
         window.MaxWidth = double.IsPositiveInfinity(MaxPopupWidth)
             ? double.PositiveInfinity
-            : MaxPopupWidth + 2 * ShadowMargin;
+            : MaxPopupWidth;
         window.MaxHeight = double.IsPositiveInfinity(MaxPopupHeight)
             ? double.PositiveInfinity
-            : MaxPopupHeight + 2 * ShadowMargin;
+            : MaxPopupHeight;
 
         var hasWidth = !double.IsNaN(PopupWidth);
         var hasHeight = !double.IsNaN(PopupHeight);
         if (hasWidth)
         {
-            window.Width = PopupWidth + 2 * ShadowMargin;
+            window.Width = PopupWidth;
         }
 
         if (hasHeight)
         {
-            window.Height = PopupHeight + 2 * ShadowMargin;
+            window.Height = PopupHeight;
         }
 
         window.SizeToContent = (hasWidth, hasHeight) switch
@@ -442,10 +441,8 @@ public sealed class PopupWindowHost : ContentControl
         }
 
         var cursor = GetCursorPositionInDips(this);
-        // Left/Top describe the layered HWND including its invisible shadow
-        // gutter. Keep the visible popup corner at the configured mouse offset.
-        window.Left = cursor.X + MouseOffsetX - ShadowMargin;
-        window.Top = cursor.Y + MouseOffsetY - ShadowMargin;
+        window.Left = cursor.X + MouseOffsetX;
+        window.Top = cursor.Y + MouseOffsetY;
     }
 
     private static void CenterWindowOnHost(PopupWindow window, Window? hostWindow)

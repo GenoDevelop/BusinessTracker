@@ -25,6 +25,40 @@ public partial class MainWindow : Window
         Closed += MainWindow_Closed;
     }
 
+    private void ThemeButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current.Resources["ThemeSettings"] is Themes.ThemeSettings themeSettings)
+        {
+            themeSettings.IsDark = !themeSettings.IsDark;
+        }
+    }
+
+    private void MainWindowTopmostButton_CheckedChanged(object sender, RoutedEventArgs e)
+    {
+        var isTopmost = MainWindowTopmostButton.IsChecked == true;
+        Topmost = isTopmost;
+        MainWindowTopmostButton.ToolTip = isTopmost
+            ? "Wyłącz zawsze na wierzchu"
+            : "Zawsze na wierzchu";
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
+        SystemCommands.MinimizeWindow(this);
+
+    private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            SystemCommands.RestoreWindow(this);
+            return;
+        }
+
+        SystemCommands.MaximizeWindow(this);
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e) =>
+        SystemCommands.CloseWindow(this);
+
     private void PopupWindowListItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { DataContext: PopupWindowEntry popupWindowEntry })

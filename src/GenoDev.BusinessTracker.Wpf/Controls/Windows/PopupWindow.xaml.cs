@@ -1,30 +1,37 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
+using System.Windows.Shell;
 using System.Windows.Threading;
 
 namespace GenoDev.BusinessTracker.Wpf.Controls;
 
 public partial class PopupWindow : Window
 {
-    private const double ScreenEdgeSnapDistance = 12;
-    private const double WindowShadowMargin = 22;
-    private const double ResizeHitTargetThickness = 8;
     private const double PeekOpacity = 0.2;
     private const double OpeningScale = 0.975;
     private static readonly Duration OpeningFadeDuration = TimeSpan.FromMilliseconds(120);
     private static readonly Duration OpeningScaleDuration = TimeSpan.FromMilliseconds(160);
-    private const int WindowPositionChangingMessage = 0x0046;
+    private const int DwmWindowAttributeNcRenderingPolicy = 2;
+    private const int DwmWindowAttributeCornerPreference = 33;
+    private const int DwmWindowAttributeBorderColor = 34;
+    private const int DwmWindowAttributeSystemBackdropType = 38;
+    private const int DwmWindowAttributeRedirectionBitmapAlpha = 39;
+    private const int DwmWindowAttributeBorderMargins = 40;
+    private const int DwmNcRenderingDisabled = 1;
+    private const int DwmNcRenderingEnabled = 2;
+    private const int DwmCornerPreferenceRound = 2;
+    private const int DwmSystemBackdropNone = 1;
+    private const int DwmColorNone = unchecked((int)0xFFFFFFFE);
     private const uint SetWindowPositionNoSize = 0x0001;
     private const uint SetWindowPositionNoMove = 0x0002;
     private const uint SetWindowPositionNoZOrder = 0x0004;
     private const uint SetWindowPositionNoActivate = 0x0010;
+    private const uint SetWindowPositionFrameChanged = 0x0020;
 
     private static readonly IntPtr WindowInsertTopmost = new(-1);
     private static readonly IntPtr WindowInsertNotTopmost = new(-2);
@@ -33,8 +40,6 @@ public partial class PopupWindow : Window
     private static readonly Geometry MaximizeGeometry = Geometry.Parse("M2,2 L18,2 L18,18 L2,18 Z");
     private static readonly Geometry RestoreGeometry = Geometry.Parse("M5,2 L18,2 L18,15 M2,5 L15,5 L15,18 L2,18 Z");
 
-    private bool _isDragging;
-    private bool _hasDragTarget;
     private bool _applicationEventsAttached;
     private bool _hostWindowEventsAttached;
     private bool _wasMinimizedWithHost;
@@ -43,17 +48,12 @@ public partial class PopupWindow : Window
     private bool _isClosingAnimationRunning;
     private bool _isHideAnimationRunning;
     private bool _skipClosingAnimation;
-    private bool _fadeWindowOnNextOpening;
     private bool _notifyRegistryAfterHide;
     private bool _restoreWithHostAfterHide;
     private bool _suppressHostActivationOnClose;
     private bool _isClosed;
     private WindowState _stateBeforeHostMinimized = WindowState.Normal;
-    private Point _dragStartCursor;
-    private Point _dragStartWindow;
-    private NativePoint _dragTargetInPixels;
-    private HwndSource? _windowSource;
-    private PopupShadowWindow? _shadowWindow;
+    private SolidColorBrush? _nativeBorderBrush;
 
     public PopupWindow()
     {
@@ -98,8 +98,12 @@ public partial class PopupWindow : Window
         base.OnSourceInitialized(e);
 
         var windowHandle = new WindowInteropHelper(this).Handle;
-        _windowSource = HwndSource.FromHwnd(windowHandle);
-        _windowSource?.AddHook(WindowMessageHook);
+        if (HwndSource.FromHwnd(windowHandle)?.CompositionTarget is { } compositionTarget)
+        {
+            compositionTarget.BackgroundColor = Colors.Transparent;
+        }
+
+        AttachNativeBorderBrush();
         AttachApplicationEvents();
         AttachHostWindowEvents();
         if (!_isClosed)
@@ -108,12 +112,6 @@ public partial class PopupWindow : Window
             // and the opening transition have not started yet.
             PopupWindowRegistry.Register(this);
         }
-    }
-
-    protected override void OnContentRendered(EventArgs e)
-    {
-        base.OnContentRendered(e);
-        UpdateShadowWindow();
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -142,19 +140,7 @@ public partial class PopupWindow : Window
     protected override void OnActivated(EventArgs e)
     {
         base.OnActivated(e);
-        Dispatcher.BeginInvoke(DispatcherPriority.Background, PlaceShadowBehindWindow);
-    }
-
-    protected override void OnLocationChanged(EventArgs e)
-    {
-        base.OnLocationChanged(e);
-        SyncShadowBounds();
-    }
-
-    protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-    {
-        base.OnRenderSizeChanged(sizeInfo);
-        SyncShadowBounds();
+        UpdateNativeFrame();
     }
 
     protected override void OnClosed(EventArgs e)
@@ -164,11 +150,8 @@ public partial class PopupWindow : Window
         PopupWindowRegistry.Unregister(this);
         DetachApplicationEvents();
         DetachHostWindowEvents();
-        _windowSource?.RemoveHook(WindowMessageHook);
-        _windowSource = null;
+        DetachNativeBorderBrush();
         IsVisibleChanged -= Window_IsVisibleChanged;
-        _shadowWindow?.Close();
-        _shadowWindow = null;
         base.OnClosed(e);
 
         if (_suppressHostActivationOnClose || hostWindow is not { IsVisible: true })
@@ -297,203 +280,7 @@ public partial class PopupWindow : Window
             0,
             SetWindowPositionNoMove |
             SetWindowPositionNoSize |
-            SetWindowPositionNoActivate);
-        PlaceShadowBehindWindow();
-    }
-
-    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ChangedButton != MouseButton.Left)
-        {
-            return;
-        }
-
-        if (e.ClickCount == 2)
-        {
-            ToggleMaximize();
-            e.Handled = true;
-            return;
-        }
-
-        if (WindowState == WindowState.Maximized)
-        {
-            return;
-        }
-
-        _dragStartCursor = GetCursorPositionInDips();
-        _dragStartWindow = new Point(Left, Top);
-        _isDragging = TitleBar.CaptureMouse();
-        if (_isDragging)
-        {
-            // Ustanów pozycję nadrzędną jeszcze przed pierwszym MouseMove.
-            // Inaczej systemowy mechanizm układania okien ma krótkie okno,
-            // w którym może skorygować pozycję przy pierwszym przeciągnięciu.
-            SetDragPosition(_dragStartWindow.X, _dragStartWindow.Y);
-            e.Handled = true;
-        }
-    }
-
-    private void TitleBar_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_isDragging)
-        {
-            return;
-        }
-
-        if (e.LeftButton != MouseButtonState.Pressed)
-        {
-            EndDrag();
-            return;
-        }
-
-        var cursor = GetCursorPositionInDips();
-        var left = _dragStartWindow.X + cursor.X - _dragStartCursor.X;
-        var top = _dragStartWindow.Y + cursor.Y - _dragStartCursor.Y;
-        var workArea = GetMonitorWorkAreaInDips(cursor);
-
-        if (Math.Abs(left + WindowShadowMargin - workArea.Left) <= ScreenEdgeSnapDistance)
-        {
-            left = workArea.Left - WindowShadowMargin;
-        }
-        else if (Math.Abs(left + ActualWidth - WindowShadowMargin - workArea.Right) <= ScreenEdgeSnapDistance)
-        {
-            left = workArea.Right - ActualWidth + WindowShadowMargin;
-        }
-
-        if (Math.Abs(top + WindowShadowMargin - workArea.Top) <= ScreenEdgeSnapDistance)
-        {
-            top = workArea.Top - WindowShadowMargin;
-        }
-        else if (Math.Abs(top + ActualHeight - WindowShadowMargin - workArea.Bottom) <= ScreenEdgeSnapDistance)
-        {
-            top = workArea.Bottom - ActualHeight + WindowShadowMargin;
-        }
-
-        SetDragPosition(left, top);
-        e.Handled = true;
-    }
-
-    private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        if (_isDragging)
-        {
-            EndDrag();
-            e.Handled = true;
-        }
-    }
-
-    private void TitleBar_LostMouseCapture(object sender, MouseEventArgs e) => _isDragging = false;
-
-    private void EndDrag()
-    {
-        _isDragging = false;
-        _hasDragTarget = false;
-        if (TitleBar.IsMouseCaptured)
-        {
-            TitleBar.ReleaseMouseCapture();
-        }
-    }
-
-    private void ResizeThumb_DragDelta(object sender, DragDeltaEventArgs e)
-    {
-        if (!IsResizable || WindowState == WindowState.Maximized || sender is not Thumb { Tag: string edge })
-        {
-            return;
-        }
-
-        SizeToContent = SizeToContent.Manual;
-
-        var left = Left;
-        var top = Top;
-        var width = ActualWidth;
-        var height = ActualHeight;
-        var resizeLeft = edge is "Left" or "TopLeft" or "BottomLeft";
-        var resizeRight = edge is "Right" or "TopRight" or "BottomRight";
-        var resizeTop = edge is "Top" or "TopLeft" or "TopRight";
-        var resizeBottom = edge is "Bottom" or "BottomLeft" or "BottomRight";
-
-        if (resizeLeft)
-        {
-            var proposedWidth = ClampWindowWidth(width - e.HorizontalChange);
-            left += width - proposedWidth;
-            width = proposedWidth;
-        }
-        else if (resizeRight)
-        {
-            width = ClampWindowWidth(width + e.HorizontalChange);
-        }
-
-        if (resizeTop)
-        {
-            var proposedHeight = ClampWindowHeight(height - e.VerticalChange);
-            top += height - proposedHeight;
-            height = proposedHeight;
-        }
-        else if (resizeBottom)
-        {
-            height = ClampWindowHeight(height + e.VerticalChange);
-        }
-
-        var cursor = GetCursorPositionInDips();
-        var workArea = GetMonitorWorkAreaInDips(cursor);
-        SnapResizeToScreenEdges(
-            ref left,
-            ref top,
-            ref width,
-            ref height,
-            workArea,
-            resizeLeft,
-            resizeRight,
-            resizeTop,
-            resizeBottom);
-
-        Left = left;
-        Top = top;
-        Width = width;
-        Height = height;
-    }
-
-    private double ClampWindowWidth(double width) =>
-        Math.Clamp(width, MinWidth, double.IsPositiveInfinity(MaxWidth) ? double.MaxValue : MaxWidth);
-
-    private double ClampWindowHeight(double height) =>
-        Math.Clamp(height, MinHeight, double.IsPositiveInfinity(MaxHeight) ? double.MaxValue : MaxHeight);
-
-    private void SnapResizeToScreenEdges(
-        ref double left,
-        ref double top,
-        ref double width,
-        ref double height,
-        Rect workArea,
-        bool resizeLeft,
-        bool resizeRight,
-        bool resizeTop,
-        bool resizeBottom)
-    {
-        if (resizeLeft && Math.Abs(left + WindowShadowMargin - workArea.Left) <= ScreenEdgeSnapDistance)
-        {
-            width += left + WindowShadowMargin - workArea.Left;
-            left = workArea.Left - WindowShadowMargin;
-        }
-        else if (resizeRight &&
-                 Math.Abs(left + width - WindowShadowMargin - workArea.Right) <= ScreenEdgeSnapDistance)
-        {
-            width = workArea.Right - left + WindowShadowMargin;
-        }
-
-        if (resizeTop && Math.Abs(top + WindowShadowMargin - workArea.Top) <= ScreenEdgeSnapDistance)
-        {
-            height += top + WindowShadowMargin - workArea.Top;
-            top = workArea.Top - WindowShadowMargin;
-        }
-        else if (resizeBottom &&
-                 Math.Abs(top + height - WindowShadowMargin - workArea.Bottom) <= ScreenEdgeSnapDistance)
-        {
-            height = workArea.Bottom - top + WindowShadowMargin;
-        }
-
-        width = ClampWindowWidth(width);
-        height = ClampWindowHeight(height);
+                SetWindowPositionNoActivate);
     }
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e) => ToggleMaximize();
@@ -529,8 +316,6 @@ public partial class PopupWindow : Window
             Activate();
             Focus();
         }
-
-        UpdateShadowWindow();
     }
 
     private void PeekThroughButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -541,13 +326,9 @@ public partial class PopupWindow : Window
         }
 
         _isPeekingThrough = true;
-        BeginAnimation(OpacityProperty, null);
-        Opacity = PeekOpacity;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.BeginAnimation(OpacityProperty, null);
-            _shadowWindow.Opacity = PeekOpacity;
-        }
+        WindowBorder.BeginAnimation(OpacityProperty, null);
+        WindowBorder.Opacity = PeekOpacity;
+        UpdateNativeFrame();
     }
 
     private void PeekThroughButton_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) =>
@@ -564,13 +345,9 @@ public partial class PopupWindow : Window
         }
 
         _isPeekingThrough = false;
-        BeginAnimation(OpacityProperty, null);
-        Opacity = 1;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.BeginAnimation(OpacityProperty, null);
-            _shadowWindow.Opacity = 1;
-        }
+        WindowBorder.BeginAnimation(OpacityProperty, null);
+        WindowBorder.Opacity = 1;
+        UpdateNativeFrame();
     }
 
     private void ToggleMaximize()
@@ -581,7 +358,13 @@ public partial class PopupWindow : Window
         }
 
         SizeToContent = SizeToContent.Manual;
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        if (WindowState == WindowState.Maximized)
+        {
+            SystemCommands.RestoreWindow(this);
+            return;
+        }
+
+        SystemCommands.MaximizeWindow(this);
     }
 
     public void BringToFront()
@@ -593,8 +376,6 @@ public partial class PopupWindow : Window
             {
                 Show();
             }
-
-            UpdateShadowWindow();
         }
 
         if (WindowState == WindowState.Minimized)
@@ -618,7 +399,6 @@ public partial class PopupWindow : Window
 
         Activate();
         Focus();
-        PlaceShadowBehindWindow();
     }
 
     public void ConstrainToWorkArea(bool useCursorMonitor)
@@ -627,10 +407,10 @@ public partial class PopupWindow : Window
             ? GetCursorPositionInDips()
             : new Point(Left + ActualWidth / 2, Top + ActualHeight / 2);
         var workArea = GetMonitorWorkAreaInDips(monitorAnchor);
-        var minimumLeft = workArea.Left - WindowShadowMargin;
-        var maximumLeft = workArea.Right - ActualWidth + WindowShadowMargin;
-        var minimumTop = workArea.Top - WindowShadowMargin;
-        var maximumTop = workArea.Bottom - ActualHeight + WindowShadowMargin;
+        var minimumLeft = workArea.Left;
+        var maximumLeft = workArea.Right - ActualWidth;
+        var minimumTop = workArea.Top;
+        var maximumTop = workArea.Bottom - ActualHeight;
 
         Left = maximumLeft >= minimumLeft
             ? Math.Clamp(Left, minimumLeft, maximumLeft)
@@ -679,54 +459,6 @@ public partial class PopupWindow : Window
             : positionInPixels;
     }
 
-    private void SetDragPosition(double left, double top)
-    {
-        var source = PresentationSource.FromVisual(this);
-        var toDevice = source?.CompositionTarget?.TransformToDevice ?? Matrix.Identity;
-        var targetInPixels = toDevice.Transform(new Point(left, top));
-        _dragTargetInPixels = new NativePoint
-        {
-            X = (int)Math.Round(targetInPixels.X),
-            Y = (int)Math.Round(targetInPixels.Y)
-        };
-        _hasDragTarget = true;
-
-        var windowHandle = new WindowInteropHelper(this).Handle;
-        _ = SetWindowPos(
-            windowHandle,
-            IntPtr.Zero,
-            _dragTargetInPixels.X,
-            _dragTargetInPixels.Y,
-            0,
-            0,
-            SetWindowPositionNoSize |
-            SetWindowPositionNoZOrder |
-            SetWindowPositionNoActivate);
-    }
-
-    private IntPtr WindowMessageHook(
-        IntPtr windowHandle,
-        int message,
-        IntPtr wordParameter,
-        IntPtr longParameter,
-        ref bool handled)
-    {
-        if (message != WindowPositionChangingMessage ||
-            !_isDragging ||
-            !_hasDragTarget ||
-            longParameter == IntPtr.Zero)
-        {
-            return IntPtr.Zero;
-        }
-
-        var position = Marshal.PtrToStructure<NativeWindowPosition>(longParameter);
-        position.X = _dragTargetInPixels.X;
-        position.Y = _dragTargetInPixels.Y;
-        position.Flags &= ~SetWindowPositionNoMove;
-        Marshal.StructureToPtr(position, longParameter, false);
-        return IntPtr.Zero;
-    }
-
     private Rect GetMonitorWorkAreaInDips(Point cursorInDips)
     {
         var source = PresentationSource.FromVisual(this);
@@ -754,93 +486,145 @@ public partial class PopupWindow : Window
     private void UpdateWindowChrome()
     {
         var isMaximized = WindowState == WindowState.Maximized;
-        ResizeLayer.Visibility = IsResizable && !isMaximized
-            ? Visibility.Visible
-            : Visibility.Collapsed;
-        ResizeLayer.IsHitTestVisible = IsResizable && !isMaximized;
-        ResizeLayer.Margin = isMaximized
-            ? new Thickness(0)
-            : new Thickness(WindowShadowMargin - ResizeHitTargetThickness / 2);
-        WindowBorder.Margin = isMaximized ? new Thickness(0) : new Thickness(WindowShadowMargin);
-        WindowBorder.CornerRadius = isMaximized ? new CornerRadius(0) : new CornerRadius(16);
-        TitleBar.CornerRadius = isMaximized ? new CornerRadius(0) : new CornerRadius(16, 16, 0, 0);
+        ResizeMode = IsResizable ? ResizeMode.CanResize : ResizeMode.NoResize;
+        if (WindowChrome.GetWindowChrome(this) is { } windowChrome)
+        {
+            windowChrome.ResizeBorderThickness = IsResizable && !isMaximized
+                ? SystemParameters.WindowResizeBorderThickness
+                : default;
+        }
+
         MaximizeButton.Visibility = IsResizable ? Visibility.Visible : Visibility.Collapsed;
         MaximizeButton.ToolTip = isMaximized ? "Przywróć rozmiar" : "Pełny ekran";
         MaximizeIcon.Data = isMaximized ? RestoreGeometry : MaximizeGeometry;
-        UpdateShadowWindow();
+        UpdateNativeFrame();
     }
 
-    private void UpdateShadowWindow()
+    private void AttachNativeBorderBrush()
     {
-        if (!IsLoaded)
+        var borderBrush = TryFindResource("BorderStrongBrush") as SolidColorBrush;
+        if (ReferenceEquals(_nativeBorderBrush, borderBrush))
         {
+            UpdateNativeFrame();
             return;
         }
 
-        if (WindowState != WindowState.Normal || !IsVisible)
+        DetachNativeBorderBrush();
+        _nativeBorderBrush = borderBrush;
+        if (_nativeBorderBrush != null)
         {
-            _shadowWindow?.Hide();
-            return;
+            _nativeBorderBrush.Changed += NativeBorderBrush_Changed;
         }
 
-        if (_shadowWindow == null)
-        {
-            if (FindResource("PopupShadow") is not Effect shadowEffect)
-            {
-                return;
-            }
-
-            _shadowWindow = new PopupShadowWindow(shadowEffect, WindowShadowMargin, 16)
-            {
-                Opacity = _isPeekingThrough
-                    ? PeekOpacity
-                    : SystemParameters.ClientAreaAnimation && !_hasAnimatedCurrentVisibility
-                        ? 0
-                        : 1
-            };
-            if (SystemParameters.ClientAreaAnimation && !_hasAnimatedCurrentVisibility)
-            {
-                _shadowWindow.SetOpeningScale(OpeningScale);
-            }
-
-            _shadowWindow.MatchBounds(this);
-            _shadowWindow.Show();
-        }
-        else if (!_shadowWindow.IsVisible)
-        {
-            _shadowWindow.Show();
-        }
-
-        SyncShadowBounds();
-        PlaceShadowBehindWindow();
+        UpdateNativeFrame();
     }
 
-    private void SyncShadowBounds()
+    private void DetachNativeBorderBrush()
     {
-        if (_shadowWindow is not { IsVisible: true } shadowWindow ||
-            WindowState != WindowState.Normal)
+        if (_nativeBorderBrush != null)
         {
-            return;
+            _nativeBorderBrush.Changed -= NativeBorderBrush_Changed;
+            _nativeBorderBrush = null;
         }
-
-        shadowWindow.MatchBounds(this);
     }
 
-    private void PlaceShadowBehindWindow()
+    private void NativeBorderBrush_Changed(object? sender, EventArgs e) =>
+        UpdateNativeFrame();
+
+    private void UpdateNativeBorderColor()
     {
-        if (_shadowWindow is not { IsVisible: true } shadowWindow ||
-            WindowState != WindowState.Normal)
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero || _nativeBorderBrush == null)
         {
             return;
         }
 
-        shadowWindow.PlaceDirectlyBehind(this, Topmost);
+        var borderColorReference = _isPeekingThrough
+            ? DwmColorNone
+            : ToColorReference(_nativeBorderBrush.Color);
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeBorderColor,
+            ref borderColorReference,
+            sizeof(int));
+    }
+
+    private static int ToColorReference(Color color) =>
+        color.R | color.G << 8 | color.B << 16;
+
+    private void UpdateNativeFrame()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero || _nativeBorderBrush == null)
+        {
+            return;
+        }
+
+        // Windows keeps its native shadow while using the softer inactive
+        // appearance during peek-through mode.
+        var renderingPolicy = _isPeekingThrough
+            ? DwmNcRenderingDisabled
+            : DwmNcRenderingEnabled;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeNcRenderingPolicy,
+            ref renderingPolicy,
+            sizeof(int));
+
+        var cornerPreference = DwmCornerPreferenceRound;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeCornerPreference,
+            ref cornerPreference,
+            sizeof(int));
+
+        // Do not place an acrylic/Mica sheet behind the client bitmap. Its
+        // tint would remain visible when the client visual becomes transparent.
+        var systemBackdrop = DwmSystemBackdropNone;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeSystemBackdropType,
+            ref systemBackdrop,
+            sizeof(int));
+
+        // Windows 11 24H2+ can composite the premultiplied alpha produced by
+        // WPF without turning the HWND into a layered window. This preserves
+        // native corners and shadow while exposing the glass brush alpha.
+        var redirectionBitmapAlphaEnabled = 1;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeRedirectionBitmapAlpha,
+            ref redirectionBitmapAlphaEnabled,
+            sizeof(int));
+
+        UpdateNativeBorderColor();
+
+        // On Windows 11 24H2+ this forces a real DWM border and clips the
+        // redirected client bitmap to the same native rounded outline.
+        var borderMargins = WindowState == WindowState.Maximized
+            ? default
+            : new NativeMargins { Left = 1, Right = 1, Top = 1, Bottom = 1 };
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeBorderMargins,
+            ref borderMargins,
+            Marshal.SizeOf<NativeMargins>());
+        _ = SetWindowPos(
+            handle,
+            IntPtr.Zero,
+            0,
+            0,
+            0,
+            0,
+            SetWindowPositionNoMove |
+            SetWindowPositionNoSize |
+            SetWindowPositionNoZOrder |
+            SetWindowPositionNoActivate |
+            SetWindowPositionFrameChanged);
     }
 
     private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        UpdateShadowWindow();
-
         if (e.NewValue is false)
         {
             _hasAnimatedCurrentVisibility = false;
@@ -858,57 +642,12 @@ public partial class PopupWindow : Window
         _hasAnimatedCurrentVisibility = true;
         if (!SystemParameters.ClientAreaAnimation)
         {
-            _fadeWindowOnNextOpening = false;
-            BeginAnimation(OpacityProperty, null);
-            Opacity = 1;
             ResetOpeningAnimation();
             return;
         }
 
-        // The surface is already hidden before Show(), so the first frame
-        // rendered after PopupWindowHost finishes positioning belongs to the
-        // animation instead of briefly flashing at full opacity.
-        var fadeNativeWindow = _fadeWindowOnNextOpening;
-        _fadeWindowOnNextOpening = false;
-        BeginAnimation(OpacityProperty, null);
         var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
-        if (fadeNativeWindow)
-        {
-            // The native HWND remains fully transparent while the border is
-            // switched to its visible base value, so DWM cannot expose the
-            // cached pre-hide frame between these operations.
-            WindowBorder.Opacity = 1;
-        }
-
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.BeginOpeningScaleAnimation(
-                OpeningScale,
-                OpeningScaleDuration,
-                easing);
-        }
-
-        if (fadeNativeWindow)
-        {
-            BeginAnimation(
-                OpacityProperty,
-                new DoubleAnimation(0, 1, OpeningFadeDuration)
-                {
-                    EasingFunction = easing,
-                    FillBehavior = FillBehavior.HoldEnd
-                });
-        }
-        else
-        {
-            WindowBorder.BeginAnimation(
-                OpacityProperty,
-                new DoubleAnimation(0, 1, OpeningFadeDuration)
-                {
-                    EasingFunction = easing,
-                    FillBehavior = FillBehavior.HoldEnd
-                });
-        }
-        _shadowWindow?.BeginAnimation(
+        WindowBorder.BeginAnimation(
             OpacityProperty,
             new DoubleAnimation(0, 1, OpeningFadeDuration)
             {
@@ -942,21 +681,12 @@ public partial class PopupWindow : Window
 
         // Commit final base values while the HoldEnd clocks still expose the
         // same effective values, then detach the clocks without a visual gap.
-        Opacity = _isPeekingThrough ? PeekOpacity : 1;
-        WindowBorder.Opacity = 1;
+        WindowBorder.Opacity = _isPeekingThrough ? PeekOpacity : 1;
         OpeningScaleTransform.ScaleX = 1;
         OpeningScaleTransform.ScaleY = 1;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.Opacity = _isPeekingThrough ? PeekOpacity : 1;
-            _shadowWindow.CommitOpeningScale();
-        }
-
-        BeginAnimation(OpacityProperty, null);
         WindowBorder.BeginAnimation(OpacityProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-        _shadowWindow?.BeginAnimation(OpacityProperty, null);
     }
 
     private void StartClosingAnimation()
@@ -967,8 +697,6 @@ public partial class PopupWindow : Window
         _isClosingAnimationRunning = true;
         IsHitTestVisible = false;
         EndPeekThrough();
-        BeginAnimation(OpacityProperty, null);
-        Opacity = 1;
         ResetOpeningAnimation();
 
         var easing = new CubicEase { EasingMode = EasingMode.EaseIn };
@@ -980,22 +708,6 @@ public partial class PopupWindow : Window
                 EasingFunction = easing,
                 FillBehavior = FillBehavior.Stop
             });
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.Opacity = 0;
-            _shadowWindow.BeginAnimation(
-                OpacityProperty,
-                new DoubleAnimation(1, 0, OpeningFadeDuration)
-                {
-                    EasingFunction = easing,
-                    FillBehavior = FillBehavior.Stop
-                });
-            _shadowWindow.BeginClosingScaleAnimation(
-                OpeningScale,
-                OpeningScaleDuration,
-                easing);
-        }
-
         OpeningScaleTransform.ScaleX = OpeningScale;
         OpeningScaleTransform.BeginAnimation(
             ScaleTransform.ScaleXProperty,
@@ -1027,8 +739,6 @@ public partial class PopupWindow : Window
         _isHideAnimationRunning = true;
         IsHitTestVisible = false;
         EndPeekThrough();
-        BeginAnimation(OpacityProperty, null);
-        Opacity = 1;
         ResetOpeningAnimation();
 
         if (!SystemParameters.ClientAreaAnimation)
@@ -1038,28 +748,13 @@ public partial class PopupWindow : Window
         }
 
         var easing = new CubicEase { EasingMode = EasingMode.EaseIn };
-        BeginAnimation(
+        WindowBorder.BeginAnimation(
             OpacityProperty,
             new DoubleAnimation(1, 0, OpeningFadeDuration)
             {
                 EasingFunction = easing,
                 FillBehavior = FillBehavior.HoldEnd
             });
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.BeginAnimation(
-                OpacityProperty,
-                new DoubleAnimation(1, 0, OpeningFadeDuration)
-                {
-                    EasingFunction = easing,
-                    FillBehavior = FillBehavior.HoldEnd
-                });
-            _shadowWindow.BeginClosingScaleAnimation(
-                OpeningScale,
-                OpeningScaleDuration,
-                easing);
-        }
-
         OpeningScaleTransform.BeginAnimation(
             ScaleTransform.ScaleXProperty,
             new DoubleAnimation(1, OpeningScale, OpeningScaleDuration)
@@ -1088,25 +783,16 @@ public partial class PopupWindow : Window
             return;
         }
 
-        // Commit the hidden frame under the active HoldEnd clocks before
-        // hiding the HWND, so this is also the exact state retained for Show().
-        Opacity = 0;
+        // Commit the transparent client visual under the active HoldEnd clock
+        // before hiding the HWND, so Show() cannot expose a stale full frame.
+        WindowBorder.Opacity = 0;
         OpeningScaleTransform.ScaleX = OpeningScale;
         OpeningScaleTransform.ScaleY = OpeningScale;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.Opacity = 0;
-            _shadowWindow.CommitClosingScale(OpeningScale);
-        }
-
-        BeginAnimation(OpacityProperty, null);
+        WindowBorder.BeginAnimation(OpacityProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-        _shadowWindow?.BeginAnimation(OpacityProperty, null);
 
         _isHideAnimationRunning = false;
-        _fadeWindowOnNextOpening = true;
-        _shadowWindow?.Hide();
         Hide();
         IsHitTestVisible = true;
 
@@ -1168,11 +854,6 @@ public partial class PopupWindow : Window
         WindowBorder.Opacity = 0;
         OpeningScaleTransform.ScaleX = OpeningScale;
         OpeningScaleTransform.ScaleY = OpeningScale;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.Opacity = 0;
-            _shadowWindow.SetOpeningScale(OpeningScale);
-        }
     }
 
     private void ResetOpeningAnimation()
@@ -1180,15 +861,9 @@ public partial class PopupWindow : Window
         WindowBorder.BeginAnimation(OpacityProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
         OpeningScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-        _shadowWindow?.BeginAnimation(OpacityProperty, null);
         WindowBorder.Opacity = 1;
         OpeningScaleTransform.ScaleX = 1;
         OpeningScaleTransform.ScaleY = 1;
-        if (_shadowWindow != null)
-        {
-            _shadowWindow.Opacity = _isPeekingThrough ? PeekOpacity : 1;
-            _shadowWindow.SetOpeningScale(1);
-        }
     }
 
     private static void OnIsResizableChanged(
@@ -1220,6 +895,20 @@ public partial class PopupWindow : Window
         int height,
         uint flags);
 
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr windowHandle,
+        int attribute,
+        ref int attributeValue,
+        int attributeSize);
+
+    [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr windowHandle,
+        int attribute,
+        ref NativeMargins attributeValue,
+        int attributeSize);
+
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativePoint
@@ -1247,14 +936,12 @@ public partial class PopupWindow : Window
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct NativeWindowPosition
+    private struct NativeMargins
     {
-        public IntPtr WindowHandle;
-        public IntPtr InsertAfter;
-        public int X;
-        public int Y;
-        public int Width;
-        public int Height;
-        public uint Flags;
+        public int Left;
+        public int Right;
+        public int Top;
+        public int Bottom;
     }
+
 }
